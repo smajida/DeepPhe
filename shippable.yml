@@ -1,0 +1,15 @@
+# language setting
+language: java
+# jdk tag
+jdk:
+- openjdk7
+- oraclejdk7
+- openjdk6
+- oraclejdk8
+after_success:
+   - mvn clean test
+
+notifications:
+  email:
+    recipients:
+      - chenpei@apache.org
