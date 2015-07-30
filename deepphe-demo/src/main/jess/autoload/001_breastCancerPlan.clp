@@ -6,7 +6,9 @@
 (defrule planning-breast-cancer "Create a prioritized goal stack for breast cancer analysis"
      (declare (salience 1000))
      ?g <- (Goal (name "establish-plan"))
-     (Diagnosis (preferredTerm ?preferredTerm&:(eq ?preferredTerm "Ductal Breast Carcinoma")))
+     (Diagnosis (preferredTerm ?preferredTerm&:(or (eq ?preferredTerm "Breast Carcinoma")
+                                                   (eq ?preferredTerm "Breast Adenocarcinoma")
+                                                   (eq ?preferredTerm "Ductal Breast Carcinoma"))))
 =>
      (printout t "Establishing goals for  Malignant Breast Neoplasm" crlf)
      (retract ?g)

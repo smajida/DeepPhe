@@ -14,7 +14,7 @@ import org.apache.uima.cas.Feature;
 import org.apache.ctakes.typesystem.type.textsem.EventMention_Type;
 
 /** Tnm Mention at Document Level
- * Updated by JCasGen Fri Feb 27 14:17:10 EST 2015
+ * Updated by JCasGen Tue Jul 28 14:10:26 EDT 2015
  * @generated */
 public class TnmMention_Type extends EventMention_Type {
   /** @generated 

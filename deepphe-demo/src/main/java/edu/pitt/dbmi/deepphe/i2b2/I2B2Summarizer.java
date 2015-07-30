@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
-import edu.pitt.dbmi.deep.phe.model.Diagnosis;
-import edu.pitt.dbmi.deep.phe.model.Report;
-import edu.pitt.dbmi.deep.phe.model.ResourceFactory;
+import edu.pitt.dbmi.deepphe.fhir.model.Diagnosis;
+import edu.pitt.dbmi.deepphe.fhir.model.Report;
+import edu.pitt.dbmi.deepphe.fhir.model.ResourceFactory;
 import edu.pitt.dbmi.nlp.noble.coder.NobleCoder;
 import edu.pitt.dbmi.nlp.noble.coder.model.Document;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;

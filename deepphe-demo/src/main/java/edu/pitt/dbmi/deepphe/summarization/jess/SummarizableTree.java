@@ -36,7 +36,7 @@ public class SummarizableTree {
 		while (patientIterator.hasNext()) {
 			Patient kbPatient = patientIterator.next();
 			String nodeName = "Patient"
-					+ StringUtils.leftPad(kbPatient.getId() + "", 4, "0");
+					+ StringUtils.leftPad(kbPatient.getSequence() + "", 4, "0");
 			DefaultMutableTreeNode patientNode = new DefaultMutableTreeNode(
 					nodeName);
 			patientNode.setUserObject(kbPatient);
@@ -46,7 +46,7 @@ public class SummarizableTree {
 			while (encounterIterator.hasNext()) {
 				Encounter kbEncounter = encounterIterator.next();
 				nodeName = "Encounter"
-						+ StringUtils.leftPad(kbPatient.getId() + "", 4, "0");
+						+ StringUtils.leftPad(kbEncounter.getSequence() + "", 4, "0");
 				DefaultMutableTreeNode encounterNode = new DefaultMutableTreeNode(
 						nodeName);
 				encounterNode.setUserObject(kbEncounter);

@@ -55,8 +55,10 @@ public class Encounter extends Summarizable {
 	}
 	
 	public String fetchInfo() {
+		String delimitedId = "<" + getId() + ">";
+		String paddedSequence = StringUtils.leftPad(getSequence() + "", 4, "0");
 		StringBuilder sb = new StringBuilder();
-		sb.append("Encounter" + StringUtils.leftPad(getId() + "", 4, "0") + "\n");
+		sb.append("Encounter" + paddedSequence + delimitedId + "\n");
 		sb.append("\n\n\n" + getContent() + "\n\n\n");
 		sb.append("\n\n=====================================================================\n\n");
 		if (getSummaries().size() == 0) {
@@ -72,7 +74,7 @@ public class Encounter extends Summarizable {
 	}
 	
 	public String toString() {
-		return "Encounter" + StringUtils.leftPad(getId() + "", 4, "0");
+		return "Encounter" + StringUtils.leftPad(getSequence() + "", 4, "0");
 	}
 
 }

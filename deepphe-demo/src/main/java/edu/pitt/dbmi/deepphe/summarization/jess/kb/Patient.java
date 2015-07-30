@@ -7,6 +7,8 @@ import org.apache.commons.lang.StringUtils;
 
 public class Patient extends Summarizable {
 	
+	private int sequence = -1;
+	
 	protected final List<Encounter> encounters = new ArrayList<Encounter>();
 
 	public void addEncounter(Encounter encounter) {
@@ -25,9 +27,19 @@ public class Patient extends Summarizable {
 		return "Female";
 	}
 	
+	public int getSequence() {
+		return sequence;
+	}
+
+	public void setSequence(int sequence) {
+		this.sequence = sequence;
+	}
+
 	public String fetchInfo() {
+		String delimitedId = "<" + getId() + ">";
+		String paddedSequence = StringUtils.leftPad(getSequence() + "", 4, "0");
 		StringBuilder sb = new StringBuilder();
-		sb.append("Patient" + StringUtils.leftPad(getId() + "", 4, "0") + "\n");
+		sb.append("Patient" + paddedSequence + delimitedId + "\n");
 		if (getSummaries().size() == 0) {
 			sb.append("\n\n\nYet to be summarized");
 		}
@@ -41,7 +53,7 @@ public class Patient extends Summarizable {
 	}
 	
 	public String toString() {
-		return "Patient" + StringUtils.leftPad(getId() + "", 4, "0");
+		return "Patient" + StringUtils.leftPad(getSequence() + "", 4, "0");
 	}
 
 }

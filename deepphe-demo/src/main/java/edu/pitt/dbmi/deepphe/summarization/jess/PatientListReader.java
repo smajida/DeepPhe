@@ -14,9 +14,10 @@ public class PatientListReader {
 	
 	private String inputDirectoryPath;
 	private List<Patient> patients;
+	private int patientSequence = -1;
 
 	public static void main(String[] args) {
-		//String file  = "/home/tseytlin/Work/DeepPhe/summarization/src/main/resources/summarization/raw";//"src\\main\\resources\\summarization\\raw";
+	
 		PatientListReader reader = new PatientListReader();
 		File reportsDirectory = new File(SummarizationGui.PROJECT_LOCATION+"/data/sample/docs");
 		final List<Patient> patients = new ArrayList<>();
@@ -43,6 +44,7 @@ public class PatientListReader {
 		File[] rawFiles = reportsDirectory.listFiles();
 		for (File rawFile : rawFiles) {
 			if (rawFile.isDirectory()) {
+				patientSequence++;
 				createPatient(rawFile);
 			}
 		}
@@ -50,6 +52,7 @@ public class PatientListReader {
 
 	private void createPatient(File patientDirectory) throws IOException {
 		Patient patient = new Patient();
+		patient.setSequence(patientSequence);
 		patients.add(patient);
 		File[] rawFiles = patientDirectory.listFiles();
 		int encounterSequence = 0;
@@ -61,8 +64,7 @@ public class PatientListReader {
 				encounter.setSequence(encounterSequence++);
 				patient.addEncounter(encounter);
 			}
-		}
-		
+		}		
 	}
 
 	public String getInputDirectoryPath() {

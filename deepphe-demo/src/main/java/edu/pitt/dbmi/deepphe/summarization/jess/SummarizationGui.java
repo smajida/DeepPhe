@@ -30,7 +30,7 @@ import edu.pitt.dbmi.deepphe.summarization.ontology.OntologyCleaner;
 import edu.pitt.dbmi.deepphe.summarization.orm.i2b2data.I2b2DataDataSourceManager;
 
 public class SummarizationGui extends JFrame implements ActionListener, PropertyChangeListener {
-	public static String PROJECT_LOCATION = "/home/tseytlin/Work/DeepPhe/";
+	public static String PROJECT_LOCATION = null;
 	private static final long serialVersionUID = 1L;
 
 	public static void main(String[] args) {
@@ -148,7 +148,10 @@ public class SummarizationGui extends JFrame implements ActionListener, Property
 			patientKnowledgeExtractor.loadProductionClipsFiles();
 			patientKnowledgeExtractor.setPatients(patients);	
 			
-			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new FhirEncounterKnowledgeExtractor());
+//			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new FhirEncounterKnowledgeExtractor());
+//			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new CtakesEncounterKnowledgeExtractor());
+			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new StubEncounterKnowledgeExtractor());
+			
 		} catch (JessException e) {
 			e.printStackTrace();
 		}

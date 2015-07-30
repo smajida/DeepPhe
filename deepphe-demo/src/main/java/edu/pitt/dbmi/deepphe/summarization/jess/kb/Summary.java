@@ -79,7 +79,7 @@ public class Summary extends Identified {
 	
 
 	public String toString() {
-		return getCode() + " " + getPreferredTerm();
+		return "<" + getId() + "> " + getCode() + " " + getPreferredTerm();
 	}
 
 }
