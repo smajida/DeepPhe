@@ -23,5 +23,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/deepphe-ctakes-cancer"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/deepphe-fhir"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
