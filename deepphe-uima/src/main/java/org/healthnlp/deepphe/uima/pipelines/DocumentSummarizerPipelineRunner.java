@@ -39,8 +39,8 @@ final public class DocumentSummarizerPipelineRunner {
                                          final String outputDirectory ) throws UIMAException, IOException {
       final CollectionReader collectionReader = CancerPipelineRunner.createFilesInDirectoryReader( inputDirectory );
       final AnalysisEngineDescription analysisEngineDescription = CancerPipelineRunner.getPipelineDescription();
-      final AnalysisEngine xmiWriter = CancerPipelineRunner.createXMIWriter( outputDirectory );
-      runCancerPipeline( collectionReader, analysisEngineDescription, xmiWriter );
+      //final AnalysisEngine xmiWriter = CancerPipelineRunner.createXMIWriter( outputDirectory );
+      runCancerPipeline( collectionReader, analysisEngineDescription, createDocSummarizerCasConsumer(outputDirectory) );
    }
 
    public static void runCancerPipeline( final CollectionReader collectionReader,
