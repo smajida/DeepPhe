@@ -11,6 +11,8 @@ import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReader;
 import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.fit.pipeline.SimplePipeline;
+import org.apache.uima.resource.ResourceInitializationException;
+import org.healthnlp.deepphe.uima.ae.DocumentSummarizerAE;
 
 import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
@@ -55,7 +57,12 @@ final public class DocumentSummarizerPipelineRunner {
    }
 
 
-
+   public static AnalysisEngine createDocSummarizerCasConsumer( final String outputDirectory )
+	         throws ResourceInitializationException {
+	      return AnalysisEngineFactory.createEngine( DocumentSummarizerAE.class,
+	    		  DocumentSummarizerAE.PARAM_OUTPUTDIR,
+	            outputDirectory );
+	   }
 
 
 }
