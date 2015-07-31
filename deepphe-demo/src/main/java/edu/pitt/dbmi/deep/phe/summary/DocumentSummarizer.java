@@ -130,7 +130,7 @@ public class DocumentSummarizer {
 		File project = new File("/home/tseytlin/Work/DeepPhe/");
 		File ontology = new File(project,"ontologies/breastCancer.owl");//breastCAEx.owl
 		File sample = new File(project,"data/sample");
-		File out = new File(sample,"fhir");
+		File out = new File(sample,"fhir2");
 		File types = new File(project,"data/desc/TypeSystem.xml");
 		
 		// load ontology
