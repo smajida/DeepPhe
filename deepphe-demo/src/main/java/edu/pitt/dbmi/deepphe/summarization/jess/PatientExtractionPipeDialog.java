@@ -49,7 +49,7 @@ public class PatientExtractionPipeDialog extends JDialog implements Runnable,
 	private JScrollPane paneScrollPane;
 	private PatientKnowledgeExtractor patientKnowledgeExtractor;
 	private List<Patient> patients;
-	
+
 	private AnnotationTabPanel annotationTabPanel;
 
 	private JButton confirmationButton = new JButton("Ok");
@@ -149,7 +149,8 @@ public class PatientExtractionPipeDialog extends JDialog implements Runnable,
 		EncounterKnowledgeExtractor encounterKnowledgeExtractor = EncounterKnowlegeExractorFactory
 				.getEncounterKnowledgeExtractor();
 		for (Patient patient : patients) {
-			encounterKnowledgeExtractor.setProjectLocation(SummarizationGui.PROJECT_LOCATION);
+			encounterKnowledgeExtractor
+					.setProjectLocation(SummarizationGui.PROJECT_LOCATION);
 			encounterKnowledgeExtractor.setPatient(patient);
 			encounterKnowledgeExtractor.execute();
 		}
@@ -166,14 +167,14 @@ public class PatientExtractionPipeDialog extends JDialog implements Runnable,
 		setMessage("Cleared any previous inference output.");
 	}
 
-
 	private void sliceOntology() {
 		try {
 			if (partialPathTreeSet.isEmpty()) {
 				setMessage("Begin Ontology Slicing");
 				final I2b2OntologyBuilder i2b2OntologyBuilder = new I2b2OntologyBuilder();
 				i2b2OntologyBuilder
-						.setOntologyPath(SummarizationGui.PROJECT_LOCATION + ("/data/ontology/breastCancer.owl"));   			
+						.setOntologyPath(SummarizationGui.PROJECT_LOCATION
+								+ ("/data/ontology/breastCancer.owl"));
 				i2b2OntologyBuilder.setSourceSystemCode("DEEPPHE2");
 				final List<String> topLevelClses = new ArrayList<String>();
 				topLevelClses
@@ -183,9 +184,11 @@ public class PatientExtractionPipeDialog extends JDialog implements Runnable,
 				topLevelClses
 						.add("http://dbmi.pitt.edu/deepphe/ontologies/breastCancer.owl#Generic_TNM_Finding");
 				topLevelClses
-					.add("http://dbmi.pitt.edu/deepphe/ontologies/breastCancer.owl#Breast_Carcinoma");
+						.add("http://dbmi.pitt.edu/deepphe/ontologies/breastCancer.owl#Breast_Carcinoma");
 				topLevelClses
 						.add("http://dbmi.pitt.edu/deepphe/ontologies/breastCancer.owl#Tumor_Size");
+				topLevelClses
+						.add("http://blulab.chpc.utah.edu/ontologies/SchemaOntology.owl#Stage");
 
 				i2b2OntologyBuilder.setTopLevelClses(topLevelClses);
 				i2b2OntologyBuilder.setPartialPathTreeSet(partialPathTreeSet);
