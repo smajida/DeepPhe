@@ -27,5 +27,11 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/fhir-0.0.82.jar"/>
+	<classpathentry kind="lib" path="lib/NobleTools-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/owlapi-distribution-4.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jess.jar"/>
+	<classpathentry kind="lib" path="lib/ojdbc6.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/deepphe-ctakes-cancer"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
