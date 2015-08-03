@@ -97,7 +97,7 @@ final public class CancerPipelineRunner {
       // core components, dictionary, dependency parser, polarity, uncertainty
       aggregateBuilder.add( SentenceDetector.createAnnotatorDescription() );
       aggregateBuilder.add( TokenizerAnnotatorPTB.createAnnotatorDescription() );
-      aggregateBuilder.add( LvgAnnotator.createAnnotatorDescription() );
+//      aggregateBuilder.add( LvgAnnotator.createAnnotatorDescription() );
       aggregateBuilder.add( ContextDependentTokenizerAnnotator.createAnnotatorDescription() );
       aggregateBuilder.add( POSTagger.createAnnotatorDescription() );
       aggregateBuilder.add( Chunker.createAnnotatorDescription() );
@@ -106,6 +106,7 @@ final public class CancerPipelineRunner {
       aggregateBuilder
             .add( AnalysisEngineFactory.createEngineDescription( CopyNPChunksToLookupWindowAnnotations.class ) );
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( RemoveEnclosedLookupWindows.class ) );
+/*
       try {
          aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( DefaultJCasTermAnnotator.class,
                AbstractJCasTermAnnotator.PARAM_WINDOW_ANNOT_PRP,
@@ -119,7 +120,7 @@ final public class CancerPipelineRunner {
          e.printStackTrace();
          throw new ResourceInitializationException( e );
       }
-
+*/
       aggregateBuilder.add( ClearNLPDependencyParserAE.createAnnotatorDescription() );
       aggregateBuilder.add( PolarityCleartkAnalysisEngine.createAnnotatorDescription() );
       aggregateBuilder.add( UncertaintyCleartkAnalysisEngine.createAnnotatorDescription() );
@@ -174,8 +175,7 @@ final public class CancerPipelineRunner {
 
    public static CollectionReader createFilesInDirectoryReader( final String inputDirectory ) throws UIMAException,
                                                                                                       IOException {
-      final String descriptorPath = "../ctakes/ctakes-core/desc/collection_reader/FilesInDirectoryCollectionReader.xml";
-      return CollectionReaderFactory.createReaderFromPath( descriptorPath,
+      return CollectionReaderFactory.createReader( FilesInDirectoryCollectionReader.class,
             FilesInDirectoryCollectionReader.PARAM_INPUTDIR,
             inputDirectory );
 
