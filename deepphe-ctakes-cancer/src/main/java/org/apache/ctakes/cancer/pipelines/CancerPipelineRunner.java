@@ -106,7 +106,7 @@ final public class CancerPipelineRunner {
       aggregateBuilder
             .add( AnalysisEngineFactory.createEngineDescription( CopyNPChunksToLookupWindowAnnotations.class ) );
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( RemoveEnclosedLookupWindows.class ) );
-/*
+
       try {
          aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( DefaultJCasTermAnnotator.class,
                AbstractJCasTermAnnotator.PARAM_WINDOW_ANNOT_PRP,
@@ -120,7 +120,7 @@ final public class CancerPipelineRunner {
          e.printStackTrace();
          throw new ResourceInitializationException( e );
       }
-*/
+
       aggregateBuilder.add( ClearNLPDependencyParserAE.createAnnotatorDescription() );
       aggregateBuilder.add( PolarityCleartkAnalysisEngine.createAnnotatorDescription() );
       aggregateBuilder.add( UncertaintyCleartkAnalysisEngine.createAnnotatorDescription() );
