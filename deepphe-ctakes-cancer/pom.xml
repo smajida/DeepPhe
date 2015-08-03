@@ -29,6 +29,16 @@
 			<artifactId>ctakes-temporal</artifactId>
 			<version>${ctakes.version}</version>			
 		</dependency>
+		<dependency>
+			<groupId>org.apache.ctakes</groupId>
+			<artifactId>ctakes-assertion</artifactId>
+			<version>${ctakes.version}</version>			
+		</dependency>		
+		<dependency>
+			<groupId>org.apache.ctakes</groupId>
+			<artifactId>ctakes-assertion-res</artifactId>
+			<version>${ctakes.version}</version>			
+		</dependency>			
 	</dependencies>
    <build>
       <plugins>
