@@ -113,4 +113,10 @@ public class CtakesEncounterKnowledgeExtractor implements EncounterKnowledgeExtr
 		
 	}
 
+	@Override
+	public void setProjectLocation(String projectLocation) {
+		// currently not used for cTAKES
+		
+	}
+
 }

@@ -7,9 +7,9 @@ import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Condition;
 import org.hl7.fhir.instance.model.Quantity;
 
-import edu.pitt.dbmi.deep.phe.model.*;
-import edu.pitt.dbmi.deep.phe.model.Cancer.Tumor;
-import edu.pitt.dbmi.deep.phe.util.OntologyUtils;
+import edu.pitt.dbmi.deepphe.fhir.model.*;
+import edu.pitt.dbmi.deepphe.fhir.model.Cancer.Tumor;
+import edu.pitt.dbmi.deepphe.fhir.util.OntologyUtils;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 
@@ -32,7 +32,7 @@ public class SummaryFactory {
 		s.setPreferredTerm(name);
 	}
 	
-	public static Patient getPatient( edu.pitt.dbmi.deep.phe.model.Patient p){
+	public static Patient getPatient( edu.pitt.dbmi.deepphe.fhir.model.Patient p){
 		Patient patient = new Patient();
 		//TODO: nothing to fill for now
 		return patient;
@@ -62,8 +62,8 @@ public class SummaryFactory {
 			encounter.addSummary(summary);
 			
 			// if Dx, add Stage as well (if available)
-			if(e instanceof edu.pitt.dbmi.deep.phe.model.Diagnosis){
-				for(Summary s: getStageSummary(((edu.pitt.dbmi.deep.phe.model.Diagnosis)e).getStage())){
+			if(e instanceof edu.pitt.dbmi.deepphe.fhir.model.Diagnosis){
+				for(Summary s: getStageSummary(((edu.pitt.dbmi.deepphe.fhir.model.Diagnosis)e).getStage())){
 					s.setSummarizableId(encounter.getId());
 					encounter.addSummary(s);
 				}
@@ -115,8 +115,8 @@ public class SummaryFactory {
 	public static Summary getSummary(Element e) {
 		CodeableConcept code = null;
 		Summary summary = null;
-		if(e instanceof edu.pitt.dbmi.deep.phe.model.Diagnosis){
-			code = ((edu.pitt.dbmi.deep.phe.model.Diagnosis)e).getCode();
+		if(e instanceof edu.pitt.dbmi.deepphe.fhir.model.Diagnosis){
+			code = ((edu.pitt.dbmi.deepphe.fhir.model.Diagnosis)e).getCode();
 			summary = new Diagnosis();
 		}else if(e instanceof Observation){
 			Observation o = (Observation) e;

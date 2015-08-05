@@ -11,8 +11,8 @@ import org.apache.ctakes.typesystem.type.textsem.EventMention;
 
 
 /** Tnm Mention at Document Level
- * Updated by JCasGen Fri Feb 27 14:17:10 EST 2015
- * XML source: C:/Users/mitchellkj/git/DeepPhe/desc/types/DeepPheTypes.xml
+ * Updated by JCasGen Tue Jul 28 14:10:26 EDT 2015
+ * XML source: C:/ws/ws-deepphe-3/DeepPhe/deepphe-demo/desc/types/DeepPheTypes.xml
  * @generated */
 public class TnmMention extends EventMention {
   /** @generated

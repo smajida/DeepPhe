@@ -18,17 +18,26 @@ public class StubEncounterKnowledgeExtractor implements EncounterKnowledgeExtrac
 	
 	@Override
 	public void execute() {
-		
+		if (patient.getSequence() == 0) {
+			initializePatientZeroEncounters();
+		}
+		else if (patient.getSequence() == 1) {
+			initializePatientOneEncounters();
+		}
+	}
+	
+	private void initializePatientZeroEncounters() {
 		for (Encounter encounter : patient.getEncounters()) {
+			
 			if (encounter.getSequence() == 0) {
-				encounter.setKind("Pathology");
+				encounter.setKind("Pathology Report");
 				encounter.setPatientId(patient.getId());
 				encounter.setSequence(0);
 				
 				Diagnosis diagnosis = new Diagnosis();
 				diagnosis.setSummarizableId(encounter.getId());
-				diagnosis.setCode("C0006142");
-				diagnosis.setPreferredTerm("Malignant Breast Neoplasm");
+				diagnosis.setCode("C0858252");
+				diagnosis.setPreferredTerm("Breast Adenocarcinoma");
 				encounter.addSummary(diagnosis);
 				
 				TumorSize tumorSize = new TumorSize();
@@ -46,28 +55,10 @@ public class StubEncounterKnowledgeExtractor implements EncounterKnowledgeExtrac
 				
 			}
 			else if (encounter.getSequence() == 1) {
-				encounter.setKind("Radiology");
+				
+				encounter.setKind("Progress Note");
 				encounter.setPatientId(patient.getId());
-				encounter.setSequence(1);
-				
-				TumorSize tumorSize = new TumorSize();
-				tumorSize.setSummarizableId(encounter.getId());
-				tumorSize.setBaseCode("C120285");
-				tumorSize.setCode("C120285");
-				tumorSize.setPreferredTerm("Tumor Less Than or Equal to 2.0 Centimeters");
-				tumorSize.setGreatestDimension(0.9d);
-				tumorSize.setDimensionOne(0.9d);
-				tumorSize.setDimensionTwo(-1.0d);
-				tumorSize.setDimensionThree(-1.0d);
-				tumorSize.setUnitOfMeasure("cm");
-				encounter.addSummary(tumorSize);
-				
-			}
-			else if (encounter.getSequence() == 2) {
-				
-				encounter.setKind("Progress");
-				encounter.setPatientId(patient.getId());
-				encounter.setSequence(2);				
+				encounter.setSequence(1);				
 				
 				Er estrogenReceptor = new Er();
 				estrogenReceptor.setCode("C0279756");
@@ -122,16 +113,182 @@ public class StubEncounterKnowledgeExtractor implements EncounterKnowledgeExtrac
 				tnmMgrade.setUnitOfMeasure("NA");
 				tnmMgrade.setValue("M0");
 				encounter.addSummary(tnmMgrade);
+			
+			}
+			else if (encounter.getSequence() == 2) {
+				
+				encounter.setKind("Progress Note");
+				encounter.setPatientId(patient.getId());
+				encounter.setSequence(2);
+				
+				TumorSize tumorSize = new TumorSize();
+				tumorSize.setSummarizableId(encounter.getId());
+				tumorSize.setBaseCode("C120285");
+				tumorSize.setCode("C120285");
+				tumorSize.setPreferredTerm("Tumor Less Than or Equal to 2.0 Centimeters");
+				tumorSize.setGreatestDimension(0.9d);
+				tumorSize.setDimensionOne(0.9d);
+				tumorSize.setDimensionTwo(-1.0d);
+				tumorSize.setDimensionThree(-1.0d);
+				tumorSize.setUnitOfMeasure("cm");
+				encounter.addSummary(tumorSize);
+				
+			}
+		}
+	}
+	
+	private void initializePatientOneEncounters() {
+		for (Encounter encounter : patient.getEncounters()) {
+			
+			if (encounter.getSequence() == 0) {
+				encounter.setKind("Pathology Report");
+				encounter.setPatientId(patient.getId());
+				
+				Diagnosis diagnosis = new Diagnosis();
+				diagnosis.setSummarizableId(encounter.getId());
+				diagnosis.setCode("C0858252");
+				diagnosis.setPreferredTerm("Breast Adenocarcinoma");
+				encounter.addSummary(diagnosis);
+				
+				TnmTgrade tnmTgrade = new TnmTgrade();
+				tnmTgrade.setBaseCode("C1707025");
+				tnmTgrade.setCode("C1707025");
+				tnmTgrade.setGroupIndex(1);
+				tnmTgrade.setPreferredTerm("Breast Cancer pT0 TNM Finding");
+				tnmTgrade.setProvidingDepartment("Pathology");
+				tnmTgrade.setSummarizableId(encounter.getId());
+				tnmTgrade.setUnitOfMeasure("NA");
+				tnmTgrade.setValue("T0");
+				encounter.addSummary(tnmTgrade);
+				
+				TnmNgrade tnmNgrade = new TnmNgrade();
+				tnmNgrade.setBaseCode("C2981868");
+				tnmNgrade.setCode("C2981868");
+				tnmNgrade.setGroupIndex(1);
+				tnmNgrade.setPreferredTerm("Breast Cancer pN0 TNM Finding v7");
+				tnmNgrade.setProvidingDepartment("Pathology");
+				tnmNgrade.setSummarizableId(encounter.getId());
+				tnmNgrade.setUnitOfMeasure("NA");
+				tnmNgrade.setValue("N0");
+				encounter.addSummary(tnmNgrade);
+				
+				TnmMgrade tnmMgrade = new TnmMgrade();
+				tnmMgrade.setBaseCode("C1707005");
+				tnmMgrade.setCode("C1707005");
+				tnmMgrade.setGroupIndex(1);
+				tnmMgrade.setPreferredTerm("Breast Cancer pM1 TNM Finding");
+				tnmMgrade.setProvidingDepartment("Clinical");
+				tnmMgrade.setSummarizableId(encounter.getId());
+				tnmMgrade.setUnitOfMeasure("NA");
+				tnmMgrade.setValue("M1");
+				encounter.addSummary(tnmMgrade);
+				
+			}
+			else if (encounter.getSequence() == 1) {
+				
+				encounter.setKind("Pathology Report");
+				encounter.setPatientId(patient.getId());
+			
+				Diagnosis diagnosis = new Diagnosis();
+				diagnosis.setSummarizableId(encounter.getId());
+				diagnosis.setCode("C0858252");
+				diagnosis.setPreferredTerm("Breast Adenocarcinoma");
+				encounter.addSummary(diagnosis);
+				
+				TnmTgrade tnmTgrade = new TnmTgrade();
+				tnmTgrade.setBaseCode("C1707026");
+				tnmTgrade.setCode("C1707026");
+				tnmTgrade.setGroupIndex(1);
+				tnmTgrade.setPreferredTerm("Breast Cancer pT1 TNM Finding");
+				tnmTgrade.setProvidingDepartment("Pathology");
+				tnmTgrade.setSummarizableId(encounter.getId());
+				tnmTgrade.setUnitOfMeasure("NA");
+				tnmTgrade.setValue("T1");
+				encounter.addSummary(tnmTgrade);
+				
+				TnmNgrade tnmNgrade = new TnmNgrade();
+				tnmNgrade.setBaseCode("C2981871");
+				tnmNgrade.setCode("C2981871");
+				tnmNgrade.setGroupIndex(1);
+				tnmNgrade.setPreferredTerm("Breast Cancer pN1 TNM Finding v7");
+				tnmNgrade.setProvidingDepartment("Pathology");
+				tnmNgrade.setSummarizableId(encounter.getId());
+				tnmNgrade.setUnitOfMeasure("NA");
+				tnmNgrade.setValue("N1");
+				encounter.addSummary(tnmNgrade);
+				
+				TnmMgrade tnmMgrade = new TnmMgrade();
+				tnmMgrade.setBaseCode("C1707005");
+				tnmMgrade.setCode("C1707005");
+				tnmMgrade.setGroupIndex(1);
+				tnmMgrade.setPreferredTerm("Breast Cancer pM1 TNM Finding");
+				tnmMgrade.setProvidingDepartment("Clinical");
+				tnmMgrade.setSummarizableId(encounter.getId());
+				tnmMgrade.setUnitOfMeasure("NA");
+				tnmMgrade.setValue("M1");
+				encounter.addSummary(tnmMgrade);
+			
+			}
+			else if (encounter.getSequence() == 2) {
+				
+				encounter.setKind("Pathology Report");
+				encounter.setPatientId(patient.getId());
+			
+				Diagnosis diagnosis = new Diagnosis();
+				diagnosis.setSummarizableId(encounter.getId());
+				diagnosis.setCode("C0858252");
+				diagnosis.setPreferredTerm("Breast Adenocarcinoma");
+				encounter.addSummary(diagnosis);
+				
+				TnmTgrade tnmTgrade = new TnmTgrade();
+				tnmTgrade.setBaseCode("C1707031");
+				tnmTgrade.setCode("C1707031");
+				tnmTgrade.setGroupIndex(1);
+				tnmTgrade.setPreferredTerm("Breast Cancer pT2 TNM Finding");
+				tnmTgrade.setProvidingDepartment("Pathology");
+				tnmTgrade.setSummarizableId(encounter.getId());
+				tnmTgrade.setUnitOfMeasure("NA");
+				tnmTgrade.setValue("T2");
+				encounter.addSummary(tnmTgrade);
+				
+				TnmNgrade tnmNgrade = new TnmNgrade();
+				tnmNgrade.setBaseCode("C2981876");
+				tnmNgrade.setCode("C2981876");
+				tnmNgrade.setGroupIndex(1);
+				tnmNgrade.setPreferredTerm("Breast Cancer pN2 TNM Finding v7");
+				tnmNgrade.setProvidingDepartment("Clinical");
+				tnmNgrade.setSummarizableId(encounter.getId());
+				tnmNgrade.setUnitOfMeasure("NA");
+				tnmNgrade.setValue("N0");
+				encounter.addSummary(tnmNgrade);
+				
+				TnmMgrade tnmMgrade = new TnmMgrade();
+				tnmMgrade.setBaseCode("C1707005");
+				tnmMgrade.setCode("C1707005");
+				tnmMgrade.setGroupIndex(1);
+				tnmMgrade.setPreferredTerm("Breast Cancer pM1 TNM Finding");
+				tnmMgrade.setProvidingDepartment("Clinical");
+				tnmMgrade.setSummarizableId(encounter.getId());
+				tnmMgrade.setUnitOfMeasure("NA");
+				tnmMgrade.setValue("M1");
+				encounter.addSummary(tnmMgrade);
 				
 			}
 		}
 		
-	
 	}
+
+
 
 	@Override
 	public void setPatient(Patient patient) {
 		this.patient = patient;
+		
+	}
+
+	@Override
+	public void setProjectLocation(String projectLocation) {
+		// not used
 		
 	}
 }

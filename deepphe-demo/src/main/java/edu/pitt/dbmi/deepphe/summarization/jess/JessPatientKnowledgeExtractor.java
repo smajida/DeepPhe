@@ -46,6 +46,7 @@ public class JessPatientKnowledgeExtractor implements PatientKnowledgeExtractor 
 	private void executePatient() throws JessException {
 		disassembleDagToKnowledge();
 		appendGoalEstablishPlan();
+		executeJess("(retract-identifiables)");
 		loadKnowledgeToJess();
 		executeJess("(run)");
 		assembleKnowledgeToDag();
@@ -177,7 +178,7 @@ public class JessPatientKnowledgeExtractor implements PatientKnowledgeExtractor 
 	public void loadProductionClipsFiles() {
 		try {
 			if (this.engine != null) {
-				File productionClipsDirectory = new File(SummarizationGui.PROJECT_LOCATION + File.separator + "summarization/src/main/jess/autoload");
+				File productionClipsDirectory = new File(SummarizationGui.PROJECT_LOCATION + File.separator + "src/main/jess/autoload");
 				if (productionClipsDirectory.isDirectory()) {
 					List<File> fileList = Arrays.asList(productionClipsDirectory.listFiles());
 					Collections.sort(fileList, new Comparator<File>() {

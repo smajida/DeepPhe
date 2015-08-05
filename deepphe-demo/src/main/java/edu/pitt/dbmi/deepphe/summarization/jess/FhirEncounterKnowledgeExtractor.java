@@ -1,31 +1,18 @@
 package edu.pitt.dbmi.deepphe.summarization.jess;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.uima.jcas.JCas;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Quantity;
 
-import edu.pitt.dbmi.deep.phe.model.Observation;
-import edu.pitt.dbmi.deep.phe.model.Report;
-import edu.pitt.dbmi.deep.phe.model.Stage;
-import edu.pitt.dbmi.deep.phe.model.Utils;
-import edu.pitt.dbmi.deep.phe.summary.DocumentSummarizer;
-import edu.pitt.dbmi.deep.phe.util.TextUtils;
-import edu.pitt.dbmi.deepphe.summarization.jess.kb.Diagnosis;
+import edu.pitt.dbmi.deepphe.fhir.model.Report;
+import edu.pitt.dbmi.deepphe.fhir.summary.DocumentSummarizer;
+import edu.pitt.dbmi.deepphe.fhir.util.TextUtils;
 import edu.pitt.dbmi.deepphe.summarization.jess.kb.Encounter;
-import edu.pitt.dbmi.deepphe.summarization.jess.kb.Er;
-import edu.pitt.dbmi.deepphe.summarization.jess.kb.Her2;
 import edu.pitt.dbmi.deepphe.summarization.jess.kb.Patient;
-import edu.pitt.dbmi.deepphe.summarization.jess.kb.Pr;
-import edu.pitt.dbmi.deepphe.summarization.jess.kb.Summarizable;
-import edu.pitt.dbmi.deepphe.summarization.jess.kb.Summary;
 import edu.pitt.dbmi.deepphe.summarization.jess.kb.SummaryFactory;
-import edu.pitt.dbmi.deepphe.summarization.jess.kb.TnmMgrade;
-import edu.pitt.dbmi.deepphe.summarization.jess.kb.TnmNgrade;
-import edu.pitt.dbmi.deepphe.summarization.jess.kb.TnmTgrade;
-import edu.pitt.dbmi.deepphe.summarization.jess.kb.TumorSize;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 
@@ -36,6 +23,8 @@ import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
  */
 
 public class FhirEncounterKnowledgeExtractor implements EncounterKnowledgeExtractor {
+
+	private String projectLocation;
 	private Patient patient;
 	private List<Report> reports;
 	
@@ -44,9 +33,8 @@ public class FhirEncounterKnowledgeExtractor implements EncounterKnowledgeExtrac
 	}
 	
 	public void execute() {
-		//TODO: THIS SHOULD NOT BE HARD-CODED IN THE FUTURE!!!!
-		File project = new File(SummarizationGui.PROJECT_LOCATION);
-		File ontology = new File(project,"ontologies"+File.separator+"breastCancer.owl");//breastCAEx.owl
+		File project = new File(projectLocation);
+		File ontology = new File(project,"data" + File.separator + "ontology" + File.separator + "breastCancer.owl");//breastCAEx.owl
 		File sample = new File(project,"data"+File.separator+"sample");
 		File types = new File(project,"data"+File.separator+"desc"+File.separator+"TypeSystem.xml");
 		
@@ -90,6 +78,12 @@ public class FhirEncounterKnowledgeExtractor implements EncounterKnowledgeExtrac
 			patient.addEncounter(encounter);
 		}
 
+	}
+
+	@Override
+	public void setProjectLocation(String projectLocation) {
+		this.projectLocation = projectLocation;
+		
 	}
 
 }

@@ -26,7 +26,6 @@ public class KnowledgeToDagAssembler {
 			if (Patient.class.isInstance(identified)) {
 				patient = (Patient) identified;
 				patient.clearEncounters();
-				break;  // should only be one patient
 			}
 		}
 	}

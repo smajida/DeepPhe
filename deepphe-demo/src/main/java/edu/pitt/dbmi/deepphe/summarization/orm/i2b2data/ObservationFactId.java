@@ -162,5 +162,17 @@ public class ObservationFactId implements java.io.Serializable {
 						.hashCode());
 		return result;
 	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("patientNum = " + patientNum + "\n");
+	    sb.append("conceptCd = " + conceptCd + "\n");
+	    sb.append("modifierCd = " + modifierCd + "\n");
+	    sb.append("startDate = " + startDate + "\n");
+	    sb.append("encounterNum = " + encounterNum + "\n");
+	    sb.append("instanceNum = " + instanceNum + "\n");
+	    sb.append("providerId = " + providerId);
+		return sb.toString();
+	}
 
 }

@@ -58,6 +58,8 @@ public class I2B2DataDataWriter {
 	}
 
 	public void cleanOldRecords() throws SQLException {
+		
+		dataSourceMgr.getSession().clear();
 
 		String sql = "delete from OBSERVATION_FACT where SOURCESYSTEM_CD = :sourceSystemCd";
 		SQLQuery sqlUpdate = dataSourceMgr.getSession().createSQLQuery(sql);
@@ -65,6 +67,11 @@ public class I2B2DataDataWriter {
 		sqlUpdate.executeUpdate();
 
 		sql = "delete from CONCEPT_DIMENSION where SOURCESYSTEM_CD = :sourceSystemCd";
+		sqlUpdate = dataSourceMgr.getSession().createSQLQuery(sql);
+		sqlUpdate.setString("sourceSystemCd", getSourceSystemCd());
+		sqlUpdate.executeUpdate();
+		
+		sql = "delete from VISIT_DIMENSION where SOURCESYSTEM_CD = :sourceSystemCd";
 		sqlUpdate = dataSourceMgr.getSession().createSQLQuery(sql);
 		sqlUpdate.setString("sourceSystemCd", getSourceSystemCd());
 		sqlUpdate.executeUpdate();
@@ -203,7 +210,7 @@ public class I2B2DataDataWriter {
 
 	private void writeObservation(Patient kbPatient, Encounter kbEncounter,
 			Summary kbSummary) {
-
+		
 		ObservationFactId observationFactId = new ObservationFactId();
 		if (kbEncounter != null) {
 			observationFactId.setEncounterNum(new BigDecimal(kbEncounter
@@ -213,6 +220,8 @@ public class I2B2DataDataWriter {
 			observationFactId.setEncounterNum(new BigDecimal(kbPatient
 					.getId()));
 		}
+		
+		System.out.println("Writing obs (" + observationFactId + ")");
 
 		observationFactId.setPatientNum(new BigDecimal(kbPatient.getId()));
 		observationFactId.setConceptCd(kbSummary.getBaseCode());
