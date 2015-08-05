@@ -1,6 +1,10 @@
 package org.apache.ctakes.cancer.ae;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Collection;
 
 import org.apache.ctakes.assertion.medfacts.cleartk.PolarityCleartkAnalysisEngine;
@@ -11,7 +15,6 @@ import org.apache.ctakes.clinicalpipeline.ae.ExtractionPrepAnnotator;
 import org.apache.ctakes.core.resource.FileLocator;
 import org.apache.ctakes.core.resource.FileResourceImpl;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
-import org.apache.ctakes.dictionary.lookup.ae.UmlsDictionaryLookupAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.AbstractJCasTermAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.JCasTermAnnotator;
@@ -41,7 +44,7 @@ public class CancerPipelineTest {
 
    // TODO  ---> this data directory path must be changed based upon the local system
 //   static private final String DATA_DIRECTORY_PATH = "../apache-ctakes/trunk/ctakes-examples/data/";
-   static private final String DATA_DIRECTORY_PATH = "C:\\Spiffy\\prj_darth_phenome\\dev\\github\\data\\sample\\docs";
+   static private final String DATA_DIRECTORY_PATH = "C:\\ws\\ws-deepphe-5\\DeepPhe\\deepphe-demo\\data\\sample\\docs";
 
    static private final String TIME_ANNOTATOR_MODEL = "/org/apache/ctakes/temporal/ae/timeannotator/model.jar";
    static private final String EVENT_ANNOTATOR_MODEL = "/org/apache/ctakes/temporal/ae/eventannotator/model.jar";
@@ -63,7 +66,7 @@ public class CancerPipelineTest {
                JCasTermAnnotator.DICTIONARY_DESCRIPTOR_KEY,
                ExternalResourceFactory.createExternalResourceDescription(
                      FileResourceImpl.class,
-                     FileLocator.locateFile( "org/apache/ctakes/dictionary/lookup/fast/cTakesHsql.xml" ) )
+                     FileLocator.locateFile( "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml" ) )
          ));
       } catch (FileNotFoundException e) {
          e.printStackTrace();
