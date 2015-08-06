@@ -56,13 +56,18 @@ final public class DocumentSummarizerPipelineRunner {
             shortName = "o",
             description = "specify the path to the directory where the output xmi files are to be saved" )
       public String getOutputDirectory();
+      
+      @Option(
+              shortName = "m",
+              description = "specify the path to the model ontology file to be used." )
+        public String getOntologyPath();
    }
 
    
    public static void runCancerPipeline( final String inputDirectory,
-                                         final String outputDirectory ) throws UIMAException, IOException {
+                                         final String outputDirectory, final String ontologyPath) throws UIMAException, IOException {
       final CollectionReader collectionReader = CancerPipelineRunner.createFilesInDirectoryReader( inputDirectory );
-      final AnalysisEngine docSummarizer = createDocSummarizerCasConsumer(outputDirectory);
+      final AnalysisEngine docSummarizer = createDocSummarizerCasConsumer(outputDirectory, ontologyPath);
       runCancerPipeline( collectionReader, docSummarizer );
 
    }
@@ -76,7 +81,7 @@ final public class DocumentSummarizerPipelineRunner {
 
    public static void main( final String... args ) throws UIMAException, IOException {
       final Options options = CliFactory.parseArguments( Options.class, args );
-      runCancerPipeline( options.getInputDirectory(), options.getOutputDirectory() );
+      runCancerPipeline( options.getInputDirectory(), options.getOutputDirectory(), options.getOntologyPath());
    }
 
 
@@ -124,11 +129,13 @@ final public class DocumentSummarizerPipelineRunner {
 	      return builder.createAggregate();
    }
    
-   public static AnalysisEngine createDocSummarizerCasConsumer( final String outputDirectory )
+   public static AnalysisEngine createDocSummarizerCasConsumer( final String outputDirectory, final String ontologyPath)
 	         throws ResourceInitializationException {
 	      return AnalysisEngineFactory.createEngine( DocumentSummarizerAE.class,
 	    		  DocumentSummarizerAE.PARAM_OUTPUTDIR,
-	            outputDirectory );
+	            outputDirectory,
+	            DocumentSummarizerAE.PARAM_ONTOLOGY_PATH,
+	            ontologyPath);
 	   }
 
 
