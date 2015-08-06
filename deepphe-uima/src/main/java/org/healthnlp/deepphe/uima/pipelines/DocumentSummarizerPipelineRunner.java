@@ -67,7 +67,7 @@ final public class DocumentSummarizerPipelineRunner {
    public static void runCancerPipeline( final String inputDirectory,
                                          final String outputDirectory, final String ontologyPath) throws UIMAException, IOException {
       final CollectionReader collectionReader = CancerPipelineRunner.createFilesInDirectoryReader( inputDirectory );
-      final AnalysisEngine docSummarizer = createDocSummarizerCasConsumer(outputDirectory, ontologyPath);
+      final AnalysisEngine docSummarizer = createDocSummarizerAE(outputDirectory, ontologyPath);
       runCancerPipeline( collectionReader, docSummarizer );
 
    }
@@ -129,7 +129,7 @@ final public class DocumentSummarizerPipelineRunner {
 	      return builder.createAggregate();
    }
    
-   public static AnalysisEngine createDocSummarizerCasConsumer( final String outputDirectory, final String ontologyPath)
+   public static AnalysisEngine createDocSummarizerAE( final String outputDirectory, final String ontologyPath)
 	         throws ResourceInitializationException {
 	      return AnalysisEngineFactory.createEngine( DocumentSummarizerAE.class,
 	    		  DocumentSummarizerAE.PARAM_OUTPUTDIR,
