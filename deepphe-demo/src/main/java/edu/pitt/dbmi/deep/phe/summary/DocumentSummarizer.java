@@ -3,44 +3,26 @@ package edu.pitt.dbmi.deep.phe.summary;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
-import org.apache.ctakes.cancer.pipelines.CancerPipelineRunner;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
-import org.apache.ctakes.core.cc.XmiWriterCasConsumerCtakes;
-import org.apache.ctakes.core.cr.FilesInDirectoryCollectionReader;
-import org.apache.ctakes.core.util.CtakesFileNamer;
-import org.apache.ctakes.core.util.JCasUtil;
-import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
-import org.apache.ctakes.typesystem.type.refsem.OntologyConcept_Type;
-import org.apache.ctakes.typesystem.type.structured.Demographics;
-import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.uima.UIMAException;
 import org.apache.uima.UIMAFramework;
-import org.apache.uima.analysis_engine.*;
+import org.apache.uima.analysis_engine.AnalysisEngine;
+import org.apache.uima.analysis_engine.AnalysisEngineDescription;
+import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CASRuntimeException;
-import org.apache.uima.cas.Feature;
-import org.apache.uima.cas.text.AnnotationFS;
-import org.apache.uima.cas.text.AnnotationIndex;
-import org.apache.uima.collection.CollectionReader;
-import org.apache.uima.fit.factory.*;
+import org.apache.uima.fit.factory.JCasFactory;
+import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.jcas.JCas;
-import org.apache.uima.jcas.tcas.Annotation;
-import org.apache.uima.jcas.tcas.DocumentAnnotation;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
-import org.cleartk.util.cr.FilesCollectionReader;
-import org.hl7.fhir.instance.formats.XmlComposer;
-import org.hl7.fhir.instance.formats.XmlComposerBase;
-import org.hl7.fhir.instance.model.Composition;
-import org.hl7.fhir.instance.model.Resource;
 
-import edu.pitt.dbmi.deep.phe.model.*;
+import edu.pitt.dbmi.deep.phe.model.Report;
+import edu.pitt.dbmi.deep.phe.model.ResourceFactory;
 import edu.pitt.dbmi.deep.phe.util.TextUtils;
 import edu.pitt.dbmi.deepphe.summarization.jess.FhirEncounterKnowledgeExtractor;
 import edu.pitt.dbmi.deepphe.summarization.jess.kb.Encounter;
@@ -127,7 +109,7 @@ public class DocumentSummarizer {
 	 */
 	
 	public static void main(String [] args ) throws Exception{
-		File project = new File("/home/tseytlin/Work/DeepPhe/");
+		File project = new File(args[0]);
 		File ontology = new File(project,"ontologies/breastCancer.owl");//breastCAEx.owl
 		File sample = new File(project,"data/sample");
 		File out = new File(sample,"fhir2");
