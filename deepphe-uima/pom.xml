@@ -31,6 +31,11 @@
 	</parent>
 	<dependencies>
 		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-distribution</artifactId>
+			<version>3.5.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.healthnlp</groupId>
 			<artifactId>deepphe-ctakes-cancer</artifactId>
 			<version>${project.version}</version>
@@ -291,20 +296,6 @@ ctakes-temporal-res
 			<version>2.5</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-distribution</artifactId>
-			<version>4.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-obo</artifactId>
-			<version>3.3</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-turtle</artifactId>
-			<version>3.3</version>
-		</dependency>
+		
 	</dependencies>
 </project>
