@@ -8,14 +8,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
-import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
-import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
-import org.apache.ctakes.typesystem.type.textsem.ProcedureMention;
 import org.apache.uima.jcas.cas.FSArray;
-import org.hibernate.type.FloatType;
-import org.hl7.fhir.instance.model.*;
+import org.hl7.fhir.instance.model.DateAndTime;
+import org.hl7.fhir.instance.model.DecimalType;
+import org.hl7.fhir.instance.model.Quantity;
+import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.StringType;
+import org.hl7.fhir.instance.model.Type;
 
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
