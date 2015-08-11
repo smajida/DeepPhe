@@ -476,6 +476,8 @@ public class Utils {
 	}
 	
 	public static String getIdentifier(Identifier id){
+		if(id==null)
+			return null;
 		return id.getValueSimple();
 	}
 	

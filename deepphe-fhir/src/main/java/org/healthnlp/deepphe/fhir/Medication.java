@@ -2,12 +2,9 @@ package org.healthnlp.deepphe.fhir;
 
 import java.io.File;
 
-import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
 import org.apache.ctakes.typesystem.type.textsem.MedicationMention;
-import org.apache.ctakes.typesystem.type.textsem.ProcedureMention;
-import org.healthnlp.deepphe.util.TextUtils;
-import org.hl7.fhir.instance.model.*;
-import org.hl7.fhir.instance.model.Observation;
+import org.hl7.fhir.instance.model.Identifier;
+import org.hl7.fhir.instance.model.Resource;
 
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;

@@ -2,16 +2,16 @@ package org.healthnlp.deepphe.uima.ae;
 
 import java.io.File;
 
+import org.apache.ctakes.typesystem.type.structured.DocumentID;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
-import org.apache.uima.cas.CAS;
-import org.apache.uima.cas.CASException;
+import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.apache.uima.resource.ResourceProcessException;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.ResourceFactory;
+import org.healthnlp.deepphe.util.TextUtils;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
@@ -48,33 +48,18 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 	}
 
 
-	public void processCas(CAS cas) throws ResourceProcessException {
-		JCas jcas;
-		try {
-			jcas = cas.getJCas();
-			
-			Report report = resourceFactory.getReport(jcas);
-			//report.setTitleSimple(TextUtils.stripSuffix(file.getName()));
-			report.save(new File(outputDir,"CT"));
-			
-		} catch (CASException e) {
-			throw new ResourceProcessException(e);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	
-	}
-
-
-
 
 	@Override
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
 		
 		try {
-			Report report = resourceFactory.getReport(jcas);
-			//report.setTitleSimple(TextUtils.stripSuffix(file.getName()));
-			report.save(new File(outputDir,"CT"));
+			
+			for ( DocumentID docID : JCasUtil.select(jcas, DocumentID.class)) {
+				Report report = resourceFactory.getReport(jcas);
+				report.setTitleSimple(TextUtils.stripSuffix(docID.getDocumentID()));
+				report.save(new File(outputDir,"CT"));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
