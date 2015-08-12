@@ -18,9 +18,9 @@ import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
 
 @Immutable
-final public class PhenotypeSummarizerPipelineRunner {
+final public class PhenotypeSummarizerPipeline {
 	   
-   private PhenotypeSummarizerPipelineRunner() {
+   private PhenotypeSummarizerPipeline() {
    }
 
    static interface Options{

@@ -36,14 +36,14 @@ import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
 
 @Immutable
-final public class DocumentSummarizerPipelineRunner {
+final public class DocumentSummarizerPipeline {
 	
    static private final String TIME_ANNOTATOR_MODEL = "/org/apache/ctakes/temporal/ae/timeannotator/model.jar";
    static private final String EVENT_ANNOTATOR_MODEL = "/org/apache/ctakes/temporal/ae/eventannotator/model.jar";
    static private final String DOCTIMEREL_ANNOTATOR_MODEL = "/org/apache/ctakes/temporal/ae/doctimerel/model.jar";
 
 	   
-   private DocumentSummarizerPipelineRunner() {
+   private DocumentSummarizerPipeline() {
    }
 
    static interface Options{
