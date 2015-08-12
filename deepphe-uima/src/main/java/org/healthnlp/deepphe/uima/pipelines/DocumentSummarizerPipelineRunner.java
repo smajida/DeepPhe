@@ -64,28 +64,15 @@ final public class DocumentSummarizerPipelineRunner {
    }
 
    
-   public static void runCancerPipeline( final String inputDirectory,
+   public static void runDocumentSummarizerPipeline( final String inputDirectory,
                                          final String outputDirectory, final String ontologyPath) throws UIMAException, IOException {
       final CollectionReader collectionReader = CancerPipelineRunner.createFilesInDirectoryReader( inputDirectory );
       final AnalysisEngine docSummarizer = createDocSummarizerAE(outputDirectory, ontologyPath);
-      runCancerPipeline( collectionReader, docSummarizer );
 
+      SimplePipeline.runPipeline( collectionReader,buildcTAKESPipeline(),docSummarizer);
    }
 
-   public static void runCancerPipeline( final CollectionReader collectionReader,
-                                         final AnalysisEngine outputWriter ) throws UIMAException, IOException {
-      SimplePipeline.runPipeline( collectionReader,
-            buildAnalysisEngine(),
-            outputWriter );
-   }
-
-   public static void main( final String... args ) throws UIMAException, IOException {
-      final Options options = CliFactory.parseArguments( Options.class, args );
-      runCancerPipeline( options.getInputDirectory(), options.getOutputDirectory(), options.getOntologyPath());
-   }
-
-
-   static public AnalysisEngine buildAnalysisEngine() throws ResourceInitializationException {
+   static public AnalysisEngine buildcTAKESPipeline() throws ResourceInitializationException {
 	      final AggregateBuilder builder = new AggregateBuilder();
 	      builder.add( ClinicalPipelineFactory.getTokenProcessingPipeline() );
 	      builder.add( AnalysisEngineFactory.createEngineDescription( CopyNPChunksToLookupWindowAnnotations.class ) );
@@ -138,5 +125,10 @@ final public class DocumentSummarizerPipelineRunner {
 	            ontologyPath);
 	   }
 
+
+   public static void main( final String... args ) throws UIMAException, IOException {
+	      final Options options = CliFactory.parseArguments( Options.class, args );
+	      runDocumentSummarizerPipeline( options.getInputDirectory(), options.getOutputDirectory(), options.getOntologyPath());
+	   }
 
 }
