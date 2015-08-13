@@ -26,6 +26,11 @@
 
 	<modules>
 		<module>deepphe-ctakes-cancer</module>
+		<module>deepphe-demo</module>		
+		<module>deepphe-fhir</module>		
+		<module>deepphe-uima</module>		
+		<module>deepphe-i2b2</module>		
+		<module>deepphe-workbench</module>		
 	</modules>
 
 	<repositories>
