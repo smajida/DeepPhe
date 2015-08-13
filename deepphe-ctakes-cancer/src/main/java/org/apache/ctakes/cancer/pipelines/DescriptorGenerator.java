@@ -28,7 +28,7 @@ final public class DescriptorGenerator {
 
    public static void writeDescriptor( final String descriptorPath )
          throws ResourceInitializationException, InvalidXMLException, IOException, SAXException {
-      final AnalysisEngineDescription aed = CancerPipelineRunner.getPipelineDescription();
+      final AnalysisEngineDescription aed = CancerPipelineFactory.getPipelineDescription();
          aed.toXML( new FileOutputStream( descriptorPath ) );
    }
 
@@ -36,7 +36,7 @@ final public class DescriptorGenerator {
          throws ResourceInitializationException, InvalidXMLException, IOException, SAXException {
 //      final DescriptorOptions options = CliFactory.parseArguments( DescriptorOptions.class, args );
       final DescriptorOptions options = CliFactory.parseArguments( DescriptorOptions.class, "-x", "C:\\Spiffy\\ctakes_trunk_intellij\\dev\\apache\\ctakes-cancer\\desc\\CancerPipeline.xml" );
-      final AnalysisEngineDescription aed = CancerPipelineRunner.getPipelineDescription( options );
+      final AnalysisEngineDescription aed = CancerPipelineFactory.getPipelineDescription( options );
       if ( options.getXmlOutput() != null ) {
          aed.toXML( new FileOutputStream( options.getXmlOutput() ) );
       }
