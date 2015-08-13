@@ -3,7 +3,9 @@ package org.healthnlp.deepphe.uima.ae;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
+import java.util.LinkedHashMap;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.ctakes.typesystem.type.structured.DocumentID;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
@@ -11,6 +13,7 @@ import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.ResourceFactory;
 import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
@@ -54,20 +57,32 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 	}
 
 
-	
-
+	private static LinkedHashMap<String,Integer> patientNameIDMap = new LinkedHashMap<String,Integer>();
+	private static int patientID = 0;
 	@Override
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
 		
 		try {
 			
 			for ( DocumentID docID : JCasUtil.select(jcas, DocumentID.class)) {
+				Patient patient = resourceFactory.getPatient(jcas);
+				
+				String namedID = patient.getIdentifierSimple();
+				Integer id = patientNameIDMap.get(namedID);
+				
+				if(id==null){
+					patientID++;
+					patientNameIDMap.put(namedID, patientID);
+					
+					id = patientID;
+				}
+				
 				Report report = resourceFactory.getReport(jcas);
 				report.setTitleSimple(TextUtils.stripSuffix(docID.getDocumentID()));
 				
 				Encounter e = SummaryFactory.getEncounter(report);
-				File reportdir = new File(new File(outputDir),TextUtils.stripSuffix(report.getTitleSimple()));
-				saveSerialized(reportdir,e);
+				File patientDir = new File(new File(outputDir),""+id);
+				saveSerialized(patientDir,TextUtils.stripSuffix(report.getTitleSimple()),e);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -78,9 +93,9 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 	}
 
 
-	public void saveSerialized(File dir, Encounter e) throws Exception{
+	public void saveSerialized(File dir, String reportTitle, Encounter e) throws Exception{
 		
-		File file = new File(dir,"report.data");
+		File file = new File(dir,reportTitle + ".data");
 		Files.createParentDirs(file);
 		Files.touch(file);
 		
@@ -88,14 +103,7 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 		FileOutputStream f_out = new 
 			FileOutputStream(file);
 
-		// Write object with ObjectOutputStream
-		ObjectOutputStream obj_out = new
-			ObjectOutputStream (f_out);
-
-		// Write object out to disk
-		obj_out.writeObject ( e );
-		
-		obj_out.close();
+		SerializationUtils.serialize(e, f_out);
 		f_out.close();
 	}
 }
