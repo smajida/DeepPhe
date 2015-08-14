@@ -8,4 +8,11 @@
   <artifactId>deepphe-workbench</artifactId>
   <name>deepphe-workbench</name>
   <description>deepphe-workbench</description>
+  <dependencies>
+  	<dependency>
+  		<groupId>org.healthnlp</groupId>
+  		<artifactId>deepphe-uima</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  	</dependency>
+  </dependencies>
 </project>

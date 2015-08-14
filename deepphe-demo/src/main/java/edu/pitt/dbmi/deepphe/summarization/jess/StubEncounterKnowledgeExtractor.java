@@ -278,8 +278,6 @@ public class StubEncounterKnowledgeExtractor implements EncounterKnowledgeExtrac
 		
 	}
 
-
-
 	@Override
 	public void setPatient(Patient patient) {
 		this.patient = patient;

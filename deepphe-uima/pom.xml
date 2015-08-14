@@ -297,5 +297,10 @@ ctakes-temporal-res
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.healthnlp</groupId>
+			<artifactId>deepphe-i2b2</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 </project>

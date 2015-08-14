@@ -242,6 +242,4 @@ public class JessPatientKnowledgeExtractor implements PatientKnowledgeExtractor 
 		return patientIterator.hasNext();
 	}
 
-
-
 }
