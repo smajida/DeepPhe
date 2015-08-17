@@ -24,5 +24,6 @@
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/deepphe-ctakes-cancer"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/deepphe-fhir"/>
+	<classpathentry kind="lib" path="lib/jess.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
