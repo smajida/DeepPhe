@@ -2,6 +2,8 @@ package org.healthnlp.deepphe.summarization.jess.kb;
 
 public class TumorSize extends Summary {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private double greatestDimension;
 	private double dimensionOne;
 	private double dimensionTwo;
