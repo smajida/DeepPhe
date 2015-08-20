@@ -179,28 +179,31 @@ public class CtakesToJessConverter {
 		tumorSize.setDimensionThree(-1.0d);
 
 		FSArray measurementsArray = cancerSize.getMeasurements();
-		float maxSize = -1.0f;
+		double maxSize = -1.0d;
 		for (int idx = 0; idx < measurementsArray.size(); idx++) {
 			SizeMeasurement sizeMeasurement = cancerSize.getMeasurements(idx);
+			float valueAsFloat = sizeMeasurement.getValue();
+			double valueAsDouble = (double) valueAsFloat;
+			System.out.println("Got size measurement of " + valueAsDouble);
 			switch (idx) {
 			case 0:
-				tumorSize.setDimensionOne(sizeMeasurement.getValue());
+				tumorSize.setDimensionOne(valueAsDouble);
 				tumorSize.setUnitOfMeasure(sizeMeasurement.getUnit());
 				break;
 			case 1:
-				tumorSize.setDimensionOne(sizeMeasurement.getValue());
+				tumorSize.setDimensionOne(valueAsDouble);
 				break;
 			default:
-				tumorSize.setDimensionThree(sizeMeasurement.getValue());
+				tumorSize.setDimensionThree(valueAsDouble);
 				break;
 			}
-			if (sizeMeasurement.getValue() > maxSize) {
-				maxSize = sizeMeasurement.getValue();
+			if (valueAsDouble  > maxSize) {
+				maxSize = valueAsDouble;
 			}			
 		}
 		tumorSize.setGreatestDimension(maxSize);
-
-		if (tumorSize.getGreatestDimension() >= 2.1) {
+		
+		if (tumorSize.getGreatestDimension() >= 2.0d) {
 			tumorSize.setBaseCode("C120286");
 			tumorSize.setCode("C120286");
 			tumorSize
