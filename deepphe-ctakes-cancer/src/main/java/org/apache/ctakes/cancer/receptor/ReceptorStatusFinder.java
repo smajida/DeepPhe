@@ -1,10 +1,8 @@
 package org.apache.ctakes.cancer.receptor;
 
-import org.apache.ctakes.cancer.type.relation.ReceptorStatusTextRelation;
-import org.apache.ctakes.cancer.type.relation.TnmStageTextRelation;
-import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
-import org.apache.ctakes.cancer.type.textsem.TnmClassification;
+import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.util.FinderUtil;
+import org.apache.ctakes.cancer.util.SpanOffsetComparator;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
@@ -13,9 +11,11 @@ import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDING;
 
@@ -24,118 +24,49 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDI
  * @version %I%
  * @since 4/29/2015
  */
-public enum ReceptorStatusFinder {
-   // TODO This will probably become a util class
-   INSTANCE;
+final public class ReceptorStatusFinder {
 
-   public static ReceptorStatusFinder getInstance() {
-      return INSTANCE;
+   private ReceptorStatusFinder() {
    }
-
 
    static private final Logger LOGGER = Logger.getLogger( "ReceptorStatusFinder" );
 
-   static public interface ReceptorStatusValue {
-      public String getTitle();
-      public boolean getBooleanValue();
-   }
-
-   static public final ReceptorStatusValue UNKNOWN_STATUS_VALUE = new ReceptorStatusValue() {
-      public String getTitle() {
-         return "Unknown Receptor Status Value";
+   static public void addReceptorStatuses( final JCas jcas, final AnnotationFS lookupWindow,
+                                           final Iterable<DiseaseDisorderMention> lookupWindowT191s ) {
+      final Collection<ReceptorStatus> receptorStatuses = getReceptorStatuses( lookupWindow.getCoveredText() );
+      if ( receptorStatuses.isEmpty() ) {
+         return;
       }
-      public boolean getBooleanValue() {
-         return true;
-      }
-   };
-
-   static public enum DefinedReceptorStatusValue implements ReceptorStatusValue{
-      POSITIVE( "Positive", true, "\\+(pos)?" ),
-      NEGATIVE( "Negative", false, "-(neg)?" );
-      final private String __title;
-      final private boolean __booleanValue;
-      final private Pattern __pattern;
-      private DefinedReceptorStatusValue( final String title, final boolean booleanValue, final String regex ) {
-         __title = title;
-         __booleanValue = booleanValue;
-         __pattern = Pattern.compile( regex );
-      }
-      @Override
-      public String getTitle() {
-         return __title;
-      }
-      private Matcher getMatcher( final CharSequence lookupWindow ) {
-         return __pattern.matcher( lookupWindow );
-      }
-      @Override
-      public boolean getBooleanValue() {
-         return __booleanValue;
+      final int windowStartOffset = lookupWindow.getBegin();
+      for ( ReceptorStatus receptorStatus : receptorStatuses ) {
+         final DiseaseDisorderMention closestDiseaseMention
+               = FinderUtil.getClosestEventMention( windowStartOffset + receptorStatus.getStartOffset(),
+               windowStartOffset + receptorStatus.getEndOffset(), lookupWindowT191s );
+         final org.apache.ctakes.cancer.type.textsem.ReceptorStatus receptorStatusAnnotation
+               = createReceptorStatusAnnotation( jcas, lookupWindow.getBegin(), receptorStatus );
+         addReceptorRelationToCas( jcas, receptorStatusAnnotation, closestDiseaseMention );
       }
    }
 
-   // http://www.breastcancer.org/symptoms/diagnosis/hormone_status
-   // http://www.breastcancer.org/symptoms/diagnosis/hormone_status/read_results
-   // I think that the specifications are case-sensitive ...
-   static private enum ReceptorStatusType {
-      ER( "Estrogen receptor", "\\bER(\\+(pos)?|-(neg)?)", "T034", "C0279754", "C0279756" ),
-      PR( "Progesterone receptor", "(\\b|/)PR(\\+(pos)?|-(neg)?)", "T034", "C0279759", "C0279766" ),
-      HER2( "Human epidermal growth factor receptor 2", "\\bHER2(/neu)?(\\+(pos)?|-(neg)?)", "T191", "C1960398", "C2316304" );
-      final private String __title;
-      final private Pattern __pattern;
-      final private String __tui;
-      final private String __positiveCui;
-      final private String __negativeCui;
-      private ReceptorStatusType( final String title, final String regex, final String tui,
-                                  final String positiveCui, final String negativeCui) {
-         __title = title;
-         __pattern = Pattern.compile( regex );
-         __tui = tui;
-         __positiveCui = positiveCui;
-         __negativeCui = negativeCui;
+   static List<ReceptorStatus> getReceptorStatuses( final String lookupWindow ) {
+      if ( lookupWindow.length() < 3 ) {
+         return Collections.emptyList();
       }
-      private Matcher getMatcher( final CharSequence lookupWindow ) {
-         return __pattern.matcher( lookupWindow );
-      }
-      private String getCui( final ReceptorStatusValue statusValue ) {
-         if ( statusValue == DefinedReceptorStatusValue.POSITIVE ) {
-            return __positiveCui;
-         }
-         return __negativeCui;
-      }
-   }
-
-   static private class HormoneReceptorStatus {
-      private final ReceptorStatusType __statusType;
-      private final int __startOffset;
-      private final int __endOffset;
-      private final ReceptorStatusValue __value;
-      private HormoneReceptorStatus( final ReceptorStatusType statusType, final int startOffset, final int endOffset,
-                                     final ReceptorStatusValue value ) {
-         __statusType = statusType;
-         __startOffset = startOffset;
-         __endOffset = endOffset;
-         __value = value;
-      }
-      public String toString() {
-         return __statusType.__title + ": " + __value.getTitle();
-      }
-   }
-
-   static private Collection<HormoneReceptorStatus> getReceptorStatuses( final String lookupWindow ) {
-      final List<HormoneReceptorStatus> receptorStatuses = new ArrayList<>();
+      final List<ReceptorStatus> receptorStatuses = new ArrayList<>();
       for ( ReceptorStatusType receptorStatusType : ReceptorStatusType.values() ) {
          final Matcher matcher = receptorStatusType.getMatcher( lookupWindow );
          while ( matcher.find() ) {
-            receptorStatuses.add( new HormoneReceptorStatus( receptorStatusType, matcher.start(), matcher.end(),
+            receptorStatuses.add( new ReceptorStatus( receptorStatusType, matcher.start(), matcher.end(),
                   getReceptorStatusValue( lookupWindow, matcher.start(), matcher.end() ) ) );
          }
       }
-      Collections.sort( receptorStatuses, ReceptorStatusOffsetComparator.getInstance() );
+      Collections.sort( receptorStatuses, SpanOffsetComparator.getInstance() );
       return receptorStatuses;
    }
 
 
-   static private ReceptorStatusValue getReceptorStatusValue( final String text, final int startOffset, final int endOffset ) {
+   static private ReceptorStatusValue getReceptorStatusValue( final String text, final int startOffset,
+                                                              final int endOffset ) {
       return getReceptorStatusValue( text.substring( startOffset, endOffset ) );
    }
 
@@ -146,59 +77,31 @@ public enum ReceptorStatusFinder {
             return receptorStatusValue;
          }
       }
-      return UNKNOWN_STATUS_VALUE;
+      return DefinedReceptorStatusValue.UNKNOWN;
    }
 
-
-   private enum ReceptorStatusOffsetComparator implements Comparator<HormoneReceptorStatus> {
-      INSTANCE;
-      public static ReceptorStatusOffsetComparator getInstance() {
-         return INSTANCE;
-      }
-      @Override
-      public int compare( final HormoneReceptorStatus status1, final HormoneReceptorStatus status2 ) {
-         return status1.__startOffset - status2.__startOffset;
-      }
-   }
-
-   public void addReceptorStatuses( final JCas jcas, final AnnotationFS lookupWindow,
-                                    final Iterable<DiseaseDisorderMention> lookupWindowT191s ) {
-      final Collection<HormoneReceptorStatus> receptorStatuses = getReceptorStatuses( lookupWindow.getCoveredText() );
-      if ( receptorStatuses.isEmpty() ) {
-         return;
-      }
-      final int windowStartOffset = lookupWindow.getBegin();
-      for ( HormoneReceptorStatus receptorStatus : receptorStatuses ) {
-         final DiseaseDisorderMention closestDiseaseMention
-               = FinderUtil.getClosestEventMention( windowStartOffset + receptorStatus.__startOffset,
-               windowStartOffset + receptorStatus.__endOffset, lookupWindowT191s );
-         final ReceptorStatus receptorStatusAnnotation = createReceptorStatusAnnotation( jcas, lookupWindow, receptorStatus );
-         addReceptorRelationToCas( jcas, receptorStatusAnnotation, closestDiseaseMention );
-      }
-   }
-
-   static private ReceptorStatus createReceptorStatusAnnotation( final JCas jcas,
-                                                                 final AnnotationFS lookupWindow,
-                                                                 final HormoneReceptorStatus receptorStatus ) {
-      final ReceptorStatus receptorStatusAnnotation
-            = new ReceptorStatus( jcas,
-            lookupWindow.getBegin()+receptorStatus.__startOffset,
-            lookupWindow.getBegin()+receptorStatus.__endOffset );
-      receptorStatusAnnotation.setCode( receptorStatus.__statusType.name() );
-      receptorStatusAnnotation.setDescription( receptorStatus.__statusType.__title );
-      receptorStatusAnnotation.setValue( receptorStatus.__value.getBooleanValue() );
+   static private org.apache.ctakes.cancer.type.textsem.ReceptorStatus createReceptorStatusAnnotation( final JCas jcas,
+                                                                 final int windowStartOffset,
+                                                                 final ReceptorStatus receptorStatus ) {
+      final org.apache.ctakes.cancer.type.textsem.ReceptorStatus receptorStatusAnnotation
+            = new org.apache.ctakes.cancer.type.textsem.ReceptorStatus( jcas,
+            windowStartOffset + receptorStatus.getStartOffset(),
+            windowStartOffset + receptorStatus.getEndOffset() );
+      receptorStatusAnnotation.setCode( receptorStatus.getStatusType().name() );
+      receptorStatusAnnotation.setDescription( receptorStatus.getStatusType().getTitle() );
+      receptorStatusAnnotation.setValue( receptorStatus.getStatusValue().getBooleanValue() );
       // Sets the receptor status annotation to match the umls concept.  I'm not sure that we want/need this
       receptorStatusAnnotation.setTypeID( NE_TYPE_ID_FINDING );
       final UmlsConcept umlsConcept = new UmlsConcept( jcas );
-      umlsConcept.setCui( receptorStatus.__statusType.getCui( receptorStatus.__value ) );
-      umlsConcept.setTui( receptorStatus.__statusType.__tui );
+      umlsConcept.setCui( receptorStatus.getStatusType().getCui( receptorStatus.getStatusValue() ) );
+      umlsConcept.setTui( receptorStatus.getStatusType().getTui() );
 //      umlsConcept.setCodingScheme( "SNOMED" ); ---> These are more NCI than SNOMED
 //      umlsConcept.setCode( "385379008" );
-      umlsConcept.setPreferredText( receptorStatus.__value.getTitle() + " " + receptorStatus.__statusType.__title );
+      umlsConcept.setPreferredText(
+            receptorStatus.getStatusValue().getTitle() + " " + receptorStatus.getStatusType().getTitle() );
       final FSArray ontologyConcepts = new FSArray( jcas, 1 );
       ontologyConcepts.set( 0, umlsConcept );
       receptorStatusAnnotation.setOntologyConceptArr( ontologyConcepts );
-
 
 
       receptorStatusAnnotation.addToIndexes();
@@ -211,13 +114,17 @@ public enum ReceptorStatusFinder {
     * allows subclasses to create/define their own types: e.g. coreference can
     * create CoreferenceRelation instead of BinaryTextRelation
     *
-    * @param jCas - JCas object, needed to create new UIMA types
-    * @param receptorStatus - First argument to relation
+    * @param jCas            - JCas object, needed to create new UIMA types
+    * @param receptorStatus  - First argument to relation
     * @param disorderMention - Second argument to relation
     */
    static private void addReceptorRelationToCas( final JCas jCas,
-                                            final ReceptorStatus receptorStatus,
-                                            final DiseaseDisorderMention disorderMention ) {
+                                                 final org.apache.ctakes.cancer.type.textsem.ReceptorStatus receptorStatus,
+                                                 final DiseaseDisorderMention disorderMention ) {
+      if ( disorderMention == null ) {
+         LOGGER.info( "No Neoplasm discovered to relate to " + receptorStatus.getCoveredText() );
+         return;
+      }
       // add the relation to the CAS
       final RelationArgument receptorStatusArgument = new RelationArgument( jCas );
       receptorStatusArgument.setArgument( receptorStatus );
@@ -227,11 +134,11 @@ public enum ReceptorStatusFinder {
       disorderMentionArgument.setArgument( disorderMention );
       disorderMentionArgument.setRole( "Related_to" );
       disorderMentionArgument.addToIndexes();
-      final ReceptorStatusTextRelation receptorStatusRelation = new ReceptorStatusTextRelation( jCas );
-      receptorStatusRelation.setArg1( receptorStatusArgument );
-      receptorStatusRelation.setArg2( disorderMentionArgument );
-      receptorStatusRelation.setCategory( "Receptor_status" );
-      receptorStatusRelation.addToIndexes();
+      final NeoplasmRelation neoplasmRelation = new NeoplasmRelation( jCas );
+      neoplasmRelation.setArg1( receptorStatusArgument );
+      neoplasmRelation.setArg2( disorderMentionArgument );
+      neoplasmRelation.setCategory( "Receptor_status_of" );
+      neoplasmRelation.addToIndexes();
    }
 
 }

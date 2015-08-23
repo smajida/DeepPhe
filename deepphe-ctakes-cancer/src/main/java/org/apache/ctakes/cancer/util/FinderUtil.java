@@ -1,18 +1,14 @@
 package org.apache.ctakes.cancer.util;
 
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
-import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.EventMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.FeatureStructure;
-import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.jcas.cas.FSArray;
-import org.apache.uima.jcas.tcas.Annotation;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * @author SPF , chip-nlp
@@ -24,10 +20,11 @@ final public class FinderUtil {
 
    static private final Logger LOGGER = Logger.getLogger( "FinderUtil" );
 
-   private FinderUtil() {}
+   private FinderUtil() {
+   }
 
 
-   static private final FeatureStructure[] NO_FEATURES = new FeatureStructure[0];
+   static private final FeatureStructure[] NO_FEATURES = new FeatureStructure[ 0 ];
 
    static private FeatureStructure[] getFeatureStructures( final IdentifiedAnnotation annotation ) {
       final FSArray fsArray = annotation.getOntologyConceptArr();
@@ -37,7 +34,12 @@ final public class FinderUtil {
       return fsArray.toArray();
    }
 
-   static public boolean hasWantedTui( final IdentifiedAnnotation annotation, final String ... wantedTuis ) {
+   /**
+    * @param annotation annotation to check for desired tui(s)
+    * @param wantedTuis tui(s) to check wrt the given annotation
+    * @return true if the annotation has one of the wanted tuis
+    */
+   static public boolean hasWantedTui( final IdentifiedAnnotation annotation, final String... wantedTuis ) {
       final FeatureStructure[] featureStructures = getFeatureStructures( annotation );
       for ( FeatureStructure featureStructure : featureStructures ) {
          if ( featureStructure instanceof UmlsConcept ) {
@@ -57,27 +59,11 @@ final public class FinderUtil {
       return false;
    }
 
-   static private boolean isTuiT191( final DiseaseDisorderMention disorderMention ) {
-      final FeatureStructure[] featureStructures = getFeatureStructures( disorderMention );
-      for ( FeatureStructure featureStructure : featureStructures ) {
-         if ( featureStructure instanceof UmlsConcept ) {
-            final String tui = ((UmlsConcept)featureStructure).getTui();
-            // T191 (Neoplastic Process) works for cancer.
-            // T033 is good for mass and lesion, but we are interested in DD not finding
-            if ( tui != null && tui.equals( "T191" ) ) {
-               return true;
-            }
-         }
-      }
-      return false;
-   }
-
    /**
-    *
     * @param testStartOffset start offset of the test text span
-    * @param testEndOffset end offset of the test text span
-    * @param eventMentions mentions to test for proximity to test text span
-    * @param <T> extension of EventMention
+    * @param testEndOffset   end offset of the test text span
+    * @param eventMentions   mentions to test for proximity to test text span
+    * @param <T>             extension of EventMention
     * @return the closest T to the test text span
     */
    static public <T extends EventMention> T getClosestEventMention( final int testStartOffset, final int testEndOffset,
@@ -97,10 +83,11 @@ final public class FinderUtil {
 
    /**
     * TODO kludgy at this point.
+    *
     * @param testStartOffset start offset of the test text span
-    * @param testEndOffset end offset of the test text span
-    * @param eventMention1 -
-    * @param eventMention2 -
+    * @param testEndOffset   end offset of the test text span
+    * @param eventMention1   -
+    * @param eventMention2   -
     * @return true if the diseaseDisorder is closer to the test text span than the signSymptom
     */
    static public EventMention getCloserEventMention( final int testStartOffset, final int testEndOffset,

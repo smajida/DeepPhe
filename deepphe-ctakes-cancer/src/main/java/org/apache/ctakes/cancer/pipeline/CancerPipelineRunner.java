@@ -1,18 +1,10 @@
-package org.apache.ctakes.cancer.pipelines;
+package org.apache.ctakes.cancer.pipeline;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.lexicalscope.jewel.cli.CliFactory;
+import com.lexicalscope.jewel.cli.Option;
 import org.apache.ctakes.assertion.medfacts.cleartk.PolarityCleartkAnalysisEngine;
 import org.apache.ctakes.assertion.medfacts.cleartk.UncertaintyCleartkAnalysisEngine;
-import org.apache.ctakes.cancer.ae.TnmAnnotator;
+import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
 import org.apache.ctakes.chunker.ae.Chunker;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.CopyNPChunksToLookupWindowAnnotations;
@@ -23,20 +15,20 @@ import org.apache.ctakes.core.ae.CDASegmentAnnotator;
 import org.apache.ctakes.core.ae.SentenceDetector;
 import org.apache.ctakes.core.ae.TokenizerAnnotatorPTB;
 import org.apache.ctakes.core.cc.XmiWriterCasConsumerCtakes;
+import org.apache.ctakes.core.cc.pretty.plaintext.PrettyTextWriterFit;
 import org.apache.ctakes.core.cr.FilesInDirectoryCollectionReader;
 import org.apache.ctakes.core.resource.FileLocator;
-import org.apache.ctakes.core.resource.FileResourceImpl;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPSemanticRoleLabelerAE;
-import org.apache.ctakes.dictionary.lookup2.ae.AbstractJCasTermAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
-import org.apache.ctakes.dictionary.lookup2.ae.JCasTermAnnotator;
 import org.apache.ctakes.lvg.ae.LvgAnnotator;
 import org.apache.ctakes.postagger.POSTagger;
 import org.apache.ctakes.relationextractor.ae.DegreeOfRelationExtractorAnnotator;
 import org.apache.ctakes.relationextractor.ae.LocationOfRelationExtractorAnnotator;
 import org.apache.ctakes.relationextractor.ae.ModifierExtractorAnnotator;
 import org.apache.ctakes.temporal.ae.*;
+import org.apache.ctakes.typesystem.type.refsem.Event;
+import org.apache.ctakes.typesystem.type.refsem.EventProperties;
 import org.apache.ctakes.typesystem.type.textsem.*;
 import org.apache.uima.UIMAException;
 import org.apache.uima.analysis_engine.AnalysisEngine;
@@ -47,7 +39,6 @@ import org.apache.uima.fit.component.JCasAnnotator_ImplBase;
 import org.apache.uima.fit.factory.AggregateBuilder;
 import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.fit.factory.CollectionReaderFactory;
-import org.apache.uima.fit.factory.ExternalResourceFactory;
 import org.apache.uima.fit.pipeline.SimplePipeline;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
@@ -55,10 +46,13 @@ import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.InvalidXMLException;
 import org.cleartk.ml.jar.GenericJarClassifierFactory;
 
-import com.lexicalscope.jewel.cli.CliFactory;
-import com.lexicalscope.jewel.cli.Option;
-
 import javax.annotation.concurrent.Immutable;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.regex.Pattern.DOTALL;
 
@@ -70,25 +64,115 @@ final public class CancerPipelineRunner {
    static interface Options extends CancerPipelineOptions {
       @Option(
             shortName = "i",
-            description = "specify the path to the directory containing the clinical notes to be processed" )
+            description = "specify the path to the directory containing the clinical notes to be processed")
       public String getInputDirectory();
 
       @Option(
             shortName = "o",
-            description = "specify the path to the directory where the output xmi files are to be saved" )
+            description = "specify the path to the directory where the output xmi files are to be saved")
       public String getOutputDirectory();
    }
 
+   static private final String CTAKES_DIR_PREFIX = "/org/apache/ctakes/";
 
-   public static CollectionReader createFilesInDirectoryReader( final String inputDirectory ) throws UIMAException,
+   public static AnalysisEngineDescription getPipelineDescription()
+         throws ResourceInitializationException, InvalidXMLException, IOException {
+      return getPipelineDescription( "" );
+   }
+
+   public static AnalysisEngineDescription getPipelineDescription( final CancerPipelineOptions options )
+         throws ResourceInitializationException, InvalidXMLException, IOException {
+      return getPipelineDescription( "" );
+   }
+
+   public static AnalysisEngineDescription getPipelineDescription( final String outputDirectory )
+         throws ResourceInitializationException, InvalidXMLException, IOException {
+      final AggregateBuilder aggregateBuilder = new AggregateBuilder();
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( PittHeaderAnnotator.class ) );
+      // grab segments using known headers from default + what UPMC has given us.
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( CDASegmentAnnotator.class,
+            CDASegmentAnnotator.PARAM_SECTIONS_FILE, "resources/ccda_sections.txt" ) );
+//	  aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(UpmcSimpleSegmenter.class));
+      // core components, dictionary, dependency parser, polarity, uncertainty
+      aggregateBuilder.add( SentenceDetector.createAnnotatorDescription() );
+      aggregateBuilder.add( TokenizerAnnotatorPTB.createAnnotatorDescription() );
+      aggregateBuilder.add( LvgAnnotator.createAnnotatorDescription() );
+      aggregateBuilder.add( ContextDependentTokenizerAnnotator.createAnnotatorDescription() );
+      aggregateBuilder.add( POSTagger.createAnnotatorDescription() );
+      aggregateBuilder.add( Chunker.createAnnotatorDescription() );
+      aggregateBuilder.add( ClinicalPipelineFactory.getStandardChunkAdjusterAnnotator() );
+
+      aggregateBuilder
+            .add( AnalysisEngineFactory.createEngineDescription( CopyNPChunksToLookupWindowAnnotations.class ) );
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( RemoveEnclosedLookupWindows.class ) );
+      aggregateBuilder.add( DefaultJCasTermAnnotator.createAnnotatorDescription(
+            "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml" ) );
+
+      aggregateBuilder.add( ClearNLPDependencyParserAE.createAnnotatorDescription() );
+      aggregateBuilder.add( PolarityCleartkAnalysisEngine.createAnnotatorDescription() );
+      aggregateBuilder.add( UncertaintyCleartkAnalysisEngine.createAnnotatorDescription() );
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ClearNLPSemanticRoleLabelerAE.class ) );
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ConstituencyParser.class ) );
+
+      // Cancer deep phe tnm, stage, hormone receptor status annotator.  Do before temporal (but after polarity?)
+      aggregateBuilder.add( CancerPropertiesAnnotator.createAnnotatorDescription() );
+
+      // temporal components:
+      aggregateBuilder.add( EventAnnotator.createAnnotatorDescription() );
+//      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( AddEvent.class ) );
+      aggregateBuilder
+            .add( AnalysisEngineFactory.createEngineDescription( CopyPropertiesToTemporalEventAnnotator.class ) );
+      aggregateBuilder.add( DocTimeRelAnnotator.createAnnotatorDescription(
+            getStandardModelPath( "temporal/ae/doctimerel" ) ) );
+      aggregateBuilder.add( BackwardsTimeAnnotator.createAnnotatorDescription(
+            getStandardModelPath( "temporal/ae/timeannotator" ) ) );
+      aggregateBuilder.add( EventTimeRelationAnnotator.createAnnotatorDescription(
+            getStandardModelPath( "temporal/ae/eventtime" ) ) );
+//                   options.getEventTimeRelationModelDirectory() + File.separator + "model.jar" ));
+//      	      if( options.getEventEventRelationModelDirectory() != null ) {
+      aggregateBuilder.add( EventEventRelationAnnotator.createAnnotatorDescription(
+            getStandardModelPath( "temporal/ae/eventevent" ) ) );
+//      	      }
+      // UMLS relations:
+      aggregateBuilder.add(
+            AnalysisEngineFactory.createEngineDescription(
+                  ModifierExtractorAnnotator.class,
+                  GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
+                  getStandardModelPath( "relationextractor/models/modifier_extractor" ) ) );
+
+      // Kludge to clean out unwanted annotations from the pittsburgh header
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( PittHeaderCleaner.class ) );
+
+      aggregateBuilder.add(
+            AnalysisEngineFactory.createEngineDescription(
+                  DegreeOfRelationExtractorAnnotator.class,
+                  GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
+                  getStandardModelPath( "relationextractor/models/degree_of" ) ) );
+      aggregateBuilder.add(
+            AnalysisEngineFactory.createEngineDescription(
+                  LocationOfRelationExtractorAnnotator.class,
+                  GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
+                  getStandardModelPath( "relationextractor/models/location_of" ) ) );
+      aggregateBuilder.add( PrettyTextWriterFit.createAnnotatorDescription( outputDirectory ) );
+
+      // coreference?
+      //	    aggregateBuilder.add(
+      //	        AnalysisEngineFactory.createEngineDescriptionFromPath("../ctakes/ctakes-coreference/desc/MipacqSvmCoreferenceResolverAggregate.xml"));
+
+      return aggregateBuilder.createAggregateDescription();
+   }
+
+   private static CollectionReader createFilesInDirectoryReader( final String inputDirectory ) throws UIMAException,
                                                                                                       IOException {
-      return CollectionReaderFactory.createReader( FilesInDirectoryCollectionReader.class,
+      final String descriptorPath
+            = FileLocator.getFullPath( "ctakes-core/desc/collection_reader/FilesInDirectoryCollectionReader.xml" );
+      return CollectionReaderFactory.createReaderFromPath( descriptorPath,
             FilesInDirectoryCollectionReader.PARAM_INPUTDIR,
             inputDirectory );
 
    }
 
-   public static AnalysisEngine createXMIWriter( final String outputDirectory )
+   private static AnalysisEngine createXMIWriter( final String outputDirectory )
          throws ResourceInitializationException {
       return AnalysisEngineFactory.createEngine( XmiWriterCasConsumerCtakes.class,
             XmiWriterCasConsumerCtakes.PARAM_OUTPUTDIR,
@@ -98,7 +182,7 @@ final public class CancerPipelineRunner {
    public static void runCancerPipeline( final String inputDirectory,
                                          final String outputDirectory ) throws UIMAException, IOException {
       final CollectionReader collectionReader = createFilesInDirectoryReader( inputDirectory );
-      final AnalysisEngineDescription analysisEngineDescription = CancerPipelineFactory.getPipelineDescription();
+      final AnalysisEngineDescription analysisEngineDescription = getPipelineDescription( outputDirectory );
       final AnalysisEngine xmiWriter = createXMIWriter( outputDirectory );
       runCancerPipeline( collectionReader, analysisEngineDescription, xmiWriter );
    }
@@ -111,7 +195,9 @@ final public class CancerPipelineRunner {
             outputWriter );
    }
 
-
+   static private String getStandardModelPath( final String moduleDirectory ) {
+      return CTAKES_DIR_PREFIX + moduleDirectory + "/model.jar";
+   }
 
 
    public static void main( final String... args ) throws UIMAException, IOException {
@@ -119,7 +205,7 @@ final public class CancerPipelineRunner {
       runCancerPipeline( options.getInputDirectory(), options.getOutputDirectory() );
    }
 
-
+   // TODO This should be elsewhere - extract upward?
    public static class CopyPropertiesToTemporalEventAnnotator extends JCasAnnotator_ImplBase {
 
       @Override
@@ -207,5 +293,30 @@ final public class CancerPipelineRunner {
       }
    }
 
+
+   // TODO This should really be someplace else - moved up to a standalone class ??  Right now there are ~4 redundant
+   public static class AddEvent extends JCasAnnotator_ImplBase {
+      @Override
+      public void process( final JCas jCas ) throws AnalysisEngineProcessException {
+         final Collection<EventMention> eventMentions = JCasUtil.select( jCas, EventMention.class );
+         if ( eventMentions == null ) {
+//            LOGGER.error( "No Event Mentions in JCAS" );
+            return;
+         }
+         for ( EventMention emention : eventMentions ) {
+            final EventProperties eventProperties = new EventProperties( jCas );
+            // create the event object
+            final Event event = new Event( jCas );
+
+            // add the links between event, mention and properties
+            event.setProperties( eventProperties );
+            emention.setEvent( event );
+
+            // add the annotations to the indexes
+            eventProperties.addToIndexes();
+            event.addToIndexes();
+         }
+      }
+   }
 
 }

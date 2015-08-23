@@ -1,10 +1,6 @@
 package org.apache.ctakes.cancer.ae;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Collection;
 
 import org.apache.ctakes.assertion.medfacts.cleartk.PolarityCleartkAnalysisEngine;
@@ -15,7 +11,6 @@ import org.apache.ctakes.clinicalpipeline.ae.ExtractionPrepAnnotator;
 import org.apache.ctakes.core.resource.FileLocator;
 import org.apache.ctakes.core.resource.FileResourceImpl;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
-import org.apache.ctakes.dictionary.lookup2.ae.AbstractJCasTermAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.JCasTermAnnotator;
 import org.apache.ctakes.temporal.ae.BackwardsTimeAnnotator;
@@ -44,7 +39,7 @@ public class CancerPipelineTest {
 
    // TODO  ---> this data directory path must be changed based upon the local system
 //   static private final String DATA_DIRECTORY_PATH = "../apache-ctakes/trunk/ctakes-examples/data/";
-   static private final String DATA_DIRECTORY_PATH = "C:\\ws\\ws-deepphe-5\\DeepPhe\\deepphe-demo\\data\\sample\\docs";
+   static private final String DATA_DIRECTORY_PATH = "C:\\Spiffy\\prj_darth_phenome\\dev\\github\\data\\sample\\docs";
 
    static private final String TIME_ANNOTATOR_MODEL = "/org/apache/ctakes/temporal/ae/timeannotator/model.jar";
    static private final String EVENT_ANNOTATOR_MODEL = "/org/apache/ctakes/temporal/ae/eventannotator/model.jar";
@@ -59,19 +54,8 @@ public class CancerPipelineTest {
       builder.add( AnalysisEngineFactory.createEngineDescription( RemoveEnclosedLookupWindows.class ) );
 
 //      builder.add( UmlsDictionaryLookupAnnotator.createAnnotatorDescription() );
-      try {
-         builder.add(AnalysisEngineFactory.createEngineDescription(DefaultJCasTermAnnotator.class,
-               AbstractJCasTermAnnotator.PARAM_WINDOW_ANNOT_PRP,
-               "org.apache.ctakes.typesystem.type.textspan.Sentence",
-               JCasTermAnnotator.DICTIONARY_DESCRIPTOR_KEY,
-               ExternalResourceFactory.createExternalResourceDescription(
-                     FileResourceImpl.class,
-                     FileLocator.locateFile( "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml" ) )
-         ));
-      } catch (FileNotFoundException e) {
-         e.printStackTrace();
-         throw new ResourceInitializationException(e);
-      }
+      builder.add( DefaultJCasTermAnnotator.createAnnotatorDescription(
+            "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml" ) );
 
       builder.add( ClearNLPDependencyParserAE.createAnnotatorDescription() );
 
@@ -89,7 +73,7 @@ public class CancerPipelineTest {
             "AnnotationVersion", 2,
             "AnnotationVersionPropKey", "ANNOTATION_VERSION" ) );
       // Add the Cancer Stage and Receptor Status Annotator
-      builder.add( AnalysisEngineFactory.createEngineDescription( TnmAnnotator.class ) );
+      builder.add( AnalysisEngineFactory.createEngineDescription( CancerPropertiesAnnotator.class ) );
 
       //ADD XMI CAS CONSUMER HERE?
 
