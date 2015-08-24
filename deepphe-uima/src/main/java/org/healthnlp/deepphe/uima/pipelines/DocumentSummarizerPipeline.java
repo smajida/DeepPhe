@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.annotation.concurrent.Immutable;
 
+import org.apache.ctakes.cancer.pipeline.CancerPipelineFactory;
 import org.apache.ctakes.cancer.pipeline.CancerPipelineRunner;
 import org.apache.uima.UIMAException;
 import org.apache.uima.analysis_engine.AnalysisEngine;

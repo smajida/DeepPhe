@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import org.apache.ctakes.cancer.ae.TnmAnnotator;
+import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
 import org.apache.ctakes.chunker.ae.Chunker;
 import org.apache.ctakes.chunker.ae.adjuster.ChunkAdjuster;
 import org.apache.ctakes.constituency.parser.MaxentParserWrapper;
@@ -103,7 +103,7 @@ public class CasPreLoadedPatientPipelineRunner {
 		Logger.getLogger(ChunkAdjuster.class).setLevel(Level.FATAL);
 		Logger.getLogger(MaxentParserWrapper.class).setLevel(Level.FATAL);
 		Logger.getLogger(MaxentParserWrapper.class).setLevel(Level.FATAL);
-		Logger.getLogger(TnmAnnotator.class).setLevel(Level.FATAL);
+		Logger.getLogger(CancerPropertiesAnnotator.class).setLevel(Level.FATAL);
 	}
 
 	private AnalysisEngine buildCasPreLoadedPatientAnalysisEngine()

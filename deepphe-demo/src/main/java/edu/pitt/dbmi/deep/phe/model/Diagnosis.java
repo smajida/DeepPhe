@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.ctakes.cancer.type.relation.TnmStageTextRelation;
+//import org.apache.ctakes.cancer.type.relation.TnmStageTextRelation;
+import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.type.textsem.TnmClassification;
 import org.apache.ctakes.typesystem.type.relation.LocationOfTextRelation;
 import org.apache.ctakes.typesystem.type.relation.LocationOfTextRelation_Type;
@@ -69,7 +70,8 @@ public class Diagnosis extends Condition implements Element {
 		}
 	
 		// now lets get the location relationships
-		for(Annotation  a: Utils.getRelatedAnnotationsByType(dm,TnmStageTextRelation.class)){
+//		for(Annotation  a: Utils.getRelatedAnnotationsByType(dm,TnmStageTextRelation.class)){
+      for(Annotation  a: Utils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
 			Stage stage = new Stage();
 			stage.initialize((TnmClassification) a);
 			setStage(stage);

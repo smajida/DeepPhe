@@ -6,11 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.ctakes.cancer.type.textsem.CancerSize;
-import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
-import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
-import org.apache.ctakes.cancer.type.textsem.TnmClassification;
-import org.apache.ctakes.cancer.type.textsem.TnmStage;
+import org.apache.ctakes.cancer.type.textsem.*;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
@@ -224,9 +220,9 @@ public class CtakesToJessConverter {
 			UmlsConcept umlsConcept, int groupIndex) {
 		TnmClassification tnmClassification = (TnmClassification) identifiedAnnotation;
 
-		TnmStage tnmT = tnmClassification.getSize();
-		TnmStage tnmN = tnmClassification.getNodeSpread();
-		TnmStage tnmM = tnmClassification.getMetastasis();
+		TnmFeature tnmT = tnmClassification.getSize();
+      TnmFeature tnmN = tnmClassification.getNodeSpread();
+      TnmFeature tnmM = tnmClassification.getMetastasis();
 
 		TnmTgrade tnmTgrade = new TnmTgrade();
 		tnmTgrade.setSummarizableId(summarizable.getId());
