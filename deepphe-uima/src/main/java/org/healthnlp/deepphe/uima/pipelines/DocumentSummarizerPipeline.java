@@ -8,6 +8,7 @@ import org.apache.ctakes.cancer.pipeline.CancerPipelineFactory;
 import org.apache.ctakes.cancer.pipeline.CancerPipelineRunner;
 import org.apache.uima.UIMAException;
 import org.apache.uima.analysis_engine.AnalysisEngine;
+import org.apache.uima.cas.impl.XmiCasSerializer;
 import org.apache.uima.collection.CollectionReader;
 import org.apache.uima.fit.factory.AggregateBuilder;
 import org.apache.uima.fit.factory.AnalysisEngineFactory;
@@ -47,7 +48,6 @@ final public class DocumentSummarizerPipeline {
                                          final String outputDirectory, final String ontologyPath) throws UIMAException, IOException {
       final CollectionReader collectionReader = CancerPipelineRunner.createFilesInDirectoryReader( inputDirectory );
       final AnalysisEngine docSummarizer = createDocSummarizerAE(outputDirectory, ontologyPath);
-
       SimplePipeline.runPipeline( collectionReader,buildcTAKESPipeline(),docSummarizer);
    }
 

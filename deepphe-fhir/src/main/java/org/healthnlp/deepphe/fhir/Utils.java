@@ -105,7 +105,9 @@ public class Utils {
 			reportTypes = new HashMap<String,CodeableConcept>();
 			reportTypes.put("SP",getCodeableConcept("Pathology Report","C0807321",SCHEMA_UMLS));
 			reportTypes.put("RAD",getCodeableConcept("Radiology Report","C1299496",SCHEMA_UMLS));
+			reportTypes.put("DS",getCodeableConcept("Discharge Summary","C0743221",SCHEMA_UMLS));
 			reportTypes.put("PGN",getCodeableConcept("Progress Note","C0747978",SCHEMA_UMLS));
+			reportTypes.put("NOTE",getCodeableConcept("Progress Note","C0747978",SCHEMA_UMLS));
 		}
 		return reportTypes.get(type);
 	}
