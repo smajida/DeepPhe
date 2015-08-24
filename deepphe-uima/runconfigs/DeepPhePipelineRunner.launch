@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/deepphe-uima/src/main/java/org/healthnlp/deepphe/uima/pipelines/DeepPhePipelineRunner.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+<listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
+</listAttribute>
+<booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.healthnlp.deepphe.uima.pipelines.DeepPhePipelineRunner"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-i ${workspace_loc}/DeepPhe/data/sample/docs&#13;&#10;-o ${workspace_loc}/DeepPhe/data/sample/ctakes-cancer-output&#13;&#10;-m ${workspace_loc}/DeepPhe/ontologies/breastCancer.owl&#13;&#10;-c ${workspace_loc}/DeepPhe/deepphe-uima/src/main/jess/autoload"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="deepphe-uima"/>
+<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
+</launchConfiguration>
