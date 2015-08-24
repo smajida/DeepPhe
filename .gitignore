@@ -1,2 +1,10 @@
 /bin
 /target/
+/.idea/
+/DeepPhe.iml
+/deepphe-ctakes-cancer/deepphe-ctakes-cancer.iml
+/deepphe-demo/deepphe-demo.iml
+/deepphe-fhir/deepphe-fhir.iml
+/deepphe-i2b2/deepphe-i2b2.iml
+/deepphe-uima/deepphe-uima.iml
+/deepphe-workbench/deepphe-workbench.iml

@@ -35,245 +35,12 @@
 			<artifactId>owlapi-distribution</artifactId>
 			<version>3.5.0</version>
 		</dependency>
-		<dependency>
+
+      <dependency>
 			<groupId>org.healthnlp</groupId>
 			<artifactId>deepphe-ctakes-cancer</artifactId>
 			<version>${project.version}</version>
 		</dependency>	
-		<!-- cTAKES module versions -->
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>ctakes-type-system</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>ctakes-utils</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>ctakes-core</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>ctakes-core-res</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>ctakes-dictionary-lookup</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>ctakes-dictionary-lookup-res</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>ctakes-preprocessor</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>ctakes-pos-tagger</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>ctakes-pos-tagger-res</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>ctakes-chunker</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>ctakes-chunker-res</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>ctakes-lvg</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>ctakes-lvg-res</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-context-tokenizer
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-clinical-pipeline
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-ne-contexts
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-ne-contexts-res
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-assertion
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-assertion-res
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-assertion-zoner
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-assertion-zoner-res
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-constituency-parser
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-constituency-parser-res
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-coreference
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-coreference-res
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-drug-ner
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-drug-ner-res
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-side-effect
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-side-effect-res
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-smoking-status
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-smoking-status-res
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-dependency-parser
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-dependency-parser-res
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-relation-extractor
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-					ctakes-relation-extractor-res
-				</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-ctakes-temporal
-</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ctakes</groupId>
-			<artifactId>
-ctakes-temporal-res
-</artifactId>
-			<version>${ctakes.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.uima</groupId>
 			<artifactId>uimaj-core</artifactId>
@@ -299,8 +66,32 @@ ctakes-temporal-res
 
 		<dependency>
 			<groupId>org.healthnlp</groupId>
-			<artifactId>deepphe-i2b2</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<artifactId>deepphe-fhir</artifactId>
+			<version>${project.version}</version>
 		</dependency>
+
+      <dependency>
+         <groupId>org.healthnlp</groupId>
+         <artifactId>deepphe-i2b2</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+
+      <!-- Dependencies that still need to be uploaded to Maven Central; when
+   done, the dependency versions should be moved into the parent pom -->
+      <dependency>
+         <groupId>jess</groupId>
+         <artifactId>jess</artifactId>
+         <version>1</version>
+         <scope>system</scope>
+         <systemPath>${project.basedir}/lib/jess.jar</systemPath>
+      </dependency>
+      <dependency>
+         <groupId>org.semanticweb</groupId>
+         <artifactId>owlapi</artifactId>
+         <version>4.0.1</version>
+         <scope>system</scope>
+         <systemPath>${project.basedir}/lib/owlapi-distribution-4.0.1.jar</systemPath>
+      </dependency>
+
 	</dependencies>
 </project>
