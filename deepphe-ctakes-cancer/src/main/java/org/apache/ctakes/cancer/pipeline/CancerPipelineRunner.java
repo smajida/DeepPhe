@@ -162,7 +162,7 @@ final public class CancerPipelineRunner {
       return aggregateBuilder.createAggregateDescription();
    }
 
-   private static CollectionReader createFilesInDirectoryReader( final String inputDirectory ) throws UIMAException,
+   public static CollectionReader createFilesInDirectoryReader( final String inputDirectory ) throws UIMAException,
                                                                                                       IOException {
       final String descriptorPath
             = FileLocator.getFullPath( "ctakes-core/desc/collection_reader/FilesInDirectoryCollectionReader.xml" );

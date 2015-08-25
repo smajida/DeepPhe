@@ -4,10 +4,8 @@ import java.io.IOException;
 
 import org.apache.ctakes.assertion.medfacts.cleartk.PolarityCleartkAnalysisEngine;
 import org.apache.ctakes.assertion.medfacts.cleartk.UncertaintyCleartkAnalysisEngine;
-import org.apache.ctakes.cancer.ae.TnmAnnotator;
-import org.apache.ctakes.cancer.pipelines.CancerPipelineRunner.CopyPropertiesToTemporalEventAnnotator;
-import org.apache.ctakes.cancer.pipelines.CancerPipelineRunner.PittHeaderAnnotator;
-import org.apache.ctakes.cancer.pipelines.CancerPipelineRunner.PittHeaderCleaner;
+import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
+import org.apache.ctakes.cancer.pipeline.CancerPipelineRunner;
 import org.apache.ctakes.chunker.ae.Chunker;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.CopyNPChunksToLookupWindowAnnotations;
@@ -47,7 +45,7 @@ public class CtakesCancerEncounterPipeBuilder {
 			IOException {
 		final AggregateBuilder aggregateBuilder = new AggregateBuilder();
 		aggregateBuilder.add(AnalysisEngineFactory
-				.createEngineDescription(PittHeaderAnnotator.class));
+				.createEngineDescription(CancerPipelineRunner.PittHeaderAnnotator.class));
 		aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(
 				CDASegmentAnnotator.class,
 				CDASegmentAnnotator.PARAM_SECTIONS_FILE,
@@ -67,18 +65,9 @@ public class CtakesCancerEncounterPipeBuilder {
 						.createEngineDescription(CopyNPChunksToLookupWindowAnnotations.class));
 		aggregateBuilder.add(AnalysisEngineFactory
 				.createEngineDescription(RemoveEnclosedLookupWindows.class));
-		aggregateBuilder
-				.add(AnalysisEngineFactory
-						.createEngineDescription(
-								DefaultJCasTermAnnotator.class,
-								AbstractJCasTermAnnotator.PARAM_WINDOW_ANNOT_PRP,
-								"org.apache.ctakes.typesystem.type.textspan.Sentence",
-								JCasTermAnnotator.DICTIONARY_DESCRIPTOR_KEY,
-								ExternalResourceFactory
-										.createExternalResourceDescription(
-												FileResourceImpl.class,
-												FileLocator
-														.locateFile("org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml"))));
+		aggregateBuilder.add(
+            DefaultJCasTermAnnotator.createAnnotatorDescription(
+                  "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml" ) );
 		aggregateBuilder.add(ClearNLPDependencyParserAE
 				.createAnnotatorDescription());
 		aggregateBuilder.add(PolarityCleartkAnalysisEngine
@@ -89,11 +78,11 @@ public class CtakesCancerEncounterPipeBuilder {
 				.createEngineDescription(ClearNLPSemanticRoleLabelerAE.class));
 		aggregateBuilder.add(AnalysisEngineFactory
 				.createEngineDescription(ConstituencyParser.class));
-		aggregateBuilder.add(TnmAnnotator.createAnnotatorDescription());
+		aggregateBuilder.add( CancerPropertiesAnnotator.createAnnotatorDescription() );
 		aggregateBuilder.add(EventAnnotator.createAnnotatorDescription());
 		aggregateBuilder
 				.add(AnalysisEngineFactory
-						.createEngineDescription(CopyPropertiesToTemporalEventAnnotator.class));
+						.createEngineDescription(CancerPipelineRunner.CopyPropertiesToTemporalEventAnnotator.class));
 		aggregateBuilder
 				.add(AnalysisEngineFactory
 						.createEngineDescription(
@@ -101,7 +90,7 @@ public class CtakesCancerEncounterPipeBuilder {
 								GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
 								getStandardModelPath("relationextractor/models/modifier_extractor")));
 		aggregateBuilder.add(AnalysisEngineFactory
-				.createEngineDescription(PittHeaderCleaner.class));
+				.createEngineDescription(CancerPipelineRunner.PittHeaderCleaner.class));
 		aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(
 				DegreeOfRelationExtractorAnnotator.class,
 				GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,

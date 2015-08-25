@@ -64,8 +64,8 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	 */
 	public String getNameSimple(){
 		for(HumanName n: getName()){
-			String f = n.getGiven().get(0).getValue();
-			String l = n.getFamily().get(0).getValue();
+			String f = (!n.getGiven().isEmpty())?n.getGiven().get(0).getValue():"";
+			String l = (!n.getFamily().isEmpty())?n.getFamily().get(0).getValue():"";
 			return (f+" "+l).trim();
 		}
 		return null;

@@ -9,6 +9,11 @@
   <name>deepphe-workbench</name>
   <description>deepphe-workbench</description>
   <dependencies>
+     <dependency>
+        <groupId>org.healthnlp</groupId>
+        <artifactId>deepphe-ctakes-cancer</artifactId>
+        <version>${project.version}</version>
+     </dependency>
   	<dependency>
   		<groupId>org.healthnlp</groupId>
   		<artifactId>deepphe-uima</artifactId>

@@ -29,5 +29,21 @@
   		<artifactId>guava</artifactId>
   		<version>19.0-rc1</version>
   	</dependency>
+     <!-- Dependencies that still need to be uploaded to Maven Central; when
+ done, the dependency versions should be moved into the parent pom -->
+     <dependency>
+        <groupId>org.semanticweb</groupId>
+        <artifactId>owlapi</artifactId>
+        <version>4.0.1</version>
+        <scope>system</scope>
+        <systemPath>${project.basedir}/lib/owlapi-distribution-4.0.1.jar</systemPath>
+     </dependency>
+     <dependency>
+        <groupId>oracle.jdbc</groupId>
+        <artifactId>ojdbc</artifactId>
+        <version>6</version>
+        <scope>system</scope>
+        <systemPath>${project.basedir}/lib/ojdbc6.jar</systemPath>
+     </dependency>
   </dependencies>
 </project>

@@ -5,12 +5,7 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDI
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.ctakes.cancer.type.textsem.CancerSize;
-import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
-import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
-import org.apache.ctakes.cancer.type.textsem.TnmClassification;
-import org.apache.ctakes.cancer.type.textsem.TnmStage;
-import org.apache.ctakes.cancer.type.textsem.TnmStagePrefix;
+import org.apache.ctakes.cancer.type.textsem.*;
 import org.apache.ctakes.typesystem.type.constants.CONST;
 import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
@@ -163,9 +158,9 @@ public class JessToCtakesConverter {
 		tnmClassificationType.addToIndexes();
 	}
 
-	private TnmStage createTnmStageFeature(final Summary summary,
+	private TnmFeature createTnmStageFeature(final Summary summary,
 			final JCas jcas) {
-		final TnmStage tnmStageFeature = new TnmStage(jcas);
+		final TnmFeature tnmStageFeature = new TnmFeature(jcas);
 		tnmStageFeature.setPrefix(createTnmStagePrefix(jcas));
 		tnmStageFeature.setCode(summary.getBaseCode());
 		tnmStageFeature.setDescription(summary.getPreferredTerm());
@@ -173,8 +168,8 @@ public class JessToCtakesConverter {
 		return tnmStageFeature;
 	}
 
-	private TnmStagePrefix createTnmStagePrefix(final JCas jcas) {
-		final TnmStagePrefix tnmStagePrefix = new TnmStagePrefix(jcas);
+	private TnmPrefix createTnmStagePrefix(final JCas jcas) {
+		final TnmPrefix tnmStagePrefix = new TnmPrefix(jcas);
 		tnmStagePrefix.setCode("-");
 		tnmStagePrefix
 				.setDescription("Stage determination unspecified; assume clinical examination");
