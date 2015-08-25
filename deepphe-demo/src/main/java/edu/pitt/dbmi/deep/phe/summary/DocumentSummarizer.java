@@ -137,7 +137,7 @@ public class DocumentSummarizer {
 		
 		
 		// process reports using NobleCoder
-		NobleCoder coder = new NobleCoder(new NobleCoderTerminology(ont));
+		/*NobleCoder coder = new NobleCoder(new NobleCoderTerminology(ont));
 		docs = new File(sample,"docs").listFiles();
 		Arrays.sort(docs);
 		for(File file: docs){
@@ -147,7 +147,7 @@ public class DocumentSummarizer {
 			Report report = summarizer.process(doc);
 			System.out.println(report.getSummary());
 			report.save(new File(out,"NC"));
-		}
+		}*/
 		
 		
 		// generate the reasoning objects
