@@ -71,9 +71,11 @@ public class Diagnosis extends Condition implements Element {
 	
 		// now lets get the location relationships
 		for(Annotation  a: Utils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
-			Stage stage = new Stage();
-			stage.initialize((TnmClassification) a);
-			setStage(stage);
+			if(a instanceof TnmClassification){
+				Stage stage = new Stage();
+				stage.initialize((TnmClassification) a);
+				setStage(stage);
+			}
 		}
 	}
 	

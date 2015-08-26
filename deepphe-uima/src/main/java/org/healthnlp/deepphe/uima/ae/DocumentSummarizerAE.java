@@ -100,6 +100,8 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 				
 				// save XMI 
 				patientDir = new File(new File(outputDir,XMI_TYPE),namedID);
+				if(!patientDir.exists())
+					patientDir.mkdirs();
 				CasIOUtil.writeXmi(jcas,new File(patientDir,report.getTitleSimple()+".xmi"));
 			}
 		} catch (Exception e) {
