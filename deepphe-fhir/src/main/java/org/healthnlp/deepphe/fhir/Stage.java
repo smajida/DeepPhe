@@ -43,7 +43,6 @@ public class Stage extends ConditionStageComponent{
 			setStringExtension(""+o.getClass(Utils.M_STAGE).getURI(),st.getMetastasis().getCode()+st.getMetastasis().getValue());
 	}
 	
-	
 	/**
 	 * get primary tumor stage
 	 * @return
@@ -126,6 +125,18 @@ public class Stage extends ConditionStageComponent{
 		dst.assessment = new ArrayList();
 		for (ResourceReference i : this.assessment)
 			dst.assessment.add(i.copy());
+		for(Extension e: getExtensions()){
+			dst.setStringExtension(e.getUrlSimple(),((StringType) e.getValue()).asStringValue());
+		}
 		return dst;
 	}
+	
+
+	public void copy(ConditionStageComponent st) {
+		setSummary(st.getSummary());
+		for(Extension e: st.getExtensions()){
+			setStringExtension(e.getUrlSimple(),((StringType) e.getValue()).asStringValue());
+		}
+	}
+	
 }

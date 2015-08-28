@@ -33,6 +33,7 @@ import org.apache.uima.jcas.tcas.DocumentAnnotation;
 import org.healthnlp.deepphe.util.FHIRComposer;
 import org.healthnlp.deepphe.util.OntologyUtils;
 import org.hl7.fhir.instance.formats.XmlComposer;
+import org.hl7.fhir.instance.formats.XmlParser;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DateAndTime;
@@ -560,6 +561,18 @@ public class Utils {
 		xml.compose(new FileOutputStream(file),r, true);
 	}
 	
+	
+	public static Resource loadFHIR(File file) throws Exception{
+		FileInputStream is = null;
+		XmlParser xml = new XmlParser();
+		try{
+			is = new FileInputStream(file);
+			return xml.parse(is);
+		}finally{
+			if(is !=null)
+				is.close();
+		}
+	}
 	
 	/**
 	 * get concept class from a default ontology based on Concept

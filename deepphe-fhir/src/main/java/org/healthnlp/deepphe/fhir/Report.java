@@ -12,6 +12,8 @@ import org.hl7.fhir.instance.model.Composition;
 import org.hl7.fhir.instance.model.DateAndTime;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.ResourceReference;
+import org.hl7.fhir.instance.model.Composition.CompositionAttesterComponent;
+import org.hl7.fhir.instance.model.Composition.SectionComponent;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 
@@ -229,6 +231,32 @@ public class Report extends Composition implements Element{
 	
 	public IClass getConceptClass(){
 		return ResourceFactory.getInstance().getOntology().getClass(Utils.COMPOSITION);
+	}
+
+
+	public void copy(Resource r) {
+		Composition c = (Composition) r;
+		identifier = c.getIdentifier();
+		date = c.getDate();
+		type = c.getType();
+		class_ = c.getClass_();
+		title = c.getTitle();
+		status = c.getStatus();
+		confidentiality = c.getConfidentiality();
+		subject = c.getSubject();
+		author = new ArrayList();
+		for (ResourceReference i : c.getAuthor())
+			author.add(i.copy());
+		attester = new ArrayList();
+		for (CompositionAttesterComponent i : c.getAttester())
+			attester.add(i.copy());
+		custodian = c.getCustodian();
+		event = c.getEvent();
+		encounter = c.getEncounter();
+		section = new ArrayList();
+		for (SectionComponent i : c.getSection())
+			section.add(i.copy());
+		
 	}
 	
 }

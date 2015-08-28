@@ -20,4 +20,5 @@ public interface Element {
 	public IClass getConceptClass();
 	public void setReport(Report r);
 	public void save(File e) throws Exception;
+	public void copy(Resource r);
 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+
 //import org.apache.ctakes.cancer.type.relation.TnmStageTextRelation;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.type.textsem.TnmClassification;
@@ -20,7 +21,11 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.hl7.fhir.instance.model.Condition;
 import org.hl7.fhir.instance.model.DateAndTime;
+import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.Condition.ConditionEvidenceComponent;
+import org.hl7.fhir.instance.model.Condition.ConditionLocationComponent;
+import org.hl7.fhir.instance.model.Condition.ConditionRelatedItemComponent;
 
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
@@ -114,6 +119,39 @@ public class Diagnosis extends Condition implements Element {
 	public void initialize(IClass cls){
 		setCode(Utils.getCodeableConcept(cls));
 		Utils.createIdentifier(addIdentifier(),this,cls);
+	}
+	
+	
+	public void copy(Resource r){
+		Condition c = (Condition)r;
+		this.identifier = new ArrayList();
+		for (Identifier i : c.getIdentifier())
+			this.identifier.add(i.copy());
+		subject = c.getSubject();
+		encounter = c.getEncounter();
+		asserter = c.getAsserter();
+		dateAsserted = c.getDateAsserted();
+		code = c.getCode();
+		category = c.getCategory();
+		status = c.getStatus();
+		certainty = c.getCertainty();
+		severity = c.getSeverity();
+		onset = c.getOnset();
+		abatement = c.getAbatement();
+		if(c.getStage() != null){
+			stage = ResourceFactory.getStage(c.getStage());
+		}
+		evidence = new ArrayList();
+		for (ConditionEvidenceComponent i : c.getEvidence())
+			evidence.add(i.copy());
+		location = new ArrayList();
+		for (ConditionLocationComponent i : c.getLocation())
+			location.add(i.copy());
+		relatedItem = new ArrayList();
+		for (ConditionRelatedItemComponent i : c.getRelatedItem())
+			relatedItem.add(i.copy());
+		notes = c.getNotes();
+
 	}
 	
 	

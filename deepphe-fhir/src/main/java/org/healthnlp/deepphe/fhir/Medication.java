@@ -72,4 +72,16 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	public void save(File dir) throws Exception {
 		Utils.saveFHIR(this,getIdentifierSimple(),dir);
 	}
+
+	public void copy(Resource r) {
+		org.hl7.fhir.instance.model.Medication p = (org.hl7.fhir.instance.model.Medication) r;
+		name = p.getName();
+		code = p.getCode();
+		isBrand = p.getIsBrand();
+		manufacturer = p.getManufacturer();
+		kind = p.getKind();
+		product = p.getProduct();
+		package_ = p.getPackage();
+		
+	}
 }

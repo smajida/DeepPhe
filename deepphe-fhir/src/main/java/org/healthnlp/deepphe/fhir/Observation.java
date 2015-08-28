@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.fhir;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,6 +16,7 @@ import org.hl7.fhir.instance.model.DateAndTime;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.Quantity;
 import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.ResourceReference;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.Type;
 
@@ -172,6 +174,33 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	
 	public void save(File dir) throws Exception {
 		Utils.saveFHIR(this,getIdentifierSimple(),dir);
+	}
+
+	public void copy(Resource r) {
+		org.hl7.fhir.instance.model.Observation o = (org.hl7.fhir.instance.model.Observation)r;
+		name = o.getName();
+		value = o.getValue();
+		interpretation = o.getInterpretation();
+		comments = o.getComments();
+		applies = o.getApplies();
+		issued = o.getIssued();
+		status = o.getStatus();
+		reliability = o.getReliability();
+		bodySite = o.getBodySite();
+		method = o.getMethod();
+		identifier = o.getIdentifier();
+		subject = o.getSubject();
+		specimen = o.getSpecimen();
+		performer = o.getPerformer();
+		for (ResourceReference i : o.getPerformer())
+			performer.add(i.copy());
+		referenceRange = new ArrayList();
+		for (ObservationReferenceRangeComponent i :o.getReferenceRange())
+			referenceRange.add(i.copy());
+		related = new ArrayList();
+		for (ObservationRelatedComponent i : o.getRelated())
+			related.add(i.copy());
+		
 	}
 
 }

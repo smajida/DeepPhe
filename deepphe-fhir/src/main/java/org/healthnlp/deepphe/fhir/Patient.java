@@ -116,7 +116,8 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	 * copy data from an existing patient object
 	 * @param dst
 	 */
-	public void copy(org.hl7.fhir.instance.model.Patient target) {
+	public void copy(Resource r) {
+		org.hl7.fhir.instance.model.Patient target = (org.hl7.fhir.instance.model.Patient) r;
 		Patient dst = this;
 		dst.identifier = new ArrayList();
 		for (Identifier i : target.getIdentifier())
@@ -180,6 +181,11 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	}
 	public IClass getConceptClass(){
 		return ResourceFactory.getInstance().getOntology().getClass(Utils.PATIENT);
+	}
+
+	public void initialize(org.hl7.fhir.instance.model.Patient loadFHIR) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
