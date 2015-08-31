@@ -437,8 +437,8 @@ public class Utils {
 	public static Narrative getNarrative(String text) {
 		Narrative n = new Narrative();
 		n.setStatusSimple(NarrativeStatus.generated);
-		XhtmlNode xn = new XhtmlNode(NodeType.Element,"pre");
-		xn.addText(text);
+		XhtmlNode xn = new XhtmlNode(NodeType.Element,"div");
+		xn.addTag("p").addText(text);
 		n.setDiv(xn);
 		return n;
 	}

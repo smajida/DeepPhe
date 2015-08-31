@@ -12,9 +12,6 @@ import org.hl7.fhir.instance.model.Composition;
 import org.hl7.fhir.instance.model.DateAndTime;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.ResourceReference;
-import org.hl7.fhir.instance.model.Composition.CompositionAttesterComponent;
-import org.hl7.fhir.instance.model.Composition.SectionComponent;
-
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 
 /**

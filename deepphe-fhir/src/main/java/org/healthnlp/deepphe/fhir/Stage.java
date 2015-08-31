@@ -1,5 +1,6 @@
 package org.healthnlp.deepphe.fhir;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.regex.*;
 
@@ -14,7 +15,7 @@ import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 
-public class Stage extends ConditionStageComponent{
+public class Stage extends ConditionStageComponent implements Serializable{
 	public void initialize(Mention st) {
 		CodeableConcept c = Utils.getCodeableConcept(st);
 		c.setTextSimple(st.getText());

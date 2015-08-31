@@ -349,7 +349,7 @@ public class ResourceFactory {
 		return list;
 	}
 	
-	private boolean isType(File f, Class cls){
+	private static boolean isType(File f, Class cls){
 		return f.getName().endsWith(".xml") && f.getName().startsWith(cls.getSimpleName().toUpperCase());
 	}
 	
@@ -414,7 +414,7 @@ public class ResourceFactory {
 	 * @param dir
 	 * @return
 	 */
-	public Report loadReport(File reportDir) throws Exception{
+	public static Report loadReport(File reportDir) throws Exception{
 		Report report = null;
 		Patient patient = null;
 		
