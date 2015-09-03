@@ -162,14 +162,10 @@ final public class CancerPipelineRunner {
       return aggregateBuilder.createAggregateDescription();
    }
 
-   public static CollectionReader createFilesInDirectoryReader( final String inputDirectory ) throws UIMAException,
-                                                                                                      IOException {
-      final String descriptorPath
-            = FileLocator.getFullPath( "ctakes-core/desc/collection_reader/FilesInDirectoryCollectionReader.xml" );
-      return CollectionReaderFactory.createReaderFromPath( descriptorPath,
+   public static CollectionReader createFilesInDirectoryReader( final String inputDirectory ) throws ResourceInitializationException {
+      return CollectionReaderFactory.createReader( FilesInDirectoryCollectionReader.class,
             FilesInDirectoryCollectionReader.PARAM_INPUTDIR,
             inputDirectory );
-
    }
 
    private static AnalysisEngine createXMIWriter( final String outputDirectory )
