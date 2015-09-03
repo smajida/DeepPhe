@@ -26,7 +26,7 @@ import org.apache.ctakes.assertion.medfacts.cleartk.HistoryCleartkAnalysisEngine
 import org.apache.ctakes.assertion.medfacts.cleartk.PolarityCleartkAnalysisEngine;
 import org.apache.ctakes.assertion.medfacts.cleartk.SubjectCleartkAnalysisEngine;
 import org.apache.ctakes.assertion.medfacts.cleartk.UncertaintyCleartkAnalysisEngine;
-import org.apache.ctakes.cancer.ae.TnmAnnotator;
+import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.contexttokenizer.ae.ContextDependentTokenizerAnnotator;
 import org.apache.ctakes.core.ae.SentenceDetector;
@@ -97,7 +97,7 @@ public class TestPipeline {
 	      builder.add( SubjectCleartkAnalysisEngine.createAnnotatorDescription() );		
 	     
 	     //Add the cancer pipeline that extracts the cancer attributes
-	      builder.add(TnmAnnotator.createAnnotatorDescription());
+	      builder.add(CancerPropertiesAnnotator.createAnnotatorDescription());
 	      
 		return builder;
 	}

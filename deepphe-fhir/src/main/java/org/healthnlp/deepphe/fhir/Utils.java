@@ -33,6 +33,7 @@ import org.apache.uima.jcas.tcas.DocumentAnnotation;
 import org.healthnlp.deepphe.util.FHIRComposer;
 import org.healthnlp.deepphe.util.OntologyUtils;
 import org.hl7.fhir.instance.formats.XmlComposer;
+import org.hl7.fhir.instance.formats.XmlParser;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DateAndTime;
@@ -105,7 +106,9 @@ public class Utils {
 			reportTypes = new HashMap<String,CodeableConcept>();
 			reportTypes.put("SP",getCodeableConcept("Pathology Report","C0807321",SCHEMA_UMLS));
 			reportTypes.put("RAD",getCodeableConcept("Radiology Report","C1299496",SCHEMA_UMLS));
+			reportTypes.put("DS",getCodeableConcept("Discharge Summary","C0743221",SCHEMA_UMLS));
 			reportTypes.put("PGN",getCodeableConcept("Progress Note","C0747978",SCHEMA_UMLS));
+			reportTypes.put("NOTE",getCodeableConcept("Progress Note","C0747978",SCHEMA_UMLS));
 		}
 		return reportTypes.get(type);
 	}
@@ -434,8 +437,8 @@ public class Utils {
 	public static Narrative getNarrative(String text) {
 		Narrative n = new Narrative();
 		n.setStatusSimple(NarrativeStatus.generated);
-		XhtmlNode xn = new XhtmlNode(NodeType.Element,"pre");
-		xn.addText(text);
+		XhtmlNode xn = new XhtmlNode(NodeType.Element,"div");
+		xn.addTag("p").addText(text);
 		n.setDiv(xn);
 		return n;
 	}
@@ -558,6 +561,18 @@ public class Utils {
 		xml.compose(new FileOutputStream(file),r, true);
 	}
 	
+	
+	public static Resource loadFHIR(File file) throws Exception{
+		FileInputStream is = null;
+		XmlParser xml = new XmlParser();
+		try{
+			is = new FileInputStream(file);
+			return xml.parse(is);
+		}finally{
+			if(is !=null)
+				is.close();
+		}
+	}
 	
 	/**
 	 * get concept class from a default ontology based on Concept

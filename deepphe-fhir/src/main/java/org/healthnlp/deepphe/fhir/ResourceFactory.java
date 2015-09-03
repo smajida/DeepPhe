@@ -1,5 +1,6 @@
 package org.healthnlp.deepphe.fhir;
 
+import java.io.File;
 import java.util.*;
 
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
@@ -12,6 +13,12 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.jcas.tcas.DocumentAnnotation;
 import org.healthnlp.deepphe.util.OntologyUtils;
+import org.hl7.fhir.instance.model.Composition;
+import org.hl7.fhir.instance.model.Condition;
+import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.Condition.ConditionLocationComponent;
+import org.hl7.fhir.instance.model.Condition.ConditionRelatedItemComponent;
+import org.hl7.fhir.instance.model.Condition.ConditionStageComponent;
 
 import edu.pitt.dbmi.nlp.noble.coder.model.*;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
@@ -342,4 +349,105 @@ public class ResourceFactory {
 		return list;
 	}
 	
+	private static boolean isType(File f, Class cls){
+		return f.getName().endsWith(".xml") && f.getName().startsWith(cls.getSimpleName().toUpperCase());
+	}
+	
+	
+	public static Report getReport(Composition c){
+		if(c == null)
+			return null;
+		Report report = new Report();
+		report.copy(c);
+		return report;
+	}
+	
+	public static Finding getFinding(Condition c){
+		if(c == null)
+			return null;
+		Finding d = new Finding();
+		d.copy(c);
+		return d;
+	}
+	public static Diagnosis getDiagnosis(Condition c){
+		if(c == null)
+			return null;
+		Diagnosis d = new Diagnosis();
+		d.copy(c);
+		return d;
+	}
+	
+	public static Procedure getProcedure(org.hl7.fhir.instance.model.Procedure p){
+		if(p == null)
+			return null;
+		Procedure pp = new Procedure();
+		pp.copy(p);
+		return pp;
+	}
+	
+	public static Observation getObservation(org.hl7.fhir.instance.model.Observation p){
+		if(p == null)
+			return null;
+		Observation pp = new Observation();
+		pp.copy(p);
+		return pp;
+	}
+	
+	public static Medication getMedication(org.hl7.fhir.instance.model.Medication p){
+		if(p == null)
+			return null;
+		Medication pp = new Medication();
+		pp.copy(p);
+		return pp;
+	}
+	
+	public static Stage getStage(ConditionStageComponent c){
+		if(c == null)
+			return null;
+		Stage s = new Stage();
+		s.copy(c);
+		return s;
+	}
+	
+	/**
+	 * if possible re-create Report FHIR object from REPORT file directory that has FHIR XML files
+	 * @param dir
+	 * @return
+	 */
+	public static Report loadReport(File reportDir) throws Exception{
+		Report report = null;
+		Patient patient = null;
+		
+		if(reportDir.exists()){
+			// find report & patient first
+			for(File f: reportDir.listFiles()){
+				if(isType(f, Report.class)){
+					report =  getReport((Composition) Utils.loadFHIR(f));
+				}else if(isType(f, Report.class)){
+					patient = getPatient((org.hl7.fhir.instance.model.Patient)Utils.loadFHIR(f));
+				}
+			}
+			// add patient to report
+			if(report != null && patient != null){
+				report.setPatient(patient);
+			}
+			
+			// load other components into report
+			for(File f: reportDir.listFiles()){
+				if(isType(f, Finding.class)){
+					report.addReportElement(getFinding((Condition) Utils.loadFHIR(f)));
+				}else if(isType(f, Diagnosis.class)){
+					report.addReportElement(getDiagnosis((Condition)Utils.loadFHIR(f)));
+				}else if(isType(f, Procedure.class)){
+					report.addReportElement(getProcedure((org.hl7.fhir.instance.model.Procedure)Utils.loadFHIR(f)));
+				}else if(isType(f, Observation.class)){
+					report.addReportElement(getObservation((org.hl7.fhir.instance.model.Observation)Utils.loadFHIR(f)));
+				}else if(isType(f, Medication.class)){
+					report.addReportElement(getMedication((org.hl7.fhir.instance.model.Medication)Utils.loadFHIR(f)));
+				}
+			}
+		}
+		
+		return report;
+	}
 }

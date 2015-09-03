@@ -1,5 +1,6 @@
 package org.healthnlp.deepphe.fhir;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.regex.*;
 
@@ -14,7 +15,7 @@ import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 
-public class Stage extends ConditionStageComponent{
+public class Stage extends ConditionStageComponent implements Serializable{
 	public void initialize(Mention st) {
 		CodeableConcept c = Utils.getCodeableConcept(st);
 		c.setTextSimple(st.getText());
@@ -42,7 +43,6 @@ public class Stage extends ConditionStageComponent{
 		if(st.getMetastasis() != null)
 			setStringExtension(""+o.getClass(Utils.M_STAGE).getURI(),st.getMetastasis().getCode()+st.getMetastasis().getValue());
 	}
-	
 	
 	/**
 	 * get primary tumor stage
@@ -126,6 +126,18 @@ public class Stage extends ConditionStageComponent{
 		dst.assessment = new ArrayList();
 		for (ResourceReference i : this.assessment)
 			dst.assessment.add(i.copy());
+		for(Extension e: getExtensions()){
+			dst.setStringExtension(e.getUrlSimple(),((StringType) e.getValue()).asStringValue());
+		}
 		return dst;
 	}
+	
+
+	public void copy(ConditionStageComponent st) {
+		setSummary(st.getSummary());
+		for(Extension e: st.getExtensions()){
+			setStringExtension(e.getUrlSimple(),((StringType) e.getValue()).asStringValue());
+		}
+	}
+	
 }
