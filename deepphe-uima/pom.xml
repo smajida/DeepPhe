@@ -40,7 +40,7 @@
 			<groupId>org.healthnlp</groupId>
 			<artifactId>deepphe-ctakes-cancer</artifactId>
 			<version>${project.version}</version>
-		</dependency>	
+      </dependency>	
 		<dependency>
 			<groupId>org.apache.uima</groupId>
 			<artifactId>uimaj-core</artifactId>
@@ -68,12 +68,24 @@
 			<groupId>org.healthnlp</groupId>
 			<artifactId>deepphe-fhir</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
       <dependency>
          <groupId>org.healthnlp</groupId>
          <artifactId>deepphe-i2b2</artifactId>
          <version>${project.version}</version>
+         <exclusions>
+         	<exclusion>
+         		<artifactId>xml-apis</artifactId>
+         		<groupId>xml-apis</groupId>
+         	</exclusion>
+         </exclusions>
       </dependency>
 
       <!-- Dependencies that still need to be uploaded to Maven Central; when
