@@ -12,7 +12,7 @@
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.apache.ctakes.cancer.pipeline.CancerPipelineRunner"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-i ${workspace_loc}/DeepPhe/data/sample/docs&#13;&#10;-o ${workspace_loc}/DeepPhe/data/sample/ctakes-cancer-output"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-i ${git_work_tree}/data/sample/docs&#13;&#10;-o ${git_work_tree}/DeepPhe/data/sample/ctakes-cancer-output"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="deepphe-ctakes-cancer"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
 </launchConfiguration>
