@@ -55,7 +55,7 @@ public class CancerPipelineFactory {
       aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(
             CDASegmentAnnotator.class,
             CDASegmentAnnotator.PARAM_SECTIONS_FILE,
-            "resources/ccda_sections.txt"));
+            "ccda_sections.txt"));
       // aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(UpmcSimpleSegmenter.class));
       // core components, dictionary, dependency parser, polarity, uncertainty
       aggregateBuilder.add(SentenceDetector.createAnnotatorDescription());

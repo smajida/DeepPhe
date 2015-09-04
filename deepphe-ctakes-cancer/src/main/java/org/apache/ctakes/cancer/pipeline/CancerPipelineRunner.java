@@ -17,7 +17,6 @@ import org.apache.ctakes.core.ae.TokenizerAnnotatorPTB;
 import org.apache.ctakes.core.cc.XmiWriterCasConsumerCtakes;
 import org.apache.ctakes.core.cc.pretty.plaintext.PrettyTextWriterFit;
 import org.apache.ctakes.core.cr.FilesInDirectoryCollectionReader;
-import org.apache.ctakes.core.resource.FileLocator;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPSemanticRoleLabelerAE;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
@@ -91,7 +90,7 @@ final public class CancerPipelineRunner {
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( PittHeaderAnnotator.class ) );
       // grab segments using known headers from default + what UPMC has given us.
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( CDASegmentAnnotator.class,
-            CDASegmentAnnotator.PARAM_SECTIONS_FILE, "resources/ccda_sections.txt" ) );
+            CDASegmentAnnotator.PARAM_SECTIONS_FILE, "ccda_sections.txt" ) );
 //	  aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(UpmcSimpleSegmenter.class));
       // core components, dictionary, dependency parser, polarity, uncertainty
       aggregateBuilder.add( SentenceDetector.createAnnotatorDescription() );

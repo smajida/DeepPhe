@@ -49,7 +49,7 @@ public class CtakesCancerEncounterPipeBuilder {
 		aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(
 				CDASegmentAnnotator.class,
 				CDASegmentAnnotator.PARAM_SECTIONS_FILE,
-				"src/main/resources/section/ccda_sections.txt"));
+				"ccda_sections.txt"));
 		aggregateBuilder.add(SentenceDetector.createAnnotatorDescription());
 		aggregateBuilder
 				.add(TokenizerAnnotatorPTB.createAnnotatorDescription());
