@@ -4,7 +4,7 @@ import java.io.FileNotFoundException;
 
 import org.apache.ctakes.assertion.medfacts.cleartk.PolarityCleartkAnalysisEngine;
 import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
-import org.apache.ctakes.cancer.pipeline.CancerPipelineRunner;
+import org.apache.ctakes.cancer.ae.EventAdder;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.CopyNPChunksToLookupWindowAnnotations;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.RemoveEnclosedLookupWindows;
@@ -58,7 +58,7 @@ public class TaggedEncounterAE extends TaggedSummarizableAE {
 		builder.add(EventAnnotator
 				.createAnnotatorDescription(EVENT_ANNOTATOR_MODEL));
 		builder.add(AnalysisEngineFactory
-				.createEngineDescription(CancerPipelineRunner.AddEvent.class));
+				.createEngineDescription(EventAdder.class));
 		builder.add(DocTimeRelAnnotator
 				.createAnnotatorDescription(DOCTIMEREL_ANNOTATOR_MODEL));
 		builder.add(PolarityCleartkAnalysisEngine.createAnnotatorDescription());

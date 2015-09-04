@@ -23,6 +23,8 @@ import org.apache.uima.resource.ResourceInitializationException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author SPF , chip-nlp
@@ -59,6 +61,13 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
                lookupDisorders.add( disorderMention );
             }
          }
+         // Java 8 stream api
+//         lookupDisorders.addAll(
+//                JCasUtil.selectCovered( jcas, DiseaseDisorderMention.class, lookupWindow )
+//               .stream()
+//               .filter( disorderMention -> FinderUtil.hasWantedTui( disorderMention, "T191" ) )
+//               .collect( Collectors.toList() ) );
+
          disorderMentions.clear();
          symptomMentions.addAll( JCasUtil.selectCovered( jcas, SignSymptomMention.class, lookupWindow ) );
          for ( SignSymptomMention symptomMention : symptomMentions ) {
