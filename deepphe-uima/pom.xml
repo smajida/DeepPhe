@@ -58,7 +58,6 @@
 			<groupId>org.healthnlp</groupId>
 			<artifactId>deepphe-fhir</artifactId>
 			<version>${project.version}</version>
-<<<<<<< HEAD
 			<exclusions>
 				<exclusion>
 					<artifactId>xml-apis</artifactId>
@@ -66,10 +65,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-=======
-      </dependency>
->>>>>>> branch 'master' of https://github.com/DeepPhe/DeepPhe.git
-
       <dependency>
          <groupId>org.healthnlp</groupId>
          <artifactId>deepphe-i2b2</artifactId>
