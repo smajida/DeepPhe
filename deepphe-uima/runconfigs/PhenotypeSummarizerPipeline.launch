@@ -23,7 +23,7 @@
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.healthnlp.deepphe.uima.pipelines.PhenotypeSummarizerPipeline"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-i ${workspace_loc}/DeepPhe/data/sample/ctakes-cancer-output&#13;&#10;-m ${workspace_loc}/DeepPhe/ontologies/breastCancer.owl&#13;&#10;-c ${workspace_loc}/DeepPhe/deepphe-uima/src/main/jess/autoload"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-i ${git_work_tree}/DeepPhe/data/sample/ctakes-cancer-output&#13;&#10;-m ${git_work_tree}/DeepPhe/ontologies/breastCancer.owl&#13;&#10;-c ${git_work_tree}/DeepPhe/deepphe-uima/src/main/jess/autoload"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="deepphe-uima"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
 </launchConfiguration>

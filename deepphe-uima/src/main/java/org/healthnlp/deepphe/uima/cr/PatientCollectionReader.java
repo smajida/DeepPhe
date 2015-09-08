@@ -3,7 +3,6 @@ package org.healthnlp.deepphe.uima.cr;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Iterator;
@@ -45,7 +44,7 @@ public class PatientCollectionReader extends CollectionReader_ImplBase {
 		super.initialize();
 
 		inputDirectory = new File(
-				(String) getConfigParameterValue(PARAM_INPUTDIR));
+				(String) getConfigParameterValue(PARAM_INPUTDIR) + File.separator + "FHIR");
 
 		// if input directory does not exist or is not a directory, throw
 		// exception
@@ -70,7 +69,7 @@ public class PatientCollectionReader extends CollectionReader_ImplBase {
 		for (File f : inputDirectory.listFiles()) {
 			if (f.isDirectory()) {
 				Patient p = new Patient();
-				p.setId(Integer.parseInt(f.getName()));
+				p.setPath(f.getAbsolutePath());
 				patients.add(p);
 			}
 		}
@@ -112,7 +111,7 @@ public class PatientCollectionReader extends CollectionReader_ImplBase {
 	 */
 	private void loadPatient(File inputDirectory, Patient p)
 			throws IOException, ClassNotFoundException {
-		File patientDir = new File(inputDirectory, "" + p.getId());
+		File patientDir = new File(p.getPath());
 		
 		for (File f : patientDir.listFiles()) {
 			if (!f.isDirectory()) {
