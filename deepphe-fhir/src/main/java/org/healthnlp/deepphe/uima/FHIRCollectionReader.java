@@ -118,8 +118,10 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 			if(f.isDirectory()){
 				System.out.println(f.getName());
 				Report r = ResourceFactory.loadReport(f);
-				if(r != null)
+				if(r != null){
 					System.out.println(r.getSummary());
+					r.save(new File("/home/tseytlin/Output/FHIR/"));
+				}
 			}
 		}
 		

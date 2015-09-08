@@ -176,7 +176,8 @@ public class Report extends Composition implements Element{
 	public String getSummary() {
 		StringBuffer st = new StringBuffer();
 		st.append("Report:\n"+getDisplaySimple()+"\n");
-		st.append(getPatient().getSummary()+"\n");
+		if(getPatient() != null)
+			st.append(getPatient().getSummary()+"\n");
 		for(Diagnosis dx: getDiagnoses()){
 			st.append(dx.getSummary()+"\n");
 		}
@@ -248,11 +249,12 @@ public class Report extends Composition implements Element{
 		for (CompositionAttesterComponent i : c.getAttester())
 			attester.add(i.copy());
 		custodian = c.getCustodian();
-		event = c.getEvent();
+		//event = c.getEvent();
 		encounter = c.getEncounter();
 		section = new ArrayList();
 		for (SectionComponent i : c.getSection())
 			section.add(i.copy());
+		setText(c.getText());
 		
 	}
 	

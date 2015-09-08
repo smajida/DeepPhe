@@ -423,7 +423,7 @@ public class ResourceFactory {
 			for(File f: reportDir.listFiles()){
 				if(isType(f, Report.class)){
 					report =  getReport((Composition) Utils.loadFHIR(f));
-				}else if(isType(f, Report.class)){
+				}else if(isType(f, Patient.class)){
 					patient = getPatient((org.hl7.fhir.instance.model.Patient)Utils.loadFHIR(f));
 				}
 			}
