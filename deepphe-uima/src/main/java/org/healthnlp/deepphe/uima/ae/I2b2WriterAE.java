@@ -33,7 +33,8 @@ public class I2b2WriterAE extends JCasAnnotator_ImplBase {
 				if (forI2b2JCas.getViewName().equals("forI2b2")) {
 					logger.debug("Pushing serialized patient to i2b2");
 					uploadPatientDAG();
-					replaceI2b2Data();
+					printSummary();
+//					replaceI2b2Data();
 					break;
 				}
 			}
@@ -42,6 +43,13 @@ public class I2b2WriterAE extends JCasAnnotator_ImplBase {
 		}
 	}
 	
+	private void printSummary() {
+		System.out.println("-------------------------Patient Phenotype----------------------------");
+//		System.out.println(patient.fetchInfo());
+		System.out.println("----------------------------------------------------------------------");
+		
+	}
+
 	private void uploadPatientDAG()
 			throws CASException {
 		try {

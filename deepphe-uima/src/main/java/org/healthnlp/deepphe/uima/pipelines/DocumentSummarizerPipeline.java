@@ -54,8 +54,13 @@ final public class DocumentSummarizerPipeline {
       final AnalysisEngineDescription ctakesCancerDescription = CancerPipelineFactory.getPipelineDescription();
       final AnalysisEngine ctakesCancerEngine = AnalysisEngineFactory.createEngine( ctakesCancerDescription );
       final AnalysisEngine xmiWriter = CancerPipelineFactory.createXMIWriter( outputDirectory );
+<<<<<<< HEAD
 //      final AnalysisEngine docSummarizer = createDocSummarizerAE(outputDirectory, ontologyPath);
       SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, xmiWriter );//, docSummarizer);
+=======
+      final AnalysisEngine docSummarizer = createDocSummarizerAE(outputDirectory, ontologyPath);
+      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, xmiWriter, docSummarizer);
+>>>>>>> branch 'master' of https://github.com/DeepPhe/DeepPhe.git
    }
 
 

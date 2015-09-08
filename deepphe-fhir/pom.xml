@@ -36,9 +36,21 @@ done, the dependency versions should be moved into the parent pom -->
      </dependency>
 
      <dependency>
+        <groupId>xml-apis</groupId>
+        <artifactId>xml-apis</artifactId>
+        <version>1.4.01</version>
+     </dependency>
+
+     <dependency>
      	<groupId>me.fhir</groupId>
      	<artifactId>fhir-dstu1</artifactId>
      	<version>0.0.82.2943</version>
+        <exclusions>
+           <exclusion>
+              <artifactId>xml-apis</artifactId>
+              <groupId>xml-apis</groupId>
+           </exclusion>
+        </exclusions>
      </dependency>
      <dependency>
      	<groupId>org.ogce</groupId>

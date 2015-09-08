@@ -11,6 +11,8 @@ public class Patient extends Summarizable {
 	
 	protected final List<Encounter> encounters = new ArrayList<Encounter>();
 
+	String path;
+	
 	public void addEncounter(Encounter encounter) {
 		encounters.add(encounter);
 	}
@@ -54,6 +56,14 @@ public class Patient extends Summarizable {
 	
 	public String toString() {
 		return "Patient" + StringUtils.leftPad(getSequence() + "", 4, "0");
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
 	}
 
 }

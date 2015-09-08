@@ -5,7 +5,9 @@ import java.io.IOException;
 import org.apache.ctakes.assertion.medfacts.cleartk.PolarityCleartkAnalysisEngine;
 import org.apache.ctakes.assertion.medfacts.cleartk.UncertaintyCleartkAnalysisEngine;
 import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
-import org.apache.ctakes.cancer.pipeline.CancerPipelineRunner;
+import org.apache.ctakes.cancer.ae.PittHeaderAnnotator;
+import org.apache.ctakes.cancer.ae.PittHeaderCleaner;
+import org.apache.ctakes.cancer.ae.PropertyToEventCopier;
 import org.apache.ctakes.chunker.ae.Chunker;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.CopyNPChunksToLookupWindowAnnotations;
@@ -15,13 +17,9 @@ import org.apache.ctakes.contexttokenizer.ae.ContextDependentTokenizerAnnotator;
 import org.apache.ctakes.core.ae.CDASegmentAnnotator;
 import org.apache.ctakes.core.ae.SentenceDetector;
 import org.apache.ctakes.core.ae.TokenizerAnnotatorPTB;
-import org.apache.ctakes.core.resource.FileLocator;
-import org.apache.ctakes.core.resource.FileResourceImpl;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPSemanticRoleLabelerAE;
-import org.apache.ctakes.dictionary.lookup2.ae.AbstractJCasTermAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
-import org.apache.ctakes.dictionary.lookup2.ae.JCasTermAnnotator;
 import org.apache.ctakes.lvg.ae.LvgAnnotator;
 import org.apache.ctakes.postagger.POSTagger;
 import org.apache.ctakes.relationextractor.ae.DegreeOfRelationExtractorAnnotator;
@@ -31,7 +29,6 @@ import org.apache.ctakes.temporal.ae.EventAnnotator;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.fit.factory.AggregateBuilder;
 import org.apache.uima.fit.factory.AnalysisEngineFactory;
-import org.apache.uima.fit.factory.ExternalResourceFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.InvalidXMLException;
 import org.cleartk.ml.jar.GenericJarClassifierFactory;
@@ -45,11 +42,11 @@ public class CtakesCancerEncounterPipeBuilder {
 			IOException {
 		final AggregateBuilder aggregateBuilder = new AggregateBuilder();
 		aggregateBuilder.add(AnalysisEngineFactory
-				.createEngineDescription(CancerPipelineRunner.PittHeaderAnnotator.class));
+				.createEngineDescription(PittHeaderAnnotator.class));
 		aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(
 				CDASegmentAnnotator.class,
 				CDASegmentAnnotator.PARAM_SECTIONS_FILE,
-				"src/main/resources/section/ccda_sections.txt"));
+				"ccda_sections.txt"));
 		aggregateBuilder.add(SentenceDetector.createAnnotatorDescription());
 		aggregateBuilder
 				.add(TokenizerAnnotatorPTB.createAnnotatorDescription());
@@ -82,7 +79,7 @@ public class CtakesCancerEncounterPipeBuilder {
 		aggregateBuilder.add(EventAnnotator.createAnnotatorDescription());
 		aggregateBuilder
 				.add(AnalysisEngineFactory
-						.createEngineDescription(CancerPipelineRunner.CopyPropertiesToTemporalEventAnnotator.class));
+						.createEngineDescription(PropertyToEventCopier.class));
 		aggregateBuilder
 				.add(AnalysisEngineFactory
 						.createEngineDescription(
@@ -90,7 +87,7 @@ public class CtakesCancerEncounterPipeBuilder {
 								GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
 								getStandardModelPath("relationextractor/models/modifier_extractor")));
 		aggregateBuilder.add(AnalysisEngineFactory
-				.createEngineDescription(CancerPipelineRunner.PittHeaderCleaner.class));
+				.createEngineDescription(PittHeaderCleaner.class));
 		aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(
 				DegreeOfRelationExtractorAnnotator.class,
 				GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
