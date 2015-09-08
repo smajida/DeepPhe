@@ -529,16 +529,25 @@ public class Utils {
 	}
 	
 	public static String getText(Narrative text) {
-		String t =  text.getDiv().getContent();
-		if(t == null){
-			for(XhtmlNode xn : text.getDiv().getChildNodes()){
-				t = xn.getContent();
-				if(t != null)
-					break;
-			}
-		}
-		return t;
+		if(text == null)
+			return null;
+		return getXhtmlText(text.getDiv());
 	}
+	
+	private static String getXhtmlText(XhtmlNode n){
+		if(n == null)
+			return null;
+		if(n.getContent() != null)
+			return n.getContent();
+		StringBuffer b = new StringBuffer();
+		for(XhtmlNode xn : n.getChildNodes()){
+			String c = getXhtmlText(xn);
+			if(c != null)
+				b.append(c.trim());
+		}
+		return b.toString();
+	}
+	
 	
 	public static ResourceReference getResourceReference(Element model){
 		return getResourceReference(new ResourceReference(), model);

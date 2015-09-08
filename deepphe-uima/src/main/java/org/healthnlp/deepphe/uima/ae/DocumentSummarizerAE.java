@@ -49,7 +49,7 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 	public static final String PARAM_ONTOLOGY_PATH = "ONTOLOGY_PATH";
 
 
-   private AnalysisEngine _xmiWriter;
+   //private AnalysisEngine _xmiWriter;
 	
 	@Override
 	public void initialize(UimaContext aContext)
@@ -68,7 +68,7 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 		} catch (IOntologyException e) {
 			throw new ResourceInitializationException(e);
 		}
-      _xmiWriter = createXMIWriter( outputDir );
+    //  _xmiWriter = createXMIWriter( outputDir );
 	}
 
 
@@ -119,7 +119,7 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 			e.printStackTrace();
 		}
 			
-      _xmiWriter.process( jcas );
+      //_xmiWriter.process( jcas );
 		
 	}
 

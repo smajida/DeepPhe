@@ -53,10 +53,10 @@ final public class DocumentSummarizerPipeline {
       final CollectionReader collectionReader = CancerPipelineFactory.createFilesInDirectoryReader( inputDirectory );
       final AnalysisEngineDescription ctakesCancerDescription = CancerPipelineFactory.getPipelineDescription();
       final AnalysisEngine ctakesCancerEngine = AnalysisEngineFactory.createEngine( ctakesCancerDescription );
-      final AnalysisEngine xmiWriter = CancerPipelineFactory.createXMIWriter( outputDirectory );
-      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, xmiWriter );//, docSummarizer);
+      // final AnalysisEngine xmiWriter = CancerPipelineFactory.createXMIWriter( outputDirectory );
+      //SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, xmiWriter );//, docSummarizer);
       final AnalysisEngine docSummarizer = createDocSummarizerAE(outputDirectory, ontologyPath);
-      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, xmiWriter, docSummarizer);
+      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, docSummarizer);
    }
 
 
@@ -72,8 +72,8 @@ final public class DocumentSummarizerPipeline {
 
    public static void main( final String... args ) throws UIMAException, IOException {
 	      final Options options = CliFactory.parseArguments( Options.class, args );
-//	      runDocumentSummarizerPipeline( options.getInputDirectory(), options.getOutputDirectory(), options.getOntologyPath());
-      CancerPipelineRunner.runCancerPipeline( options.getInputDirectory(), options.getOutputDirectory() );
+	      runDocumentSummarizerPipeline( options.getInputDirectory(), options.getOutputDirectory(), options.getOntologyPath());
+	      //CancerPipelineRunner.runCancerPipeline( options.getInputDirectory(), options.getOutputDirectory() );
 	   }
 
 

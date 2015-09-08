@@ -10,7 +10,7 @@ import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 
 public class Medication extends org.hl7.fhir.instance.model.Medication implements Element {
-	protected Identifier identifier;
+	//protected Identifier identifier;
 	public Medication(){
 		setLanguageSimple(Utils.DEFAULT_LANGUAGE); // we only care about English
 	}
@@ -20,9 +20,9 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	}
 
 	public String getIdentifierSimple() {
-		return Utils.getIdentifier(getIdentifier());
+		return  getClass().getSimpleName().toUpperCase()+"_"+getDisplaySimple().replaceAll("\\W+","_");
 	}
-	
+	/*
 	public Identifier getIdentifier() {
 		return this.identifier;
 	}
@@ -31,7 +31,7 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 		this.identifier = value;
 		return this;
 	}
-
+	 */
 
 	public String getSummary() {
 		StringBuffer st = new StringBuffer();
@@ -48,7 +48,7 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	public void initialize(Mention m){
 		setNameSimple(m.getConcept().getName());
 		setCode(Utils.getCodeableConcept(m));
-		setIdentifier(Utils.createIdentifier(this,m));
+		//setIdentifier(Utils.createIdentifier(this,m));
 	}
 	
 	/**
@@ -58,7 +58,7 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	public void initialize(MedicationMention dm){
 		setNameSimple(Utils.getConceptName(dm));
 		setCode(Utils.getCodeableConcept(dm));
-		setIdentifier(Utils.createIdentifier(this,dm));
+		//setIdentifier(Utils.createIdentifier(this,dm));
 	}
 	public IClass getConceptClass(){
 		return Utils.getConceptClass(getCode());
