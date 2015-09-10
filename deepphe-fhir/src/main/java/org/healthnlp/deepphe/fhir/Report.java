@@ -2,6 +2,9 @@ package org.healthnlp.deepphe.fhir;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,6 +15,7 @@ import org.hl7.fhir.instance.model.Composition;
 import org.hl7.fhir.instance.model.DateAndTime;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.ResourceReference;
+
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 
 /**
@@ -257,5 +261,14 @@ public class Report extends Composition implements Element{
 		setText(c.getText());
 		
 	}
+	
+	/*private void writeObject(ObjectOutputStream stream) throws IOException {
+		System.out.println("WTF: "+getClass().getName());
+		stream.defaultWriteObject();
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		stream.defaultReadObject();
+	}*/
 	
 }

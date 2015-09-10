@@ -2,6 +2,7 @@ package org.healthnlp.deepphe.uima.ae;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
@@ -21,15 +22,25 @@ import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.ResourceFactory;
 import org.healthnlp.deepphe.summarization.jess.DagToKnowledgeDisassembler;
 import org.healthnlp.deepphe.summarization.jess.KnowledgeToDagAssembler;
+import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
 import org.healthnlp.deepphe.summarization.jess.kb.Goal;
 import org.healthnlp.deepphe.summarization.jess.kb.Identified;
 import org.healthnlp.deepphe.summarization.jess.kb.Patient;
+import org.healthnlp.deepphe.summarization.jess.kb.Summary;
+import org.healthnlp.deepphe.summarization.jess.kb.SummaryFactory;
+
+import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
+import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 
 public class PhenotypeSummarizerAE extends JCasAnnotator_ImplBase {
 
 	public static final String PARAM_CLIPS_DIRECTORY_PATH = "CLIPS_DIRECTORY_PATH";
+	public static final String PARAM_ONTOLOGY_PATH = "ONTOLOGY_PATH";
 
 	private Patient patient;
 	private Rete jessEngine;
@@ -42,6 +53,17 @@ public class PhenotypeSummarizerAE extends JCasAnnotator_ImplBase {
 		String clipsDirectoryPath = 
 		        (String) aContext.getConfigParameterValue(PARAM_CLIPS_DIRECTORY_PATH);
 		loadProductionClipsFiles(clipsDirectoryPath);
+		String ontologyPath = 
+		        (String) aContext.getConfigParameterValue(PARAM_ONTOLOGY_PATH);
+		
+		File ontologyFile = new File(ontologyPath);
+		IOntology ontology;
+		try {
+			ontology = OOntology.loadOntology(ontologyFile);
+			new ResourceFactory(ontology);
+		} catch (IOntologyException e) {
+			throw new ResourceInitializationException(e);
+		}
 	}
 
 	private void loadProductionClipsFiles(String clipsDirectoryPath) {
@@ -91,6 +113,8 @@ public class PhenotypeSummarizerAE extends JCasAnnotator_ImplBase {
 			e.printStackTrace();
 		}
 	}
+	
+
 	
 	private void disassembleDagToKnowledge() {
 		DagToKnowledgeDisassembler disassembler = new DagToKnowledgeDisassembler();

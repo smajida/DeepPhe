@@ -1,6 +1,9 @@
 package org.healthnlp.deepphe.fhir;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
@@ -202,5 +205,4 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 			related.add(i.copy());
 		
 	}
-
 }
