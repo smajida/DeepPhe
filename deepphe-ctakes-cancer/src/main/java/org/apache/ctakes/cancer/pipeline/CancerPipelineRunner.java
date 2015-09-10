@@ -35,7 +35,7 @@ final public class CancerPipelineRunner {
    public static void runCancerPipeline( final String inputDirectory,
                                          final String outputDirectory ) throws UIMAException, IOException {
       final CollectionReader collectionReader = CancerPipelineFactory.createFilesInDirectoryReader( inputDirectory );
-      final AnalysisEngineDescription ctakesCancerDescription = CancerPipelineFactory.getPipelineDescription();
+      final AnalysisEngineDescription ctakesCancerDescription = CancerPipelineFactory.createPipelineDescription();
       final AnalysisEngine ctakesCancerEngine = AnalysisEngineFactory.createEngine( ctakesCancerDescription );
       final AnalysisEngine xmiWriter = CancerPipelineFactory.createXMIWriter( outputDirectory );
       final AnalysisEngine prettyTextWriter = createPrettyTextWriter( outputDirectory );

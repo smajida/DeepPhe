@@ -27,14 +27,14 @@ final public class DescriptorGenerator {
 
    public static void writeDescriptor( final String descriptorPath )
          throws ResourceInitializationException, InvalidXMLException, IOException, SAXException {
-      final AnalysisEngineDescription aed = CancerPipelineFactory.getPipelineDescription();
+      final AnalysisEngineDescription aed = CancerPipelineFactory.createPipelineDescription();
       aed.toXML( new FileOutputStream( descriptorPath ) );
    }
 
    public static void main( final String... args )
          throws ResourceInitializationException, InvalidXMLException, IOException, SAXException {
       final DescriptorOptions options = CliFactory.parseArguments( DescriptorOptions.class, args );
-      final AnalysisEngineDescription aed = CancerPipelineFactory.getPipelineDescription( options );
+      final AnalysisEngineDescription aed = CancerPipelineFactory.createPipelineDescription( options );
       if ( options.getXmlOutput() != null ) {
          aed.toXML( new FileOutputStream( options.getXmlOutput() ) );
       }

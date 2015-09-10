@@ -99,7 +99,7 @@ final public class SizeFinder {
       }
    }
 
-   static private final CancerSize createCancerSize( final JCas jcas, final int windowStartOffset, final Size size ) {
+   static private CancerSize createCancerSize( final JCas jcas, final int windowStartOffset, final Size size ) {
       final int startOffset = windowStartOffset + size.getStartOffset();
       final int endOffset = windowStartOffset + size.getEndOffset();
       final CancerSize cancerSize = new CancerSize( jcas, startOffset, endOffset );
