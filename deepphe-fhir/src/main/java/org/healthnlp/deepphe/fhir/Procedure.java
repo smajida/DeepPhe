@@ -1,6 +1,9 @@
 package org.healthnlp.deepphe.fhir;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
@@ -135,4 +138,12 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 			relatedItem.add(i.copy());
 		notes = p.getNotes();
 	}	
+	private void writeObject(ObjectOutputStream stream) throws IOException {
+		System.out.println("WTF: "+getClass().getName());
+		stream.defaultWriteObject();
+	}
+
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		stream.defaultReadObject();
+	}
 }

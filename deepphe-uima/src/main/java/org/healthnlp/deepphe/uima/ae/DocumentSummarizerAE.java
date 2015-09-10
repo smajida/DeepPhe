@@ -37,9 +37,9 @@ import org.xml.sax.SAXException;
 
 
 public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
-	private static final String POJO_TYPE = "POJO";
-	private static final String FHIR_TYPE = "FHIR";
-	private static final String XMI_TYPE = "XMI";
+	public static final String POJO_TYPE = "POJO";
+	public static final String FHIR_TYPE = "FHIR";
+	public static final String XMI_TYPE = "XMI";
 	
 	private ResourceFactory resourceFactory;
 
@@ -99,13 +99,13 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 				System.out.println(report.getSummary());
 				System.out.println("\n===================================================================\n\n");
 				
-				// save pojo encounter data
+				/*// save pojo encounter data
 				Encounter e = SummaryFactory.getEncounter(report);
 				File patientDir = new File(new File(outputDir,POJO_TYPE),namedID);
-				saveSerialized(patientDir,TextUtils.stripSuffix(report.getTitleSimple()),e);
+				saveSerialized(patientDir,TextUtils.stripSuffix(report.getTitleSimple()),e);*/
 				
 				// save FHIR related data
-				patientDir = new File(new File(outputDir,FHIR_TYPE),namedID);
+				File patientDir = new File(new File(outputDir,FHIR_TYPE),namedID);
 				report.save(patientDir);
 				
 				// save XMI 

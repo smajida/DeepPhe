@@ -13,6 +13,7 @@ import org.apache.uima.fit.pipeline.SimplePipeline;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.uima.ae.I2b2WriterAE;
 import org.healthnlp.deepphe.uima.ae.PhenotypeSummarizerAE;
+import org.healthnlp.deepphe.uima.cr.FHIRCollectionReader;
 import org.healthnlp.deepphe.uima.cr.PatientCollectionReader;
 
 import com.lexicalscope.jewel.cli.CliFactory;
@@ -46,7 +47,7 @@ final public class PhenotypeSummarizerPipeline {
 			final String inputDirectory, final String ontologyPath, final String clipsDirectoryPath)
 			throws UIMAException, IOException {
 		final CollectionReader collectionReader = createCollectionReader(inputDirectory);
-		final AnalysisEngine phenotypeSummarizerAE = createPhenotypeSummarizerAE(clipsDirectoryPath);
+		final AnalysisEngine phenotypeSummarizerAE = createPhenotypeSummarizerAE(clipsDirectoryPath,ontologyPath);
 		final AnalysisEngine i2B2OutputAE = createI2B2OutputAE();
 
 		SimplePipeline.runPipeline(collectionReader, phenotypeSummarizerAE, i2B2OutputAE);
@@ -54,15 +55,18 @@ final public class PhenotypeSummarizerPipeline {
 
 	private static CollectionReader createCollectionReader(String inputDirectory)
 			throws ResourceInitializationException {
-		return CollectionReaderFactory.createReader(
+		/*return CollectionReaderFactory.createReader(
 				PatientCollectionReader.class,
-				PatientCollectionReader.PARAM_INPUTDIR, inputDirectory);
+				PatientCollectionReader.PARAM_INPUTDIR, inputDirectory);*/
+		return CollectionReaderFactory.createReader(
+				FHIRCollectionReader.class,
+				FHIRCollectionReader.PARAM_INPUTDIR, inputDirectory);
 	}
 
-	static public AnalysisEngine createPhenotypeSummarizerAE(String clipsDirectoryPath)
+	static public AnalysisEngine createPhenotypeSummarizerAE(String clipsDirectoryPath,String ontologyPath)
 			throws ResourceInitializationException {
 		return AnalysisEngineFactory.createEngine(PhenotypeSummarizerAE.class,
-				PhenotypeSummarizerAE.PARAM_CLIPS_DIRECTORY_PATH, clipsDirectoryPath);
+				PhenotypeSummarizerAE.PARAM_CLIPS_DIRECTORY_PATH, clipsDirectoryPath,PhenotypeSummarizerAE.PARAM_ONTOLOGY_PATH,ontologyPath);
 	}
 
 	static private AnalysisEngine createI2B2OutputAE()

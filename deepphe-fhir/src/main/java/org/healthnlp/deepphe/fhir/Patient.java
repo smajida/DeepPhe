@@ -3,6 +3,9 @@ package org.healthnlp.deepphe.fhir;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -182,10 +185,13 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	public IClass getConceptClass(){
 		return ResourceFactory.getInstance().getOntology().getClass(Utils.PATIENT);
 	}
+	private void writeObject(ObjectOutputStream stream) throws IOException {
+		System.out.println("WTF: "+getClass().getName());
+		stream.defaultWriteObject();
+	}
 
-	public void initialize(org.hl7.fhir.instance.model.Patient loadFHIR) {
-		// TODO Auto-generated method stub
-		
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		stream.defaultReadObject();
 	}
 
 }

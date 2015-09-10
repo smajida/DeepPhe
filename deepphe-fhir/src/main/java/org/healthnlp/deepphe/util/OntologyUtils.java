@@ -132,14 +132,30 @@ public class OntologyUtils {
 	}
 
 
+	private static void printClass(IClass c,String s){
+		System.out.println(s+c.getName());
+		Concept cc = c.getConcept();
+		cc.getCode();
+		cc.getCodes();
+		cc.getSynonyms();
+		cc.getDefinition();
+		
+		for(IClass ch: c.getDirectSubClasses()){
+			printClass(ch,s+"  ");
+		}
+	}
+	
 
 	public static void main(String [] args) throws Exception{
-		File f = new File("/home/tseytlin/Work/DeepPhe/ontologies/breastCancer.owl");
-		File of = new File("/home/tseytlin/Work/DeepPhe/ontologies/breastCancer.bsv");
+		//File f = new File("/home/tseytlin/Work/DeepPhe/ontologies/breastCancer.owl");
+		File of = new File("/home/tseytlin/breastCancer.bsv"); //Work/DeepPhe/ontologies/
 		
-		IOntology ont = OOntology.loadOntology(f);
+		IOntology ont = OOntology.loadOntology("http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl");
+		printClass(ont.getClass("Element"),"");
+		
+		
 		//OntologyUtils ou = new OntologyUtils(ont);
-		saveDictionary(ont.getClass("Element"),of);
+		//saveDictionary(ont.getClass("Element"),of);
 		System.out.println("done");
 		//System.out.println(ou.getClass("C0441960"));
 	}

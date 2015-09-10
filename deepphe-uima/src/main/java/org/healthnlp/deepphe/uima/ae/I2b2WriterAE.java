@@ -45,7 +45,7 @@ public class I2b2WriterAE extends JCasAnnotator_ImplBase {
 	
 	private void printSummary() {
 		System.out.println("-------------------------Patient Phenotype----------------------------");
-		System.out.println(patient.fetchInfo());
+//		System.out.println(patient.fetchInfo());
 		System.out.println("----------------------------------------------------------------------");
 		
 	}
