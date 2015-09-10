@@ -40,7 +40,10 @@ import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.cleartk.ml.jar.GenericJarClassifierFactory;
 
-public class CancerPipelineFactory {
+import javax.annotation.concurrent.Immutable;
+
+@Immutable
+final public class CancerPipelineFactory {
 
 //   Is the ExtractionPrepAnnotator necessary?
 //   builder.add( AnalysisEngineFactory.createEngineDescription( ExtractionPrepAnnotator.class,
@@ -50,6 +53,8 @@ public class CancerPipelineFactory {
 
 
    static private final String CTAKES_DIR_PREFIX = "/org/apache/ctakes/";
+
+   private CancerPipelineFactory() {}
 
    public static AnalysisEngine createPipelineEngine() throws ResourceInitializationException {
       return createPipelineEngine( null );
