@@ -5,19 +5,13 @@ import java.io.IOException;
 import javax.annotation.concurrent.Immutable;
 
 import org.apache.ctakes.cancer.pipeline.CancerPipelineFactory;
-import org.apache.ctakes.cancer.pipeline.CancerPipelineRunner;
-import org.apache.ctakes.core.cc.XmiWriterCasConsumerCtakes;
-import org.apache.ctakes.core.cc.pretty.plaintext.PrettyTextWriterFit;
 import org.apache.uima.UIMAException;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
-import org.apache.uima.cas.impl.XmiCasSerializer;
 import org.apache.uima.collection.CollectionReader;
-import org.apache.uima.fit.factory.AggregateBuilder;
 import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.fit.pipeline.SimplePipeline;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.apache.uima.util.InvalidXMLException;
 import org.healthnlp.deepphe.uima.ae.DocumentSummarizerAE;
 
 import com.lexicalscope.jewel.cli.CliFactory;
@@ -51,12 +45,10 @@ final public class DocumentSummarizerPipeline {
                                                      final String outputDirectory,
                                                      final String ontologyPath ) throws UIMAException, IOException {
       final CollectionReader collectionReader = CancerPipelineFactory.createFilesInDirectoryReader( inputDirectory );
-      final AnalysisEngineDescription ctakesCancerDescription = CancerPipelineFactory.getPipelineDescription();
+      final AnalysisEngineDescription ctakesCancerDescription = CancerPipelineFactory.createPipelineDescription();
       final AnalysisEngine ctakesCancerEngine = AnalysisEngineFactory.createEngine( ctakesCancerDescription );
-      // final AnalysisEngine xmiWriter = CancerPipelineFactory.createXMIWriter( outputDirectory );
-      //SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, xmiWriter );//, docSummarizer);
-      final AnalysisEngine docSummarizer = createDocSummarizerAE(outputDirectory, ontologyPath);
-      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, docSummarizer);
+      final AnalysisEngine docSummarizer = createDocSummarizerAE( outputDirectory, ontologyPath );
+      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, docSummarizer );
    }
 
 
@@ -73,7 +65,7 @@ final public class DocumentSummarizerPipeline {
    public static void main( final String... args ) throws UIMAException, IOException {
 	      final Options options = CliFactory.parseArguments( Options.class, args );
 	      runDocumentSummarizerPipeline( options.getInputDirectory(), options.getOutputDirectory(), options.getOntologyPath());
-	      //CancerPipelineRunner.runCancerPipeline( options.getInputDirectory(), options.getOutputDirectory() );
+//      CancerPipelineRunner.runCancerPipeline( options.getInputDirectory(), options.getOutputDirectory() );
 	   }
 
 
