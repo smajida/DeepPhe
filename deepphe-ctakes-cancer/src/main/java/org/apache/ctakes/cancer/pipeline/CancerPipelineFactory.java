@@ -40,17 +40,44 @@ import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.cleartk.ml.jar.GenericJarClassifierFactory;
 
-public class CancerPipelineFactory {
+import javax.annotation.concurrent.Immutable;
+
+@Immutable
+final public class CancerPipelineFactory {
+
+//   Is the ExtractionPrepAnnotator necessary?
+//   builder.add( AnalysisEngineFactory.createEngineDescription( ExtractionPrepAnnotator.class,
+//         "AnnotationVersion", 2,
+//         "AnnotationVersionPropKey", "ANNOTATION_VERSION" ) );
+
+
 
    static private final String CTAKES_DIR_PREFIX = "/org/apache/ctakes/";
 
+   private CancerPipelineFactory() {}
 
-   public static AnalysisEngineDescription getPipelineDescription() throws ResourceInitializationException {
-      return getPipelineDescription( null );
+   public static AnalysisEngine createPipelineEngine() throws ResourceInitializationException {
+      return createPipelineEngine( null );
    }
 
-   public static AnalysisEngineDescription getPipelineDescription( final CancerPipelineOptions options )
+   public static AnalysisEngine createPipelineEngine( final CancerPipelineOptions options )
          throws ResourceInitializationException {
+      final AggregateBuilder aggregateBuilder = createAggregateBuilder();
+      return aggregateBuilder.createAggregate();
+   }
+
+
+   public static AnalysisEngineDescription createPipelineDescription() throws ResourceInitializationException {
+      return createPipelineDescription( null );
+   }
+
+   public static AnalysisEngineDescription createPipelineDescription( final CancerPipelineOptions options )
+         throws ResourceInitializationException {
+      final AggregateBuilder aggregateBuilder = createAggregateBuilder();
+      return aggregateBuilder.createAggregateDescription();
+   }
+
+   private static AggregateBuilder createAggregateBuilder() throws ResourceInitializationException {
       final AggregateBuilder aggregateBuilder = new AggregateBuilder();
 
       addPittHeaderEngines( aggregateBuilder );
@@ -67,7 +94,7 @@ public class CancerPipelineFactory {
       //	    aggregateBuilder.add(
       //	        AnalysisEngineFactory.createEngineDescriptionFromPath("../ctakes/ctakes-coreference/desc/MipacqSvmCoreferenceResolverAggregate.xml"));
 
-      return aggregateBuilder.createAggregateDescription();
+      return aggregateBuilder;
    }
 
    public static CollectionReader createFilesInDirectoryReader( final String inputDirectory )
