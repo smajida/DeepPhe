@@ -87,4 +87,7 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 		package_ = p.getPackage();
 		
 	}
+	public String toString(){
+		return getDisplaySimple();
+	}
 }

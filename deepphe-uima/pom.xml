@@ -40,6 +40,20 @@
 			<groupId>org.healthnlp</groupId>
 			<artifactId>deepphe-ctakes-cancer</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>xercesImpl</artifactId>
+					<groupId>xerces</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jdom</artifactId>
+					<groupId>org.jdom</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>dom4j</artifactId>
+					<groupId>dom4j</groupId>
+				</exclusion>
+			</exclusions>
       </dependency>	
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -60,8 +74,16 @@
 			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
-					<artifactId>xml-apis</artifactId>
-					<groupId>xml-apis</groupId>
+					<artifactId>xercesImpl</artifactId>
+					<groupId>xerces</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jdom</artifactId>
+					<groupId>org.jdom</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>dom4j</artifactId>
+					<groupId>dom4j</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -73,6 +95,10 @@
          	<exclusion>
          		<artifactId>xml-apis</artifactId>
          		<groupId>xml-apis</groupId>
+         	</exclusion>
+         	<exclusion>
+         		<artifactId>dom4j</artifactId>
+         		<groupId>dom4j</groupId>
          	</exclusion>
          </exclusions>
       </dependency>

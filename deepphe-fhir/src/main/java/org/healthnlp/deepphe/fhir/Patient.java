@@ -168,6 +168,10 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 		
 	}
 	
+	public String toString(){
+		return getDisplaySimple();
+	}
+	
 	public int getAge(){
 		return yearsOld;
 	}

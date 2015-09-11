@@ -11,6 +11,7 @@ import java.util.List;
 
 
 
+
 //import org.apache.ctakes.cancer.type.relation.TnmStageTextRelation;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.type.textsem.TnmClassification;
@@ -210,5 +211,8 @@ public class Diagnosis extends Condition implements Element {
 	}
 	public IClass getConceptClass(){
 		return Utils.getConceptClass(getCode());
+	}
+	public String toString(){
+		return getDisplaySimple();
 	}
 }

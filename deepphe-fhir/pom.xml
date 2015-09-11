@@ -50,7 +50,11 @@ done, the dependency versions should be moved into the parent pom -->
               <artifactId>xml-apis</artifactId>
               <groupId>xml-apis</groupId>
            </exclusion>
-        </exclusions>
+          <exclusion>
+	          <artifactId>xercesImpl</artifactId>
+	          <groupId>xerces</groupId>
+	        </exclusion>
+	   </exclusions>
      </dependency>
      <dependency>
      	<groupId>org.ogce</groupId>

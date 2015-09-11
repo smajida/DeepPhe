@@ -65,6 +65,10 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	public String getIdentifierSimple() {
 		return Utils.getIdentifier(getIdentifier());
 	}
+	
+	public String toString(){
+		return getDisplaySimple();
+	}
 
 	public String getSummary() {
 		StringBuffer st = new StringBuffer();

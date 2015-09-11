@@ -81,7 +81,9 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 			for(File f: file.listFiles()){
 				if(f.isDirectory()){
 					Report r = ResourceFactory.loadReport(f);
+				
 					if(r != null){
+						System.out.println(r.getSummary());
 						//reports.add(r);
 						Encounter encounter = SummaryFactory.getEncounter(r);
 						patient.addEncounter(encounter);
@@ -90,6 +92,8 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 				}
 				
 			}
+			
+			
 			
 			// create a document
 			DocumentID documentIDAnnotation = new DocumentID(jcas);

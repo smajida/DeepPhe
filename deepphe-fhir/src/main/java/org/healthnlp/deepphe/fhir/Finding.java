@@ -104,4 +104,7 @@ public class Finding extends Condition  implements Element{
 		notes = c.getNotes();
 		
 	}
+	public String toString(){
+		return getDisplaySimple();
+	}
 }

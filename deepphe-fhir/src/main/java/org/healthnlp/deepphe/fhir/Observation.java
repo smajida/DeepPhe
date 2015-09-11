@@ -205,4 +205,7 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 			related.add(i.copy());
 		
 	}
+	public String toString(){
+		return getDisplaySimple();
+	}
 }

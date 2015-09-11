@@ -177,6 +177,10 @@ public class Report extends Composition implements Element{
 		return Utils.getIdentifier(getIdentifier());
 	}
 
+	public String toString(){
+		return getDisplaySimple();
+	}
+	
 	public String getSummary() {
 		StringBuffer st = new StringBuffer();
 		st.append("Report:\n"+getDisplaySimple()+"\n");
