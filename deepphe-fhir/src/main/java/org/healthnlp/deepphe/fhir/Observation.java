@@ -12,6 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
+import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
+import org.apache.ctakes.cancer.type.textsem.ReceptorStatus_Type;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.uima.jcas.cas.FSArray;
@@ -118,11 +120,17 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 		}
 		
 		// set positive/negative
-		for(String st: Arrays.asList("Positive", "Negative","Unknown")){
-			if(Utils.getConceptName(dm).contains(st)){
-				setValue(new StringType(st));
-				break;
+		if(dm instanceof ReceptorStatus){
+			/*for(String st: Arrays.asList("Positive", "Negative","Unknown")){
+				if(Utils.getConceptName(dm).contains(st)){
+					setValue(new StringType(st));
+					break;
+				}
 			}
+			*/
+			boolean value = ((ReceptorStatus)dm).getValue();
+			setValue(new StringType(value?"Positive":"Negative"));
+			
 		}
 		
 		// if cancer size, then use their value

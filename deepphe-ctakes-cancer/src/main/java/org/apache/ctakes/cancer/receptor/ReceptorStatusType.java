@@ -13,13 +13,13 @@ import java.util.regex.Pattern;
 enum ReceptorStatusType {
    ER( "Estrogen receptor",
          "\\b(Estrogen|ER) ?((\\+(pos)?|-(neg)?)|(\\s+(status\\s+)?(is\\s+)?(pos(itive)?|neg(ative)?|N/?A\\b|unknown|indeterminate|equivocal|(not assessed))))",
-         "C1719706", "C1719707", "C0279758" ),
+         "C1516974", "C1516974", "C1516974" ),
    PR( "Progesterone receptor",
          "\\b(Progesterone|PR) ?((\\+(pos)?|-(neg)?)|(\\s+(status\\s+)?(is\\s+)?(pos(itive)?|neg(ative)?|N/?A\\b|unknown|indeterminate|equivocal|(not assessed))))",
-         "C0279759", "C0279766", "C0279768" ),
+         "C1514471", "C1514471", "C1514471" ),
    HER2( "Human epidermal growth factor receptor 2",
          "\\bHER2(/neu)? ?((\\+(pos)?|-(neg)?)|(\\s+(status\\s+)?(is\\s+)?(pos(itive)?|neg(ative)?|N/?A\\b|unknown|indeterminate|equivocal|(not assessed))))",
-         "C2348909", "C2348908", "C2348910" );
+         "C1512413", "C1512413", "C1512413" );
 
    static private final String TUI = "T034";
 
