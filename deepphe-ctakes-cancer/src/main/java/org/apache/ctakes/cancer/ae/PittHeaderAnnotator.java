@@ -1,6 +1,7 @@
 package org.apache.ctakes.cancer.ae;
 
 import org.apache.ctakes.typesystem.type.textsem.TimeMention;
+import org.apache.ctakes.typesystem.type.textspan.Segment;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.component.JCasAnnotator_ImplBase;
 import org.apache.uima.jcas.JCas;
@@ -29,10 +30,15 @@ final public class PittHeaderAnnotator extends JCasAnnotator_ImplBase {
       if ( m.matches() ) {
          final TimeMention docTime = new TimeMention( jcas );
          docTime.setBegin( m.start( 1 ) );
-         docTime.setEnd( m.end( 1 ) );
+         docTime.setEnd( m.end( 2 ) );
          docTime.setId( 0 );
          docTime.addToIndexes();
       }
 
+      int headerEnd = docText.indexOf("\n", docText.indexOf("[Report de-identified"));
+      
+      Segment mainSegment = new Segment(jcas, headerEnd+1, docText.length()-1);
+      mainSegment.setId("SIMPLE_SEGMENT");
+      mainSegment.addToIndexes();
    }
 }

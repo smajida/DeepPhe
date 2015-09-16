@@ -1,6 +1,8 @@
 package org.apache.ctakes.cancer.pipeline;
 
 
+import javax.annotation.concurrent.Immutable;
+
 import org.apache.ctakes.assertion.medfacts.cleartk.PolarityCleartkAnalysisEngine;
 import org.apache.ctakes.assertion.medfacts.cleartk.UncertaintyCleartkAnalysisEngine;
 import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
@@ -13,7 +15,6 @@ import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.CopyNPChunksTo
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.RemoveEnclosedLookupWindows;
 import org.apache.ctakes.constituency.parser.ae.ConstituencyParser;
 import org.apache.ctakes.contexttokenizer.ae.ContextDependentTokenizerAnnotator;
-import org.apache.ctakes.core.ae.CDASegmentAnnotator;
 import org.apache.ctakes.core.ae.SentenceDetector;
 import org.apache.ctakes.core.ae.TokenizerAnnotatorPTB;
 import org.apache.ctakes.core.cc.XmiWriterCasConsumerCtakes;
@@ -39,8 +40,6 @@ import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.cleartk.ml.jar.GenericJarClassifierFactory;
-
-import javax.annotation.concurrent.Immutable;
 
 @Immutable
 final public class CancerPipelineFactory {
@@ -116,8 +115,8 @@ final public class CancerPipelineFactory {
          throws ResourceInitializationException {
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( PittHeaderAnnotator.class ) );
       // grab segments using known headers from default + what UPMC has given us.
-      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( CDASegmentAnnotator.class,
-            CDASegmentAnnotator.PARAM_SECTIONS_FILE, "ccda_sections.txt" ) );
+//      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( CDASegmentAnnotator.class,
+//            CDASegmentAnnotator.PARAM_SECTIONS_FILE, "ccda_sections.txt" ) );
 //	  aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(UpmcSimpleSegmenter.class));
    }
 
