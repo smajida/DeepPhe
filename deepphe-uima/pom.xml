@@ -71,11 +71,11 @@
       <!-- Dependencies that still need to be uploaded to Maven Central; when
    done, the dependency versions should be moved into the parent pom -->
       <dependency>
-         <groupId>jess</groupId>
-         <artifactId>jess</artifactId>
+         <groupId>dphere</groupId>
+         <artifactId>dphere</artifactId>
          <version>1</version>
          <scope>system</scope>
-         <systemPath>${project.basedir}/lib/jess.jar</systemPath>
+         <systemPath>${project.basedir}/lib/dphere.jar</systemPath>
       </dependency>
       <dependency>
          <groupId>org.semanticweb</groupId>
