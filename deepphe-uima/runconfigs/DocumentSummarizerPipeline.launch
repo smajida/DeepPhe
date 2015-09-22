@@ -8,8 +8,6 @@
 </listAttribute>
 <mapAttribute key="org.eclipse.debug.core.environmentVariables">
 <mapEntry key="CTAKES_HOME" value="${workspace_loc}/DeepPhe/deepphe-ctakes-cancer"/>
-<mapEntry key="ctakes.umlspw" value="D3m06at135"/>
-<mapEntry key="ctakes.umlsuser" value="girishc"/>
 </mapAttribute>
 <stringAttribute key="org.eclipse.debug.ui.ATTR_CAPTURE_IN_FILE" value="${workspace_loc}/output.log"/>
 <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
