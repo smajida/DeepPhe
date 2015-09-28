@@ -16,6 +16,7 @@ import org.healthnlp.deepphe.uima.ae.DocumentSummarizerAE;
 
 import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
+import org.healthnlp.deepphe.uima.ae.IClassExtractor;
 
 @Immutable
 final public class DocumentSummarizerPipeline {
@@ -35,9 +36,9 @@ final public class DocumentSummarizerPipeline {
       public String getOutputDirectory();
 
       @Option(
-              shortName = "m",
-              description = "specify the path to the model ontology file to be used." )
-        public String getOntologyPath();
+            shortName = "m",
+            description = "specify the path to the model ontology file to be used." )
+      public String getOntologyPath();
    }
 
 
@@ -45,17 +46,19 @@ final public class DocumentSummarizerPipeline {
                                                      final String outputDirectory,
                                                      final String ontologyPath ) throws UIMAException, IOException {
       final CollectionReader collectionReader = CancerPipelineFactory.createFilesInDirectoryReader( inputDirectory );
-      final AnalysisEngineDescription ctakesCancerDescription = CancerPipelineFactory.createPipelineDescription();
-      final AnalysisEngine ctakesCancerEngine = AnalysisEngineFactory.createEngine( ctakesCancerDescription );
+      final AnalysisEngine ctakesCancerEngine = CancerPipelineFactory.createPipelineEngine();
+      final AnalysisEngine iClassExtractor
+            = AnalysisEngineFactory
+            .createEngine( IClassExtractor.class, DocumentSummarizerAE.PARAM_ONTOLOGY_PATH, ontologyPath );
       final AnalysisEngine docSummarizer = createDocSummarizerAE( outputDirectory, ontologyPath );
-      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, docSummarizer );
+      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, iClassExtractor, docSummarizer );
    }
 
 
    public static AnalysisEngine createDocSummarizerAE( final String outputDirectory, final String ontologyPath)
-	         throws ResourceInitializationException {
-	      return AnalysisEngineFactory.createEngine( DocumentSummarizerAE.class,
-	    		  DocumentSummarizerAE.PARAM_OUTPUTDIR,
+         throws ResourceInitializationException {
+      return AnalysisEngineFactory.createEngine( DocumentSummarizerAE.class,
+            DocumentSummarizerAE.PARAM_OUTPUTDIR,
 	            outputDirectory,
 	            DocumentSummarizerAE.PARAM_ONTOLOGY_PATH,
 	            ontologyPath);

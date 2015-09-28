@@ -18,7 +18,6 @@ import org.apache.ctakes.constituency.parser.ae.ConstituencyParser;
 import org.apache.ctakes.contexttokenizer.ae.ContextDependentTokenizerAnnotator;
 import org.apache.ctakes.core.ae.SentenceDetector;
 import org.apache.ctakes.core.ae.TokenizerAnnotatorPTB;
-import org.apache.ctakes.core.cc.XmiWriterCasConsumerCtakes;
 import org.apache.ctakes.core.cr.FilesInDirectoryCollectionReader;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPSemanticRoleLabelerAE;
@@ -51,10 +50,10 @@ final public class CancerPipelineFactory {
 //         "AnnotationVersionPropKey", "ANNOTATION_VERSION" ) );
 
 
-
    static private final String CTAKES_DIR_PREFIX = "/org/apache/ctakes/";
 
-   private CancerPipelineFactory() {}
+   private CancerPipelineFactory() {
+   }
 
    public static AnalysisEngine createPipelineEngine() throws ResourceInitializationException {
       return createPipelineEngine( null );
@@ -107,7 +106,7 @@ final public class CancerPipelineFactory {
    public static AnalysisEngine createXMIWriter( final String outputDirectory )
          throws ResourceInitializationException {
       return AnalysisEngineFactory.createEngine( XmiWriter.class,
-    		  XmiWriter.PARAM_OUTPUTDIR,
+            XmiWriter.PARAM_OUTPUTDIR,
             outputDirectory );
    }
 
