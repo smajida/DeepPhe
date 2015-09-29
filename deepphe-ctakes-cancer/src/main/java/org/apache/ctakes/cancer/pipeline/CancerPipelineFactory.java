@@ -9,7 +9,7 @@ import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
 import org.apache.ctakes.cancer.ae.PittHeaderAnnotator;
 import org.apache.ctakes.cancer.ae.PittHeaderCleaner;
 import org.apache.ctakes.cancer.ae.PropertyToEventCopier;
-import org.apache.ctakes.cancer.ae.XmiWriter;
+import org.apache.ctakes.cancer.ae.XMIWriter;
 import org.apache.ctakes.chunker.ae.Chunker;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.CopyNPChunksToLookupWindowAnnotations;
@@ -105,8 +105,8 @@ final public class CancerPipelineFactory {
 
    public static AnalysisEngine createXMIWriter( final String outputDirectory )
          throws ResourceInitializationException {
-      return AnalysisEngineFactory.createEngine( XmiWriter.class,
-            XmiWriter.PARAM_OUTPUTDIR,
+      return AnalysisEngineFactory.createEngine( XMIWriter.class,
+            XMIWriter.PARAM_OUTPUTDIR,
             outputDirectory );
    }
 
