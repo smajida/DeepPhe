@@ -53,7 +53,7 @@ import java.net.URL;
  * <li><code>OutputDirectory</code> - path to directory into which output files will be written</li>
  * </ul>
  */
-public class XmiWriter extends CasConsumer_ImplBase {
+public class XMIWriter extends CasConsumer_ImplBase {
    /**
     * Name of configuration parameter that must be set to the path of a directory into which the
     * output files will be written.
@@ -138,7 +138,7 @@ public class XmiWriter extends CasConsumer_ImplBase {
     * @throws Exception
     * @throws ResourceProcessException
     */
-   private void writeXmi( CAS aCas, File name ) throws IOException, SAXException {
+   public static void writeXmi( CAS aCas, File name ) throws IOException, SAXException {
       FileOutputStream out = null;
 
       try {
@@ -163,7 +163,7 @@ public class XmiWriter extends CasConsumer_ImplBase {
     * @throws Exception
     * @throws ResourceProcessException
     */
-   private void writeXmi( CAS aCas, File name, String modelFileName ) throws IOException, SAXException {
+   public static void writeXmi( CAS aCas, File name, String modelFileName ) throws IOException, SAXException {
       FileOutputStream out = null;
 
       try {
@@ -187,13 +187,13 @@ public class XmiWriter extends CasConsumer_ImplBase {
     * @throws InvalidXMLException if the descriptor is invalid or missing
     */
    public static CasConsumerDescription getDescription() throws InvalidXMLException {
-      InputStream descStream = XmiWriter.class
+      InputStream descStream = XMIWriter.class
             .getResourceAsStream( "XmiWriter.xml" );
       return UIMAFramework.getXMLParser().parseCasConsumerDescription(
             new XMLInputSource( descStream, null ) );
    }
 
    public static URL getDescriptorURL() {
-      return XmiWriter.class.getResource( "XmiWriter.xml" );
+      return XMIWriter.class.getResource( "XmiWriter.xml" );
    }
 }
