@@ -6,7 +6,6 @@ import org.apache.ctakes.dictionary.lookup2.util.SemanticUtil;
 import org.apache.ctakes.typesystem.type.constants.CONST;
 import org.apache.log4j.Logger;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
