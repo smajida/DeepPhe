@@ -43,8 +43,8 @@ done, the dependency versions should be moved into the parent pom -->
 
      <dependency>
      	<groupId>me.fhir</groupId>
-     	<artifactId>fhir-dstu1</artifactId>
-     	<version>0.0.82.2943</version>
+     	<artifactId>fhir-dstu2</artifactId>
+     	<version>1.0.0.6881</version>
         <exclusions>
            <exclusion>
               <artifactId>xml-apis</artifactId>

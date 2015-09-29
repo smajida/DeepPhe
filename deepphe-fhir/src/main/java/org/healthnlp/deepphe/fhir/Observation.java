@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,11 +18,9 @@ import org.apache.ctakes.cancer.type.textsem.ReceptorStatus_Type;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.uima.jcas.cas.FSArray;
-import org.hl7.fhir.instance.model.DateAndTime;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.Quantity;
 import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.ResourceReference;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.Type;
 
@@ -36,13 +35,12 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	private Report report;
 	
 	public Observation(){
-		setStatusSimple(ObservationStatus.final_);
-		setLanguageSimple(Utils.DEFAULT_LANGUAGE); // we only care about English
-
+		setStatus(ObservationStatus.FINAL);
+		//setLanguage(Utils.DEFAULT_LANGUAGE); // we only care about English
 	}
 	
-	public String getDisplaySimple() {
-		return getName().getTextSimple();
+	public String getDisplay() {
+		return getCode().getText();
 	}
 
 	public String getIdentifierSimple() {
@@ -50,7 +48,7 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	}
 
 	public String getSummary() {
-		return "Observation:\t"+getDisplaySimple()+" | value: "+getValueSimple();
+		return "Observation:\t"+getDisplay()+" | value: "+getValueSimple();
 	}
 	
 	public Resource getResource() {
@@ -66,9 +64,9 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 			setSubjectTarget(p);
 		}
 		// set date
-		DateAndTime d = r.getDateSimple();
+		Date d = r.getDate();
 		if( d != null){
-			setIssuedSimple(d);
+			setIssued(d);
 		}
 	}
 
@@ -78,10 +76,10 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	 */
 	public void initialize(Mention m){
 		// set name for this observation
-		setName(Utils.getCodeableConcept(m));
+		setCode(Utils.getCodeableConcept(m));
 		
 		// create identifier
-		setIdentifier(Utils.createIdentifier(this,m));
+		addIdentifier(Utils.createIdentifier(this,m));
 				
 		
 		//TODO: this should be defined in the ontology
@@ -108,8 +106,8 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	 */
 	public void initialize(IdentifiedAnnotation dm){
 		// set some properties
-		setName(Utils.getCodeableConcept(dm));
-		setIdentifier(Utils.createIdentifier(this,dm));
+		setCode(Utils.getCodeableConcept(dm));
+		addIdentifier(Utils.createIdentifier(this,dm));
 		
 		// extract value using free text if necessary
 		String text = dm.getCoveredText();
@@ -148,24 +146,24 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 
 	public void setValue(SizeMeasurement num){
 		setValue(num.getValue(),num.getUnit());
-		String ident = getClass().getSimpleName().toUpperCase()+"_"+getDisplaySimple(); 
-		setIdentifier(Utils.createIdentifier((ident+"_"+getValueSimple()).replaceAll("\\W+","_")));
+		String ident = getClass().getSimpleName().toUpperCase()+"_"+getDisplay(); 
+		addIdentifier(Utils.createIdentifier((ident+"_"+getValueSimple()).replaceAll("\\W+","_")));
 	}
 	
 	public void setValue(String value, String unit){
 		setValue(Double.parseDouble(value),unit);
-		String ident = getClass().getSimpleName().toUpperCase()+"_"+getDisplaySimple(); 
-		setIdentifier(Utils.createIdentifier((ident+"_"+getValueSimple()).replaceAll("\\W+","_")));
+		String ident = getClass().getSimpleName().toUpperCase()+"_"+getDisplay(); 
+		addIdentifier(Utils.createIdentifier((ident+"_"+getValueSimple()).replaceAll("\\W+","_")));
 	}
 	
 	public void setValue(double value, String unit){
 		Quantity q = new Quantity();
-		q.setValueSimple(new BigDecimal(value,MathContext.DECIMAL32));
-		q.setUnitsSimple(unit);
+		q.setValue(new BigDecimal(value,MathContext.DECIMAL32));
+		q.setUnit(unit);
 		setValue(q);
 	}
 	public IClass getConceptClass(){
-		return Utils.getConceptClass(getName());
+		return Utils.getConceptClass(getCode());
 	}
 	public String getValueSimple(){
 		Type t = getValue();
@@ -175,7 +173,7 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 			else if( t instanceof DecimalType)
 				return ""+((DecimalType)t).getValue();
 			else if( t instanceof Quantity)
-				return ((Quantity)t).getValueSimple().doubleValue()+" "+((Quantity)t).getUnitsSimple();
+				return ((Quantity)t).getValue().doubleValue()+" "+((Quantity)t).getUnit();
 			else
 				return t.toString();
 		}
@@ -188,23 +186,24 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	}
 
 	public void copy(Resource r) {
+		//TODO:
 		org.hl7.fhir.instance.model.Observation o = (org.hl7.fhir.instance.model.Observation)r;
-		name = o.getName();
+		code = o.getCode();
 		value = o.getValue();
 		interpretation = o.getInterpretation();
-		comments = o.getComments();
-		applies = o.getApplies();
-		issued = o.getIssued();
-		status = o.getStatus();
-		reliability = o.getReliability();
+		comments = o.getCommentsElement();
+		//applies = o.getApplies();
+		issued = o.getIssuedElement();
+		status = o.getStatusElement();
+		//reliability = o.getReliability();
 		bodySite = o.getBodySite();
 		method = o.getMethod();
 		identifier = o.getIdentifier();
 		subject = o.getSubject();
 		specimen = o.getSpecimen();
 		performer = o.getPerformer();
-		for (ResourceReference i : o.getPerformer())
-			performer.add(i.copy());
+		//for (ResourceReference i : o.getPerformer())
+		//	performer.add(i.copy());
 		referenceRange = new ArrayList();
 		for (ObservationReferenceRangeComponent i :o.getReferenceRange())
 			referenceRange.add(i.copy());
@@ -214,6 +213,6 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 		
 	}
 	public String toString(){
-		return getDisplaySimple();
+		return getDisplay();
 	}
 }

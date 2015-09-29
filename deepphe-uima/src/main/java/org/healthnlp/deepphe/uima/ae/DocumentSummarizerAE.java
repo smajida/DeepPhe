@@ -94,7 +94,7 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 				}
 				*/
 				Report report = resourceFactory.getReport(jcas);
-				report.setTitleSimple(TextUtils.stripSuffix(docID.getDocumentID()));
+				report.setTitle(TextUtils.stripSuffix(docID.getDocumentID()));
 				System.out.println("\n\n-------------------------------------------------------------------\n");
 				System.out.println(report.getSummary());
 				System.out.println("\n===================================================================\n\n");
@@ -112,7 +112,7 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 				patientDir = new File(new File(outputDir,XMI_TYPE),namedID);
 				if(!patientDir.exists())
 					patientDir.mkdirs();
-				CasIOUtil.writeXmi(jcas,new File(patientDir,report.getTitleSimple()+".xmi"));
+				CasIOUtil.writeXmi(jcas,new File(patientDir,report.getTitle()+".xmi"));
 //            writeXmi( jcas.getCas(), new File(patientDir,report.getTitleSimple()+".xmi") );
 			}
 		} catch (Exception e) {

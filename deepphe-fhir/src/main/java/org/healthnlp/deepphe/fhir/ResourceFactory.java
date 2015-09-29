@@ -16,8 +16,6 @@ import org.healthnlp.deepphe.util.OntologyUtils;
 import org.hl7.fhir.instance.model.Composition;
 import org.hl7.fhir.instance.model.Condition;
 import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.Condition.ConditionLocationComponent;
-import org.hl7.fhir.instance.model.Condition.ConditionRelatedItemComponent;
 import org.hl7.fhir.instance.model.Condition.ConditionStageComponent;
 
 import edu.pitt.dbmi.nlp.noble.coder.model.*;
@@ -115,7 +113,7 @@ public class ResourceFactory {
 	 */
 	public Report getReport(Document doc) {
 		Report r = getReport(doc.getText());
-		r.setTitleSimple(doc.getTitle());
+		r.setTitle(doc.getTitle());
 		
 		// find patient if available
 		Patient patient = getPatient(doc);

@@ -14,7 +14,7 @@ import edu.pitt.dbmi.nlp.noble.ontology.IClass;
  * @author tseytlin
  */
 public interface Element extends Serializable {
-	public String getDisplaySimple();
+	public String getDisplay();
 	public String getIdentifierSimple();
 	public String getSummary();
 	public Resource getResource();

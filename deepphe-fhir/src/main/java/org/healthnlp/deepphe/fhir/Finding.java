@@ -6,13 +6,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Condition;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.Condition.ConditionEvidenceComponent;
-import org.hl7.fhir.instance.model.Condition.ConditionLocationComponent;
-import org.hl7.fhir.instance.model.Condition.ConditionRelatedItemComponent;
-import org.hl7.fhir.instance.model.Condition.ConditionStatus;
+import org.hl7.fhir.instance.model.DateType;
 
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
@@ -21,11 +20,12 @@ public class Finding extends Condition  implements Element{
 
 	public Finding(){
 		setCategory(Utils.CONDITION_CATEGORY_FINDING);
-		setLanguageSimple(Utils.DEFAULT_LANGUAGE); // we only care about English
-		setStatusSimple(ConditionStatus.confirmed); // here we only deal with 'confirmed' dx
+		setLanguage(Utils.DEFAULT_LANGUAGE); // we only care about English
+		//setClinicalStatus();
+		setVerificationStatus(ConditionVerificationStatus.CONFIRMED);
 	}
-	public String getDisplaySimple() {
-		return getCode().getTextSimple();
+	public String getDisplay() {
+		return getCode().getText();
 	}
 
 	public String getIdentifierSimple() {
@@ -34,7 +34,7 @@ public class Finding extends Condition  implements Element{
 
 	public String getSummary() {
 		StringBuffer st = new StringBuffer();
-		st.append("Finding:\t"+getDisplaySimple());
+		st.append("Finding:\t"+getDisplay());
 		return st.toString();
 	}
 	public Resource getResource() {
@@ -57,8 +57,8 @@ public class Finding extends Condition  implements Element{
 	public void setReport(Report r) {
 		Patient p = r.getPatient();
 		if(p != null){
-			setSubject(Utils.getResourceReference(p));
-			setSubjectTarget(p);
+			setPatient(Utils.getResourceReference(p));
+			setPatientTarget(p);
 		}
 		// set date
 		/*DateAndTime d = r.getDateSimple();
@@ -78,14 +78,14 @@ public class Finding extends Condition  implements Element{
 		for (Identifier i : c.getIdentifier())
 			identifier.add(i.copy());
 		// subject target?
-		subject = c.getSubject();
+		patient = c.getPatient();
 		encounter = c.getEncounter();
 		asserter = c.getAsserter();
-		dateAsserted = c.getDateAsserted();
+		dateRecorded = new DateType(c.getDateRecorded());
 		code = c.getCode();
 		category = c.getCategory();
-		status = c.getStatus();
-		certainty = c.getCertainty();
+		clinicalStatus = c.getClinicalStatusElement();
+		verificationStatus = c.getVerificationStatusElement();
 		severity = c.getSeverity();
 		onset = c.getOnset();
 		abatement = c.getAbatement();
@@ -95,16 +95,13 @@ public class Finding extends Condition  implements Element{
 		evidence = new ArrayList();
 		for (ConditionEvidenceComponent i : c.getEvidence())
 			evidence.add(i.copy());
-		location = new ArrayList();
-		for (ConditionLocationComponent i : c.getLocation())
-			location.add(i.copy());
-		relatedItem = new ArrayList();
-		for (ConditionRelatedItemComponent i : c.getRelatedItem())
-			relatedItem.add(i.copy());
-		notes = c.getNotes();
+		bodySite = new ArrayList();
+		for (CodeableConcept i : c.getBodySite())
+			bodySite.add(i.copy());
+		notes = c.getNotesElement();
 		
 	}
 	public String toString(){
-		return getDisplaySimple();
+		return getDisplay();
 	}
 }
