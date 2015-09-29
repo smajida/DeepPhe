@@ -18,6 +18,14 @@
  */
 
 package org.apache.ctakes.cancer.ae;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 import org.apache.ctakes.core.util.DocumentIDAnnotationUtil;
 import org.apache.uima.UIMAFramework;
 import org.apache.uima.UimaContext;
@@ -34,16 +42,7 @@ import org.apache.uima.resource.ResourceProcessException;
 import org.apache.uima.util.InvalidXMLException;
 import org.apache.uima.util.UriUtils;
 import org.apache.uima.util.XMLInputSource;
-import org.apache.uima.util.XMLSerializer;
 import org.xml.sax.SAXException;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 /**
  * A simple CAS consumer that writes the CAS to XMI format.
@@ -145,7 +144,7 @@ public class XMIWriter extends CasConsumer_ImplBase {
          // write XMI
          out = new FileOutputStream( name );
          XmiCasSerializer ser = new XmiCasSerializer( aCas.getTypeSystem() );
-         XMLSerializer xmlSer = new XMLSerializer( out, true );
+         XMISerializer xmlSer = new XMISerializer( out, true );
          ser.serialize( aCas, xmlSer.getContentHandler() );
       } finally {
          if ( out != null ) {
@@ -170,7 +169,7 @@ public class XMIWriter extends CasConsumer_ImplBase {
          // write XMI
          out = new FileOutputStream( name );
          XmiCasSerializer ser = new XmiCasSerializer( aCas.getTypeSystem() );
-         XMISerializer xmlSer = new XMISerializer( System.out, true );
+         XMISerializer xmlSer = new XMISerializer( out, true );
          ser.serialize( aCas, xmlSer.getContentHandler() );
       } finally {
          if ( out != null ) {
