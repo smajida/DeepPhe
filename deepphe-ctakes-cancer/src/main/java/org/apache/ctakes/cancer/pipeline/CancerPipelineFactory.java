@@ -16,7 +16,7 @@ import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.CopyNPChunksTo
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.RemoveEnclosedLookupWindows;
 import org.apache.ctakes.constituency.parser.ae.ConstituencyParser;
 import org.apache.ctakes.contexttokenizer.ae.ContextDependentTokenizerAnnotator;
-import org.apache.ctakes.core.ae.SentenceDetector;
+import org.apache.ctakes.core.ae.SentenceDetectorAnnotator;
 import org.apache.ctakes.core.ae.TokenizerAnnotatorPTB;
 import org.apache.ctakes.core.cr.FilesInDirectoryCollectionReader;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
@@ -122,7 +122,7 @@ final public class CancerPipelineFactory {
 
    static private void addCoreEngines( final AggregateBuilder aggregateBuilder )
          throws ResourceInitializationException {
-      aggregateBuilder.add( SentenceDetector.createAnnotatorDescription() );
+      aggregateBuilder.add( SentenceDetectorAnnotator.getDescription("/org/apache/ctakes/core/sentdetect/model.jar") );
       aggregateBuilder.add( TokenizerAnnotatorPTB.createAnnotatorDescription() );
       aggregateBuilder.add( LvgAnnotator.createAnnotatorDescription() );
       aggregateBuilder.add( ContextDependentTokenizerAnnotator.createAnnotatorDescription() );
