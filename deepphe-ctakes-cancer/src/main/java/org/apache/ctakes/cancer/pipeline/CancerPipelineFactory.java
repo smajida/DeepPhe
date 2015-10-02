@@ -1,22 +1,23 @@
 package org.apache.ctakes.cancer.pipeline;
 
 
+import javax.annotation.concurrent.Immutable;
+
 import org.apache.ctakes.assertion.medfacts.cleartk.PolarityCleartkAnalysisEngine;
 import org.apache.ctakes.assertion.medfacts.cleartk.UncertaintyCleartkAnalysisEngine;
 import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
 import org.apache.ctakes.cancer.ae.PittHeaderAnnotator;
 import org.apache.ctakes.cancer.ae.PittHeaderCleaner;
 import org.apache.ctakes.cancer.ae.PropertyToEventCopier;
+import org.apache.ctakes.cancer.ae.XmiWriter;
 import org.apache.ctakes.chunker.ae.Chunker;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.CopyNPChunksToLookupWindowAnnotations;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.RemoveEnclosedLookupWindows;
 import org.apache.ctakes.constituency.parser.ae.ConstituencyParser;
 import org.apache.ctakes.contexttokenizer.ae.ContextDependentTokenizerAnnotator;
-import org.apache.ctakes.core.ae.CDASegmentAnnotator;
 import org.apache.ctakes.core.ae.SentenceDetector;
 import org.apache.ctakes.core.ae.TokenizerAnnotatorPTB;
-import org.apache.ctakes.core.cc.XmiWriterCasConsumerCtakes;
 import org.apache.ctakes.core.cr.FilesInDirectoryCollectionReader;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPSemanticRoleLabelerAE;
@@ -40,8 +41,6 @@ import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.cleartk.ml.jar.GenericJarClassifierFactory;
 
-import javax.annotation.concurrent.Immutable;
-
 @Immutable
 final public class CancerPipelineFactory {
 
@@ -51,10 +50,10 @@ final public class CancerPipelineFactory {
 //         "AnnotationVersionPropKey", "ANNOTATION_VERSION" ) );
 
 
-
    static private final String CTAKES_DIR_PREFIX = "/org/apache/ctakes/";
 
-   private CancerPipelineFactory() {}
+   private CancerPipelineFactory() {
+   }
 
    public static AnalysisEngine createPipelineEngine() throws ResourceInitializationException {
       return createPipelineEngine( null );
@@ -106,8 +105,8 @@ final public class CancerPipelineFactory {
 
    public static AnalysisEngine createXMIWriter( final String outputDirectory )
          throws ResourceInitializationException {
-      return AnalysisEngineFactory.createEngine( XmiWriterCasConsumerCtakes.class,
-            XmiWriterCasConsumerCtakes.PARAM_OUTPUTDIR,
+      return AnalysisEngineFactory.createEngine( XmiWriter.class,
+            XmiWriter.PARAM_OUTPUTDIR,
             outputDirectory );
    }
 
@@ -116,8 +115,8 @@ final public class CancerPipelineFactory {
          throws ResourceInitializationException {
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( PittHeaderAnnotator.class ) );
       // grab segments using known headers from default + what UPMC has given us.
-      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( CDASegmentAnnotator.class,
-            CDASegmentAnnotator.PARAM_SECTIONS_FILE, "ccda_sections.txt" ) );
+//      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( CDASegmentAnnotator.class,
+//            CDASegmentAnnotator.PARAM_SECTIONS_FILE, "ccda_sections.txt" ) );
 //	  aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(UpmcSimpleSegmenter.class));
    }
 

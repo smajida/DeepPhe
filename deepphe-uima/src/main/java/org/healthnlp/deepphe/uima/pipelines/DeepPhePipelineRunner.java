@@ -4,6 +4,9 @@ import java.io.IOException;
 
 import javax.annotation.concurrent.Immutable;
 
+import net.sf.saxon.lib.NamespaceConstant;
+
+import org.apache.ctakes.cancer.pipeline.CancerPipelineRunner;
 import org.apache.uima.UIMAException;
 
 import com.lexicalscope.jewel.cli.CliFactory;
@@ -36,7 +39,14 @@ final public class DeepPhePipelineRunner {
    }
 
    public static void main( final String... args ) throws UIMAException, IOException {
+	   
+	   System.setProperty("javax.xml.xpath.XPathFactory:"
+               + NamespaceConstant.OBJECT_MODEL_SAXON,
+               "net.sf.saxon.xpath.XPathFactoryImpl");
+
+	   
 	      final Options options = CliFactory.parseArguments( Options.class, args );
+	      //CancerPipelineRunner.runCancerPipeline( options.getInputDirectory(), options.getOutputDirectory() );
 	      DocumentSummarizerPipeline.runDocumentSummarizerPipeline( options.getInputDirectory(), options.getOutputDirectory(), options.getOntologyPath());
 	      PhenotypeSummarizerPipeline.runPhenotypeSummarizerPipeline(options.getOutputDirectory(), options.getOntologyPath(), options.getClipsDirectoryPath());
 	      

@@ -45,16 +45,6 @@ done, the dependency versions should be moved into the parent pom -->
      	<groupId>me.fhir</groupId>
      	<artifactId>fhir-dstu2</artifactId>
      	<version>1.0.0.6881</version>
-        <exclusions>
-           <exclusion>
-              <artifactId>xml-apis</artifactId>
-              <groupId>xml-apis</groupId>
-           </exclusion>
-          <exclusion>
-	          <artifactId>xercesImpl</artifactId>
-	          <groupId>xerces</groupId>
-	        </exclusion>
-	   </exclusions>
      </dependency>
      <dependency>
      	<groupId>org.ogce</groupId>

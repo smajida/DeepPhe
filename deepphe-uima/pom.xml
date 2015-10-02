@@ -40,20 +40,7 @@
 			<groupId>org.healthnlp</groupId>
 			<artifactId>deepphe-ctakes-cancer</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>xercesImpl</artifactId>
-					<groupId>xerces</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jdom</artifactId>
-					<groupId>org.jdom</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>dom4j</artifactId>
-					<groupId>dom4j</groupId>
-				</exclusion>
-			</exclusions>
+
       </dependency>	
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -72,45 +59,23 @@
 			<groupId>org.healthnlp</groupId>
 			<artifactId>deepphe-fhir</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>xercesImpl</artifactId>
-					<groupId>xerces</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jdom</artifactId>
-					<groupId>org.jdom</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>dom4j</artifactId>
-					<groupId>dom4j</groupId>
-				</exclusion>
-			</exclusions>
+
 		</dependency>
       <dependency>
          <groupId>org.healthnlp</groupId>
          <artifactId>deepphe-i2b2</artifactId>
          <version>${project.version}</version>
-         <exclusions>
-         	<exclusion>
-         		<artifactId>xml-apis</artifactId>
-         		<groupId>xml-apis</groupId>
-         	</exclusion>
-         	<exclusion>
-         		<artifactId>dom4j</artifactId>
-         		<groupId>dom4j</groupId>
-         	</exclusion>
-         </exclusions>
+
       </dependency>
 
       <!-- Dependencies that still need to be uploaded to Maven Central; when
    done, the dependency versions should be moved into the parent pom -->
       <dependency>
-         <groupId>jess</groupId>
-         <artifactId>jess</artifactId>
+         <groupId>dphere</groupId>
+         <artifactId>dphere</artifactId>
          <version>1</version>
          <scope>system</scope>
-         <systemPath>${project.basedir}/lib/jess.jar</systemPath>
+         <systemPath>${project.basedir}/lib/dphere.jar</systemPath>
       </dependency>
       <dependency>
          <groupId>org.semanticweb</groupId>

@@ -23,20 +23,20 @@
 
    <dictionaries>
       <dictionary>
-         <name>CancerDictionaryBsv</name>
-         <implementationName>org.apache.ctakes.dictionary.lookup2.dictionary.BsvRareWordDictionary</implementationName>
+         <name>CancerDictionaryOwl</name>
+         <implementationName>org.apache.ctakes.dictionary.lookup2.dictionary.OwlDictionary</implementationName>
          <properties>
-            <property key="bsvPath" value="org/apache/ctakes/cancer/dictionary/lookup/fast/breastCancer.bsv"/>
+            <property key="owlPath" value="data/ontology/breastCancer-3.owl"/>
          </properties>
       </dictionary>
    </dictionaries>
 
    <conceptFactories>
       <conceptFactory>
-         <name>CancerConceptFactoryBsv</name>
-         <implementationName>org.apache.ctakes.dictionary.lookup2.concept.BsvConceptFactory</implementationName>
+         <name>CancerConceptFactoryOwl</name>
+         <implementationName>org.apache.ctakes.dictionary.lookup2.concept.OwlConceptFactory</implementationName>
          <properties>
-            <property key="bsvPath" value="org/apache/ctakes/cancer/dictionary/lookup/fast/breastCancer.bsv"/>
+            <property key="owlPath" value="data/ontology/breastCancer-3.owl"/>
          </properties>
       </conceptFactory>
    </conceptFactories>
@@ -44,19 +44,20 @@
    <!--  Defines what terms and concepts will be used  -->
    <dictionaryConceptPairs>
       <dictionaryConceptPair>
-         <name>CancerBsv</name>
-         <dictionaryName>CancerDictionaryBsv</dictionaryName>
-         <conceptFactoryName>CancerConceptFactoryBsv</conceptFactoryName>
+         <name>CancerOwl</name>
+         <dictionaryName>CancerDictionaryOwl</dictionaryName>
+         <conceptFactoryName>CancerConceptFactoryOwl</conceptFactoryName>
       </dictionaryConceptPair>
    </dictionaryConceptPairs>
 
    <rareWordConsumer>
       <name>Term Consumer</name>
       <implementationName>org.apache.ctakes.dictionary.lookup2.consumer.PrecisionTermConsumer</implementationName>
+      <!--<implementationName>org.apache.ctakes.dictionary.lookup2.consumer.OwlTermConsumer</implementationName>-->
       <properties>
-          <!-- Depending upon the consumer, the value of codingScheme may or may not be used.  With the packaged consumers,
-          codingScheme is a default value used only for cuis that do not have secondary codes (snomed, rxnorm, etc.)  -->
-         <property key="codingScheme" value="cancer"/>
+         <!-- Depending upon the consumer, the value of codingScheme may or may not be used.  With the packaged consumers,
+         codingScheme is a default value used only for cuis that do not have secondary codes (snomed, rxnorm, etc.)  -->
+         <property key="codingScheme" value="cancer_owl"/>
       </properties>
    </rareWordConsumer>
 
