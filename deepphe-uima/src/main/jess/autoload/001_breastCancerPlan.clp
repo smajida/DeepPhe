@@ -25,6 +25,9 @@
      (modify ?g (name "extract-tnm") (priority ?priority))
      (bind ?priority (+ ?priority 1))
      (bind ?g (add (new Goal)))
+     (modify ?g (name "extract-stage") (priority ?priority))
+     (bind ?priority (+ ?priority 1))
+     (bind ?g (add (new Goal)))
      (modify ?g (name "extract-receptor-status") (priority ?priority)))
 
 (defrule planning-goal-achieved "remove highest priority goal and activate the next one"

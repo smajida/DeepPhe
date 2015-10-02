@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.util.LinkedHashMap;
 
 import org.apache.commons.lang.SerializationUtils;
+import org.apache.ctakes.cancer.ae.XMIWriter;
 import org.apache.ctakes.typesystem.type.structured.DocumentID;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
@@ -92,12 +93,12 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 				File patientDir = new File(new File(outputDir,FHIR_TYPE),namedID);
 				report.save(patientDir);
 				
-				// save XMI 
-				patientDir = new File(new File(outputDir,XMI_TYPE),namedID);
-				if(!patientDir.exists())
-					patientDir.mkdirs();
-				CasIOUtil.writeXmi(jcas,new File(patientDir,report.getTitle()+".xmi"));
-//            writeXmi( jcas.getCas(), new File(patientDir,report.getTitleSimple()+".xmi") );
+				// save XMI
+            	patientDir = new File( new File( outputDir, XMI_TYPE ), namedID );
+            	if ( !patientDir.exists() ) {
+               	patientDir.mkdirs();
+            	}
+           	 	XMIWriter.writeXmi( jcas.getCas(), new File( patientDir, report.getTitle() + ".xmi" ) );
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -106,22 +107,5 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
       //_xmiWriter.process( jcas );
 		
 	}
-
-
-
-   public void saveSerialized( File dir, String reportTitle, Encounter e ) throws Exception {
-
-      File file = new File( dir, reportTitle + ".data" );
-      Files.createParentDirs( file );
-      Files.touch( file );
-
-      // Write to disk with FileOutputStream
-      FileOutputStream f_out = new
-            FileOutputStream( file );
-
-      SerializationUtils.serialize( e, f_out );
-      f_out.close();
-   }
-
 
 }
