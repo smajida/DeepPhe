@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.ctakes.cancer.type.textsem.*;
+import org.apache.ctakes.cancer.type.textsem.CancerSize;
+import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
+import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
+import org.apache.ctakes.cancer.type.textsem.TnmClassification;
+import org.apache.ctakes.cancer.type.textsem.TnmFeature;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
@@ -26,7 +30,7 @@ import org.healthnlp.deepphe.summarization.jess.kb.Summary;
 import org.healthnlp.deepphe.summarization.jess.kb.TnmMgrade;
 import org.healthnlp.deepphe.summarization.jess.kb.TnmNgrade;
 import org.healthnlp.deepphe.summarization.jess.kb.TnmTgrade;
-import org.healthnlp.deepphe.summarization.jess.kb.TumorSize;
+import org.healthnlp.deepphe.summarization.jess.kb.TumorSizeCalculator;
 import org.healthnlp.deepphe.uima.ae.CasDetector;
 
 public class CtakesToJessConverter {
@@ -167,7 +171,7 @@ public class CtakesToJessConverter {
 
 		CancerSize cancerSize = (CancerSize) identifiedAnnotation;
 
-		TumorSize tumorSize = new TumorSize();
+		TumorSizeCalculator tumorSize = new TumorSizeCalculator();
 		tumorSize.setSummarizableId(summarizable.getId());
 
 		tumorSize.setDimensionOne(-1.0d);
@@ -221,8 +225,8 @@ public class CtakesToJessConverter {
 		TnmClassification tnmClassification = (TnmClassification) identifiedAnnotation;
 
 		TnmFeature tnmT = tnmClassification.getSize();
-      TnmFeature tnmN = tnmClassification.getNodeSpread();
-      TnmFeature tnmM = tnmClassification.getMetastasis();
+		TnmFeature tnmN = tnmClassification.getNodeSpread();
+		TnmFeature tnmM = tnmClassification.getMetastasis();
 
 		TnmTgrade tnmTgrade = new TnmTgrade();
 		tnmTgrade.setSummarizableId(summarizable.getId());

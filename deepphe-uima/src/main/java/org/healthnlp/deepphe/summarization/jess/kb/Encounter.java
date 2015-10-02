@@ -4,6 +4,8 @@ import org.apache.commons.lang.StringUtils;
 
 public class Encounter extends Summarizable {
 	
+	private static final long serialVersionUID = 995528454712965512L;
+	
 	private int patientId = -1;
 	private int sequence = -1;
 	private String kind = "NA";

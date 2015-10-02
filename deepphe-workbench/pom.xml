@@ -19,5 +19,12 @@
   		<artifactId>deepphe-uima</artifactId>
   		<version>0.0.1-SNAPSHOT</version>
   	</dependency>
+  	  <dependency>
+         <groupId>org.healthnlp</groupId>
+         <artifactId>modgen</artifactId>
+         <version>20150910</version>
+         <scope>system</scope>
+         <systemPath>${project.basedir}/lib/modgen.jar</systemPath>
+      </dependency>
   </dependencies>
 </project>

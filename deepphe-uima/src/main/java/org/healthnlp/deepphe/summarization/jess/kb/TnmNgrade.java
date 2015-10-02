@@ -2,6 +2,8 @@ package org.healthnlp.deepphe.summarization.jess.kb;
 
 public class TnmNgrade extends Summary {
 	
+	private static final long serialVersionUID = -6329902508407691598L;
+	
 	private String providingDepartment;
 	private int groupIndex = -1;
 

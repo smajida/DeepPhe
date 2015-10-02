@@ -2,6 +2,8 @@ package org.healthnlp.deepphe.summarization.jess.kb;
 
 public class Goal extends Identified {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private String name;
 	private int priority;
 
