@@ -95,6 +95,22 @@
                   </lifecycleMappingMetadata>
                </configuration>
             </plugin>
+<!-- Maven expects tests to start or end with "Test", not "Tests", so 
+					explicitly include files ending in "Tests" -->
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.12.1</version>
+					<configuration>
+						<includes>
+							<include>**/Test*.java</include>
+							<include>**/*Test.java</include>
+							<include>**/*Tests.java</include>
+							<include>**/*TestCase.java</include>
+						</includes>
+						<argLine>-Xmx3g</argLine>
+						<forkedProcessTimeoutInSeconds>900</forkedProcessTimeoutInSeconds>
+					</configuration>
+				</plugin>            
          </plugins>
       </pluginManagement>
    </build>
