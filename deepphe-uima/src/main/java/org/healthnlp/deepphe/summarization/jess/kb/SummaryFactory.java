@@ -56,7 +56,7 @@ public class SummaryFactory {
 		// create an encounter representing the document in question
 		Encounter encounter = new Encounter();
 		encounter.setContent(r.getTextSimple());
-		encounter.setKind(r.getType().getTextSimple());
+		encounter.setKind(r.getType().getText());
 		encounter.setUri(r.getIdentifierSimple());
 					
 		// add all report elements to an encounter
@@ -128,8 +128,8 @@ public class SummaryFactory {
 			summary = new Diagnosis();
 		}else if(e instanceof Observation){
 			Observation o = (Observation) e;
-			code = o.getName();
-			String name = code.getTextSimple();
+			code = o.getCode();
+			String name = code.getText();
 			if(name.toLowerCase().contains("estrogen receptor"))
 				summary = new Er();
 			else if(name.toLowerCase().contains("progesterone receptor"))
@@ -139,8 +139,8 @@ public class SummaryFactory {
 			else if(name.toLowerCase().contains("tumor size")){
 				summary = new TumorSize();
 				Quantity q = (Quantity) o.getValue();
-				((TumorSize)summary).setGreatestDimension(q.getValueSimple().doubleValue());
-				((TumorSize)summary).setUnitOfMeasure(q.getUnitsSimple());
+				((TumorSize)summary).setGreatestDimension(q.getValue().doubleValue());
+				((TumorSize)summary).setUnitOfMeasure(q.getUnit());
 			}
 			summary.setValue(o.getValueSimple());
 		}

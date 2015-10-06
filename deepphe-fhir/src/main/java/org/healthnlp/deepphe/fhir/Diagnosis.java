@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -24,13 +25,12 @@ import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.TimeMention;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
+import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Condition;
-import org.hl7.fhir.instance.model.DateAndTime;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.Condition.ConditionEvidenceComponent;
-import org.hl7.fhir.instance.model.Condition.ConditionLocationComponent;
-import org.hl7.fhir.instance.model.Condition.ConditionRelatedItemComponent;
+import org.hl7.fhir.instance.model.DateType;
 
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
@@ -43,8 +43,10 @@ public class Diagnosis extends Condition implements Element {
 	
 	public Diagnosis(){
 		setCategory(Utils.CONDITION_CATEGORY_DIAGNOSIS);
-		setLanguageSimple(Utils.DEFAULT_LANGUAGE); // we only care about English
-		setStatusSimple(ConditionStatus.confirmed); // here we only deal with 'confirmed' dx
+		setLanguage(Utils.DEFAULT_LANGUAGE); // we only care about English
+		
+		//setClinicalStatus("active"); // here we only deal with 'confirmed' dx
+		setVerificationStatus(ConditionVerificationStatus.CONFIRMED); //?????
 		//Utils.createIdentifier(addIdentifier(),this);
 	}
 	
@@ -65,7 +67,7 @@ public class Diagnosis extends Condition implements Element {
 		// perhaps have annotation from Document time
 		TimeMention tm = dm.getStartTime();
 		if(tm != null){
-			setDateAssertedSimple(Utils.getDate(tm));
+			setDateRecorded(Utils.getDate(tm));
 		}
 			
 		// now lets take a look at the location of this diagnosis
@@ -74,9 +76,8 @@ public class Diagnosis extends Condition implements Element {
 			as = Utils.getAnatimicLocation(dm);
 		}
 		if(as != null){
-			ConditionLocationComponent location = addLocation();
-			location.setCode(Utils.getCodeableConcept(as));
-			location.setDetailSimple(as.getCoveredText());
+			// TODO: create body-site object as well
+			addBodySite(Utils.getCodeableConcept(as));
 		}
 	
 		// now lets get the location relationships
@@ -103,9 +104,7 @@ public class Diagnosis extends Condition implements Element {
 		// find annatomic location
 		Mention al = Utils.getNearestMention(m,m.getSentence().getDocument(),Utils.ANATOMICAL_SITE);
 		if(al != null){
-			ConditionLocationComponent location = addLocation();
-			location.setCode(Utils.getCodeableConcept(al));
-			location.setDetailSimple(al.getText());
+			addBodySite(Utils.getCodeableConcept(al));
 		}
 		
 		// find relevant stage
@@ -132,14 +131,14 @@ public class Diagnosis extends Condition implements Element {
 		this.identifier = new ArrayList();
 		for (Identifier i : c.getIdentifier())
 			this.identifier.add(i.copy());
-		subject = c.getSubject();
+		patient = c.getPatient();
 		encounter = c.getEncounter();
 		asserter = c.getAsserter();
-		dateAsserted = c.getDateAsserted();
+		dateRecorded = new DateType(c.getDateRecorded());
 		code = c.getCode();
 		category = c.getCategory();
-		status = c.getStatus();
-		certainty = c.getCertainty();
+		clinicalStatus = c.getClinicalStatusElement();
+		verificationStatus = c.getVerificationStatusElement();
 		severity = c.getSeverity();
 		onset = c.getOnset();
 		abatement = c.getAbatement();
@@ -149,23 +148,32 @@ public class Diagnosis extends Condition implements Element {
 		evidence = new ArrayList();
 		for (ConditionEvidenceComponent i : c.getEvidence())
 			evidence.add(i.copy());
-		location = new ArrayList();
-		for (ConditionLocationComponent i : c.getLocation())
-			location.add(i.copy());
-		relatedItem = new ArrayList();
+		bodySite = new ArrayList();
+		for (CodeableConcept i : c.getBodySite())
+			bodySite.add(i.copy());
+		/*relatedItem = new ArrayList();
 		for (ConditionRelatedItemComponent i : c.getRelatedItem())
-			relatedItem.add(i.copy());
-		notes = c.getNotes();
+			relatedItem.add(i.copy());*/
+		notes = c.getNotesElement();
 
 	}
 	
 	
 	public Stage getStage(){
-		return (Stage) super.getStage();
+		ConditionStageComponent st =  super.getStage();
+		if(st == null || st.getSummary() == null || st.getSummary().getCoding().isEmpty())
+			return null;
+		if(st instanceof Stage)
+			return (Stage) st;
+		// convert to new stage
+		Stage s = new Stage();
+		s.copy(st);
+		setStage(s);
+		return s;
 	}
 
-	public String getDisplaySimple() {
-		return getCode().getTextSimple();
+	public String getDisplay() {
+		return getCode().getText();
 	}
 
 	public String getIdentifierSimple() {
@@ -174,13 +182,13 @@ public class Diagnosis extends Condition implements Element {
 
 	public String getSummary() {
 		StringBuffer st = new StringBuffer();
-		st.append("Diagnosis:\t"+getDisplaySimple());
-		for(ConditionLocationComponent l: getLocation()){
-			st.append(" | location: "+l.getCode().getTextSimple());
+		st.append("Diagnosis:\t"+getDisplay());
+		for(CodeableConcept l: getBodySite()){
+			st.append(" | location: "+l.getText());
 		}
 		Stage s = getStage();
 		if(s != null){
-			st.append(" | stage: "+s.getSummary().getTextSimple());
+			st.append(" | stage: "+s.getSummary().getText());
 			//+" T:"+s.getPrimaryTumorStage()+" N: "+s.getRegionalLymphNodeStage()+" M: "+s.getDistantMetastasisStage());
 		}
 		return st.toString();
@@ -200,19 +208,19 @@ public class Diagnosis extends Condition implements Element {
 	public void setReport(Report r) {
 		Patient p = r.getPatient();
 		if(p != null){
-			setSubject(Utils.getResourceReference(p));
-			setSubjectTarget(p);
+			setPatient(Utils.getResourceReference(p));
+			setPatientTarget(p);
 		}
 		// set date
-		DateAndTime d = r.getDateSimple();
+		Date d = r.getDate();
 		if( d != null){
-			setDateAssertedSimple(d);
+			setDateRecorded(d);
 		}
 	}
 	public IClass getConceptClass(){
 		return Utils.getConceptClass(getCode());
 	}
 	public String toString(){
-		return getDisplaySimple();
+		return getDisplay();
 	}
 }

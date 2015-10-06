@@ -9,7 +9,7 @@ import org.healthnlp.deepphe.summarization.jess.kb.Pr;
 import org.healthnlp.deepphe.summarization.jess.kb.TnmMgrade;
 import org.healthnlp.deepphe.summarization.jess.kb.TnmNgrade;
 import org.healthnlp.deepphe.summarization.jess.kb.TnmTgrade;
-import org.healthnlp.deepphe.summarization.jess.kb.TumorSize;
+import org.healthnlp.deepphe.summarization.jess.kb.TumorSizeCalculator;
 
 
 public class EncounterKnowledgeExtractorStub implements EncounterKnowledgeExtractorInterface {
@@ -40,7 +40,7 @@ public class EncounterKnowledgeExtractorStub implements EncounterKnowledgeExtrac
 				diagnosis.setPreferredTerm("Breast Adenocarcinoma");
 				encounter.addSummary(diagnosis);
 				
-				TumorSize tumorSize = new TumorSize();
+				TumorSizeCalculator tumorSize = new TumorSizeCalculator();
 				tumorSize.setSummarizableId(encounter.getId());
 				tumorSize.setBaseCode("C120286");
 				tumorSize.setCode("C120286");
@@ -121,7 +121,7 @@ public class EncounterKnowledgeExtractorStub implements EncounterKnowledgeExtrac
 				encounter.setPatientId(patient.getId());
 				encounter.setSequence(2);
 				
-				TumorSize tumorSize = new TumorSize();
+				TumorSizeCalculator tumorSize = new TumorSizeCalculator();
 				tumorSize.setSummarizableId(encounter.getId());
 				tumorSize.setBaseCode("C120285");
 				tumorSize.setCode("C120285");

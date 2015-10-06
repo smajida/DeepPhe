@@ -179,7 +179,7 @@ public class PatientKnowledgeExtractorJess implements PatientKnowledgeExtractorI
 	public void loadProductionClipsFiles() {
 		try {
 			if (this.engine != null) {
-				File productionClipsDirectory = new File(Workbench.PROJECT_LOCATION + File.separator + "../deepphe-uima/src/main/jess/autoload");
+				File productionClipsDirectory = new File(Workbench.PROJECT_LOCATION + File.separator + "../deepphe-uima/src/main/jess/autoload0915");
 				if (productionClipsDirectory.isDirectory()) {
 					List<File> fileList = Arrays.asList(productionClipsDirectory.listFiles());
 					Collections.sort(fileList, new Comparator<File>() {

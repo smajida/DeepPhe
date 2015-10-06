@@ -53,17 +53,10 @@ import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
 
-/** <p>
- * Simple visitor that grabs any labels on an entity.
- * </p>
- * <p/>
- * Author: Sean Bechhofer<br>
- * The University Of Manchester<br>
- * Information Management Group<br>
- * Date: 17-03-2007<br>
- * <br> */
 public class PreferredCuiExtractor implements OWLAnnotationObjectVisitor {
     
+//	private String cuiAttribute = "prefCUI";
+	private String cuiAttribute = "code";
 	private String cui;
 
     public PreferredCuiExtractor() {
@@ -87,25 +80,16 @@ public class PreferredCuiExtractor implements OWLAnnotationObjectVisitor {
          */
     	if (cui == null) {
     		String annotationAsString = annotation.getProperty().getIRI().toString();
-            if (annotationAsString.endsWith("prefCUI")) {
+            if (annotationAsString.endsWith(cuiAttribute)) {
                 OWLLiteral owlLiteral = (OWLLiteral) annotation.getValue();
                 cui = owlLiteral.getLiteral();
                 cui = extractPrefixCuiUmls(cui);
             }
-    	}
-    	if (cui == null) {
-    		String annotationAsString = annotation.getProperty().getIRI().toString();
-            if (annotationAsString.endsWith("prefCUI")) {
-                OWLLiteral owlLiteral = (OWLLiteral) annotation.getValue();
-                cui = owlLiteral.getLiteral();
-                cui = extractPrefixCuiDeepPhe(cui);
-            }
-    	}
-    	
+    	} 	
     }
     
     private String extractPrefixCuiUmls(String cui) {
-        Pattern pattern = Pattern.compile("^(C\\d{7})\\D*$");
+        Pattern pattern = Pattern.compile("^(C\\d{7}) \\[UMLS_CUI\\]$");
         Matcher matcher = pattern.matcher(cui);
         if (matcher.matches()) {
         	cui = "umls:" + matcher.group(1);
@@ -115,18 +99,7 @@ public class PreferredCuiExtractor implements OWLAnnotationObjectVisitor {
         }
         return cui;
     }
-    
-    private String extractPrefixCuiDeepPhe(String cui) {
-        Pattern pattern = Pattern.compile("^(C1\\d{5})\\D*$");
-        Matcher matcher = pattern.matcher(cui);
-        if (matcher.matches()) {
-        	cui = "umls:" + matcher.group(1);
-        }
-        else {
-        	cui = null;
-        }
-        return cui;
-    }
+   
 
     @Override
     public void visit(OWLAnnotationAssertionAxiom axiom) {}

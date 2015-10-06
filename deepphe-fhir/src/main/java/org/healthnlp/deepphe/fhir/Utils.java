@@ -30,20 +30,22 @@ import org.apache.uima.cas.Type;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.jcas.tcas.DocumentAnnotation;
-import org.healthnlp.deepphe.util.FHIRComposer;
+import org.healthnlp.deepphe.util.FHIRParser;
 import org.healthnlp.deepphe.util.OntologyUtils;
-import org.hl7.fhir.instance.formats.XmlComposer;
 import org.hl7.fhir.instance.formats.XmlParser;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
-import org.hl7.fhir.instance.model.DateAndTime;
+import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Narrative;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.instance.model.Reference;
+import org.hl7.fhir.instance.utils.NarrativeGenerator.ResourceWithReference;
 import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.ResourceReference;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.hl7.fhir.utilities.xml.XMLWriter;
+import org.hl7.fhir.utilities.xml.XmlGenerator;
 
 import edu.pitt.dbmi.nlp.noble.coder.model.Document;
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
@@ -121,11 +123,11 @@ public class Utils {
 	 */
 	public static CodeableConcept getCodeableConcept(String name,String cui,String scheme){
 		CodeableConcept c = new CodeableConcept();
-		c.setTextSimple(name);
+		c.setText(name);
 		Coding cc = c.addCoding();
-		cc.setCodeSimple(cui);
-		cc.setDisplaySimple(name);
-		cc.setSystemSimple(scheme);
+		cc.setCode(cui);
+		cc.setDisplay(name);
+		cc.setSystem(scheme);
 		return c;
 	}
 	
@@ -134,32 +136,15 @@ public class Utils {
 	 * @param tm
 	 * @return
 	 */
-	public static DateAndTime getDate(TimeMention tm){
+	public static Date getDate(TimeMention tm){
 		//Date dt = tm.getDate();
 		Time t  = tm.getTime();
-		//TODO: implement
-		return new DateAndTime(new Date());
+		org.apache.ctakes.typesystem.type.refsem.Date dt = tm.getDate();
+		//dt.getYear();
+		//TODO: //
+		return new Date();
 	}
 	
-	/**
-	 * get FHIR date object from cTAKES time mention
-	 * @param tm
-	 * @return
-	 */
-	public static Date getDate(DateAndTime dt){
-		Date d = new Date(dt.getYear(),dt.getMonth(),dt.getDay(),dt.getHour(), dt.getMinute(),dt.getSecond());
-		//TDDO: use calendar
-		return d;
-	}
-	
-	/**
-	 * get FHIR date object from cTAKES time mention
-	 * @param tm
-	 * @return
-	 */
-	public static DateAndTime getDate(Date dt){
-		return new DateAndTime(dt);
-	}
 	
 	/**
 	 * parse date from string
@@ -185,7 +170,7 @@ public class Utils {
 	 * @return
 	 */
 	public static CodeableConcept setCodeableConcept(CodeableConcept cc,IdentifiedAnnotation ia){
-		cc.setTextSimple(ia.getCoveredText());
+		cc.setText(ia.getCoveredText());
 		
 		// go over mapped concepts (merge them into multiple coding systems)
 		if(ia.getOntologyConceptArr() != null){
@@ -194,9 +179,9 @@ public class Utils {
 				OntologyConcept c = ia.getOntologyConceptArr(i);
 				// add coding for this concept
 				Coding ccc = cc.addCoding();
-				ccc.setCodeSimple(c.getCode());
-				ccc.setDisplaySimple(ia.getCoveredText());
-				ccc.setSystemSimple(c.getCodingScheme());
+				ccc.setCode(c.getCode());
+				ccc.setDisplay(ia.getCoveredText());
+				ccc.setSystem(c.getCodingScheme());
 				cuis.add(c.getCode());
 				
 				// add codign for UMLS
@@ -204,9 +189,9 @@ public class Utils {
 					String cui = ((UmlsConcept)c).getCui();
 					if(!cuis.contains(cui)){
 						Coding cccc = cc.addCoding();
-						cccc.setCodeSimple(cui);
-						cccc.setDisplaySimple(((UmlsConcept)c).getPreferredText());
-						cccc.setSystemSimple(SCHEMA_UMLS);
+						cccc.setCode(cui);
+						cccc.setDisplay(((UmlsConcept)c).getPreferredText());
+						cccc.setSystem(SCHEMA_UMLS);
 						cuis.add(cui);
 					}
 				}
@@ -218,17 +203,17 @@ public class Utils {
 		if(cls != null){
 			// add class URI
 			Coding ccc = cc.addCoding();
-			ccc.setCodeSimple(cls.getURI().toString());
-			ccc.setDisplaySimple(cls.getName());
-			ccc.setSystemSimple(cls.getOntology().getURI().toString());
-			cc.setTextSimple(cls.getConcept().getName());
+			ccc.setCode(cls.getURI().toString());
+			ccc.setDisplay(cls.getName());
+			ccc.setSystem(cls.getOntology().getURI().toString());
+			cc.setText(cls.getConcept().getName());
 		
 			// add RxNORM codes
 			for(String rxcode: OntologyUtils.getRXNORM_Codes(cls)){
 				Coding c2 = cc.addCoding();
-				c2.setCodeSimple(rxcode);
-				c2.setDisplaySimple(cls.getName());
-				c2.setSystemSimple(SCHEMA_RXNORM);
+				c2.setCode(rxcode);
+				c2.setDisplay(cls.getName());
+				c2.setSystem(SCHEMA_RXNORM);
 			}
 		
 		}
@@ -285,12 +270,12 @@ public class Utils {
 	 */
 	public static String getConceptCode(CodeableConcept c){
 		for(Coding cc: c.getCoding()){
-			if(SCHEMA_UMLS.equals(cc.getSystemSimple())){
-				return cc.getCodeSimple();
+			if(SCHEMA_UMLS.equals(cc.getSystem())){
+				return cc.getCode();
 			}
 		}
 		// else get first code you encouner
-		return c.getCoding().isEmpty()?c.getTextSimple():c.getCoding().get(0).getCodeSimple();
+		return c.getCoding().isEmpty()?c.getText():c.getCoding().get(0).getCode();
 	}
 	
 	/**
@@ -299,11 +284,11 @@ public class Utils {
 	 * @return
 	 */
 	public static String getConceptName(CodeableConcept c){
-		String name = c.getTextSimple();
+		String name = c.getText();
 		for(Coding cc: c.getCoding()){
-			if(SCHEMA_UMLS.equals(cc.getSystemSimple())){
-				if(cc.getDisplaySimple() != null)
-					name = cc.getDisplaySimple();
+			if(SCHEMA_UMLS.equals(cc.getSystem())){
+				if(cc.getDisplay() != null)
+					name = cc.getDisplay();
 			}
 		}
 		// else get first code you encouner
@@ -340,31 +325,31 @@ public class Utils {
 	 */
 	public static CodeableConcept setCodeableConcept(CodeableConcept cc,Mention mm){
 		Concept c = mm.getConcept();
-		cc.setTextSimple(c.getName());
+		cc.setText(c.getName());
 		
 		// add coding for class
 		IClass cls = getConceptClass(mm);
 		if(cls != null){
 			Coding ccc = cc.addCoding();
-			ccc.setCodeSimple(cls.getURI().toString());
-			ccc.setDisplaySimple(c.getName());
-			ccc.setSystemSimple(cls.getOntology().getURI().toString());
+			ccc.setCode(cls.getURI().toString());
+			ccc.setDisplay(c.getName());
+			ccc.setSystem(cls.getOntology().getURI().toString());
 		}
 		// add CUI
 		String cui = getConceptCode(c);
 		if(cui != null){
 			Coding cc2 = cc.addCoding();
-			cc2.setCodeSimple(cui);
-			cc2.setDisplaySimple(c.getName());
-			cc2.setSystemSimple(SCHEMA_UMLS);
+			cc2.setCode(cui);
+			cc2.setDisplay(c.getName());
+			cc2.setSystem(SCHEMA_UMLS);
 		}
 		
 		// add RxNORM codes
 		for(String rxcode: OntologyUtils.getRXNORM_Codes(c)){
 			Coding c2 = cc.addCoding();
-			c2.setCodeSimple(rxcode);
-			c2.setDisplaySimple(cls.getName());
-			c2.setSystemSimple(SCHEMA_RXNORM);
+			c2.setCode(rxcode);
+			c2.setDisplay(cls.getName());
+			c2.setSystem(SCHEMA_RXNORM);
 		}
 		
 		
@@ -377,31 +362,31 @@ public class Utils {
 	 */
 	public static CodeableConcept setCodeableConcept(CodeableConcept cc,IClass cls){
 		Concept c = cls.getConcept();
-		cc.setTextSimple(c.getName());
+		cc.setText(c.getName());
 		
 		// add coding for class
 		if(cls != null){
 			Coding ccc = cc.addCoding();
-			ccc.setCodeSimple(cls.getURI().toString());
-			ccc.setDisplaySimple(c.getName());
-			ccc.setSystemSimple(cls.getOntology().getURI().toString());
+			ccc.setCode(cls.getURI().toString());
+			ccc.setDisplay(c.getName());
+			ccc.setSystem(cls.getOntology().getURI().toString());
 		}
 	
 		// add CUI
 		String cui = getConceptCode(c);
 		if(cui != null){
 			Coding cc2 = cc.addCoding();
-			cc2.setCodeSimple(cui);
-			cc2.setDisplaySimple(c.getName());
-			cc2.setSystemSimple(SCHEMA_UMLS);
+			cc2.setCode(cui);
+			cc2.setDisplay(c.getName());
+			cc2.setSystem(SCHEMA_UMLS);
 		}
 		
 		// add RxNORM codes
 		for(String rxcode: OntologyUtils.getRXNORM_Codes(c)){
 			Coding c2 = cc.addCoding();
-			c2.setCodeSimple(rxcode);
-			c2.setDisplaySimple(cls.getName());
-			c2.setSystemSimple(SCHEMA_RXNORM);
+			c2.setCode(rxcode);
+			c2.setDisplay(cls.getName());
+			c2.setSystem(SCHEMA_RXNORM);
 		}
 		
 		
@@ -436,7 +421,7 @@ public class Utils {
 	 */
 	public static Narrative getNarrative(String text) {
 		Narrative n = new Narrative();
-		n.setStatusSimple(NarrativeStatus.generated);
+		n.setStatus(NarrativeStatus.GENERATED);
 		XhtmlNode xn = new XhtmlNode(NodeType.Element,"div");
 		xn.addTag("p").addText(text);
 		n.setDiv(xn);
@@ -481,7 +466,7 @@ public class Utils {
 	public static String getIdentifier(Identifier id){
 		if(id==null)
 			return null;
-		return id.getValueSimple();
+		return id.getValue();
 	}
 	
 	public static String getIdentifier(List<Identifier> ids){
@@ -496,9 +481,9 @@ public class Utils {
 	}
 	
 	public static Identifier createIdentifier(Identifier id, String ident){
-		id.setLabelSimple("id");
-		id.setSystemSimple("local");
-		id.setValueSimple(ident);
+		id.setId("id");
+		id.setSystem("local");
+		id.setValue(ident);
 		return id;
 	}
 	
@@ -549,15 +534,15 @@ public class Utils {
 	}
 	
 	
-	public static ResourceReference getResourceReference(Element model){
-		return getResourceReference(new ResourceReference(), model);
+	public static Reference getResourceReference(Element model){
+		return getResourceReference(new Reference(), model);
 	}
 	
-	public static ResourceReference getResourceReference(ResourceReference r,Element model){
+	public static Reference getResourceReference(Reference r,Element model){
 		if(r == null)
-			r = new ResourceReference();
-		r.setDisplaySimple(model.getDisplaySimple());
-		r.setReferenceSimple(model.getIdentifierSimple());
+			r = new Reference();
+		r.setDisplay(model.getDisplay());
+		r.setReference(model.getIdentifierSimple());
 		return r;
 	}
 	
@@ -566,8 +551,13 @@ public class Utils {
 		File file = new File(dir,name+".xml");
 		if(!file.getParentFile().exists())
 			file.getParentFile().mkdirs();
-		XmlComposer xml = new FHIRComposer();
-		xml.compose(new FileOutputStream(file),r, true);
+		//XmlWriter xml = new FHIRComposer();
+		//xml.compose(new FileOutputStream(file),r, true);
+		//XmlGenerator xml = new XmlGenerator();
+		//xml.generate(r, file);
+		XmlParser xml = new FHIRParser();
+		xml.compose(new FileOutputStream(file),r,true);
+		
 	}
 	
 	
@@ -602,8 +592,8 @@ public class Utils {
 	 */
 	public static IClass getConceptClass(IOntology ontology, CodeableConcept c){
 		for(Coding coding : c.getCoding()){
-			if((""+ontology.getURI()).equals(coding.getSystemSimple())){
-				return ontology.getClass(coding.getCodeSimple());
+			if((""+ontology.getURI()).equals(coding.getSystem())){
+				return ontology.getClass(coding.getCode());
 			}
 		}
 		return null;

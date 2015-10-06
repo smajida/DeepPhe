@@ -5,10 +5,10 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.healthnlp.deepphe.fhir.ResourceFactory;
 import org.healthnlp.deepphe.util.TextUtils;
 import org.hl7.fhir.instance.model.*;
-import org.hl7.fhir.instance.model.Condition.ConditionLocationComponent;
-import org.hl7.fhir.instance.model.Condition.ConditionStatus;
+import org.hl7.fhir.instance.model.Condition.ConditionEvidenceComponent;
 
 
 
@@ -19,13 +19,7 @@ import org.hl7.fhir.instance.model.Condition.ConditionStatus;
  */
 public class Cancer extends Diagnosis {
 	protected List<Tumor> tumors = new ArrayList();
-	public Cancer(){
-		setCategory(Utils.CONDITION_CATEGORY_DIAGNOSIS);
-		setLanguageSimple(Utils.DEFAULT_LANGUAGE); // we only care about English
-		setStatusSimple(ConditionStatus.confirmed); // here we only deal with 'confirmed' dx
-		//Utils.createIdentifier(addIdentifier(),this);
-	}
-			
+	
 	public List<Tumor> getTumors() {
 		return this.tumors;
 	}
@@ -42,7 +36,7 @@ public class Cancer extends Diagnosis {
 	 */
 	public static class Tumor extends BackboneElement  {
 		protected CodeableConcept type;
-		protected List<ConditionLocationComponent> location = new ArrayList();
+		protected List<CodeableConcept> bodySite = new ArrayList();
 		protected List<ConditionEvidenceComponent> genomicFactors = new ArrayList();
 		protected List<ConditionEvidenceComponent> treatmentFactors = new ArrayList();
 		protected List<ConditionEvidenceComponent> relatedFactors = new ArrayList();
@@ -82,13 +76,12 @@ public class Cancer extends Diagnosis {
 			return t;
 		}
 				
-		public List<ConditionLocationComponent> getLocation() {
-			return this.location;
+		public List<CodeableConcept> getBodySite() {
+			return this.bodySite;
 		}
 
-		public ConditionLocationComponent addLocation() {
-			ConditionLocationComponent t = new ConditionLocationComponent();
-			this.location.add(t);
+		public CodeableConcept addBodySite(CodeableConcept t) {
+			this.bodySite.add(t);
 			return t;
 		}
 		public CodeableConcept getType() {
@@ -102,32 +95,32 @@ public class Cancer extends Diagnosis {
 		
 		public String getSummary() {
 			StringBuffer st = new StringBuffer();
-			st.append("Tumor:\t"+getType().getTextSimple());
-			for(ConditionLocationComponent l: getLocation()){
-				st.append(" | location: "+l.getCode().getTextSimple());
+			st.append("Tumor:\t"+getType().getText());
+			for(CodeableConcept l: getBodySite()){
+				st.append(" | location: "+l.getText());
 			}
 			if(!getPhenotypicFactors().isEmpty()){
 				st.append("\nPhenotypic Factors\n");
 				for(ConditionEvidenceComponent ev: getPhenotypicFactors()){
-					st.append("\tFactor:\t"+ev.getCode().getTextSimple()+"\n");
+					st.append("\tFactor:\t"+ev.getCode().getText()+"\n");
 				}
 			}
 			if(!getTreatmentFactors().isEmpty()){
 				st.append("\nTreatment Factors\n");
 				for(ConditionEvidenceComponent ev: getTreatmentFactors()){
-					st.append("\tFactor:\t"+ev.getCode().getTextSimple()+"\n");
+					st.append("\tFactor:\t"+ev.getCode().getText()+"\n");
 				}
 			}
 			if(!getGenomicFactors().isEmpty()){
 				st.append("\nGenomic Factors\n");
 				for(ConditionEvidenceComponent ev: getGenomicFactors()){
-					st.append("\tFactor:\t"+ev.getCode().getTextSimple()+"\n");
+					st.append("\tFactor:\t"+ev.getCode().getText()+"\n");
 				}
 			}
 			if(!getRelatedFactors().isEmpty()){
 				st.append("\nRelated Factors\n");
 				for(ConditionEvidenceComponent ev: getRelatedFactors()){
-					st.append("\tFactor:\t"+ev.getCode().getTextSimple()+"\n");
+					st.append("\tFactor:\t"+ev.getCode().getText()+"\n");
 				}
 			}
 			return st.toString();
@@ -136,11 +129,26 @@ public class Cancer extends Diagnosis {
 		protected void listChildren(List<Property> childrenList) {
 			super.listChildren(childrenList);
 			childrenList.add(new Property("type", "CodeableConcept","A manifestation or symptom that led to the recording of this condition.", 0, 2147483647,this.type));
-			childrenList.add(new Property("location", "", "The anatomical location where this condition manifests itself.", 0, 2147483647, this.location));
+			childrenList.add(new Property("bodySite", "", "The anatomical location where this condition manifests itself.", 0, 2147483647, this.bodySite));
 			childrenList.add(new Property("phenotypicFactors","","Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.",0, 2147483647, this.phenotypicFactors));
 			childrenList.add(new Property("genomicFactors","","Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.",0, 2147483647, this.genomicFactors));
 			childrenList.add(new Property("treatmentFactors","","Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.",0, 2147483647, this.treatmentFactors));
 			childrenList.add(new Property("relatedFactors","","Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.",0, 2147483647, this.relatedFactors));
+		}
+		
+		public BackboneElement copy() {
+			Tumor c =  new Tumor();
+			for(CodeableConcept cc: getBodySite())
+				c.addBodySite(cc);
+			for (ConditionEvidenceComponent i : getPhenotypicFactors())
+				c.addPhenotypicFactors().setCode(i.getCode().copy());
+			for (ConditionEvidenceComponent i : getGenomicFactors())
+				c.addGenomicFactors().setCode(i.getCode().copy());
+			for (ConditionEvidenceComponent i : getTreatmentFactors())
+				c.addTreatmentFactors().setCode(i.getCode().copy());
+			for (ConditionEvidenceComponent i : getRelatedFactors())
+				c.addRelatedFactors().setCode(i.getCode().copy());
+			return c;
 		}
 		
 	}
@@ -152,13 +160,13 @@ public class Cancer extends Diagnosis {
 	
 	public String getSummary() {
 		StringBuffer st = new StringBuffer();
-		st.append("Cancer:\t"+getDisplaySimple());
-		for(ConditionLocationComponent l: getLocation()){
-			st.append(" | location: "+l.getCode().getTextSimple());
+		st.append("Cancer:\t"+getDisplay());
+		for(CodeableConcept l: getBodySite()){
+			st.append(" | location: "+l.getText());
 		}
 		Stage s = getStage();
 		if(s != null){
-			st.append(" | stage: "+s.getSummary().getTextSimple());
+			st.append(" | stage: "+s.getSummary().getText());
 		}
 		st.append("\n");
 		for(Tumor t: getTumors()){
@@ -200,7 +208,7 @@ public class Cancer extends Diagnosis {
 		super.save(dir);
 		
 		// go over components
-		Patient pt = (Patient) getSubjectTarget();
+		Patient pt = (Patient) getPatientTarget();
 		if(pt != null)
 			pt.save(dir);
 		for(Element e: getFactorElements()){

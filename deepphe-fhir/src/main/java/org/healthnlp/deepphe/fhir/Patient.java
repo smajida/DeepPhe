@@ -12,17 +12,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.uima.jcas.JCas;
-import org.hl7.fhir.instance.formats.XmlComposer;
 import org.hl7.fhir.instance.model.Address;
 import org.hl7.fhir.instance.model.Attachment;
 import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Contact;
+import org.hl7.fhir.instance.model.ContactPoint;
+import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.HumanName;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.ResourceReference;
 import org.hl7.fhir.instance.model.Patient.ContactComponent;
 import org.hl7.fhir.instance.model.Patient.PatientLinkComponent;
+import org.hl7.fhir.instance.model.Reference;
 
 import edu.pitt.dbmi.nlp.noble.coder.model.Document;
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
@@ -33,7 +33,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	private int yearsOld;
 	
 	public Patient(){
-		setActiveSimple(true);
+		setActive(true);
 		//Utils.createIdentifier(addIdentifier(),this);
 	}
 	
@@ -45,18 +45,18 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 		HumanName hn = addName();
 		if(name.contains(",")){
 			String [] p = name.split(",");
-			hn.addFamilySimple(p[0].trim());
+			hn.addFamily(p[0].trim());
 			if(p.length > 1){
-				hn.addGivenSimple(p[p.length-1].trim());
+				hn.addGiven(p[p.length-1].trim());
 			}
 		}else if(name.contains(" ")){
 			String [] p = name.split("\\s+");
-			hn.addGivenSimple(p[0].trim());
+			hn.addGiven(p[0].trim());
 			if(p.length > 1){
-				hn.addFamilySimple(p[p.length-1].trim());
+				hn.addFamily(p[p.length-1].trim());
 			}
 		}else{
-			hn.addFamilySimple(name);
+			hn.addFamily(name);
 		}
 		String id = getClass().getSimpleName().toUpperCase()+"_"+name.replaceAll("\\W+","_");
 		Utils.createIdentifier(addIdentifier(),id);
@@ -74,12 +74,12 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 		return null;
 	}
 
-	public ResourceReference getReference(){
-		return getReference(new ResourceReference());
+	public Reference getReference(){
+		return getReference(new Reference());
 	}
-	public ResourceReference getReference(ResourceReference r){
-		r.setDisplaySimple(getNameSimple());
-		r.setReferenceSimple(getIdentifierSimple());
+	public Reference getReference(Reference r){
+		r.setDisplay(getNameSimple());
+		r.setReference(getIdentifierSimple());
 		return r;
 	}
 
@@ -87,12 +87,12 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 		// derive birhdate if available
 		if(yearsOld > 0){
 			Date bday = new Date(currentDate.getTime()-Utils.MILLISECONDS_IN_YEAR* yearsOld);
-			setBirthDateSimple(Utils.getDate(bday));
+			setBirthDate(bday);
 		}
 	}
 
 
-	public String getDisplaySimple() {
+	public String getDisplay() {
 		return getNameSimple();
 	}
 
@@ -102,9 +102,9 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 
 	public String getSummary() {
 		StringBuffer st = new StringBuffer();
-		st.append("Patient:\t"+getDisplaySimple());
+		st.append("Patient:\t"+getDisplay());
 		if(getGender() != null)
-			st.append(" | gender: "+getGender().getTextSimple());
+			st.append(" | gender: "+getGender().getDisplay());
 		if(getAge() > 0)
 			st.append(" | age: "+getAge());
 		
@@ -129,10 +129,10 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 		for (HumanName i : target.getName())
 			dst.name.add(i.copy());
 		dst.telecom = new ArrayList();
-		for (Contact i : target.getTelecom())
+		for (ContactPoint i : target.getTelecom())
 			dst.telecom.add(i.copy());
-		dst.gender = ((target.getGender() == null) ? null : target.getGender().copy());
-		dst.birthDate = ((target.getBirthDate() == null) ? null : target.getBirthDate().copy());
+		dst.gender = ((target.getGender() == null) ? null : target.getGenderElement().copy());
+		dst.birthDate = ((target.getBirthDate() == null) ? null : target.getBirthDateElement().copy());
 		dst.deceased = ((target.getDeceased() == null) ? null : target.getDeceased().copy());
 		dst.address = new ArrayList();
 		for (Address i : target.getAddress())
@@ -147,16 +147,16 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 			dst.contact.add(i.copy());
 		dst.animal = ((target.getAnimal() == null) ? null : target.getAnimal().copy());
 		dst.communication = new ArrayList();
-		for (CodeableConcept i : target.getCommunication())
+		for (PatientCommunicationComponent i : target.getCommunication())
 			dst.communication.add(i.copy());
 		dst.careProvider = new ArrayList();
-		for (ResourceReference i : target.getCareProvider())
+		for (Reference i : target.getCareProvider())
 			dst.careProvider.add(i.copy());
 		dst.managingOrganization = ((target.getManagingOrganization() == null) ? null : target.getManagingOrganization().copy());
 		dst.link = new ArrayList();
 		for (PatientLinkComponent i : target.getLink())
 			dst.link.add(i.copy());
-		dst.active = ((target.getActive() == null) ? null : target.getActive().copy());
+		dst.active = target.getActiveElement();
 	}
 
 	public void save(File dir) throws Exception {
@@ -169,7 +169,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	}
 	
 	public String toString(){
-		return getDisplaySimple();
+		return getDisplay();
 	}
 	
 	public int getAge(){
@@ -184,7 +184,11 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	}
 
 	public void setGender(Mention m) {
-		setGender(Utils.getCodeableConcept(m));
+		try {
+			setGender(AdministrativeGender.fromCode(m.getText()));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	public IClass getConceptClass(){
 		return ResourceFactory.getInstance().getOntology().getClass(Utils.PATIENT);

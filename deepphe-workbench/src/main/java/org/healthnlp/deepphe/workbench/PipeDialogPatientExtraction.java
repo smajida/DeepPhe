@@ -50,6 +50,8 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 	private PatientKnowledgeExtractorInterface patientKnowledgeExtractor;
 	private List<Patient> patients;
 
+	private boolean isSlicingOntology = false;
+
 	private AnnotationTabPanel annotationTabPanel;
 
 	private JButton confirmationButton = new JButton("Ok");
@@ -78,13 +80,17 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 	@Override
 	public void run() {
 		setMessage("Begin Processing");
-//		sliceOntology();
+		if (isSlicingOntology) {
+			sliceOntology();
+		}
 		clearOldSummaryData();
 		extractEncounterKnowledge();
 		extractPatientKnowledge();
 		annotationTabPanel.reBuild();
-		ontologizeAndActiveSummaries();
-		replaceI2b2Data();
+		if (isSlicingOntology) {
+			ontologizeAndActiveSummaries();
+			replaceI2b2Data();
+		}
 		setMessage("Finished Processing");
 		confirmationButton.setEnabled(true);
 	}
@@ -287,6 +293,14 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 
 	public void setAnnotationTabPanel(AnnotationTabPanel annotationTabPanel) {
 		this.annotationTabPanel = annotationTabPanel;
+	}
+
+	public boolean isSlicingOntology() {
+		return isSlicingOntology;
+	}
+
+	public void setSlicingOntology(boolean isSlicingOntology) {
+		this.isSlicingOntology = isSlicingOntology;
 	}
 
 }

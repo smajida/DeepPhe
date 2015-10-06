@@ -2,13 +2,15 @@ package org.healthnlp.deepphe.summarization.jess.kb;
 
 import java.io.Serializable;
 
-public class Identified implements Serializable{
+public class Identified implements Serializable {
 	
+	private static final long serialVersionUID = 3569891592557068875L;
+
 	public static int idGenerator = 0;
 	
 	private int id;
 	private int isActive = 0;
-	
+
 	public Identified() {
 		id = idGenerator++;
 	}

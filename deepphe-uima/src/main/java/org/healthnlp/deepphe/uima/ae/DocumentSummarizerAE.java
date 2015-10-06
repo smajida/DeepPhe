@@ -83,33 +83,29 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 					id = patientID;
 				}
 				*/
-            Report report = resourceFactory.getReport( jcas );
-            report.setTitleSimple( TextUtils.stripSuffix( docID.getDocumentID() ) );
-            System.out.println( "\n\n-------------------------------------------------------------------\n" );
-            System.out.println( report.getSummary() );
-            System.out.println( "\n===================================================================\n\n" );
+				Report report = resourceFactory.getReport(jcas);
+				report.setTitle(TextUtils.stripSuffix(docID.getDocumentID()));
+				System.out.println("\n\n-------------------------------------------------------------------\n");
+				System.out.println(report.getSummary());
+				System.out.println("\n===================================================================\n\n");
 				
-				/*// save pojo encounter data
-				Encounter e = SummaryFactory.getEncounter(report);
-				File patientDir = new File(new File(outputDir,POJO_TYPE),namedID);
-				saveSerialized(patientDir,TextUtils.stripSuffix(report.getTitleSimple()),e);*/
-
-            // save FHIR related data
-            File patientDir = new File( new File( outputDir, FHIR_TYPE ), namedID );
-            report.save( patientDir );
-
-            // save XMI
-            patientDir = new File( new File( outputDir, XMI_TYPE ), namedID );
-            if ( !patientDir.exists() ) {
-               patientDir.mkdirs();
-            }
-            XMIWriter.writeXmi( jcas.getCas(), new File( patientDir, report.getTitleSimple() + ".xmi" ) );
-         }
-      } catch ( Exception e ) {
-         e.printStackTrace();
-      }
-   }
-
-
+				// save FHIR related data
+				File patientDir = new File(new File(outputDir,FHIR_TYPE),namedID);
+				report.save(patientDir);
+				
+				// save XMI
+            	patientDir = new File( new File( outputDir, XMI_TYPE ), namedID );
+            	if ( !patientDir.exists() ) {
+               	patientDir.mkdirs();
+            	}
+           	 	XMIWriter.writeXmi( jcas.getCas(), new File( patientDir, report.getTitle() + ".xmi" ) );
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+			
+      //_xmiWriter.process( jcas );
+		
+	}
 
 }

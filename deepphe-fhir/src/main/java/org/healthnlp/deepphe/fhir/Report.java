@@ -12,10 +12,8 @@ import java.util.List;
 import org.healthnlp.deepphe.util.TextUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Composition;
-import org.hl7.fhir.instance.model.DateAndTime;
+import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.ResourceReference;
-
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 
 /**
@@ -32,11 +30,9 @@ public class Report extends Composition implements Element{
 	 * create a default report object
 	 */
 	public Report(){
-		setStatusSimple(CompositionStatus.final_);
-		setLanguageSimple(Utils.DEFAULT_LANGUAGE);
-		event = new CompositionEventComponent();
-		setEvent(event);
-		
+		setStatus(CompositionStatus.FINAL);
+		setLanguage(Utils.DEFAULT_LANGUAGE);
+		event = addEvent();
 	}
 
 	
@@ -48,22 +44,14 @@ public class Report extends Composition implements Element{
 		setText(Utils.getNarrative(text));
 	}
 	
-	public Composition setTitleSimple(String value) {
+	public Composition setTitle(String value) {
 		setIdentifier(Utils.createIdentifier(getClass().getSimpleName().toUpperCase()+"_"+TextUtils.stripSuffix(value)));
-		return super.setTitleSimple(value);
+		return super.setTitle(value);
 	}
 
 
 	public String getTextSimple(){
 		return Utils.getText(getText());
-	}
-	
-	/**
-	 * set principal date
-	 * @param dt
-	 */
-	public void setDate(Date dt){
-		setDateSimple(Utils.getDate(dt));
 	}
 	
 	/**
@@ -73,9 +61,9 @@ public class Report extends Composition implements Element{
 		setSubject(p.getReference());
 		setSubjectTarget(p);
 		// set DateTime
-		DateAndTime dt = getDateSimple();
+		Date dt = getDate();
 		if(dt != null)
-			p.setCurrentDate(Utils.getDate(dt));
+			p.setCurrentDate(dt);
 	}
 	
 	public Patient getPatient(){
@@ -163,13 +151,13 @@ public class Report extends Composition implements Element{
 		el.setReport(this);
 			
 		// add reference
-		ResourceReference r = event.addDetail();
+		Reference r = event.addDetail();
 		Utils.getResourceReference(r,el);
 	}
 
 	
 
-	public String getDisplaySimple() {
+	public String getDisplay() {
 		return getTextSimple();
 	}
 
@@ -178,12 +166,12 @@ public class Report extends Composition implements Element{
 	}
 
 	public String toString(){
-		return getDisplaySimple();
+		return getDisplay();
 	}
 	
 	public String getSummary() {
 		StringBuffer st = new StringBuffer();
-		st.append("Report:\n"+getDisplaySimple()+"\n");
+		st.append("Report:\n"+getDisplay()+"\n");
 		if(getPatient() != null)
 			st.append(getPatient().getSummary()+"\n");
 		for(Diagnosis dx: getDiagnoses()){
@@ -219,7 +207,7 @@ public class Report extends Composition implements Element{
 	public void save(File dir) throws Exception{
 		String id = getIdentifierSimple();
 		
-		dir = new File(dir,TextUtils.stripSuffix(getTitleSimple()));
+		dir = new File(dir,TextUtils.stripSuffix(getTitle()));
 		Utils.saveFHIR(this,id,dir);
 		
 		// go over components
@@ -243,15 +231,15 @@ public class Report extends Composition implements Element{
 	public void copy(Resource r) {
 		Composition c = (Composition) r;
 		identifier = c.getIdentifier();
-		date = c.getDate();
+		date = c.getDateElement();
 		type = c.getType();
 		class_ = c.getClass_();
-		title = c.getTitle();
-		status = c.getStatus();
-		confidentiality = c.getConfidentiality();
+		title = c.getTitleElement();
+		status = c.getStatusElement();
+		confidentiality = c.getConfidentialityElement();
 		subject = c.getSubject();
 		author = new ArrayList();
-		for (ResourceReference i : c.getAuthor())
+		for (Reference i : c.getAuthor())
 			author.add(i.copy());
 		attester = new ArrayList();
 		for (CompositionAttesterComponent i : c.getAttester())

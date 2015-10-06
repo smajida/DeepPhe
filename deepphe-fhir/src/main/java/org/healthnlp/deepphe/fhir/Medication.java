@@ -13,45 +13,29 @@ import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 
 public class Medication extends org.hl7.fhir.instance.model.Medication implements Element {
-	//protected Identifier identifier;
-	public Medication(){
-		setLanguageSimple(Utils.DEFAULT_LANGUAGE); // we only care about English
-	}
-	
-	public String getDisplaySimple() {
-		return getCode().getTextSimple();
+	public String getDisplay() {
+		return getCode().getText();
 	}
 
 	public String getIdentifierSimple() {
-		return  getClass().getSimpleName().toUpperCase()+"_"+getDisplaySimple().replaceAll("\\W+","_");
+		return  getClass().getSimpleName().toUpperCase()+"_"+getDisplay().replaceAll("\\W+","_");
 	}
-	/*
-	public Identifier getIdentifier() {
-		return this.identifier;
-	}
-
-	public Medication setIdentifier(Identifier value) {
-		this.identifier = value;
-		return this;
-	}
-	 */
 
 	public String getSummary() {
 		StringBuffer st = new StringBuffer();
-		st.append("Medication:\t"+getDisplaySimple());
+		st.append("Medication:\t"+getDisplay());
 		return st.toString();
 	}
 	public Resource getResource() {
 		return this;
 	}
+
 	/**
 	 * initialize 
 	 * @param m
 	 */
 	public void initialize(Mention m){
-		setNameSimple(m.getConcept().getName());
 		setCode(Utils.getCodeableConcept(m));
-		//setIdentifier(Utils.createIdentifier(this,m));
 	}
 	
 	/**
@@ -59,10 +43,9 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	 * @param dx
 	 */
 	public void initialize(MedicationMention dm){
-		setNameSimple(Utils.getConceptName(dm));
 		setCode(Utils.getCodeableConcept(dm));
-		//setIdentifier(Utils.createIdentifier(this,dm));
 	}
+	
 	public IClass getConceptClass(){
 		return Utils.getConceptClass(getCode());
 	}
@@ -70,24 +53,24 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	 * assign report instance and add appropriate information from there
 	 */
 	public void setReport(Report r) {
-	
+		
 	}
+	
+	
 	public void save(File dir) throws Exception {
 		Utils.saveFHIR(this,getIdentifierSimple(),dir);
 	}
 
 	public void copy(Resource r) {
 		org.hl7.fhir.instance.model.Medication p = (org.hl7.fhir.instance.model.Medication) r;
-		name = p.getName();
 		code = p.getCode();
-		isBrand = p.getIsBrand();
+		isBrand = p.getIsBrandElement();
 		manufacturer = p.getManufacturer();
-		kind = p.getKind();
 		product = p.getProduct();
 		package_ = p.getPackage();
 		
 	}
 	public String toString(){
-		return getDisplaySimple();
+		return getDisplay();
 	}
 }

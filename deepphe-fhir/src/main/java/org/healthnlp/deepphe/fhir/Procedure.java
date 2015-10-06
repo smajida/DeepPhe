@@ -5,16 +5,16 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
 import org.apache.ctakes.typesystem.type.textsem.ProcedureMention;
 import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.DateAndTime;
+import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Period;
+import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.ResourceReference;
-
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 
@@ -25,7 +25,8 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	 * @param m
 	 */
 	public void initialize(Mention m){
-		setType(Utils.getCodeableConcept(m));
+		setCode(Utils.getCodeableConcept(m));
+		setStatus(ProcedureStatus.COMPLETED);
 		Utils.createIdentifier(addIdentifier(),this,m);
 		// find annatomic location
 		Mention al = Utils.getNearestMention(m,m.getSentence().getDocument(),Utils.ANATOMICAL_SITE);
@@ -41,7 +42,8 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	 */
 	public void initialize(ProcedureMention dm){
 		// set some properties
-		setType(Utils.getCodeableConcept(dm));
+		setCode(Utils.getCodeableConcept(dm));
+		setStatus(ProcedureStatus.COMPLETED);
 		Utils.createIdentifier(addIdentifier(),this,dm);
 				
 		// now lets take a look at the location of this diagnosis
@@ -58,8 +60,8 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	}
 	
 
-	public String getDisplaySimple() {
-		return getType().getTextSimple();
+	public String getDisplay() {
+		return getCode().getText();
 	}
 
 	public String getIdentifierSimple() {
@@ -67,14 +69,14 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	}
 	
 	public String toString(){
-		return getDisplaySimple();
+		return getDisplay();
 	}
 
 	public String getSummary() {
 		StringBuffer st = new StringBuffer();
-		st.append("Procedure:\t"+getDisplaySimple());
+		st.append("Procedure:\t"+getDisplay());
 		for(CodeableConcept l: getBodySite()){
-			st.append(" | location: "+l.getTextSimple());
+			st.append(" | location: "+l.getText());
 		}
 		return st.toString();
 	}
@@ -98,17 +100,14 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 			setSubjectTarget(p);
 		}
 		// set date
-		DateAndTime d = r.getDateSimple();
+		Date d = r.getDate();
 		if( d != null){
-			Period pp = new Period();
-			pp.setStartSimple(d);
-			pp.setEndSimple(d);
-			setDate(pp);
+			setPerformed(new DateType(d));
 		}
 	}
 	
 	public IClass getConceptClass(){
-		return Utils.getConceptClass(getType());
+		return Utils.getConceptClass(getCode());
 	}
 
 	public void copy(Resource r) {
@@ -117,29 +116,23 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 		for (Identifier i : p.getIdentifier())
 			identifier.add(i.copy());
 		subject = p.getSubject();
-		type = p.getType();
+		code = p.getCode();
 		bodySite = new ArrayList();
 		for (CodeableConcept i : p.getBodySite())
 			bodySite.add(i.copy());
-		indication = new ArrayList();
-		for (CodeableConcept i : p.getIndication())
-			indication.add(i.copy());
 		performer = new ArrayList();
 		for (ProcedurePerformerComponent i : p.getPerformer())
 			performer.add(i.copy());
-		date = p.getDate();
+		performed = p.getPerformed();
 		encounter = p.getEncounter();
 		outcome = p.getOutcome();
 		report = new ArrayList();
-		for (ResourceReference i : p.getReport())
+		for (Reference i : p.getReport())
 			report.add(i.copy());
 		complication = new ArrayList();
 		for (CodeableConcept i : p.getComplication())
 			complication.add(i.copy());
 		followUp = p.getFollowUp();
-		relatedItem = new ArrayList();
-		for (ProcedureRelatedItemComponent i : p.getRelatedItem())
-			relatedItem.add(i.copy());
 		notes = p.getNotes();
 	}	
 	private void writeObject(ObjectOutputStream stream) throws IOException {
