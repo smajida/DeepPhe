@@ -13,6 +13,7 @@ import org.apache.ctakes.dictionary.lookup2.util.collection.CollectionMap;
 import org.apache.log4j.Logger;
 import org.apache.uima.UimaContext;
 
+import java.io.FileNotFoundException;
 import java.util.*;
 
 import static org.apache.ctakes.dictionary.lookup2.dictionary.RareWordTermMapCreator.CuiTerm;
@@ -120,7 +121,7 @@ public class OwlDictionary implements RareWordDictionary {
             cuiTerms.addAll( createCuiTerms( childClass ) );
          }
          return cuiTerms;
-      } catch ( IOntologyException ontE ) {
+      } catch ( IOntologyException | FileNotFoundException ontE ) {
          LOGGER.error( ontE.getMessage() );
       }
       return Collections.emptyList();

@@ -3,8 +3,11 @@ package org.apache.ctakes.dictionary.lookup2.ontology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
+
+import org.apache.ctakes.core.resource.FileLocator;
 import org.apache.log4j.Logger;
 
+import java.io.FileNotFoundException;
 import java.util.*;
 
 
@@ -34,7 +37,7 @@ public enum OwlConnectionFactory {
       return Collections.unmodifiableSet( ONTOLOGIES.keySet() );
    }
 
-   public IOntology getOntology( final String owlPath ) throws IOntologyException {
+   public IOntology getOntology( final String owlPath ) throws IOntologyException, FileNotFoundException {
       IOntology ontology = ONTOLOGIES.get( owlPath );
       if ( ontology != null ) {
          return ontology;
@@ -43,8 +46,8 @@ public enum OwlConnectionFactory {
       final Timer timer = new Timer();
       timer.scheduleAtFixedRate( new DotPlotter(), 333, 333 );
       try {
-         ontology = OOntology.loadOntology( owlPath );
-      } catch ( IOntologyException ontE ) {
+         ontology = OOntology.loadOntology( FileLocator.getFullPath(owlPath) );
+      } catch ( IOntologyException | FileNotFoundException ontE ) {
          timer.cancel();
          EOL_LOGGER.error( "" );
          LOGGER.error( "  Could not load Ontology at " + owlPath );
