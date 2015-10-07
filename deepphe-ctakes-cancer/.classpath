@@ -38,5 +38,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/ctakes-coref-cleartk-0.0.1-deepphe.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
