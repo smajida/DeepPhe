@@ -1,7 +1,8 @@
 package org.healthnlp.deepphe.uima.ae;
 
-import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
-import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
+import java.io.FileNotFoundException;
+import java.util.Collection;
+
 import org.apache.ctakes.core.util.IdentifiedAnnotationUtil;
 import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
 import org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory;
@@ -16,8 +17,8 @@ import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 
-import java.util.Collection;
-import java.util.stream.Stream;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 
 
 /**
@@ -39,18 +40,13 @@ public class IClassExtractor extends JCasAnnotator_ImplBase {
 
    @Override
    public void initialize( final UimaContext uimaContext ) throws ResourceInitializationException {
-      final Object ontologyPath = uimaContext.getConfigParameterValue( DocumentSummarizerAE.PARAM_ONTOLOGY_PATH );
-      if ( ontologyPath != null ) {
-         _ontologyPath = ontologyPath.toString();
-      }
-      if ( _ontologyPath != null ) {
-         try {
-            _ontology = OwlConnectionFactory.getInstance().getOntology( _ontologyPath );
-         } catch ( IOntologyException ontE ) {
-            LOGGER.error( ontE.getMessage() );
-            throw new ResourceInitializationException( ontE.getCause() );
-         }
-      }
+	   super.initialize(uimaContext);
+	   try {
+		   _ontology = OwlConnectionFactory.getInstance().getOntology( _ontologyPath );
+	   } catch ( IOntologyException | FileNotFoundException ontE ) {
+		   LOGGER.error( ontE.getMessage() );
+		   throw new ResourceInitializationException( ontE.getCause() );
+	   }
    }
 
    /**
