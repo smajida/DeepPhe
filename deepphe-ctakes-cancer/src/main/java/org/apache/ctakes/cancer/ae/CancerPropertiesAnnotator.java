@@ -1,15 +1,21 @@
 package org.apache.ctakes.cancer.ae;
 
+import edu.pitt.dbmi.nlp.noble.ontology.IClass;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import org.apache.ctakes.cancer.receptor.ReceptorStatusFinder;
 import org.apache.ctakes.cancer.size.SizeFinder;
 import org.apache.ctakes.cancer.stage.StageFinder;
 import org.apache.ctakes.cancer.tnm.TnmFinder;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
-import org.apache.ctakes.cancer.util.FinderUtil;
-import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
-import org.apache.ctakes.typesystem.type.textsem.SignSymptomMention;
+import org.apache.ctakes.core.util.IdentifiedAnnotationUtil;
+import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
+import org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory;
+import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
+import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textspan.Segment;
 import org.apache.log4j.Logger;
+import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.component.JCasAnnotator_ImplBase;
@@ -20,9 +26,11 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.resource.ResourceInitializationException;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.io.FileNotFoundException;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
 
 /**
  * @author SPF , chip-nlp
@@ -42,6 +50,53 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
    private Class<? extends Annotation> _lookupWindowType = Segment.class;
 
 
+   private Predicate<IdentifiedAnnotation> _hasNeoplasm;
+   private Predicate<IdentifiedAnnotation> _hasMass;
+
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public void initialize( final UimaContext uimaContext ) throws ResourceInitializationException {
+      super.initialize( uimaContext );
+      try {
+         final List<String> ontologyPaths = new ArrayList<>( OwlConnectionFactory.getInstance().listOntologyPaths() );
+         if ( ontologyPaths.size() != 1 ) {
+            throw new ResourceInitializationException(
+                  new IOntologyException( "Need a single Ontology for cancer annotation" ) );
+         }
+         final IOntology ontology = OwlConnectionFactory.getInstance().getOntology( ontologyPaths.get( 0 ) );
+
+         final Predicate<IClass> hasNeoplasm
+               = iClass -> (iClass.getName().equals( "Breast_Neoplasm" )
+                            || Arrays.toString( iClass.getSuperClasses() ).contains( "Breast_Neoplasm" ));
+         _hasNeoplasm = annotation -> IdentifiedAnnotationUtil.getUmlsConcepts( annotation ).stream()
+               .filter( concept -> OwlConcept.URI.equals( concept.getCodingScheme() ) )
+               .map( OntologyConcept::getCode )
+               .map( ontology::getClass )
+               .filter( hasNeoplasm )
+               .findAny()
+               .isPresent();
+
+         final Predicate<IClass> hasMass
+               = iClass -> (iClass.getName().equals( "Mass" )
+                            || Arrays.toString( iClass.getSuperClasses() ).contains( "Mass" ));
+         _hasMass = annotation -> IdentifiedAnnotationUtil.getUmlsConcepts( annotation ).stream()
+               .filter( concept -> OwlConcept.URI.equals( concept.getCodingScheme() ) )
+               .map( OntologyConcept::getCode )
+               .map( ontology::getClass )
+               .filter( hasMass )
+               .findAny()
+               .isPresent();
+
+      } catch ( IOntologyException | FileNotFoundException ontE ) {
+         LOGGER.error( ontE.getMessage() );
+         throw new ResourceInitializationException( ontE.getCause() );
+      }
+   }
+
+
    /**
     * {@inheritDoc}
     */
@@ -49,33 +104,27 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
    public void process( final JCas jcas ) throws AnalysisEngineProcessException {
       LOGGER.info( "Starting processing" );
 
-      final Collection<DiseaseDisorderMention> lookupDisorders = new HashSet<>();
-      final Collection<SignSymptomMention> lookupSymptoms = new HashSet<>();
       final Collection<? extends Annotation> lookupWindows = JCasUtil.select( jcas, _lookupWindowType );
       for ( Annotation lookupWindow : lookupWindows ) {
-         // Java 8 stream api
-         lookupDisorders.addAll(
-                JCasUtil.selectCovered( jcas, DiseaseDisorderMention.class, lookupWindow )
-               .stream()
-               .filter( disorderMention -> FinderUtil.hasWantedTui( disorderMention, "T191" ) )
-               .collect( Collectors.toList() ) );
-         lookupSymptoms.addAll(
-               JCasUtil.selectCovered( jcas, SignSymptomMention.class, lookupWindow )
-                     .stream()
-                     .filter( symptomMention -> FinderUtil.hasWantedTui( symptomMention, "T033", "T034", "T184" ) )
-                     .collect( Collectors.toList() ) );
-         if ( !lookupDisorders.isEmpty() ) {
-            TnmFinder.addTnmTumorClasses( jcas, lookupWindow, lookupDisorders );
-            ReceptorStatusFinder.addReceptorStatuses( jcas, lookupWindow, lookupDisorders );
-            StageFinder.addStages( jcas, lookupWindow, lookupDisorders );
-         }
-         SizeFinder.addSizes( jcas, lookupWindow, lookupDisorders, lookupSymptoms );
-         lookupDisorders.clear();
-         lookupSymptoms.clear();
+         final Collection<IdentifiedAnnotation> annotations
+               = JCasUtil.selectCovered( jcas, IdentifiedAnnotation.class, lookupWindow );
+         final Collection<IdentifiedAnnotation> breastNeoplasms = annotations.stream()
+               .filter( _hasNeoplasm )
+               .collect( Collectors.toList() );
 
-         if ( LOGGER.isDebugEnabled() ) {
-            printCancerFindings( jcas );
+         if ( !breastNeoplasms.isEmpty() ) {
+            TnmFinder.addTnmTumorClasses( jcas, lookupWindow, breastNeoplasms );
+            ReceptorStatusFinder.addReceptorStatuses( jcas, lookupWindow, breastNeoplasms );
+            StageFinder.addStages( jcas, lookupWindow, breastNeoplasms );
          }
+
+         final Collection<IdentifiedAnnotation> masses = annotations.stream()
+               .filter( _hasMass )
+               .collect( Collectors.toList() );
+         SizeFinder.addSizes( jcas, lookupWindow, breastNeoplasms, masses );
+//         if ( LOGGER.isDebugEnabled() ) {
+            printCancerFindings( jcas );
+//         }
       }
 
       LOGGER.info( "Finished processing" );
@@ -89,8 +138,9 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
    static private void printCancerFindings( final JCas jcas ) {
       final Collection<NeoplasmRelation> neoplasmRelations = JCasUtil.select( jcas, NeoplasmRelation.class );
       for ( NeoplasmRelation relation : neoplasmRelations ) {
-         LOGGER.info( relation.getCategory().replace( '_', ' ' ) + " " + relation.getArg2().getArgument().getCoveredText()
-                       + "\n\tis: " + relation.getArg1().getArgument().getCoveredText() );
+         LOGGER.info( "DISCOVERY! \t" + relation.getCategory().replace( '_', ' ' )
+                      + " " + relation.getArg2().getArgument().getCoveredText()
+                      + "\t is: \t" + relation.getArg1().getArgument().getCoveredText() );
       }
    }
 

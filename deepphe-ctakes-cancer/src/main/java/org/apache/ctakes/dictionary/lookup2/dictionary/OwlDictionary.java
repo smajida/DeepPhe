@@ -15,6 +15,7 @@ import org.apache.uima.UimaContext;
 
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.ctakes.dictionary.lookup2.dictionary.RareWordTermMapCreator.CuiTerm;
 
@@ -82,12 +83,9 @@ public class OwlDictionary implements RareWordDictionary {
       if ( synonyms == null || synonyms.length == 0 ) {
          return Collections.emptyList();
       }
-      final Collection<CuiTerm> cuiTerms = new HashSet<>();
-//      Arrays.stream( synonyms ).map( String::toLowerCase ).forEach( s -> cuiTerms.add( new CuiTerm( cui, s ) ) );
-      for ( String synonym : synonyms ) {
-         cuiTerms.add( new CuiTerm( cui, synonym.toLowerCase() ) );
-      }
-      return cuiTerms;
+      return Arrays.stream( synonyms )
+            .map( synonym -> new CuiTerm( cui, synonym.toLowerCase() ) )
+            .collect( Collectors.toSet() );
    }
 
 
