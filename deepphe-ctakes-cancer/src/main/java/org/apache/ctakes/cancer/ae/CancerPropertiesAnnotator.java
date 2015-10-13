@@ -28,6 +28,7 @@ import org.apache.uima.resource.ResourceInitializationException;
 
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -68,25 +69,23 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
          }
          final IOntology ontology = OwlConnectionFactory.getInstance().getOntology( ontologyPaths.get( 0 ) );
 
-         final Predicate<IClass> hasNeoplasm
-               = iClass -> (iClass.getName().equals( "Breast_Neoplasm" )
-                            || Arrays.toString( iClass.getSuperClasses() ).contains( "Breast_Neoplasm" ));
+         final Function<String, Predicate<IClass>> isClass
+               = name -> iClass -> iClass.getName().equals( name )
+                                   || Arrays.toString( iClass.getSuperClasses() ).contains( name );
+
          _hasNeoplasm = annotation -> IdentifiedAnnotationUtil.getUmlsConcepts( annotation ).stream()
                .filter( concept -> OwlConcept.URI.equals( concept.getCodingScheme() ) )
                .map( OntologyConcept::getCode )
                .map( ontology::getClass )
-               .filter( hasNeoplasm )
+               .filter( isClass.apply( "Breast_Neoplasm" ) )
                .findAny()
                .isPresent();
 
-         final Predicate<IClass> hasMass
-               = iClass -> (iClass.getName().equals( "Mass" )
-                            || Arrays.toString( iClass.getSuperClasses() ).contains( "Mass" ));
          _hasMass = annotation -> IdentifiedAnnotationUtil.getUmlsConcepts( annotation ).stream()
                .filter( concept -> OwlConcept.URI.equals( concept.getCodingScheme() ) )
                .map( OntologyConcept::getCode )
                .map( ontology::getClass )
-               .filter( hasMass )
+               .filter( isClass.apply( "Mass" ) )
                .findAny()
                .isPresent();
 
