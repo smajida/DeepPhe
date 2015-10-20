@@ -2,6 +2,8 @@ package org.healthnlp.deepphe.summarization.jess.kb;
 
 
 public class Summary extends Identified {
+
+	private static final long serialVersionUID = 932761016714436847L;
 	
 	private int summarizableId = -1;
 	private String code = "NA";

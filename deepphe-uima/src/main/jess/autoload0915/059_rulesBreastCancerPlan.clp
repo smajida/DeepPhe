@@ -6,10 +6,11 @@
 (defrule planning-breast-cancer "Create a prioritized goal stack for breast cancer analysis"
      (declare (salience 1000))
      ?g <- (Goal (name ?goalName&:(eq ?goalName "establish-plan")))
-     (Diagnosis (preferredTerm ?preferredTerm&:(or (eq ?preferredTerm "Breast Carcinoma")
+     (Diagnosis (preferredTerm ?preferredTerm&:(or 
+                                                   (eq ?preferredTerm "Invasive Ductal Carcinoma, Not Otherwise Specified")
+                                                   (eq ?preferredTerm "Breast Carcinoma")
                                                    (eq ?preferredTerm "Breast Adenocarcinoma")
-                                                   (eq ?preferredTerm "Ductal Breast Carcinoma")
-                                                   (eq ?preferredTerm "Invasive Ductal Breast Carcinoma"))))
+                                                   (eq ?preferredTerm "Ductal Breast Carcinoma"))))
 =>
      (printout t "Establishing goals for  Malignant Breast Neoplasm" crlf)
      (retract ?g)
@@ -22,6 +23,9 @@
      (bind ?priority (+ ?priority 1))
      (bind ?g (add (new Goal)))
      (modify ?g (name "extract-tnm") (priority ?priority))
+     (bind ?priority (+ ?priority 1))
+     (bind ?g (add (new Goal)))
+     (modify ?g (name "extract-stage") (priority ?priority))
      (bind ?priority (+ ?priority 1))
      (bind ?g (add (new Goal)))
      (modify ?g (name "extract-receptor-status") (priority ?priority)))
@@ -49,7 +53,3 @@
 =>
       (printout t "<JESS-ENGINE> Module for goal " ?nameOne " needs written.  Finished for now." crlf)
       (retract ?g))
-
-
-
-

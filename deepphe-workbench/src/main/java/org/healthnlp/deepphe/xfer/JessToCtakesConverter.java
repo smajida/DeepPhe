@@ -5,7 +5,12 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDI
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.ctakes.cancer.type.textsem.*;
+import org.apache.ctakes.cancer.type.textsem.CancerSize;
+import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
+import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
+import org.apache.ctakes.cancer.type.textsem.TnmClassification;
+import org.apache.ctakes.cancer.type.textsem.TnmFeature;
+import org.apache.ctakes.cancer.type.textsem.TnmPrefix;
 import org.apache.ctakes.typesystem.type.constants.CONST;
 import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
@@ -18,7 +23,7 @@ import org.healthnlp.deepphe.summarization.jess.kb.Summary;
 import org.healthnlp.deepphe.summarization.jess.kb.TnmMgrade;
 import org.healthnlp.deepphe.summarization.jess.kb.TnmNgrade;
 import org.healthnlp.deepphe.summarization.jess.kb.TnmTgrade;
-import org.healthnlp.deepphe.summarization.jess.kb.TumorSize;
+import org.healthnlp.deepphe.summarization.jess.kb.TumorSizeCalculator;
 
 public class JessToCtakesConverter {
 
@@ -51,7 +56,7 @@ public class JessToCtakesConverter {
 				tnmMgrade = (TnmMgrade) summary;
 				tnmGradesSeen++;
 				break;
-			case "TumorSize":
+			case "TumorSizeCalculator":
 				cacheTumorSize(summary);
 				break;
 			case "Her2":
@@ -107,7 +112,7 @@ public class JessToCtakesConverter {
 	}
 
 	private void cacheTumorSize(Summary summary) {
-		final TumorSize tumorSize = (TumorSize) summary;
+		final TumorSizeCalculator tumorSize = (TumorSizeCalculator) summary;
 		final CancerSize cancerSize = new CancerSize(patientJCas, 0, 0);
 		final List<Double> dimensions = new ArrayList<Double>();
 		if (tumorSize.getDimensionOne() > 0.0d) {

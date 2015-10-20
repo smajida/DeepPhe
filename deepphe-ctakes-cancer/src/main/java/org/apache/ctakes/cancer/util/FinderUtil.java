@@ -1,7 +1,6 @@
 package org.apache.ctakes.cancer.util;
 
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
-import org.apache.ctakes.typesystem.type.textsem.EventMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.FeatureStructure;
@@ -62,43 +61,45 @@ final public class FinderUtil {
    /**
     * @param testStartOffset start offset of the test text span
     * @param testEndOffset   end offset of the test text span
-    * @param eventMentions   mentions to test for proximity to test text span
+    * @param annotations     annotations to test for proximity to test text span
     * @param <T>             extension of EventMention
     * @return the closest T to the test text span
     */
-   static public <T extends EventMention> T getClosestEventMention( final int testStartOffset, final int testEndOffset,
-                                                                    final Iterable<T> eventMentions ) {
-      T closestMention = null;
+   static public <T extends IdentifiedAnnotation> T getClosestAnnotation( final int testStartOffset,
+                                                                          final int testEndOffset,
+                                                                          final Iterable<T> annotations ) {
+      T closestAnnotation = null;
       int smallestGap = Integer.MAX_VALUE;
-      for ( T eventMention : eventMentions ) {
-         final int gap = Math.max( eventMention.getBegin() - testEndOffset,
-               testStartOffset - eventMention.getEnd() );
+      for ( T annotation : annotations ) {
+         final int gap = Math.max( annotation.getBegin() - testEndOffset,
+               testStartOffset - annotation.getEnd() );
          if ( gap < smallestGap ) {
-            closestMention = eventMention;
+            closestAnnotation = annotation;
             smallestGap = gap;
          }
       }
-      return closestMention;
+      return closestAnnotation;
    }
+
 
    /**
     * TODO kludgy at this point.
     *
     * @param testStartOffset start offset of the test text span
     * @param testEndOffset   end offset of the test text span
-    * @param eventMention1   -
-    * @param eventMention2   -
+    * @param annotation1     -
+    * @param annotation2     -
     * @return true if the diseaseDisorder is closer to the test text span than the signSymptom
     */
-   static public EventMention getCloserEventMention( final int testStartOffset, final int testEndOffset,
-                                                     final EventMention eventMention1,
-                                                     final EventMention eventMention2 ) {
-      if ( eventMention1 == null ) {
-         return eventMention2;
-      } else if ( eventMention2 == null ) {
-         return eventMention1;
+   static public IdentifiedAnnotation getCloserAnnotation( final int testStartOffset, final int testEndOffset,
+                                                           final IdentifiedAnnotation annotation1,
+                                                           final IdentifiedAnnotation annotation2 ) {
+      if ( annotation1 == null ) {
+         return annotation2;
+      } else if ( annotation2 == null ) {
+         return annotation1;
       }
-      return getClosestEventMention( testStartOffset, testEndOffset, Arrays.asList( eventMention1, eventMention2 ) );
+      return getClosestAnnotation( testStartOffset, testEndOffset, Arrays.asList( annotation1, annotation2 ) );
    }
 
 

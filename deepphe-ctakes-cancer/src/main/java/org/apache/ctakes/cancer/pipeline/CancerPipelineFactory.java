@@ -19,6 +19,10 @@ import org.apache.ctakes.contexttokenizer.ae.ContextDependentTokenizerAnnotator;
 import org.apache.ctakes.core.ae.SentenceDetectorAnnotator;
 import org.apache.ctakes.core.ae.TokenizerAnnotatorPTB;
 import org.apache.ctakes.core.cr.FilesInDirectoryCollectionReader;
+import org.apache.ctakes.coreference.ae.DeterministicMarkableAnnotator;
+import org.apache.ctakes.coreference.ae.MarkableSalienceAnnotator;
+import org.apache.ctakes.coreference.ae.MentionClusterCoreferenceAnnotator;
+import org.apache.ctakes.coreference.eval.EvaluationOfEventCoreference.RemovePersonMarkables;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPSemanticRoleLabelerAE;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
@@ -93,14 +97,19 @@ final public class CancerPipelineFactory {
       //	    aggregateBuilder.add(
       //	        AnalysisEngineFactory.createEngineDescriptionFromPath("../ctakes/ctakes-coreference/desc/MipacqSvmCoreferenceResolverAggregate.xml"));
 
+      addCorefEngines(aggregateBuilder);
+      
       return aggregateBuilder;
    }
 
-   public static CollectionReader createFilesInDirectoryReader( final String inputDirectory )
+
+public static CollectionReader createFilesInDirectoryReader( final String inputDirectory )
          throws ResourceInitializationException {
       return CollectionReaderFactory.createReader( FilesInDirectoryCollectionReader.class,
             FilesInDirectoryCollectionReader.PARAM_INPUTDIR,
-            inputDirectory );
+            inputDirectory,
+            FilesInDirectoryCollectionReader.PARAM_RECURSE,
+            true);
    }
 
    public static AnalysisEngine createXMIWriter( final String outputDirectory )
@@ -180,6 +189,13 @@ final public class CancerPipelineFactory {
                   LocationOfRelationExtractorAnnotator.class,
                   GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
                   getModelPath( "relationextractor/models/location_of" ) ) );
+   }
+
+   private static void addCorefEngines(AggregateBuilder aggregateBuilder) throws ResourceInitializationException {
+	   aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(DeterministicMarkableAnnotator.class));
+	   aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(RemovePersonMarkables.class));
+	   aggregateBuilder.add(MarkableSalienceAnnotator.createAnnotatorDescription("/org/apache/ctakes/temporal/ae/salience/model.jar"));
+	   aggregateBuilder.add(MentionClusterCoreferenceAnnotator.createAnnotatorDescription("/org/apache/ctakes/coreference/mention-cluster/model.jar"));
    }
 
 

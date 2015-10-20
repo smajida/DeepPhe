@@ -55,6 +55,14 @@ done, the dependency versions should be moved into the parent pom -->
          <artifactId>owlapi-distribution</artifactId>
          <version>3.5.0</version>
       </dependency>
+      <!-- To be removed when the new coref stuff is in ctakes -->
+      <!--<dependency>-->
+      <!--<groupId>org.apache.ctakes</groupId>-->
+      <!--<artifactId>ctakes-coref-cleartk</artifactId>-->
+      <!--<version>0.0.1</version>-->
+      <!--<scope>system</scope>-->
+      <!--<systemPath>${project.basedir}/lib/ctakes-coref-cleartk-0.0.1-deepphe.jar</systemPath>-->
+      <!--</dependency>-->
 
    </dependencies>
 

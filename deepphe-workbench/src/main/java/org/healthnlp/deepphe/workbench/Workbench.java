@@ -215,6 +215,7 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 		patientExtractor.setPartialPathTreeSet(partialPathTreeSet);
 		patientExtractor.setPartialPathMap(partialPathMap);
 		patientExtractor.addPropertyChangeListener(this);
+		patientExtractor.setSlicingOntology(false);
 		patientExtractor.setVisible(true);
 		(new Thread(patientExtractor)).start();
 	}

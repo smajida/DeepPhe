@@ -91,6 +91,9 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 				
 				// save FHIR related data
 				File patientDir = new File(new File(outputDir,FHIR_TYPE),namedID);
+            	if ( !patientDir.exists() ) {
+                   	patientDir.mkdirs();
+            	}
 				report.save(patientDir);
 				
 				// save XMI
@@ -98,7 +101,7 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
             	if ( !patientDir.exists() ) {
                	patientDir.mkdirs();
             	}
-           	 	XMIWriter.writeXmi( jcas.getCas(), new File( patientDir, report.getTitle() + ".xmi" ) );
+           	 	XMIWriter.writeXmi( jcas.getCas(), new File( patientDir, report.getTitle().replace('/', '_') + ".xmi" ) );
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

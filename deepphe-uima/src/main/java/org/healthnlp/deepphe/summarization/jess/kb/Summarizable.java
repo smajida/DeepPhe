@@ -7,6 +7,8 @@ import org.apache.commons.lang.StringUtils;
 
 public class Summarizable extends Identified {
 	
+	private static final long serialVersionUID = -7882233828225664692L;
+	
 	protected final List<Summary> summaries = new ArrayList<Summary>();
 
 	public void addSummary(Summary summary) {
