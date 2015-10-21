@@ -7,7 +7,7 @@ import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
-import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
+import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.jcas.JCas;
@@ -51,15 +51,15 @@ final public class StageFinder {
    }
 
    static public void addStages( final JCas jcas, final AnnotationFS lookupWindow,
-                                 final Iterable<DiseaseDisorderMention> lookupWindowT191s ) {
+                                 final Iterable<IdentifiedAnnotation> lookupWindowT191s ) {
       final Collection<Stage> stages = getStages( lookupWindow.getCoveredText() );
       if ( stages.isEmpty() ) {
          return;
       }
       final int windowStartOffset = lookupWindow.getBegin();
       for ( Stage stage : stages ) {
-         final DiseaseDisorderMention closestDiseaseMention
-               = FinderUtil.getClosestEventMention( windowStartOffset + stage.getStartOffset(),
+         final IdentifiedAnnotation closestDiseaseMention
+               = FinderUtil.getClosestAnnotation( windowStartOffset + stage.getStartOffset(),
                windowStartOffset + stage.getEndOffset(), lookupWindowT191s );
          final CancerStage cancerStageAnnotation = createStageAnnotation( jcas, lookupWindow.getBegin(), stage );
          addStageRelationToCas( jcas, cancerStageAnnotation, closestDiseaseMention );
@@ -95,7 +95,7 @@ final public class StageFinder {
     */
    static private void addStageRelationToCas( final JCas jCas,
                                               final CancerStage cancerStage,
-                                              final DiseaseDisorderMention diseaseDisorder ) {
+                                              final IdentifiedAnnotation diseaseDisorder ) {
       if ( diseaseDisorder == null ) {
          LOGGER.info( "No Neoplasm discovered to relate to " + cancerStage.getCoveredText() );
          return;

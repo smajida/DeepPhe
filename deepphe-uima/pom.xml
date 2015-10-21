@@ -59,13 +59,12 @@
 			<groupId>org.healthnlp</groupId>
 			<artifactId>deepphe-fhir</artifactId>
 			<version>${project.version}</version>
-
 		</dependency>
+		
       <dependency>
          <groupId>org.healthnlp</groupId>
          <artifactId>deepphe-i2b2</artifactId>
          <version>${project.version}</version>
-
       </dependency>
 
       <!-- Dependencies that still need to be uploaded to Maven Central; when
@@ -84,13 +83,17 @@
          <scope>system</scope>
          <systemPath>${project.basedir}/lib/owlapi-distribution-4.0.1.jar</systemPath>
       </dependency>
-       <dependency>
+      <dependency>
          <groupId>org.healthnlp</groupId>
          <artifactId>modgen</artifactId>
-         <version>20150910</version>
+         <version>20151021</version>
          <scope>system</scope>
          <systemPath>${project.basedir}/lib/modgen.jar</systemPath>
       </dependency>
-
+      	 <dependency>
+	       <groupId>org.drools</groupId>
+	       <artifactId>drools-compiler</artifactId>
+	       <version>${droolsVersion}</version>
+        </dependency>
 	</dependencies>
 </project>

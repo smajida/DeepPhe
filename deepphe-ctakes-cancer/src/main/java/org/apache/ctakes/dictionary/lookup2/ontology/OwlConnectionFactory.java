@@ -30,33 +30,32 @@ public enum OwlConnectionFactory {
 
    private final Map<String, IOntology> ONTOLOGIES = Collections.synchronizedMap( new HashMap<>() );
 
-   private OwlConnectionFactory() {
-   }
-
-   public Collection<String> listOntologyPaths() {
+   synchronized public Collection<String> listOntologyPaths() {
       return Collections.unmodifiableSet( ONTOLOGIES.keySet() );
    }
 
-   public IOntology getOntology( final String owlPath ) throws IOntologyException, FileNotFoundException {
-      IOntology ontology = ONTOLOGIES.get( owlPath );
+   synchronized public IOntology getOntology( final String owlPath ) throws IOntologyException, FileNotFoundException {
+      // FileLocator can throw declared exception fnfE - no need for try catch (descriptive FileLocator fnfE message)
+      final String fullOwlPath = FileLocator.getFullPath( owlPath );
+      IOntology ontology = ONTOLOGIES.get( fullOwlPath );
       if ( ontology != null ) {
          return ontology;
       }
-      LOGGER.info( "Loading Ontology at " + owlPath + ":" );
+      LOGGER.info( "Loading Ontology at " + fullOwlPath + ":" );
       final Timer timer = new Timer();
       timer.scheduleAtFixedRate( new DotPlotter(), 333, 333 );
       try {
-         ontology = OOntology.loadOntology( FileLocator.getFullPath(owlPath) );
-      } catch ( IOntologyException | FileNotFoundException ontE ) {
+         ontology = OOntology.loadOntology( fullOwlPath );
+      } catch ( IOntologyException ontE ) {
          timer.cancel();
          EOL_LOGGER.error( "" );
-         LOGGER.error( "  Could not load Ontology at " + owlPath );
+         LOGGER.error( "Could not load Ontology at " + fullOwlPath );
          throw ontE;
       }
       timer.cancel();
       EOL_LOGGER.info( "" );
-      LOGGER.info( " Ontology loaded" );
-      ONTOLOGIES.put( owlPath, ontology );
+      LOGGER.info( "Ontology loaded" );
+      ONTOLOGIES.put( fullOwlPath, ontology );
       return ontology;
    }
 

@@ -1,0 +1,15 @@
+package org.healthnlp.deepphe.summarization.drools.rules;
+
+//list any import classes here.
+import org.healthnlp.deepphe.summarization.drools.kb.*;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.*;
+
+rule "004_breastCancerStage Transition Goal State"
+	salience 500
+	when
+	    $g : KbGoal (name == "extract-stage",
+                isActive > 0)
+    then
+        System.out.println("<DROOLS-ENGINE> Achieved goal " + $g.getName());
+    	retract($g);
+    end

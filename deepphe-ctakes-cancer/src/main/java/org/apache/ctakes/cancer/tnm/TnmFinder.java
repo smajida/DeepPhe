@@ -9,7 +9,7 @@ import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
-import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
+import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.jcas.JCas;
@@ -140,7 +140,7 @@ final public class TnmFinder {
    }
 
    static public void addTnmTumorClasses( final JCas jcas, final AnnotationFS lookupWindow,
-                                          final Iterable<DiseaseDisorderMention> lookupWindowT191s ) {
+                                          final Iterable<IdentifiedAnnotation> lookupWindowT191s ) {
       final Collection<TnmTumorClassification> tnmTumorClassifications
             = getTnmTumorClassifications( lookupWindow.getCoveredText() );
       if ( tnmTumorClassifications.isEmpty() ) {
@@ -148,8 +148,8 @@ final public class TnmFinder {
       }
       final int windowStartOffset = lookupWindow.getBegin();
       for ( TnmTumorClassification classification : tnmTumorClassifications ) {
-         final DiseaseDisorderMention closestDiseaseMention
-               = FinderUtil.getClosestEventMention( windowStartOffset + classification.getStartOffset(),
+         final IdentifiedAnnotation closestDiseaseMention
+               = FinderUtil.getClosestAnnotation( windowStartOffset + classification.getStartOffset(),
                windowStartOffset + classification.getEndOffset(), lookupWindowT191s );
          final TnmClassification tnmAnnotation = createTnmAnnotation( jcas, lookupWindow, classification );
          addTnmRelationToCas( jcas, tnmAnnotation, closestDiseaseMention );
@@ -245,7 +245,7 @@ final public class TnmFinder {
     */
    static private void addTnmRelationToCas( final JCas jCas,
                                             final TnmClassification tnmClassification,
-                                            final DiseaseDisorderMention disorderMention ) {
+                                            final IdentifiedAnnotation disorderMention ) {
       if ( disorderMention == null ) {
          LOGGER.info( "No Neoplasm discovered to relate to " + tnmClassification.getCoveredText() );
          return;
