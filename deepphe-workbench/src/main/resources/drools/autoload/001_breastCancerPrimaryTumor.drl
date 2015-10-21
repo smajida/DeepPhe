@@ -1,0 +1,65 @@
+package org.healthnlp.deepphe.summarization.drools.rules;
+
+//list any import classes here.
+import org.healthnlp.deepphe.summarization.drools.kb.*;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+//declare any global variables here
+
+rule "001_breastCancerPrimaryTumor From First Encounter"
+    salience 1000
+    when
+        KbGoal (name == "extract-primary-tumor",
+                isActive > 0)
+        KbEncounter ($encounterOneId : id,
+                     $encounterOneSequence : sequence)
+        $diag : MalignantBreastNeoplasm ( summarizableId == $encounterOneId )
+        $p : KbPatient( $patientId : id ) 
+        not
+        	MalignantBreastNeoplasm (summarizableId == $patientId)  
+        not 
+        	(KbEncounter ($encounterTwoId : id,
+                     $encounterTwoSequence : sequence,
+                     $encounterTwoId != $encounterOneId,
+                     $encounterTwoSequence < $encounterOneSequence)             
+             and MalignantBreastNeoplasm ( summarizableId == $encounterTwoId ))
+    then     
+        MalignantBreastNeoplasm patientDisease = beanCopyMalignantBreastNeoplasm($diag);
+        System.out.println("Linking a " + patientDisease.getClass().getSimpleName() + " to the patient ");
+        patientDisease.setSummarizableId($patientId);
+        insert(patientDisease);
+end
+
+rule "001_breastCancerPrimaryTumor Transition Goal State"
+	salience 500
+	when
+	    $g : KbGoal (name == "extract-primary-tumor",
+                isActive > 0)
+    then
+        System.out.println("<DROOLS-ENGINE> Achieved goal " + $g.getName());
+    	retract($g);
+    	
+    end
+    
+   
+
+function KbSummaryInterface beanCopy(KbSummaryInterface summary) {
+			KbSummaryInterface result = null;
+		try {
+			Class<?> cls = summary.getClass();
+			Class<?>[] emptyClsParameters = {};
+			Constructor<?> constructor = cls.getConstructor(emptyClsParameters);
+			Object[] emptyObjParameters = {};
+			result = (KbSummaryInterface) constructor
+					.newInstance(emptyObjParameters);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+function MalignantBreastNeoplasm beanCopyMalignantBreastNeoplasm(MalignantBreastNeoplasm disease) {
+        return (MalignantBreastNeoplasm) beanCopy(disease);
+        }
