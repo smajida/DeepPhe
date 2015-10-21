@@ -6,9 +6,7 @@ import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
-import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
-import org.apache.ctakes.typesystem.type.textsem.EventMention;
-import org.apache.ctakes.typesystem.type.textsem.SignSymptomMention;
+import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.jcas.JCas;
@@ -77,8 +75,8 @@ final public class SizeFinder {
 
 
    static public void addSizes( final JCas jcas, final AnnotationFS lookupWindow,
-                                final Iterable<DiseaseDisorderMention> lookupDisorders,
-                                final Iterable<SignSymptomMention> lookupSymptoms ) {
+                                final Iterable<IdentifiedAnnotation> neoplasms,
+                                final Iterable<IdentifiedAnnotation> masses ) {
       final Collection<Size> sizes = getSizes( lookupWindow.getCoveredText() );
       if ( sizes.isEmpty() ) {
          return;
@@ -88,14 +86,13 @@ final public class SizeFinder {
          final CancerSize cancerSize = createCancerSize( jcas, windowStartOffset, size );
          final int startOffset = windowStartOffset + size.getStartOffset();
          final int endOffset = windowStartOffset + size.getEndOffset();
-         final DiseaseDisorderMention closestDiseaseMention
-               = FinderUtil.getClosestEventMention( startOffset, endOffset, lookupDisorders );
-         final SignSymptomMention closestFindingMention
-               = FinderUtil.getClosestEventMention( startOffset, endOffset, lookupSymptoms );
-         final EventMention closerEventMention
-               = FinderUtil
-               .getCloserEventMention( startOffset, endOffset, closestDiseaseMention, closestFindingMention );
-         addCancerSizeRelationToCas( jcas, cancerSize, closerEventMention );
+         final IdentifiedAnnotation closestNeoplasm
+               = FinderUtil.getClosestAnnotation( startOffset, endOffset, neoplasms );
+         final IdentifiedAnnotation closestMass
+               = FinderUtil.getClosestAnnotation( startOffset, endOffset, masses );
+         final IdentifiedAnnotation closerAnnotation
+               = FinderUtil.getCloserAnnotation( startOffset, endOffset, closestNeoplasm, closestMass );
+         addCancerSizeRelationToCas( jcas, cancerSize, closerAnnotation );
       }
    }
 
@@ -124,14 +121,14 @@ final public class SizeFinder {
     * allows subclasses to create/define their own types: e.g. coreference can
     * create CoreferenceRelation instead of BinaryTextRelation
     *
-    * @param jCas         - JCas object, needed to create new UIMA types
-    * @param cancerSize   - First argument to relation
-    * @param eventMention - Second argument to relation
+    * @param jCas       - JCas object, needed to create new UIMA types
+    * @param cancerSize - First argument to relation
+    * @param annotation - Second argument to relation
     */
    static private void addCancerSizeRelationToCas( final JCas jCas,
                                                    final CancerSize cancerSize,
-                                                   final EventMention eventMention ) {
-      if ( eventMention == null ) {
+                                                   final IdentifiedAnnotation annotation ) {
+      if ( annotation == null ) {
          LOGGER.info( "No Neoplasm discovered to relate to " + cancerSize.getCoveredText() );
          return;
       }
@@ -140,13 +137,13 @@ final public class SizeFinder {
       cancerSizeArgument.setArgument( cancerSize );
       cancerSizeArgument.setRole( "Argument" );
       cancerSizeArgument.addToIndexes();
-      final RelationArgument eventMentionArgument = new RelationArgument( jCas );
-      eventMentionArgument.setArgument( eventMention );
-      eventMentionArgument.setRole( "Related_to" );
-      eventMentionArgument.addToIndexes();
+      final RelationArgument annotationArgument = new RelationArgument( jCas );
+      annotationArgument.setArgument( annotation );
+      annotationArgument.setRole( "Related_to" );
+      annotationArgument.addToIndexes();
       final NeoplasmRelation neoplasmRelation = new NeoplasmRelation( jCas );
       neoplasmRelation.setArg1( cancerSizeArgument );
-      neoplasmRelation.setArg2( eventMentionArgument );
+      neoplasmRelation.setArg2( annotationArgument );
       neoplasmRelation.setCategory( "Size_of" );
       neoplasmRelation.addToIndexes();
    }

@@ -10,6 +10,7 @@ import org.apache.ctakes.dictionary.lookup2.util.CuiCodeUtil;
 import org.apache.log4j.Logger;
 import org.apache.uima.UimaContext;
 
+import java.io.FileNotFoundException;
 import java.util.*;
 
 
@@ -87,7 +88,7 @@ public class OwlConceptFactory implements ConceptFactory {
             conceptMap.putAll( createOwlConcepts( childClass ) );
          }
          return conceptMap;
-      } catch ( IOntologyException ontE ) {
+      } catch ( IOntologyException | FileNotFoundException ontE ) {
          LOGGER.error( ontE.getMessage() );
       }
       return Collections.emptyMap();

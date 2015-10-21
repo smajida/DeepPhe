@@ -5,7 +5,7 @@ import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
-import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
+import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.jcas.JCas;
@@ -32,15 +32,15 @@ final public class ReceptorStatusFinder {
    static private final Logger LOGGER = Logger.getLogger( "ReceptorStatusFinder" );
 
    static public void addReceptorStatuses( final JCas jcas, final AnnotationFS lookupWindow,
-                                           final Iterable<DiseaseDisorderMention> lookupWindowT191s ) {
+                                           final Iterable<IdentifiedAnnotation> lookupWindowT191s ) {
       final Collection<ReceptorStatus> receptorStatuses = getReceptorStatuses( lookupWindow.getCoveredText() );
       if ( receptorStatuses.isEmpty() ) {
          return;
       }
       final int windowStartOffset = lookupWindow.getBegin();
       for ( ReceptorStatus receptorStatus : receptorStatuses ) {
-         final DiseaseDisorderMention closestDiseaseMention
-               = FinderUtil.getClosestEventMention( windowStartOffset + receptorStatus.getStartOffset(),
+         final IdentifiedAnnotation closestDiseaseMention
+               = FinderUtil.getClosestAnnotation( windowStartOffset + receptorStatus.getStartOffset(),
                windowStartOffset + receptorStatus.getEndOffset(), lookupWindowT191s );
          final org.apache.ctakes.cancer.type.textsem.ReceptorStatus receptorStatusAnnotation
                = createReceptorStatusAnnotation( jcas, lookupWindow.getBegin(), receptorStatus );
@@ -81,8 +81,8 @@ final public class ReceptorStatusFinder {
    }
 
    static private org.apache.ctakes.cancer.type.textsem.ReceptorStatus createReceptorStatusAnnotation( final JCas jcas,
-                                                                 final int windowStartOffset,
-                                                                 final ReceptorStatus receptorStatus ) {
+                                                                                                       final int windowStartOffset,
+                                                                                                       final ReceptorStatus receptorStatus ) {
       final org.apache.ctakes.cancer.type.textsem.ReceptorStatus receptorStatusAnnotation
             = new org.apache.ctakes.cancer.type.textsem.ReceptorStatus( jcas,
             windowStartOffset + receptorStatus.getStartOffset(),
@@ -114,14 +114,14 @@ final public class ReceptorStatusFinder {
     * allows subclasses to create/define their own types: e.g. coreference can
     * create CoreferenceRelation instead of BinaryTextRelation
     *
-    * @param jCas            - JCas object, needed to create new UIMA types
-    * @param receptorStatus  - First argument to relation
-    * @param disorderMention - Second argument to relation
+    * @param jCas           - JCas object, needed to create new UIMA types
+    * @param receptorStatus - First argument to relation
+    * @param annotation     - Second argument to relation
     */
    static private void addReceptorRelationToCas( final JCas jCas,
                                                  final org.apache.ctakes.cancer.type.textsem.ReceptorStatus receptorStatus,
-                                                 final DiseaseDisorderMention disorderMention ) {
-      if ( disorderMention == null ) {
+                                                 final IdentifiedAnnotation annotation ) {
+      if ( annotation == null ) {
          LOGGER.info( "No Neoplasm discovered to relate to " + receptorStatus.getCoveredText() );
          return;
       }
@@ -130,13 +130,13 @@ final public class ReceptorStatusFinder {
       receptorStatusArgument.setArgument( receptorStatus );
       receptorStatusArgument.setRole( "Argument" );
       receptorStatusArgument.addToIndexes();
-      final RelationArgument disorderMentionArgument = new RelationArgument( jCas );
-      disorderMentionArgument.setArgument( disorderMention );
-      disorderMentionArgument.setRole( "Related_to" );
-      disorderMentionArgument.addToIndexes();
+      final RelationArgument annotationArgument = new RelationArgument( jCas );
+      annotationArgument.setArgument( annotation );
+      annotationArgument.setRole( "Related_to" );
+      annotationArgument.addToIndexes();
       final NeoplasmRelation neoplasmRelation = new NeoplasmRelation( jCas );
       neoplasmRelation.setArg1( receptorStatusArgument );
-      neoplasmRelation.setArg2( disorderMentionArgument );
+      neoplasmRelation.setArg2( annotationArgument );
       neoplasmRelation.setCategory( "Receptor_status_of" );
       neoplasmRelation.addToIndexes();
    }
