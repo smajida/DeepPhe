@@ -59,7 +59,7 @@ done, the dependency versions should be moved into the parent pom -->
       <dependency>
       <groupId>org.apache.ctakes</groupId>
       <artifactId>ctakes-coref-cleartk</artifactId>
-      version>0.0.1</version>
+      <version>0.0.1</version>
       <scope>system</scope>
       <systemPath>${project.basedir}/lib/ctakes-coref-cleartk-0.0.1-deepphe.jar</systemPath>
       </dependency>
