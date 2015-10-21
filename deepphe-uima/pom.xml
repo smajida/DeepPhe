@@ -90,5 +90,10 @@
          <scope>system</scope>
          <systemPath>${project.basedir}/lib/modgen.jar</systemPath>
       </dependency>
+      	 <dependency>
+	       <groupId>org.drools</groupId>
+	       <artifactId>drools-compiler</artifactId>
+	       <version>${droolsVersion}</version>
+        </dependency>
 	</dependencies>
 </project>
