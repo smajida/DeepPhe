@@ -6,4 +6,4 @@ dependencies:
     - mvn -e clean compile
 test:
   override:
-    - mvn test
+    - mvn -e clean test
