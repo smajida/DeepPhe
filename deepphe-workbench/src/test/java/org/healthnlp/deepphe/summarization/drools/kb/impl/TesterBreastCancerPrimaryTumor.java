@@ -1,4 +1,4 @@
-package org.healthnlp.deepphe.summarization.drools.db.impl;
+package org.healthnlp.deepphe.summarization.drools.kb.impl;
 
 import static org.junit.Assert.assertEquals;
 
@@ -16,13 +16,17 @@ import org.drools.runtime.rule.FactHandle;
 import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
 import org.healthnlp.deepphe.summarization.drools.kb.KbGoal;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.summarization.drools.kb.MalignantBreastNeoplasm;
+import org.healthnlp.deepphe.summarization.drools.kb.NippleCarcinoma;
 import org.healthnlp.deepphe.summarization.drools.kb.RecurrentBreastCarcinoma;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.MalignantBreastNeoplasmImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.NippleCarcinomaImpl;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.RecurrentBreastCarcinomaImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TesterBreastCancerPlanner {
+public class TesterBreastCancerPrimaryTumor {
 
 	private StatefulKnowledgeSession session = null;
 
@@ -42,6 +46,11 @@ public class TesterBreastCancerPlanner {
 					builder.add(rulesResource, ResourceType.DRL);
 				}
 			}
+
+			// Resource rulesResource =
+			// ResourceFactory..newClassPathResource("discountRules.drl");
+			// builder.add(rulesResource,
+			// ResourceType.DRL);
 			if (builder.hasErrors()) {
 				throw new RuntimeException(builder.getErrors().toString());
 			}
@@ -61,9 +70,9 @@ public class TesterBreastCancerPlanner {
 			session.dispose();
 		}
 	}
-	
+
 	@Test
-	public void testPlannerScaffold() {
+	public void testPrimaryTumorRule() {
 
 		int idCounter = 0;
 
@@ -72,7 +81,7 @@ public class TesterBreastCancerPlanner {
 		KbGoal goal = new KbGoal();
 		goal.setId(idCounter++);
 		goal.setIsActive(1);
-		goal.setName("establish-plan");
+		goal.setName("extract-primary-tumor");
 
 		KbPatient patient = new KbPatient();
 		patient.setId(idCounter++);
@@ -84,80 +93,45 @@ public class TesterBreastCancerPlanner {
 		encOne.setIsActive(1);
 		encOne.setKind("Pathology");
 
-		RecurrentBreastCarcinoma diseaseOne = new RecurrentBreastCarcinomaImpl();
+		KbEncounter encTwo = new KbEncounter();
+		encTwo.setId(idCounter++);
+		encTwo.setPatientId(patient.getId());
+		encTwo.setSequence(1);
+		encTwo.setIsActive(1);
+		encTwo.setKind("Pathology");
+
+		NippleCarcinoma diseaseOne = new NippleCarcinomaImpl();
 		diseaseOne.setId(idCounter++);
 		diseaseOne.setSummarizableId(encOne.getId());
+
+		RecurrentBreastCarcinoma diseaseTwo = new RecurrentBreastCarcinomaImpl();
+		diseaseTwo.setId(idCounter++);
+		diseaseTwo.setSummarizableId(encTwo.getId());
+
+		MalignantBreastNeoplasm diseaseThree = new MalignantBreastNeoplasmImpl();
+		diseaseThree.setId(idCounter++);
+		diseaseThree.setSummarizableId(encTwo.getId());
 
 		session.insert(goal);
 		FactHandle handlePatient = session.insert(patient);
 		FactHandle handleEncOne = session.insert(encOne);
+		FactHandle handleEncTwo = session.insert(encTwo);
 		FactHandle handleDiseaseOne = session.insert(diseaseOne);
+		FactHandle handleDiseaseTwo = session.insert(diseaseTwo);
 
 		final String[] rulesToTest = { 
-				"000_breastCancerPlanner Activate when BreastNeoplasm",
-				"000_breastCancerPlanner Module Needs Written",
-				"000_breastCancerPlanner Activate Next Goal"};
+				"001_breastCancerPrimaryTumor From First Encounter",
+				"001_breastCancerPrimaryTumor Transition Goal State"};
 		CustomAgendaFilter customAgendaFilter = new CustomAgendaFilter(
 				rulesToTest);
 		int numRulesFired = session.fireAllRules(customAgendaFilter);
-		assertEquals(10, numRulesFired);
+		assertEquals(2, numRulesFired);
 
 		session.retract(handlePatient);
 		session.retract(handleEncOne);
+		session.retract(handleEncTwo);
 		session.retract(handleDiseaseOne);
+		session.retract(handleDiseaseTwo);
 
 	}
-	
-	@Test
-	public void testPlannerDenucleated() {
-
-		int idCounter = 0;
-
-		System.out.println("\nRunning testPlannerDenucleated\n");
-
-		KbGoal goal = new KbGoal();
-		goal.setId(idCounter++);
-		goal.setIsActive(1);
-		goal.setName("establish-plan");
-
-		KbPatient patient = new KbPatient();
-		patient.setId(idCounter++);
-
-		KbEncounter encOne = new KbEncounter();
-		encOne.setId(idCounter++);
-		encOne.setPatientId(patient.getId());
-		encOne.setSequence(0);
-		encOne.setIsActive(1);
-		encOne.setKind("Pathology");
-
-		RecurrentBreastCarcinoma diseaseOne = new RecurrentBreastCarcinomaImpl();
-		diseaseOne.setId(idCounter++);
-		diseaseOne.setSummarizableId(encOne.getId());
-
-		session.insert(goal);
-		FactHandle handlePatient = session.insert(patient);
-		FactHandle handleEncOne = session.insert(encOne);
-		FactHandle handleDiseaseOne = session.insert(diseaseOne);
-
-		final String[] rulesToTest = { 
-				"000_breastCancerPlanner Activate when BreastNeoplasm",
-				"000_breastCancerPlanner Module Needs Written",
-				"000_breastCancerPlanner Activate Next Goal",
-				"001_breastCancerPrimaryTumor Transition Goal State",
-				"002_breastCancerTumorSize Transition Goal State",
-				"003_breastCancerTnm Transition Goal State",
-				"004_breastCancerStage Transition Goal State",
-				"005_breastCancerReceptor Transition Goal State"
-				};
-		CustomAgendaFilter customAgendaFilter = new CustomAgendaFilter(
-				rulesToTest);
-		int numRulesFired = session.fireAllRules(customAgendaFilter);
-		assertEquals(10, numRulesFired);
-
-		session.retract(handlePatient);
-		session.retract(handleEncOne);
-		session.retract(handleDiseaseOne);
-
-	}
-
 }

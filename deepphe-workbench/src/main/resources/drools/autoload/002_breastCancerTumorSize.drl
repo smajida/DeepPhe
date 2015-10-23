@@ -4,6 +4,31 @@ package org.healthnlp.deepphe.summarization.drools.rules;
 import org.healthnlp.deepphe.summarization.drools.kb.*;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.*;
 
+// ============================================================
+//  
+// Tumor Size
+//
+// Set 1: Document Genre Rules for sourcing data
+//
+// ============================================================
+
+rule "002_breastCancerTumorSize Tumor Size From First Reliable Encounter"
+	salience 1000
+	when
+	    $g : KbGoal (name == "extract-tumor-size",
+                isActive > 0)
+        KbEncounter ($encounterOneId : id,
+                     $encounterOneSequence : sequence)
+        $t : TumorSize (summarizableId == $encounterOneId)
+        KbPatient( $patientId : id ) 
+        not
+        	TumorSize (summarizableId == $patientId)  
+    then
+        TumorSize patientTumorSize = beanCopyTumorSize($t);
+        patientTumorSize.setSummarizableId($patientId);
+ 	    insert(patientTumorSize);
+ 	    System.out.println("<DROOLS-ENGINE> Achieved goal " + patientTumorSize.getClass().getSimpleName());
+    end
 
 rule "002_breastCancerTumorSize Transition Goal State"
 	salience 500
@@ -11,6 +36,11 @@ rule "002_breastCancerTumorSize Transition Goal State"
 	    $g : KbGoal (name == "extract-tumor-size",
                 isActive > 0)
     then
-    	System.out.println("<DROOLS-ENGINE> Achieved goal " + $g.getName());
+
     	retract($g);
+    	System.out.println("<DROOLS-ENGINE> Achieved goal " + $g.getName());
     end
+    
+function TumorSize beanCopyTumorSize(TumorSize tumorSize) {
+        return (TumorSize) beanCopy(tumorSize);
+        }    

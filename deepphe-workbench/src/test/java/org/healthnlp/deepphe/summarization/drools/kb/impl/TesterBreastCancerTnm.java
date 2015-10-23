@@ -1,4 +1,4 @@
-package org.healthnlp.deepphe.summarization.drools.db.impl;
+package org.healthnlp.deepphe.summarization.drools.kb.impl;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,20 +13,17 @@ import org.drools.io.Resource;
 import org.drools.io.ResourceFactory;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.FactHandle;
+import org.healthnlp.deepphe.summarization.drools.kb.GenericDistantMetastasisTnmFinding;
+import org.healthnlp.deepphe.summarization.drools.kb.GenericPrimaryTumorTnmFinding;
+import org.healthnlp.deepphe.summarization.drools.kb.GenericRegionalLymphNodesTnmFinding;
 import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
 import org.healthnlp.deepphe.summarization.drools.kb.KbGoal;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
-import org.healthnlp.deepphe.summarization.drools.kb.MalignantBreastNeoplasm;
-import org.healthnlp.deepphe.summarization.drools.kb.NippleCarcinoma;
-import org.healthnlp.deepphe.summarization.drools.kb.RecurrentBreastCarcinoma;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.MalignantBreastNeoplasmImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.NippleCarcinomaImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.RecurrentBreastCarcinomaImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TesterBreastCancerPrimaryTumor {
+public class TesterBreastCancerTnm {
 
 	private StatefulKnowledgeSession session = null;
 
@@ -46,11 +43,6 @@ public class TesterBreastCancerPrimaryTumor {
 					builder.add(rulesResource, ResourceType.DRL);
 				}
 			}
-
-			// Resource rulesResource =
-			// ResourceFactory..newClassPathResource("discountRules.drl");
-			// builder.add(rulesResource,
-			// ResourceType.DRL);
 			if (builder.hasErrors()) {
 				throw new RuntimeException(builder.getErrors().toString());
 			}
@@ -72,16 +64,16 @@ public class TesterBreastCancerPrimaryTumor {
 	}
 
 	@Test
-	public void testPrimaryTumorRule() {
+	public void testTnm() {
 
 		int idCounter = 0;
 
-		System.out.println("\nRunning testPrimaryTumorRule\n");
+		System.out.println("\nRunning testTnm\n");
 
 		KbGoal goal = new KbGoal();
 		goal.setId(idCounter++);
 		goal.setIsActive(1);
-		goal.setName("extract-primary-tumor");
+		goal.setName("extract-tnm");
 
 		KbPatient patient = new KbPatient();
 		patient.setId(idCounter++);
@@ -91,47 +83,54 @@ public class TesterBreastCancerPrimaryTumor {
 		encOne.setPatientId(patient.getId());
 		encOne.setSequence(0);
 		encOne.setIsActive(1);
-		encOne.setKind("Pathology");
+		encOne.setKind("Pathology Report");
 
-		KbEncounter encTwo = new KbEncounter();
-		encTwo.setId(idCounter++);
-		encTwo.setPatientId(patient.getId());
-		encTwo.setSequence(1);
-		encTwo.setIsActive(1);
-		encTwo.setKind("Pathology");
-
-		NippleCarcinoma diseaseOne = new NippleCarcinomaImpl();
-		diseaseOne.setId(idCounter++);
-		diseaseOne.setSummarizableId(encOne.getId());
-
-		RecurrentBreastCarcinoma diseaseTwo = new RecurrentBreastCarcinomaImpl();
-		diseaseTwo.setId(idCounter++);
-		diseaseTwo.setSummarizableId(encTwo.getId());
-
-		MalignantBreastNeoplasm diseaseThree = new MalignantBreastNeoplasmImpl();
-		diseaseThree.setId(idCounter++);
-		diseaseThree.setSummarizableId(encTwo.getId());
+		
+		// TNM T
+		GenericPrimaryTumorTnmFinding tum = new T2bStageFindingImpl();
+		tum.setId(idCounter++);
+		tum.setSummarizableId(encOne.getId());
+		
+		// TNM N
+		GenericRegionalLymphNodesTnmFinding nod = new N2StageFindingImpl();
+		nod.setId(idCounter++);
+		nod.setSummarizableId(encOne.getId());
+		
+		// TNM M
+		GenericDistantMetastasisTnmFinding met = new M1StageFindingImpl();
+		met.setId(idCounter++);
+		met.setSummarizableId(encOne.getId());
 
 		session.insert(goal);
 		FactHandle handlePatient = session.insert(patient);
 		FactHandle handleEncOne = session.insert(encOne);
-		FactHandle handleEncTwo = session.insert(encTwo);
-		FactHandle handleDiseaseOne = session.insert(diseaseOne);
-		FactHandle handleDiseaseTwo = session.insert(diseaseTwo);
+		FactHandle handleTum = session.insert(tum);
+		FactHandle handleNod = session.insert(nod);
+		FactHandle handleMet = session.insert(met);
+
+		long numberOfFactsInSession = session.getFactCount();
+		assertEquals(numberOfFactsInSession, 6);
 
 		final String[] rulesToTest = { 
-				"001_breastCancerPrimaryTumor From First Encounter",
-				"001_breastCancerPrimaryTumor Transition Goal State"};
+				"003_breastCancerTnm T Grade From Last Encounter",
+				"003_breastCancerTnm N Grade From Last Encounter",
+				"003_breastCancerTnm M Grade From Last Encounter",
+				"003_breastCancerTnm Transition Goal State"
+		};
+		
 		CustomAgendaFilter customAgendaFilter = new CustomAgendaFilter(
 				rulesToTest);
 		int numRulesFired = session.fireAllRules(customAgendaFilter);
-		assertEquals(2, numRulesFired);
+		assertEquals(4, numRulesFired);
+
+		numberOfFactsInSession = session.getFactCount();
+		assertEquals(numberOfFactsInSession, 8);
 
 		session.retract(handlePatient);
 		session.retract(handleEncOne);
-		session.retract(handleEncTwo);
-		session.retract(handleDiseaseOne);
-		session.retract(handleDiseaseTwo);
-
-	}
+		session.retract(handleTum);
+		session.retract(handleNod);
+		session.retract(handleMet);
+	}	
+	
 }

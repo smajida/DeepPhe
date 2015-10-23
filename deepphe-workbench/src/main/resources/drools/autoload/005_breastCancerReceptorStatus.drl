@@ -187,10 +187,6 @@ rule "005_breastCancerReceptorStatus Hormone receptor negative"
         insert(patientTripleNegative);
     end    
 
-function OrdinalInterpretation beanCopyOrdinalInterpretation(OrdinalInterpretation ordinalInterpretation) {
-        return (OrdinalInterpretation) beanCopy(ordinalInterpretation);
-        }    
-
 //
 // Retract the goal for this module
 //
@@ -203,3 +199,7 @@ rule "005_breastCancerReceptorStatus Transition Goal State"
         System.out.println("<DROOLS-ENGINE> Achieved goal " + $g.getName());
     	retract($g);
     end
+    
+function OrdinalInterpretation beanCopyOrdinalInterpretation(OrdinalInterpretation ordinalInterpretation) {
+        return (OrdinalInterpretation) beanCopy(ordinalInterpretation);
+        }    

@@ -1,4 +1,4 @@
-package org.healthnlp.deepphe.summarization.drools.db.impl;
+package org.healthnlp.deepphe.summarization.drools.kb.impl;
 
 import static org.junit.Assert.assertEquals;
 

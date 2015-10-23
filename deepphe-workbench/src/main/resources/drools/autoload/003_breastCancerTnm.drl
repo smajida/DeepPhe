@@ -4,6 +4,76 @@ package org.healthnlp.deepphe.summarization.drools.rules;
 import org.healthnlp.deepphe.summarization.drools.kb.*;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.*;
 
+// ============================================================
+//  
+//   If populating a TNM target template, and there exists a
+// latest TNM document level mention for the patient
+// and not in the past then use this as the TNM
+//
+// ============================================================
+
+rule "003_breastCancerTnm T Grade From Last Encounter"
+	salience 1000
+	when
+	    KbGoal (name == "extract-tnm", isActive > 0)
+	    KbPatient( $patientId : id )
+        KbEncounter($encounterOneId : id, 
+                    patientId == $patientId,
+                    $encounterOneSequence : sequence,                         
+                    ( kind == "Pathology Report" || kind == "Progress Note" ))
+         $encounterTumorGrade : GenericPrimaryTumorTnmFinding (summarizableId == $encounterOneId)
+         not GenericPrimaryTumorTnmFinding (summarizableId == $patientId)
+         not ( KbEncounter ($encounterTwoId : id,
+                            patientId == $patientId,
+                            sequence > $encounterOneSequence) and 
+               GenericPrimaryTumorTnmFinding (summarizableId == $encounterTwoId) )
+    then
+        System.out.println("<DROOLS-ENGINE> Extrcting T grade for patient ");
+    	GenericPrimaryTumorTnmFinding patientTumorGrade = beanCopyGenericPrimaryTumorTnmFinding($encounterTumorGrade);
+    	patientTumorGrade.setSummarizableId($patientId);
+        insert(patientTumorGrade);
+    end
+    
+rule "003_breastCancerTnm N Grade From Last Encounter"
+	salience 1000
+	when
+	    KbGoal (name == "extract-tnm", isActive > 0)
+	    KbPatient( $patientId : id )
+        KbEncounter($encounterOneId : id, 
+                    patientId == $patientId,
+                    $encounterOneSequence : sequence,                         
+                    ( kind == "Pathology Report" || kind == "Progress Note" ))
+        $encounterNodeGrade : GenericRegionalLymphNodesTnmFinding (summarizableId == $encounterOneId)
+        not GenericRegionalLymphNodesTnmFinding (summarizableId == $patientId)
+        not ( KbEncounter ($encounterTwoId : id, sequence > $encounterOneSequence) and 
+                GenericRegionalLymphNodesTnmFinding (summarizableId == $encounterTwoId) )
+    then
+        System.out.println("<DROOLS-ENGINE> Extrcting N grade for patient ");
+    	GenericRegionalLymphNodesTnmFinding patientNodeGrade = beanCopyGenericRegionalLymphNodesTnmFinding($encounterNodeGrade);
+    	patientNodeGrade.setSummarizableId($patientId);
+        insert(patientNodeGrade);
+    end
+ 
+ rule "003_breastCancerTnm M Grade From Last Encounter"
+	salience 1000
+	when
+        KbGoal (name == "extract-tnm", isActive > 0)
+	    KbPatient( $patientId : id )
+        KbEncounter($encounterOneId : id, 
+                    patientId == $patientId,
+                    $encounterOneSequence : sequence,                         
+                    ( kind == "Pathology Report" || kind == "Progress Note" ))
+        $encounterMetastaticGrade : GenericDistantMetastasisTnmFinding (summarizableId == $encounterOneId)
+        not GenericDistantMetastasisTnmFinding (summarizableId == $patientId)
+        not ( KbEncounter ($encounterTwoId : id, sequence > $encounterOneSequence) and 
+                GenericDistantMetastasisTnmFinding (summarizableId == $encounterTwoId) )
+    then
+        System.out.println("<DROOLS-ENGINE> Extrcting M grade for patient ");
+    	GenericDistantMetastasisTnmFinding patientMetastaticGrade = beanCopyGenericDistantMetastasisTnmFinding($encounterMetastaticGrade);
+    	patientMetastaticGrade.setSummarizableId($patientId);
+        insert(patientMetastaticGrade);
+    end   
+
 rule "003_breastCancerTnm Transition Goal State"
 	salience 500
 	when
@@ -13,3 +83,14 @@ rule "003_breastCancerTnm Transition Goal State"
         System.out.println("<DROOLS-ENGINE> Achieved goal " + $g.getName());
     	retract($g);
     end
+    
+function GenericPrimaryTumorTnmFinding beanCopyGenericPrimaryTumorTnmFinding(GenericPrimaryTumorTnmFinding genericPrimaryTumorTnmFinding) {
+        return (GenericPrimaryTumorTnmFinding) beanCopy(genericPrimaryTumorTnmFinding);
+}
+function GenericRegionalLymphNodesTnmFinding beanCopyGenericRegionalLymphNodesTnmFinding(GenericRegionalLymphNodesTnmFinding genericRegionalLymphNodesTnmFinding) {
+        return (GenericRegionalLymphNodesTnmFinding) beanCopy(genericRegionalLymphNodesTnmFinding);
+}    
+function GenericDistantMetastasisTnmFinding beanCopyGenericDistantMetastasisTnmFinding(GenericDistantMetastasisTnmFinding genericDistantMetastasisTnmFinding) {
+        return (GenericDistantMetastasisTnmFinding) beanCopy(genericDistantMetastasisTnmFinding);
+}        
+
