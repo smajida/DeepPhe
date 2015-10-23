@@ -31,6 +31,7 @@
       <module>deepphe-uima</module>
       <module>deepphe-i2b2</module>
       <module>deepphe-workbench</module>
+      <module>deepphe-distribution</module>
    </modules>
 
    <repositories>
