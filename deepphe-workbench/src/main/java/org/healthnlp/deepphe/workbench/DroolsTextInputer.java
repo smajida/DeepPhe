@@ -9,8 +9,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
@@ -25,12 +27,12 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
-public class JessTextInputer extends JPanel implements ActionListener {
+public class DroolsTextInputer extends JPanel implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 
-	private PatientKnowledgeExtractorInterface tmnExtractor;
-	private JessTextOutputer jessTextOutputer;
+	private DroolsKnowledgeBaseAndSession engine;
+	private DroolsTextOutputer droolsTextOutputer;
 
 	private JScrollPane inputScrollPane;
 	private JTextPane inputTextPane;
@@ -45,14 +47,14 @@ public class JessTextInputer extends JPanel implements ActionListener {
 	public static void main(String[] args) {
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		JessTextInputer inputer = new JessTextInputer();
+		DroolsTextInputer inputer = new DroolsTextInputer();
 		frame.getContentPane().add(inputer);
 		frame.setSize(800, 400);
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
 
-	public JessTextInputer() {
+	public DroolsTextInputer() {
 
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.gridx = 1;
@@ -76,42 +78,78 @@ public class JessTextInputer extends JPanel implements ActionListener {
 
 		buildPopUpMenu();
 
-		TitledBorder border = BorderFactory.createTitledBorder("Jess Input");
+		TitledBorder border = BorderFactory.createTitledBorder("Drools Input");
 		setBorder(border);
 	}
 
 	private void buildPopUpMenu() {
+		
+		final ImageIcon clearIcon = new ImageIcon(
+				WorkbenchMenu.class.getResource("/images/16f/clear.gif"));
+		final ImageIcon droolsIcon = new ImageIcon(
+				WorkbenchMenu.class.getResource("/images/16f/drools.gif"));
+		final ImageIcon editIcon = new ImageIcon(
+				WorkbenchMenu.class.getResource("/images/16f/edit.gif"));
+		final  ImageIcon runExcIcon = new ImageIcon(
+				WorkbenchMenu.class.getResource("/images/16f/run_exc.gif"));	
+		final  ImageIcon saveIcon = new ImageIcon(
+				WorkbenchMenu.class.getResource("/images/16f/save.gif"));		
+		final  ImageIcon saveAsIcon = new ImageIcon(
+				WorkbenchMenu.class.getResource("/images/16f/saveas.gif"));		
+		
 		popup = new JPopupMenu();
-		JMenuItem m = new JMenuItem("Jess Eval");
+		
+		JMenuItem m = new JMenuItem("Clear Text");
+		m.setIcon(clearIcon);
 		m.addActionListener(this);
 		popup.add(m);
-		m = new JMenuItem("Jess Run");
-		m.addActionListener(this);
-		popup.add(m);
-		m = new JMenuItem("Jess Reset");
-		m.addActionListener(this);
-		popup.add(m);
-		m = new JMenuItem("Jess Clear");
-		m.addActionListener(this);
-		popup.add(m);
+				
 		popup.addSeparator();
-		m = new JMenuItem("Clear Text");
+			
+		m = new JMenuItem("Drools Eval");
+		m.setIcon(droolsIcon);
 		m.addActionListener(this);
 		popup.add(m);
+		
+		m = new JMenuItem("Drools Run");
+		m.setIcon(droolsIcon);
+		m.addActionListener(this);
+		popup.add(m);
+				
+		m = new JMenuItem("Drools Reset");
+		m.setIcon(droolsIcon);
+		m.addActionListener(this);
+		popup.add(m);
+		
+		m = new JMenuItem("Drools Clear");
+		m.setIcon(droolsIcon);
+		m.addActionListener(this);
+		popup.add(m);
+		
 		popup.addSeparator();
-		m = new JMenuItem("Read Clips");
+		
+		m = new JMenuItem("Edit drls script");
+		m.setIcon(editIcon);
 		m.addActionListener(this);
 		popup.add(m);
-		m = new JMenuItem("Execute Clips");
+		
+		m = new JMenuItem("Execute drls script");
+		m.setIcon(runExcIcon);
 		m.addActionListener(this);
 		popup.add(m);
+
 		popup.addSeparator();
-		m = new JMenuItem("Save Clips");
+		
+		m = new JMenuItem("Save drls script");
+		m.setIcon(saveIcon);
 		m.addActionListener(this);
 		popup.add(m);
-		m = new JMenuItem("Save Clips As");
+		
+		m = new JMenuItem("Save drls script as");
+		m.setIcon(saveAsIcon);
 		m.addActionListener(this);
 		popup.add(m);
+		
 		inputTextPane.addMouseListener(new PopupListener());
 	}
 
@@ -135,23 +173,23 @@ public class JessTextInputer extends JPanel implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals("Jess Eval")) {
-			processEvalJess();
-		} else if (e.getActionCommand().equals("Jess Run")) {
-			processRunJess();
-		} else if (e.getActionCommand().equals("Jess Reset")) {
-			processResetJess();
-		} else if (e.getActionCommand().equals("Jess Clear")) {
-			processClearJess();
+		if (e.getActionCommand().equals("Drools Eval")) {
+			processEvalDrools();
+		} else if (e.getActionCommand().equals("Drools Run")) {
+			processRunDrools();
+		} else if (e.getActionCommand().equals("Drools Reset")) {
+			processResetDrools();
+		} else if (e.getActionCommand().equals("Drools Clear")) {
+			processClearDrools();
 		} else if (e.getActionCommand().equals("Clear Text")) {
 			inputTextPane.setText("");
-		} else if (e.getActionCommand().equals("Read Clips")) {
+		} else if (e.getActionCommand().equals("Read Drls")) {
 			processRead();
-		} else if (e.getActionCommand().equals("Execute Clips")) {
+		} else if (e.getActionCommand().equals("Execute Drls")) {
 			processExecute();
-		} else if (e.getActionCommand().equals("Save Clips")) {
+		} else if (e.getActionCommand().equals("Save Drls")) {
 			processSave();
-		} else if (e.getActionCommand().equals("Save Clips As")) {
+		} else if (e.getActionCommand().equals("Save Drls As")) {
 			processSaveAs();
 		}
 	}
@@ -163,9 +201,9 @@ public class JessTextInputer extends JPanel implements ActionListener {
 			}
 			String textRead = FileUtils.readFileToString(readSourceFile);
 			inputTextPane.setText(inputTextPane.getText() + "\n" + textRead);
-			tmnExtractor.executeJess(textRead);
+			engine.executeDrools(textRead);
 		} catch (IOException e) {
-			jessTextOutputer.displayException(e);
+			droolsTextOutputer.displayException(e);
 		}
 	}
 
@@ -178,7 +216,7 @@ public class JessTextInputer extends JPanel implements ActionListener {
 			inputTextPane.setText(inputTextPane.getText() + "\n" + textRead);	
 			setReadSourceFile(null);
 		} catch (IOException e) {
-			jessTextOutputer.displayException(e);
+			droolsTextOutputer.displayException(e);
 		}
 		
 	}
@@ -190,15 +228,15 @@ public class JessTextInputer extends JPanel implements ActionListener {
 			System.out.println("The working directory is " + workingDirectory);
 			File fileSearchDirectory = new File(workingDirectory, "src\\main\\jess");
 			fc.setCurrentDirectory(fileSearchDirectory);
-			FileFilter filter = new FileNameExtensionFilter("Clips files",
+			FileFilter filter = new FileNameExtensionFilter("Drls files",
 					"clp");
 			fc.addChoosableFileFilter(filter);
 		}
-		int returnVal = fc.showOpenDialog(JessTextInputer.this);
+		int returnVal = fc.showOpenDialog(DroolsTextInputer.this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			setReadSourceFile(fc.getSelectedFile());
 		} else {
-			jessTextOutputer.appendError("\nRead command cancelled by user.\n");
+			droolsTextOutputer.appendError("\nRead command cancelled by user.\n");
 		}
 		
 	}
@@ -211,22 +249,22 @@ public class JessTextInputer extends JPanel implements ActionListener {
 		this.readSourceFile = readSourceFile;
 	}
 
-	private void processEvalJess() {
+	private void processEvalDrools() {
 		if (!StringUtils.isEmpty(inputTextPane.getSelectedText())) {
-			tmnExtractor.executeJess(inputTextPane.getSelectedText());
+			engine.executeDrools(inputTextPane.getSelectedText());
 		}
 	}
 
-	private void processClearJess() {
-		tmnExtractor.executeJess("(clear)");
+	private void processClearDrools() {
+		engine.clearDrools();
 	}
 
-	private void processRunJess() {
-		tmnExtractor.executeJess("(run)");
+	private void processRunDrools() {
+		engine.execute();
 	}
 
-	private void processResetJess() {
-		tmnExtractor.executeJess("(reset)");
+	private void processResetDrools() {
+		engine.resetDrools();
 	}
 
 	private void processSave() {
@@ -240,7 +278,7 @@ public class JessTextInputer extends JPanel implements ActionListener {
 			}
 			FileUtils.write(saveTargetFile, textToSave);
 		} catch (IOException e) {
-			jessTextOutputer.displayException(e);
+			droolsTextOutputer.displayException(e);
 		}
 
 	}
@@ -261,16 +299,17 @@ public class JessTextInputer extends JPanel implements ActionListener {
 	private void establishSaveTargetFile() {
 		if (fc == null) {
 			fc = new JFileChooser();
-			fc.setCurrentDirectory(new File(".\\src\\main\\jess"));
-			FileFilter filter = new FileNameExtensionFilter("Clips files",
-					"clp");
+			URL autoloadDirectoryUrl = getClass().getResource("/resources/drools/autoload");
+			fc.setCurrentDirectory(new File(autoloadDirectoryUrl.getPath()));
+			FileFilter filter = new FileNameExtensionFilter("Drls files",
+					"drl");
 			fc.addChoosableFileFilter(filter);
 		}
-		int returnVal = fc.showSaveDialog(JessTextInputer.this);
+		int returnVal = fc.showSaveDialog(DroolsTextInputer.this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			setSaveTargetFile(fc.getSelectedFile());
 		} else {
-			jessTextOutputer.appendError("\nSave command cancelled by user.\n");
+			droolsTextOutputer.appendError("\nSave command cancelled by user.\n");
 		}
 	}
 
@@ -291,11 +330,18 @@ public class JessTextInputer extends JPanel implements ActionListener {
 	}
 
 	public void setKnowledgeExtractor(PatientKnowledgeExtractorInterface tmnExtractor) {
-		this.tmnExtractor = tmnExtractor;
 	}
 
-	public void setJessTextOutputer(JessTextOutputer jessTextOutputer) {
-		this.jessTextOutputer = jessTextOutputer;
+	public void setDroolsTextOutputer(DroolsTextOutputer droolsTextOutputer) {
+		this.droolsTextOutputer = droolsTextOutputer;
+	}
+
+	public DroolsKnowledgeBaseAndSession getEngine() {
+		return engine;
+	}
+
+	public void setEngine(DroolsKnowledgeBaseAndSession engine) {
+		this.engine = engine;
 	}
 
 }

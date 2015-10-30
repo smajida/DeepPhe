@@ -1,7 +1,7 @@
 package org.healthnlp.deepphe.workbench.treeview;
 
-public class JessDefTemplatesUserObj {
+public class DroolsRulesUserObj {
 	public String toString() {
-		return "deftemplates";
+		return "rules";
 	}
 }

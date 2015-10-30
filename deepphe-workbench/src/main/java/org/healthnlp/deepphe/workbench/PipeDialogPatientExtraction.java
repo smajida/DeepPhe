@@ -26,11 +26,13 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-
 import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
 import org.healthnlp.deepphe.ontology.I2b2OntologyBuilder;
 import org.healthnlp.deepphe.ontology.PartialPath;
 import org.healthnlp.deepphe.ontology.Utilities;
+import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
 import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
 import org.healthnlp.deepphe.summarization.jess.kb.Patient;
 import org.healthnlp.deepphe.summarization.jess.kb.Summary;
@@ -48,7 +50,7 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 	private JTextPane messageText;
 	private JScrollPane paneScrollPane;
 	private PatientKnowledgeExtractorInterface patientKnowledgeExtractor;
-	private List<Patient> patients;
+	private List<KbPatient> patients;
 
 	private boolean isSlicingOntology = false;
 
@@ -116,12 +118,12 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 	}
 
 	private void ontologizeAndActiveSummaries() {
-		for (Patient patient : patients) {
-			for (Summary summary : patient.getSummaries()) {
+		for (KbPatient patient : patients) {
+			for (KbSummary summary : patient.getSummaries()) {
 				ontologizeSummary(summary);
 			}
-			for (Encounter encounter : patient.getEncounters()) {
-				for (Summary summary : encounter.getSummaries()) {
+			for (KbEncounter encounter : patient.getEncounters()) {
+				for (KbSummary summary : encounter.getSummaries()) {
 					ontologizeSummary(summary);
 				}
 			}
@@ -130,7 +132,7 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 
 	}
 
-	private void ontologizeSummary(Summary summary) {
+	private void ontologizeSummary(KbSummary summary) {
 		String code = "umls:" + summary.getCode();
 		PartialPath pathForCode = partialPathMap.get(code);
 		if (pathForCode != null) {
@@ -154,7 +156,7 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 	private void extractEncounterKnowledge() {
 		EncounterKnowledgeExtractorInterface encounterKnowledgeExtractor = EncounterKnowlegeExractorFactory
 				.getEncounterKnowledgeExtractor();
-		for (Patient patient : patients) {
+		for (KbPatient patient : patients) {
 			encounterKnowledgeExtractor
 					.setProjectLocation(Workbench.PROJECT_LOCATION);
 			encounterKnowledgeExtractor.setPatient(patient);
@@ -164,9 +166,9 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 	}
 
 	private void clearOldSummaryData() {
-		for (Patient patient : patients) {
+		for (KbPatient patient : patients) {
 			patient.clearSummaries();
-			for (Encounter encounter : patient.getEncounters()) {
+			for (KbEncounter encounter : patient.getEncounters()) {
 				encounter.clearSummaries();
 			}
 		}
@@ -278,11 +280,11 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 		this.patientKnowledgeExtractor = knowledgeExtractor;
 	}
 
-	public List<Patient> getPatients() {
+	public List<KbPatient> getPatients() {
 		return patients;
 	}
 
-	public void setPatients(List<Patient> patients) {
+	public void setPatients(List<KbPatient> patients) {
 		this.patients = patients;
 
 	}

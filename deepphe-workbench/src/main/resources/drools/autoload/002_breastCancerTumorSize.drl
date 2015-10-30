@@ -27,7 +27,7 @@ rule "002_breastCancerTumorSize Tumor Size From First Reliable Encounter"
         TumorSize patientTumorSize = beanCopyTumorSize($t);
         patientTumorSize.setSummarizableId($patientId);
  	    insert(patientTumorSize);
- 	    System.out.println("<DROOLS-ENGINE> Achieved goal " + patientTumorSize.getClass().getSimpleName());
+ 	    System.out.println("<DROOLS-ENGINE> Nominalized tumor size as " + patientTumorSize.getClass().getSimpleName());
     end
 
 rule "002_breastCancerTumorSize Transition Goal State"

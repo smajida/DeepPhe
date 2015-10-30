@@ -10,14 +10,15 @@ import org.apache.uima.cas.CASException;
 import org.apache.uima.jcas.JCas;
 import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DataDataSourceManager;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 import org.healthnlp.deepphe.summarization.jess.kb.Patient;
-import org.healthnlp.deepphe.xfer.CtakesToJessConverter;
+import org.healthnlp.deepphe.xfer.CtakesToDroolsConverter;
 
 public class CasPreLoadedI2b2WriterAE extends JCasAnnotator_ImplBase {
 
 	private JCas multiJCas;
 	private JCas patientJCas;
-	private Patient patient;
+	private KbPatient patient;
 	
 	static private final Logger logger = Logger
 			.getLogger(CasPreLoadedI2b2WriterAE.class);
@@ -43,10 +44,10 @@ public class CasPreLoadedI2b2WriterAE extends JCasAnnotator_ImplBase {
 	
 	private void uploadPatientDAG()
 			throws CASException {
-		CtakesToJessConverter ctakesToJessConverter = new CtakesToJessConverter();
+		CtakesToDroolsConverter ctakesToJessConverter = new CtakesToDroolsConverter();
 		ctakesToJessConverter.setMultiJCas(multiJCas);
 		ctakesToJessConverter.setPatientJCas(patientJCas);
-		ctakesToJessConverter.setPatient(new Patient());
+		ctakesToJessConverter.setPatient(new KbPatient());
 		ctakesToJessConverter.execute();
 		patient = ctakesToJessConverter.getPatient();
 	}

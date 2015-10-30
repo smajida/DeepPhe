@@ -18,21 +18,21 @@ import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.healthnlp.deepphe.summarization.jess.DagToKnowledgeDisassembler;
-import org.healthnlp.deepphe.summarization.jess.KnowledgeToDagAssembler;
-import org.healthnlp.deepphe.summarization.jess.kb.Goal;
-import org.healthnlp.deepphe.summarization.jess.kb.Identified;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
-import org.healthnlp.deepphe.xfer.CtakesToJessConverter;
-import org.healthnlp.deepphe.xfer.JessToCtakesConverter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbGoal;
+import org.healthnlp.deepphe.summarization.drools.kb.KbIdentified;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.xfer.CtakesToDroolsConverter;
+import org.healthnlp.deepphe.xfer.DagToKnowledgeDisassembler;
+import org.healthnlp.deepphe.xfer.DroolsToCtakesConverter;
+import org.healthnlp.deepphe.xfer.KnowledgeToDagAssembler;
 
 public class TaggedPatientAE extends TaggedSummarizableAE {
 
 	private JCas multiJCas;
 	private JCas patientJCas;
-	private Patient patient;
+	private KbPatient patient;
 	private Rete jessEngine;
-	private final HashMap<Integer, Identified> knowledgeMap = new HashMap<Integer, Identified>();
+	private final HashMap<Integer, KbIdentified> knowledgeMap = new HashMap<Integer, KbIdentified>();
 
 	@Override
 	public void initialize(UimaContext aContext)
@@ -85,7 +85,7 @@ public class TaggedPatientAE extends TaggedSummarizableAE {
 	}
 	
 	private void cachePatientDAG() 	throws CASException {
-		JessToCtakesConverter jessToCtakesConverter = new JessToCtakesConverter();
+		DroolsToCtakesConverter jessToCtakesConverter = new DroolsToCtakesConverter();
 		jessToCtakesConverter.setPatient(patient);
 		jessToCtakesConverter.setPatientJCas(patientJCas);	
 		jessToCtakesConverter.execute();
@@ -101,23 +101,23 @@ public class TaggedPatientAE extends TaggedSummarizableAE {
 
 	private void uploadPatientDAG()
 			throws CASException {
-		CtakesToJessConverter ctakesToJessConverter = new CtakesToJessConverter();
+		CtakesToDroolsConverter ctakesToJessConverter = new CtakesToDroolsConverter();
 		ctakesToJessConverter.setMultiJCas(multiJCas);
 		ctakesToJessConverter.setPatientJCas(patientJCas);
-		ctakesToJessConverter.setPatient(new Patient());
+		ctakesToJessConverter.setPatient(new KbPatient());
 		ctakesToJessConverter.execute();
 		patient = ctakesToJessConverter.getPatient();
 	}
 
 	private void loadKnowledgeToJess() throws JessException {
-		for (Identified identified :  knowledgeMap.values()) {
+		for (KbIdentified identified :  knowledgeMap.values()) {
 			System.out.println("Adding a " + identified.getClass().getSimpleName() + " to working memory.");
 			jessEngine.add(identified);
 		}
 	}
 	
 	private void appendGoalEstablishPlan() {
-		Goal goal = new Goal();
+		KbGoal goal = new KbGoal();
 		goal.setName("establish-plan");
 		goal.setIsActive(1);
 		goal.setPriority(0);
@@ -141,8 +141,8 @@ public class TaggedPatientAE extends TaggedSummarizableAE {
 			jess.Fact fact = (jess.Fact) factsIterator.next();
 			Object factObj = extractObjectSlot(fact);
 			if (factObj != null) {
-				if (Identified.class.isAssignableFrom(factObj.getClass())) {
-					assembler.add((Identified) factObj);
+				if (KbIdentified.class.isAssignableFrom(factObj.getClass())) {
+					assembler.add((KbIdentified) factObj);
 					System.out.println(factObj.toString());
 				}				
 			}

@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -26,7 +27,7 @@ import javax.swing.text.StyledDocument;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 
-public class JessTextOutputer extends JPanel implements ActionListener {
+public class DroolsTextOutputer extends JPanel implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -40,14 +41,14 @@ public class JessTextOutputer extends JPanel implements ActionListener {
 	public static void main(String[] args) {
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		JessTextOutputer outputer = new JessTextOutputer();
+		DroolsTextOutputer outputer = new DroolsTextOutputer();
 		frame.getContentPane().add(outputer);
 		frame.setSize(800, 400);
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
 
-	public JessTextOutputer() {
+	public DroolsTextOutputer() {
 
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.gridx = 1;
@@ -71,17 +72,28 @@ public class JessTextOutputer extends JPanel implements ActionListener {
 
 		buildPopUpMenu();
 
-		TitledBorder border = BorderFactory.createTitledBorder("Jess Output");
+		TitledBorder border = BorderFactory.createTitledBorder("Drools Output");
 		setBorder(border);
 		
 		setPreferredSize(new Dimension(1200, 300));
 	}
 
 	private void buildPopUpMenu() {
-		popup = new JPopupMenu();
-		JMenuItem m = new JMenuItem("Clear");
+		
+		final ImageIcon clearIcon = new ImageIcon(
+				WorkbenchMenu.class.getResource("/images/16f/clear.gif"));
+		
+		JMenuItem m = new JMenuItem("Clear Text");
+		m.setIcon(clearIcon);
 		m.addActionListener(this);
 		popup.add(m);
+		
+		popup = new JPopupMenu();
+		m = new JMenuItem("Clear");
+		m.setIcon(clearIcon);
+		m.addActionListener(this);
+		popup.add(m);
+		
 		jessOutputTextPane.addMouseListener(new PopupListener());
 	}
 

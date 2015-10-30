@@ -5,13 +5,15 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
 import org.healthnlp.deepphe.summarization.jess.kb.Patient;
 
 public class PatientListReader {
 	
 	private String inputDirectoryPath;
-	private List<Patient> patients;
+	private List<KbPatient> patients;
 	private int patientSequence = -1;
 	
 	public void execute() {
@@ -34,14 +36,14 @@ public class PatientListReader {
 	}
 
 	private void createPatient(File patientDirectory) throws IOException {
-		Patient patient = new Patient();
+		KbPatient patient = new KbPatient();
 		patient.setSequence(patientSequence);
 		patients.add(patient);
 		File[] rawFiles = patientDirectory.listFiles();
 		int encounterSequence = 0;
 		for (File rawFile : rawFiles) {
 			if (rawFile.isFile()) {
-				Encounter encounter = new Encounter();
+				KbEncounter encounter = new KbEncounter();
 				encounter.setPatientId(patient.getId());
 				encounter.setUri(rawFile.getAbsolutePath());
 				encounter.setContent(FileUtils.readFileToString(rawFile));
@@ -59,11 +61,11 @@ public class PatientListReader {
 		this.inputDirectoryPath = inputDirectoryPath;
 	}
 
-	public List<Patient> getPatients() {
+	public List<KbPatient> getPatients() {
 		return patients;
 	}
 
-	public void setPatients(List<Patient> patients) {
+	public void setPatients(List<KbPatient> patients) {
 		this.patients = patients;
 	}
 	

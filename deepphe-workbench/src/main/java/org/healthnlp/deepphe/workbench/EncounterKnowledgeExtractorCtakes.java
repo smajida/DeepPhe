@@ -9,19 +9,21 @@ import org.apache.uima.fit.pipeline.SimplePipeline;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.InvalidXMLException;
+import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
 import org.healthnlp.deepphe.summarization.jess.kb.Patient;
 import org.healthnlp.deepphe.uima.pipelines.CtakesCancerEncounterPipeBuilder;
-import org.healthnlp.deepphe.xfer.CtakesToJessConverter;
+import org.healthnlp.deepphe.xfer.CtakesToDroolsConverter;
 
 public class EncounterKnowledgeExtractorCtakes implements
 		EncounterKnowledgeExtractorInterface {
 
-	private Patient patient;
+	private KbPatient patient;
 	private AnalysisEngine ae = null;
 	
 	@Override
-	public void setPatient(Patient patient) {
+	public void setPatient(KbPatient patient) {
 		this.patient = patient;
 	}
 
@@ -30,12 +32,12 @@ public class EncounterKnowledgeExtractorCtakes implements
 		try {
 			if (patient != null && patient.getEncounters().size() > 0) {
 				buildCtakesAnalysisEngine();
-				for (Encounter encounter : patient.getEncounters()) {
+				for (KbEncounter encounter : patient.getEncounters()) {
 					JCas encounterJCas = ae.newJCas();
 					String documentText = encounter.getContent();
 					encounterJCas.setDocumentText(documentText);
 					SimplePipeline.runPipeline(encounterJCas, ae);
-					CtakesToJessConverter ctakesToJessConverter = new CtakesToJessConverter();
+					CtakesToDroolsConverter ctakesToJessConverter = new CtakesToDroolsConverter();
 					encounter.clearSummaries();			
 					ctakesToJessConverter.getSummariesForSummarizable(encounter, encounterJCas);
 				}

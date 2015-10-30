@@ -3,7 +3,6 @@ package org.healthnlp.deepphe.workbench;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.io.File;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -15,9 +14,8 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
-import org.healthnlp.deepphe.uima.cr.PatientListReader;
+import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 
 public class AnnotationTabPanel extends JPanel implements TreeSelectionListener {
 	
@@ -27,9 +25,8 @@ public class AnnotationTabPanel extends JPanel implements TreeSelectionListener 
 	private JPanel summarizableViewerPanel;
 	
 	private JTextPane summarizableTextPane = new JTextPane();
-	
-	private PatientListReader patientListReader;
-	private List<Patient> patients;
+
+	private List<KbPatient> patients;
 	
 	private SummarizableTree summarizableTree = new SummarizableTree();
 	
@@ -37,12 +34,6 @@ public class AnnotationTabPanel extends JPanel implements TreeSelectionListener 
 	}
 	
 	public void build() {
-		String file  = Workbench.PROJECT_LOCATION+File.separator+"src/main/resources/corpora/one";
-		final File encountersDirectory = new File(file);
-		patientListReader.setInputDirectoryPath(encountersDirectory.getAbsolutePath());
-		patientListReader.setPatients(patients);
-		patientListReader.execute();
-		
 		setLayout(new BorderLayout());
 		summarizableChooserPanel = createReportExplorer();
 		summarizableViewerPanel = createReportViewerPanel();
@@ -95,13 +86,13 @@ public class AnnotationTabPanel extends JPanel implements TreeSelectionListener 
 		else if (selectedNode.getUserObject() == null) {
 			;
 		}
-		else if (selectedNode.getUserObject() instanceof Patient) {
-			Patient patient = (Patient) selectedNode.getUserObject();
+		else if (selectedNode.getUserObject() instanceof KbPatient) {
+			KbPatient patient = (KbPatient) selectedNode.getUserObject();
 			summarizableTextPane.setText(patient.fetchInfo());
 			summarizableTextPane.setCaretPosition(0);
 		}
-		else if (selectedNode.getUserObject() instanceof Encounter) {
-			Encounter encounter = (Encounter) selectedNode.getUserObject();
+		else if (selectedNode.getUserObject() instanceof KbEncounter) {
+			KbEncounter encounter = (KbEncounter) selectedNode.getUserObject();
 			summarizableTextPane.setText(encounter.fetchInfo());
 			summarizableTextPane.setCaretPosition(0);
 		}
@@ -115,19 +106,11 @@ public class AnnotationTabPanel extends JPanel implements TreeSelectionListener 
 		this.summarizableTree = encounterTree;
 	}
 
-	public PatientListReader getPatientListReader() {
-		return patientListReader;
-	}
-
-	public void setPatientListReader(PatientListReader patientListReader) {
-		this.patientListReader = patientListReader;
-	}
-
-	public List<Patient> getPatients() {
+	public List<KbPatient> getPatients() {
 		return patients;
 	}
 
-	public void setPatients(List<Patient> patients) {
+	public void setPatients(List<KbPatient> patients) {
 		this.patients = patients;
 	}
 

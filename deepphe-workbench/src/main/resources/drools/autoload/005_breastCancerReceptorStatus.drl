@@ -19,24 +19,28 @@ import org.healthnlp.deepphe.summarization.drools.kb.impl.*;
 rule "005_breastCancerReceptorStatus Er"
 	salience 1000
 	when
-	     $g : KbGoal (name == "extract-receptor-status",
+         KbGoal (name == "extract-receptor-status",
                 isActive > 0)
-         $enc : KbEncounter($encounterId : id,                          
-                            ( kind == "Pathology Report" || kind == "Progress Note" )
-                         )
-         $rec : EstrogenReceptorStatus($erId : id, summarizableId == $encounterId)
-         $rel : RelationHasinterpretation($domain : domainId, $range : rangeId)
-         $ord : OrdinalInterpretation(id == $range)   
-         $p : KbPatient($patientId : id)
+         KbPatient($patientId : id)
+         KbEncounter($patientId == patientId,
+                     $encounterId : id,                          
+                     ( kind == "Pathology Report" || kind == "Progress Note" ))
+         EstrogenReceptorStatus($erId : id, summarizableId == $encounterId)
+         $ord : OrdinalInterpretation($ordId : id, summarizableId == $encounterId)   
+         RelationHasinterpretation($erId == domainId, $ordId == rangeId)    
          not EstrogenReceptorStatus(summarizableId == $patientId)                      
     then
         System.out.println("<DROOLS-ENGINE> Estrogen Receptor Fires... ");
         EstrogenReceptorStatus patientEr = new EstrogenReceptorStatusImpl();
-        patientEr.setSummarizableId($patientId);
         OrdinalInterpretation patientOrdinalInterpretation = beanCopyOrdinalInterpretation($ord);
         RelationHasinterpretation patientRelationHasInterpretation = new RelationHasinterpretationImpl();
         patientRelationHasInterpretation.setDomainId(patientEr.getId());
         patientRelationHasInterpretation.setRangeId(patientOrdinalInterpretation.getId());
+        
+        patientEr.setSummarizableId($patientId);
+        patientOrdinalInterpretation.setSummarizableId($patientId);
+        patientRelationHasInterpretation.setSummarizableId($patientId);
+       
         insert(patientEr);
         insert(patientOrdinalInterpretation);
         insert(patientRelationHasInterpretation);
@@ -51,24 +55,28 @@ rule "005_breastCancerReceptorStatus Er"
 rule "005_breastCancerReceptorStatus Pr"
 	salience 1000
 	when
-	     $g : KbGoal (name == "extract-receptor-status",
+         KbGoal (name == "extract-receptor-status",
                 isActive > 0)
-         $enc : KbEncounter($encounterId : id,                          
-                            ( kind == "Pathology Report" || kind == "Progress Note" )
-                        )
-         $rec : ProgesteroneReceptorStatus($erId : id, summarizableId == $encounterId)
-         $rel : RelationHasinterpretation($domain : domainId, $range : rangeId)
-         $ord : OrdinalInterpretation(id == $range)   
-         $p : KbPatient($patientId : id)
-         not ProgesteroneReceptorStatus(summarizableId == $patientId)                      
+         KbPatient($patientId : id)
+         KbEncounter($patientId == patientId,
+                     $encounterId : id,                          
+                     ( kind == "Pathology Report" || kind == "Progress Note" ))
+         ProgesteroneReceptorStatus($prId : id, summarizableId == $encounterId)
+         $ord : OrdinalInterpretation($ordId : id, summarizableId == $encounterId)   
+         RelationHasinterpretation($prId == domainId, $ordId == rangeId)    
+         not ProgesteroneReceptorStatus(summarizableId == $patientId)          
     then
         System.out.println("<DROOLS-ENGINE> Progesterone Receptor Fires... ");
         ProgesteroneReceptorStatus patientPr = new ProgesteroneReceptorStatusImpl();
-        patientPr.setSummarizableId($patientId);
         OrdinalInterpretation patientOrdinalInterpretation = beanCopyOrdinalInterpretation($ord);
         RelationHasinterpretation patientRelationHasInterpretation = new RelationHasinterpretationImpl();
         patientRelationHasInterpretation.setDomainId(patientPr.getId());
         patientRelationHasInterpretation.setRangeId(patientOrdinalInterpretation.getId());
+                       
+        patientPr.setSummarizableId($patientId);
+        patientOrdinalInterpretation.setSummarizableId($patientId);
+        patientRelationHasInterpretation.setSummarizableId($patientId);
+            
         insert(patientPr);
         insert(patientOrdinalInterpretation);
         insert(patientRelationHasInterpretation);
@@ -83,24 +91,28 @@ rule "005_breastCancerReceptorStatus Pr"
 rule "005_breastCancerReceptorStatus Her2"
 	salience 1000
 	when
-	     $g : KbGoal (name == "extract-receptor-status",
+         KbGoal (name == "extract-receptor-status",
                 isActive > 0)
-         $enc : KbEncounter($encounterId : id,                          
-                            ( kind == "Pathology Report" || kind == "Progress Note" )
-                        )
-         $rec : Her2NeuStatus($erId : id, summarizableId == $encounterId)
-         $rel : RelationHasinterpretation($domain : domainId, $range : rangeId)
-         $ord : OrdinalInterpretation(id == $range)   
-         $p : KbPatient($patientId : id)
-         not Her2NeuStatus(summarizableId == $patientId)                      
+         KbPatient($patientId : id)
+         KbEncounter($patientId == patientId,
+                     $encounterId : id,                          
+                     ( kind == "Pathology Report" || kind == "Progress Note" ))
+         Her2NeuStatus($herNeuId : id, summarizableId == $encounterId)
+         $ord : OrdinalInterpretation($ordId : id, summarizableId == $encounterId)   
+         RelationHasinterpretation($herNeuId == domainId, $ordId == rangeId)    
+         not Her2NeuStatus(summarizableId == $patientId)         	           
     then
         System.out.println("<DROOLS-ENGINE> Her2/Neu Receptor Fires... ");
         Her2NeuStatus patientHer2 = new Her2NeuStatusImpl();
-        patientHer2.setSummarizableId($patientId);
         OrdinalInterpretation patientOrdinalInterpretation = beanCopyOrdinalInterpretation($ord);
         RelationHasinterpretation patientRelationHasInterpretation = new RelationHasinterpretationImpl();
         patientRelationHasInterpretation.setDomainId(patientHer2.getId());
         patientRelationHasInterpretation.setRangeId(patientOrdinalInterpretation.getId());
+ 
+        patientHer2.setSummarizableId($patientId);
+        patientOrdinalInterpretation.setSummarizableId($patientId);
+        patientRelationHasInterpretation.setSummarizableId($patientId);
+ 
         insert(patientHer2);
         insert(patientOrdinalInterpretation);
         insert(patientRelationHasInterpretation);

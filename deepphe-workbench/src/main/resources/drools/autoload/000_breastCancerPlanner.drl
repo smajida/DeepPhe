@@ -13,7 +13,7 @@ rule "000_breastCancerPlanner Activate when BreastNeoplasm"
                 isActive > 0)
         BreastNeoplasm ( $id : id,  $isActive : isActive )    
     then
-        System.out.println("Stacking goals for BreastNeoplasm Analysis based on " + $id +
+        System.out.println("<DROOLS-ENGINE> Stacking goals for BreastNeoplasm Analysis based on " + $id +
          "\nwith activity = " + $isActive);
          retract($g);
        

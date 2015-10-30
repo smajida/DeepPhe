@@ -9,6 +9,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,15 +22,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import jess.JessException;
-import jess.Rete;
-
 import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
-import org.healthnlp.deepphe.ontology.PartialPath;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
-import org.healthnlp.deepphe.ontology.OntologyCleaner;
-import org.healthnlp.deepphe.uima.cr.PatientListReader;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DataDataSourceManager;
+import org.healthnlp.deepphe.ontology.OntologyCleaner;
+import org.healthnlp.deepphe.ontology.PartialPath;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.uima.cr.PatientListReader;
 
 public class Workbench extends JFrame implements ActionListener, PropertyChangeListener {
 	
@@ -53,20 +51,22 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 	
 	private final TreeSet<PartialPath> partialPathTreeSet = new TreeSet<PartialPath>();
 	private final HashMap<String, PartialPath> partialPathMap = new HashMap<>();
-	private final Rete engine = new Rete();
-	private final PatientKnowledgeExtractorInterface patientKnowledgeExtractor = new PatientKnowledgeExtractorJess();
-	private final JessTextInputer jessInputer = new JessTextInputer();
-	private final JessTextOutputer jessOutputer = new JessTextOutputer();
+	private final PatientKnowledgeExtractorInterface patientKnowledgeExtractor = new PatientKnowledgeExtractorDrools();
+	private final DroolsTextInputer droolsInputer = new DroolsTextInputer();
+	private final DroolsTextOutputer droolsOutputer = new DroolsTextOutputer();
 	private final PatientListReader patientListReader = new PatientListReader();
-	private final List<Patient> patients = new ArrayList<>();
+	private final List<KbPatient> patients = new ArrayList<>();
+	
+	private final DroolsKnowledgeBaseAndSession engine = DroolsKnowledgeBaseAndSession.getInstance();
 
 	private WindowAdapter windowAdapter;
 
 	private JPanel mainPanel;
 	private ImageIcon iconOne =  new ImageIcon(
-			Workbench.class.getResource("/images/24/dashboardico.gif"));
+			Workbench.class.getResource("/images/24f/dashboardico.gif"));
 	private JTabbedPane mainTabbedPane = new JTabbedPane();
 	private AnnotationTabPanel annotationTabPanel;
+	private InferenceTabPanel inferenceTabPanel;
 	
 	private OntologyCleaner ontologyCleaner;
 	private PipeDialogPatientExtraction patientExtractor;
@@ -82,6 +82,19 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 		
 		establishWindowControls();
 		
+		String file  = Workbench.PROJECT_LOCATION+File.separator+"src/main/resources/corpora/one";
+		final File encountersDirectory = new File(file);
+		patientListReader.setInputDirectoryPath(encountersDirectory.getAbsolutePath());
+		patientListReader.setPatients(patients);
+		patientListReader.execute();
+		
+		establishExtractor();
+		patientKnowledgeExtractor.setDroolsTextOutputer(droolsOutputer);
+		droolsInputer.setDroolsTextOutputer(droolsOutputer);
+		droolsInputer.setKnowledgeExtractor(patientKnowledgeExtractor);
+		
+		buildAnnotationTabPanel();
+		buildInferenceTabPanel();
 		buildMainPanel();
 		JPanel mainPanel = getMainPanel();
 		
@@ -114,48 +127,49 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 
 		addWindowListener(windowAdapter);
 	}
-
-	private void buildMainPanel() {
-		mainPanel = new JPanel();
-		
+	
+	private void buildAnnotationTabPanel() {
 		annotationTabPanel = new AnnotationTabPanel();
-		mainTabbedPane.addTab("Annotation", iconOne, annotationTabPanel, "AnnotateTab");
-		mainTabbedPane.setSelectedIndex(0);
-		
 		annotationTabPanel.setPatients(patients);
-		annotationTabPanel.setPatientListReader(patientListReader);
 		annotationTabPanel.build();
-			
-		InferenceTabPanel inferenceTabPanel = new InferenceTabPanel();
-		mainTabbedPane.addTab("Inference", iconOne, inferenceTabPanel, "InferenceTab");
-		
-		establishExtractor();
-		patientKnowledgeExtractor.setJessTextOutputer(jessOutputer);
-		jessInputer.setJessTextOutputer(jessOutputer);
-		jessInputer.setKnowledgeExtractor(patientKnowledgeExtractor);
-		inferenceTabPanel.setJessInputer(jessInputer);
-		inferenceTabPanel.setJessOutputer(jessOutputer);
+	}
+	
+	private void buildInferenceTabPanel() {
+		inferenceTabPanel = new InferenceTabPanel();
+		inferenceTabPanel.setDroolsInputer(droolsInputer);
+		inferenceTabPanel.setDroolsOutputer(droolsOutputer);
 		inferenceTabPanel.setKnowledgeExtractor(patientKnowledgeExtractor);
 		inferenceTabPanel.setEngine(engine);
 		inferenceTabPanel.setPatients(patients);
 		inferenceTabPanel.build();
-		
+	}
+	
+	private void rebuildInferencePanel() {
+		int selectedIdx = mainTabbedPane.getSelectedIndex();
+		mainTabbedPane.remove(1);
+		buildInferenceTabPanel();
+		mainTabbedPane.addTab("Inference", iconOne, inferenceTabPanel, "InferenceTab");
+		mainTabbedPane.setSelectedIndex(selectedIdx);
+	}
+
+	private void buildMainPanel() {
+		mainPanel = new JPanel();
+		mainTabbedPane.addTab("Annotation", iconOne, annotationTabPanel, "AnnotateTab");
+		mainTabbedPane.setSelectedIndex(0);
+		mainTabbedPane.addTab("Inference", iconOne, inferenceTabPanel, "InferenceTab");
 		mainPanel.setLayout(new GridLayout(1, 1));
 		mainPanel.add(mainTabbedPane);
 		mainPanel.setPreferredSize(new Dimension(1200, 900));
 	}
-	
+
 	private void establishExtractor() {
 		try {
-			engine.reset();
-			patientKnowledgeExtractor.setJessEngine(engine);
-			patientKnowledgeExtractor.loadProductionClipsFiles();
-			patientKnowledgeExtractor.setPatients(patients);	
+		    patientKnowledgeExtractor.setKnowledgeBase(engine);
+			patientKnowledgeExtractor.setPatients(patients);		
+			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new EncounterKnowledgeExtractorStub());
+//			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new EncounterKnowledgeExtractorCtakes());
 			
-//			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new EncounterKnowledgeExtractorStub());
-			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new EncounterKnowledgeExtractorCtakes());
-			
-		} catch (JessException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -177,6 +191,7 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 			processExtractPatient();
 		} else if (actionCommand.equals("Load Single Patient To KB")) {
 			processLoadSinglePatientToKb();
+			rebuildInferencePanel();
 		}  else if (actionCommand.equals("Extract Encounters")) {
 			processExtractEncounters();
 		} else if (actionCommand.equals("Ontology Clean")) {
@@ -184,24 +199,22 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 		} else if (actionCommand.equals("Patient Clean")) {
 			processPatientClean();
 		} else if (actionCommand.equals("Reset")) {
-			patientKnowledgeExtractor.executeJess("(reset)");
+			engine.executeDrools("(reset)");
 		} else if (actionCommand.equals("Clear")) {
-			patientKnowledgeExtractor.clearJess();
+			engine.clearDrools();
 		} else if (actionCommand.equals("Eval")) {
-			patientKnowledgeExtractor.executeJess(jessInputer.geSelectedText());
+			engine.executeDrools(droolsInputer.geSelectedText());
 		} else if (actionCommand.equals("Run")) {
-			patientKnowledgeExtractor.executeJess("(run)");
-		} else if (e.getActionCommand().equals("Templates")) {
-			patientKnowledgeExtractor.displayDeftemplates();
+			engine.execute();
+			rebuildInferencePanel();
 		} else if (e.getActionCommand().equals("Facts")) {
-			patientKnowledgeExtractor.displayFacts();
+			engine.displayFacts();
 		}
 	}
 	
 	private void processExtractEncounters() {
-		EncounterKnowledgeExtractorInterface encounterKnowledgeExtractor = new
-				EncounterKnowledgeExtractorCtakes();
-		for (Patient patient : patients) {
+		EncounterKnowledgeExtractorInterface encounterKnowledgeExtractor = EncounterKnowlegeExractorFactory.getEncounterKnowledgeExtractor();
+		for (KbPatient patient : patients) {
 			encounterKnowledgeExtractor.setPatient(patient);
 			encounterKnowledgeExtractor.execute();
 		}		
@@ -222,7 +235,7 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 	
 	private void processLoadSinglePatientToKb() {
 		EncounterKnowledgeExtractorInterface encounterKnowledgeExtractor = EncounterKnowlegeExractorFactory.getEncounterKnowledgeExtractor();
-		for (Patient patient : patients) {
+		for (KbPatient patient : patients) {
 			encounterKnowledgeExtractor.setPatient(patient);
 			encounterKnowledgeExtractor.execute();
 			break;
@@ -233,6 +246,8 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 			patientKnowledgeExtractor.nextPatient();
 			patientKnowledgeExtractor.loadSinglePatient();
 		}
+		
+	
 	}
 
 	private void processPatientClean() {

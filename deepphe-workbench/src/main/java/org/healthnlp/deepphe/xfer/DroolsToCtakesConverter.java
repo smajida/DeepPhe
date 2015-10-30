@@ -17,57 +17,48 @@ import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
-import org.healthnlp.deepphe.summarization.jess.kb.Diagnosis;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
-import org.healthnlp.deepphe.summarization.jess.kb.Summary;
-import org.healthnlp.deepphe.summarization.jess.kb.TnmMgrade;
-import org.healthnlp.deepphe.summarization.jess.kb.TnmNgrade;
-import org.healthnlp.deepphe.summarization.jess.kb.TnmTgrade;
-import org.healthnlp.deepphe.summarization.jess.kb.TumorSizeCalculator;
+import org.healthnlp.deepphe.summarization.drools.kb.DiseaseDisorder;
+import org.healthnlp.deepphe.summarization.drools.kb.GenericDistantMetastasisTnmFinding;
+import org.healthnlp.deepphe.summarization.drools.kb.GenericPrimaryTumorTnmFinding;
+import org.healthnlp.deepphe.summarization.drools.kb.GenericRegionalLymphNodesTnmFinding;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
+import org.healthnlp.deepphe.summarization.drools.kb.RelationHasinterpretation;
+import org.healthnlp.deepphe.summarization.drools.kb.TumorGreaterThanOrEqualTo21Centimeters;
+import org.healthnlp.deepphe.summarization.drools.kb.TumorLessThanOrEqualTo20Centimeters;
+import org.healthnlp.deepphe.summarization.drools.kb.TumorSize;
 
-public class JessToCtakesConverter {
+public class DroolsToCtakesConverter {
 
-	private Patient patient;
+	private KbPatient patient;
 	private JCas patientJCas;
 
-	private TnmTgrade tnmTgrade;
-	private TnmNgrade tnmNgrade;
-	private TnmMgrade tnmMgrade;
+	private GenericPrimaryTumorTnmFinding tnmTgrade;
+	private GenericRegionalLymphNodesTnmFinding tnmNgrade;
+	private GenericDistantMetastasisTnmFinding tnmMgrade;
 
 	private int tnmGradesSeen = 0;
 
 	public void execute() {
-
-		for (Summary summary : patient.getSummaries()) {
-			String className = summary.getClass().getSimpleName();
-			switch (className) {
-			case "Diagnosis":
+		
+		for (KbSummary summary : patient.getSummaries()) {
+			
+			if (DiseaseDisorder.class.isAssignableFrom(summary.getClass())) {
 				cacheDiagnosis(summary);
-				break;
-			case "TnmTgrade":
-				tnmTgrade = (TnmTgrade) summary;
-				tnmGradesSeen++;
-				break;
-			case "TnmNgrade":
-				tnmNgrade = (TnmNgrade) summary;
-				tnmGradesSeen++;
-				break;
-			case "TnmMgrade":
-				tnmMgrade = (TnmMgrade) summary;
-				tnmGradesSeen++;
-				break;
-			case "TumorSizeCalculator":
+			} else if (GenericPrimaryTumorTnmFinding.class.isAssignableFrom(summary.getClass())) {
+				tnmTgrade = (GenericPrimaryTumorTnmFinding) summary;
+			}  else if (GenericRegionalLymphNodesTnmFinding.class.isAssignableFrom(summary.getClass())) {
+				tnmNgrade = (GenericRegionalLymphNodesTnmFinding) summary;
+			}  else if (GenericDistantMetastasisTnmFinding .class.isAssignableFrom(summary.getClass())) {
+				tnmMgrade = (GenericDistantMetastasisTnmFinding) summary;
+			}   else if (TumorSize.class.isAssignableFrom(summary.getClass())) {
 				cacheTumorSize(summary);
-				break;
-			case "Her2":
-			case "Er":
-			case "Pr":
+			}   else if (RelationHasinterpretation.class.isAssignableFrom(summary.getClass())) {
+				int domainId = ((RelationHasinterpretation) summary).getDomainId();
+				int rangeId =  ((RelationHasinterpretation) summary).getRangeId();
 				cacheReceptorStatus(summary);
-				break;
-			default:
-				break;
 			}
-
+	
 			if (tnmGradesSeen == 3) {
 				cacheTnmGrade();
 				tnmGradesSeen = 0;
@@ -75,8 +66,8 @@ public class JessToCtakesConverter {
 		}
 	}
 
-	private void cacheDiagnosis(Summary summary) {
-		final Diagnosis diagnosis = (Diagnosis) summary;
+	private void cacheDiagnosis(KbSummary summary) {
+		final DiseaseDisorder diagnosis = (DiseaseDisorder) summary;
 		final FSArray ocArr = new FSArray(patientJCas, 1);
 		final OntologyConcept oc = new OntologyConcept(patientJCas);
 		oc.setCode(diagnosis.getCode());
@@ -92,7 +83,7 @@ public class JessToCtakesConverter {
 		neAnnot.addToIndexes();
 	}
 
-	private void cacheReceptorStatus(Summary summary) {
+	private void cacheReceptorStatus(KbSummary summary) {
 		final ReceptorStatus receptorStatusAnnotation = new ReceptorStatus(
 				patientJCas, 0, 0);
 		receptorStatusAnnotation.setCode(summary.getCode());
@@ -111,19 +102,17 @@ public class JessToCtakesConverter {
 		receptorStatusAnnotation.addToIndexes();
 	}
 
-	private void cacheTumorSize(Summary summary) {
-		final TumorSizeCalculator tumorSize = (TumorSizeCalculator) summary;
+	private void cacheTumorSize(KbSummary summary) {
+		
 		final CancerSize cancerSize = new CancerSize(patientJCas, 0, 0);
 		final List<Double> dimensions = new ArrayList<Double>();
-		if (tumorSize.getDimensionOne() > 0.0d) {
-			dimensions.add(tumorSize.getDimensionOne());
-		}
-		if (tumorSize.getDimensionTwo() > 0.0d) {
-			dimensions.add(tumorSize.getDimensionTwo());
-		}
-		if (tumorSize.getDimensionThree() > 0.0d) {
-			dimensions.add(tumorSize.getDimensionThree());
-		}
+		
+		if (TumorGreaterThanOrEqualTo21Centimeters.class.isAssignableFrom(summary.getClass())) {
+			dimensions.add(2.1d);
+		} 
+		else if (TumorLessThanOrEqualTo20Centimeters.class.isAssignableFrom(summary.getClass())) {
+			dimensions.add(2.0d);
+		} 
 		if (!dimensions.isEmpty()) {
 			final FSArray measurementFeatures = new FSArray(patientJCas,
 					dimensions.size());
@@ -132,7 +121,7 @@ public class JessToCtakesConverter {
 				final SizeMeasurement measurementFeature = new SizeMeasurement(
 						patientJCas);
 				measurementFeature.setValue(dimension.floatValue());
-				measurementFeature.setUnit(tumorSize.getUnitOfMeasure());
+				measurementFeature.setUnit("cm");
 				measurementFeatures.set(measurementIndex, measurementFeature);
 				measurementIndex++;
 			}
@@ -144,11 +133,11 @@ public class JessToCtakesConverter {
 	private void cacheTnmGrade() {
 		final TnmClassification tnmClassificationType = new TnmClassification(
 				patientJCas, 0, 0);
-		tnmClassificationType.setSize(createTnmStageFeature(tnmTgrade,
+		tnmClassificationType.setSize(createTnmStageFeature((KbSummary)tnmTgrade,
 				patientJCas));
-		tnmClassificationType.setNodeSpread(createTnmStageFeature(tnmNgrade,
+		tnmClassificationType.setNodeSpread(createTnmStageFeature((KbSummary)tnmNgrade,
 				patientJCas));
-		tnmClassificationType.setMetastasis(createTnmStageFeature(tnmMgrade,
+		tnmClassificationType.setMetastasis(createTnmStageFeature((KbSummary)tnmMgrade,
 				patientJCas));
 		tnmClassificationType.setTypeID(NE_TYPE_ID_FINDING);
 		final UmlsConcept umlsConcept = new UmlsConcept(patientJCas);
@@ -163,7 +152,7 @@ public class JessToCtakesConverter {
 		tnmClassificationType.addToIndexes();
 	}
 
-	private TnmFeature createTnmStageFeature(final Summary summary,
+	private TnmFeature createTnmStageFeature(final KbSummary summary,
 			final JCas jcas) {
 		final TnmFeature tnmStageFeature = new TnmFeature(jcas);
 		tnmStageFeature.setPrefix(createTnmStagePrefix(jcas));
@@ -181,11 +170,11 @@ public class JessToCtakesConverter {
 		return tnmStagePrefix;
 	}
 
-	public Patient getPatient() {
+	public KbPatient getPatient() {
 		return patient;
 	}
 
-	public void setPatient(Patient patient) {
+	public void setPatient(KbPatient patient) {
 		this.patient = patient;
 	}
 

@@ -27,7 +27,7 @@ rule "001_breastCancerPrimaryTumor From First Encounter"
              and MalignantBreastNeoplasm ( summarizableId == $encounterTwoId ))
     then     
         MalignantBreastNeoplasm patientDisease = beanCopyMalignantBreastNeoplasm($diag);
-        System.out.println("Linking a " + patientDisease.getClass().getSimpleName() + " to the patient ");
+        System.out.println("<DROOLS-ENGINE> Linking a " + patientDisease.getClass().getSimpleName() + " to the patient ");
         patientDisease.setSummarizableId($patientId);
         insert(patientDisease);
 end

@@ -10,7 +10,6 @@ import org.apache.ctakes.cancer.type.textsem.CancerSize;
 import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.cancer.type.textsem.TnmClassification;
-import org.apache.ctakes.cancer.type.textsem.TnmFeature;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
@@ -19,27 +18,41 @@ import org.apache.uima.cas.FeatureStructure;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.tcas.Annotation;
-import org.healthnlp.deepphe.summarization.jess.kb.Diagnosis;
-import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
-import org.healthnlp.deepphe.summarization.jess.kb.Er;
-import org.healthnlp.deepphe.summarization.jess.kb.Her2;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
-import org.healthnlp.deepphe.summarization.jess.kb.Pr;
-import org.healthnlp.deepphe.summarization.jess.kb.Summarizable;
-import org.healthnlp.deepphe.summarization.jess.kb.Summary;
-import org.healthnlp.deepphe.summarization.jess.kb.TnmMgrade;
-import org.healthnlp.deepphe.summarization.jess.kb.TnmNgrade;
-import org.healthnlp.deepphe.summarization.jess.kb.TnmTgrade;
-import org.healthnlp.deepphe.summarization.jess.kb.TumorSizeCalculator;
+import org.healthnlp.deepphe.summarization.drools.kb.EstrogenReceptorStatus;
+import org.healthnlp.deepphe.summarization.drools.kb.GenericDistantMetastasisTnmFinding;
+import org.healthnlp.deepphe.summarization.drools.kb.GenericPrimaryTumorTnmFinding;
+import org.healthnlp.deepphe.summarization.drools.kb.GenericRegionalLymphNodesTnmFinding;
+import org.healthnlp.deepphe.summarization.drools.kb.Her2NeuStatus;
+import org.healthnlp.deepphe.summarization.drools.kb.InvasiveBreastCarcinoma;
+import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.summarization.drools.kb.KbSummarizable;
+import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
+import org.healthnlp.deepphe.summarization.drools.kb.OrdinalInterpretation;
+import org.healthnlp.deepphe.summarization.drools.kb.ProgesteroneReceptorStatus;
+import org.healthnlp.deepphe.summarization.drools.kb.RelationHasinterpretation;
+import org.healthnlp.deepphe.summarization.drools.kb.TumorSize;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.EstrogenReceptorStatusImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.GenericDistantMetastasisTnmFindingImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.GenericPrimaryTumorTnmFindingImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.GenericRegionalLymphNodesTnmFindingImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.Her2NeuStatusImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.InvasiveBreastCarcinomaImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.NegativeImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.PositiveImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.ProgesteroneReceptorStatusImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.RelationHasinterpretationImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.TumorGreaterThanOrEqualTo21CentimetersImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.TumorLessThanOrEqualTo20CentimetersImpl;
 import org.healthnlp.deepphe.uima.ae.CasDetector;
 
-public class CtakesToJessConverter {
+public class CtakesToDroolsConverter {
 	
 	private JCas multiJCas;
 	private JCas patientJCas;
-	private Patient patient;
+	private KbPatient patient;
 	
-	public CtakesToJessConverter() {
+	public CtakesToDroolsConverter() {
 		;
 	}
 	
@@ -53,7 +66,7 @@ public class CtakesToJessConverter {
 				getSummariesForSummarizable(patient, summarizableCas);
 			}
 			else if (CasDetector.isEncounterJCas(summarizableCas)) {
-				Encounter encounter = new Encounter();
+				KbEncounter encounter = new KbEncounter();
 				encounter.setPatientId(patient.getId());
 				encounter.setId(parseIdFromViewKey(summarizableCas.getViewName()));
 				encounter.setSequence(encounter.getId());
@@ -64,7 +77,7 @@ public class CtakesToJessConverter {
 		}
 	}
 	
-	public void getSummariesForSummarizable(Summarizable summarizable, JCas summarizableJCas) {
+	public void getSummariesForSummarizable(KbSummarizable summarizable, JCas summarizableJCas) {
 
 		List<IdentifiedAnnotation> identifiedAnnotations = new ArrayList<IdentifiedAnnotation>();
 		identifiedAnnotations.addAll(getAnnotationsByType(summarizableJCas,
@@ -109,56 +122,65 @@ public class CtakesToJessConverter {
 		}
 	}
 
-	private void processDiseaseDisorderMention(Summarizable summarizable,
+	private void processDiseaseDisorderMention(KbSummarizable summarizable,
 			JCas encounterJCas, IdentifiedAnnotation identifiedAnnotation,
 			UmlsConcept umlsConcept) {
-		
 		String cui = getCuiForUmlsConcept(umlsConcept);
 		if (cui.equals("C1134719")) {
-			Diagnosis diagnosis = new Diagnosis();
+			InvasiveBreastCarcinoma diagnosis = new InvasiveBreastCarcinomaImpl();
 			diagnosis.setSummarizableId(summarizable.getId());
 			diagnosis.setBaseCode(cui);
 			diagnosis.setCode(cui);
 			diagnosis.setPreferredTerm("Invasive Ductal Breast Carcinoma");
 			diagnosis.setValue("NA");			
-			summarizable.addSummary(diagnosis);
+			summarizable.addSummary((KbSummary) diagnosis);
 		}
-		
-		
 	}
 
-	private void processReceptorStatus(Summarizable summarizable,
+	private void processReceptorStatus(KbSummarizable summarizable,
 			UmlsConcept umlsConcept) {
 		
 		String cui = getCuiForUmlsConcept(umlsConcept);
 		
 		switch (cui) {
-		case "C0279756": // Negative Estrogen Receptor
-			Summary receptorStatusSummary = new Er();
+		case "C0279756": // Negative Estrogen Receptor	
+			RelationHasinterpretation receptorStatusSummary = new RelationHasinterpretationImpl();
+			EstrogenReceptorStatus erStatus = new EstrogenReceptorStatusImpl();
+			OrdinalInterpretation erInterpretation = new NegativeImpl();
+			receptorStatusSummary.setDomainId(erStatus.getId());
+			receptorStatusSummary.setRangeId(erInterpretation.getId());
 			receptorStatusSummary.setSummarizableId(summarizable.getId());
 			receptorStatusSummary.setBaseCode(cui);
 			receptorStatusSummary.setCode(cui);
 			receptorStatusSummary.setPreferredTerm(getPreferredTermForUmlsConcept(umlsConcept));
 			receptorStatusSummary.setValue("negative");			
-			summarizable.addSummary(receptorStatusSummary);
+			summarizable.addSummary((KbSummary)receptorStatusSummary);
 			break;
 		case "C0279766": // Negative Progesterone Receptor
-			receptorStatusSummary = new Pr();
+			receptorStatusSummary = new RelationHasinterpretationImpl();
+			ProgesteroneReceptorStatus prStatus = new ProgesteroneReceptorStatusImpl();
+			OrdinalInterpretation prInterpretation = new NegativeImpl();
+			receptorStatusSummary.setDomainId(prStatus.getId());
+			receptorStatusSummary.setRangeId(prInterpretation.getId());
 			receptorStatusSummary.setSummarizableId(summarizable.getId());
 			receptorStatusSummary.setBaseCode(cui);
 			receptorStatusSummary.setCode(cui);
 			receptorStatusSummary.setPreferredTerm(getPreferredTermForUmlsConcept(umlsConcept));
-			receptorStatusSummary.setValue("negative");
-			summarizable.addSummary(receptorStatusSummary);
+			receptorStatusSummary.setValue("negative");			
+			summarizable.addSummary((KbSummary)receptorStatusSummary);
 			break;
 		case "C1960398": // Positive Human epidermal growth factor receptor 2
-			receptorStatusSummary = new Her2();
+			receptorStatusSummary = new RelationHasinterpretationImpl();
+			Her2NeuStatus her2NeuStatus = new Her2NeuStatusImpl();
+			OrdinalInterpretation her2NeuInterpretation = new PositiveImpl();
+			receptorStatusSummary.setDomainId(her2NeuStatus.getId());
+			receptorStatusSummary.setRangeId(her2NeuInterpretation.getId());
 			receptorStatusSummary.setSummarizableId(summarizable.getId());
 			receptorStatusSummary.setBaseCode(cui);
 			receptorStatusSummary.setCode(cui);
 			receptorStatusSummary.setPreferredTerm(getPreferredTermForUmlsConcept(umlsConcept));
-			receptorStatusSummary.setValue("positive");
-			summarizable.addSummary(receptorStatusSummary);
+			receptorStatusSummary.setValue("positive");			
+			summarizable.addSummary((KbSummary)receptorStatusSummary);
 			break;
 		default:
 			break;
@@ -166,101 +188,67 @@ public class CtakesToJessConverter {
 
 	}
 
-	private void processCancerSize(Summarizable summarizable, JCas encounterJCas,
+	private void processCancerSize(KbSummarizable summarizable, JCas encounterJCas,
 			IdentifiedAnnotation identifiedAnnotation, UmlsConcept umlsConcept) {
-
+	
 		CancerSize cancerSize = (CancerSize) identifiedAnnotation;
-
-		TumorSizeCalculator tumorSize = new TumorSizeCalculator();
-		tumorSize.setSummarizableId(summarizable.getId());
-
-		tumorSize.setDimensionOne(-1.0d);
-		tumorSize.setDimensionTwo(-1.0d);
-		tumorSize.setDimensionThree(-1.0d);
-
 		FSArray measurementsArray = cancerSize.getMeasurements();
 		double maxSize = -1.0d;
 		for (int idx = 0; idx < measurementsArray.size(); idx++) {
 			SizeMeasurement sizeMeasurement = cancerSize.getMeasurements(idx);
 			float valueAsFloat = sizeMeasurement.getValue();
 			double valueAsDouble = (double) valueAsFloat;
-			System.out.println("Got size measurement of " + valueAsDouble);
-			switch (idx) {
-			case 0:
-				tumorSize.setDimensionOne(valueAsDouble);
-				tumorSize.setUnitOfMeasure(sizeMeasurement.getUnit());
-				break;
-			case 1:
-				tumorSize.setDimensionOne(valueAsDouble);
-				break;
-			default:
-				tumorSize.setDimensionThree(valueAsDouble);
-				break;
-			}
 			if (valueAsDouble  > maxSize) {
 				maxSize = valueAsDouble;
 			}			
 		}
-		tumorSize.setGreatestDimension(maxSize);
 		
-		if (tumorSize.getGreatestDimension() >= 2.0d) {
-			tumorSize.setBaseCode("C120286");
-			tumorSize.setCode("C120286");
-			tumorSize
-					.setPreferredTerm("Tumor Greater Than or Equal to 2.1 Centimeters");
-		} else {
-			tumorSize.setBaseCode("C120285");
-			tumorSize.setCode("C120285");
-			tumorSize
-					.setPreferredTerm("Tumor Less Than or Equal to 2.0 Centimeters");
+		if (maxSize > 0.0d) {
+			System.out.println("Got size measurement of " + maxSize);		
+			TumorSize tumorSize;
+			if (maxSize >= 2.0d) {
+				tumorSize = new TumorGreaterThanOrEqualTo21CentimetersImpl();
+				tumorSize.setBaseCode("C120286");
+				tumorSize.setCode("C120286");
+				tumorSize
+						.setPreferredTerm("Tumor Greater Than or Equal to 2.1 Centimeters");
+			} else {
+				tumorSize = new TumorLessThanOrEqualTo20CentimetersImpl();
+				tumorSize.setBaseCode("C120285");
+				tumorSize.setCode("C120285");
+				tumorSize
+						.setPreferredTerm("Tumor Less Than or Equal to 2.0 Centimeters");
+			}
+			summarizable.addSummary((KbSummary)tumorSize);
 		}
-
-		summarizable.addSummary(tumorSize);
-
+		
 	}
 
-	private void processTnmClassification(Summarizable summarizable,
+	private void processTnmClassification(KbSummarizable summarizable,
 			JCas encounterJCas, IdentifiedAnnotation identifiedAnnotation,
 			UmlsConcept umlsConcept, int groupIndex) {
-		TnmClassification tnmClassification = (TnmClassification) identifiedAnnotation;
 
-		TnmFeature tnmT = tnmClassification.getSize();
-		TnmFeature tnmN = tnmClassification.getNodeSpread();
-		TnmFeature tnmM = tnmClassification.getMetastasis();
-
-		TnmTgrade tnmTgrade = new TnmTgrade();
+		GenericPrimaryTumorTnmFinding tnmTgrade = new GenericPrimaryTumorTnmFindingImpl();
 		tnmTgrade.setSummarizableId(summarizable.getId());
 		tnmTgrade.setCode(getCuiForUmlsConcept(umlsConcept));
 		tnmTgrade.setBaseCode("T");
-		tnmTgrade.setGroupIndex(groupIndex);
 		tnmTgrade.setIsActive(1);
-		tnmTgrade.setPreferredTerm(tnmT.getDescription());
-		tnmTgrade.setValue(tnmT.getValue());
-		tnmTgrade.setProvidingDepartment("Pathology");
 		tnmTgrade.setUnitOfMeasure("NA");
-		summarizable.getSummaries().add(tnmTgrade);
+		summarizable.getSummaries().add((KbSummary)tnmTgrade);
 
-		TnmNgrade tnmNgrade = new TnmNgrade();
+		GenericRegionalLymphNodesTnmFinding tnmNgrade = new GenericRegionalLymphNodesTnmFindingImpl();
 		tnmNgrade.setSummarizableId(summarizable.getId());
 		tnmNgrade.setBaseCode("N");
 		tnmNgrade.setCode(getCuiForUmlsConcept(umlsConcept));
-		tnmNgrade.setGroupIndex(groupIndex);
-		tnmNgrade.setPreferredTerm(tnmN.getDescription());
-		tnmNgrade.setProvidingDepartment("Pathology");
 		tnmNgrade.setUnitOfMeasure("NA");
-		tnmNgrade.setValue(tnmN.getValue());
-		summarizable.addSummary(tnmNgrade);
+		summarizable.addSummary((KbSummary)tnmNgrade);
 
-		TnmMgrade tnmMgrade = new TnmMgrade();
+		GenericDistantMetastasisTnmFinding tnmMgrade = new GenericDistantMetastasisTnmFindingImpl();
 		tnmMgrade.setSummarizableId(summarizable.getId());
 		tnmMgrade.setBaseCode("M");
 		tnmMgrade.setCode(getCuiForUmlsConcept(umlsConcept));
-		tnmMgrade.setGroupIndex(groupIndex);
-		tnmMgrade.setPreferredTerm(tnmM.getDescription());
-		tnmMgrade.setProvidingDepartment("Pathology");
 		tnmMgrade.setUnitOfMeasure("NA");
-		tnmMgrade.setValue(tnmM.getValue());
-		summarizable.addSummary(tnmMgrade);
+		summarizable.addSummary((KbSummary)tnmMgrade);
 
 	}
 
@@ -330,11 +318,11 @@ public class CtakesToJessConverter {
 		this.patientJCas = patientJCas;
 	}
 
-	public Patient getPatient() {
+	public KbPatient getPatient() {
 		return patient;
 	}
 
-	public void setPatient(Patient patient) {
+	public void setPatient(KbPatient patient) {
 		this.patient = patient;
 	}
 

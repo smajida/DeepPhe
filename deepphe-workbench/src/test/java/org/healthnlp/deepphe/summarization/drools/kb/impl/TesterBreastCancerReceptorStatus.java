@@ -542,15 +542,15 @@ public class TesterBreastCancerReceptorStatus {
 		prStatus.setId(idCounter++);
 		prStatus.setSummarizableId(encOne.getId());
 		
-		Negative prPositive = new NegativeImpl();
-		prPositive.setId(idCounter++);
-		prPositive.setSummarizableId(encOne.getId());
+		Negative prNegative = new NegativeImpl();
+		prNegative.setId(idCounter++);
+		prNegative.setSummarizableId(encOne.getId());
 		
 		RelationHasinterpretation prHasInterpretation = new RelationHasinterpretationImpl();
 		prHasInterpretation.setId(idCounter++);
 		prHasInterpretation.setSummarizableId(encOne.getId());
-		erHasInterpretation.setDomainId(prStatus.getId());
-		erHasInterpretation.setRangeId(prPositive.getId());
+		prHasInterpretation.setDomainId(prStatus.getId());
+		prHasInterpretation.setRangeId(prNegative.getId());
 		
 		// Her2Neu-
 		Her2NeuStatus her2NeuStatus = new Her2NeuStatusImpl();
@@ -575,7 +575,7 @@ public class TesterBreastCancerReceptorStatus {
 		session.insert(erNegative);
 		session.insert(erHasInterpretation);
 		session.insert(prStatus);
-		session.insert(prPositive);
+		session.insert(prNegative);
 		session.insert(prHasInterpretation);
 		session.insert(her2NeuStatus);
 		session.insert(her2NeuNegative);
