@@ -23,7 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
-import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DataDataSourceManager;
+import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
 import org.healthnlp.deepphe.ontology.OntologyCleaner;
 import org.healthnlp.deepphe.ontology.PartialPath;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
@@ -252,7 +252,7 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 
 	private void processPatientClean() {
 		try {
-			final I2b2DataDataSourceManager i2b2DataDataSourceManager = new I2b2DataDataSourceManager();
+			final I2b2DemoDataSourceManager i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
 			final I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
 			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
 			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE2");

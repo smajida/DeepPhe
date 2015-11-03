@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.summarization.drools.kb.impl;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.net.URL;
 
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
@@ -32,8 +33,8 @@ public class TesterBreastCancerPlanner {
 
 			KnowledgeBuilder builder = KnowledgeBuilderFactory
 					.newKnowledgeBuilder();
-			File autoloadDirectory = new File(
-					"src\\main\\resources\\drools\\autoload");
+			URL autoloadUrl = getClass().getResource("drools/autoload");
+			File autoloadDirectory = new File(autoloadUrl.getPath());
 			if (autoloadDirectory.exists() && autoloadDirectory.isDirectory()) {
 				File[] autoloadFiles = autoloadDirectory.listFiles();
 				for (File autoloadFile : autoloadFiles) {

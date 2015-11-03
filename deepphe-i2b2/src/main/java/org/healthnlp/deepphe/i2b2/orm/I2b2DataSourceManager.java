@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.healthnlp.deepphe.i2b2.orm.i2b2data;
+package org.healthnlp.deepphe.i2b2.orm;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -22,38 +22,39 @@ import org.slf4j.LoggerFactory;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 
-public class I2b2DataDataSourceManager {
+public abstract class I2b2DataSourceManager {
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(I2b2DataDataSourceManager.class);
+			.getLogger(I2b2DataSourceManager.class);
 
-	private String hibernateDialect;
-	private String hibernateDriver;
-	private String hibernateConnectionUrl;
-	private String hibernateUserName;
-	private String hibernateUserPassword;
+	protected String hibernateDialect;
+	protected String hibernateDriver;
+	protected String hibernateConnectionUrl;
+	protected String hibernateUserName;
+	protected String hibernateUserPassword;
 
 	// Very dangerous to have this set to create or update. Only available for
 	// explicit use by the installer or other utility methods. Must always
 	// default to null to avoid accidental database modifications.
-	private String hibernateHbm2ddlAuto = "none";
+	protected String hibernateHbm2ddlAuto = "none";
 
-	private String hibernateShowSql = "true";
-	private String hibernateCacheUseSecondLevelCache = "false";
+	protected String hibernateShowSql = "true";
+	protected String hibernateCacheUseSecondLevelCache = "false";
 
-	private Configuration configuration;
+	protected Configuration configuration;
 
-	private SessionFactory sessionFactory;
+	protected SessionFactory sessionFactory;
 
-	private Session session;
+	protected Session session;
+	
+	protected URL dbPropertiesUrl;
 
-	public I2b2DataDataSourceManager() {
+	public I2b2DataSourceManager() {
 	}
 
-	private void buildConfiguration() {
+	protected void buildConfiguration() {
 
 		try {
-			URL dbPropertiesUrl = getClass().getResource("jdbc.properties");
 			Properties dbProperties = new Properties();
 			FileReader reader = new FileReader(dbPropertiesUrl.getPath());
 			dbProperties.load(reader);
@@ -109,14 +110,7 @@ public class I2b2DataDataSourceManager {
 		return configuration;
 	}
 
-	private void addAnnotatedClasses() {
-		configuration.addAnnotatedClass(ObservationFact.class);
-		configuration.addAnnotatedClass(ProviderDimension.class);
-		configuration.addAnnotatedClass(VisitDimension.class);
-		configuration.addAnnotatedClass(PatientDimension.class);
-		configuration.addAnnotatedClass(ConceptDimension.class);
-
-	}
+	protected abstract void addAnnotatedClasses(); 
 
 	public void addAnnotatedClsesForPackage() {
 		logger.debug("Entered addAnnotatedClsesForPackage for "
@@ -152,7 +146,7 @@ public class I2b2DataDataSourceManager {
 	/*
 	 * SessionFactory
 	 */
-	private boolean buildSessionFactory(Configuration configuration) {
+	protected boolean buildSessionFactory(Configuration configuration) {
 		sessionFactory = configuration.buildSessionFactory();
 		return !sessionFactory.isClosed();
 	}
@@ -182,14 +176,14 @@ public class I2b2DataDataSourceManager {
 	/*
 	 * Clean up
 	 */
-	private void closeSession() throws HibernateException {
+	protected void closeSession() throws HibernateException {
 		if (session != null && session.isOpen()) {
 			session.close();
 			session = null;
 		}
 	}
 
-	private void closeSessionFactory() throws HibernateException {
+	protected void closeSessionFactory() throws HibernateException {
 		if (sessionFactory != null && !sessionFactory.isClosed()) {
 			sessionFactory.close();
 		}

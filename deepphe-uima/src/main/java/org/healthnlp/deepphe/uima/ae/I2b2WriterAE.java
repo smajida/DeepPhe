@@ -11,7 +11,7 @@ import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.jcas.JCas;
 import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
-import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DataDataSourceManager;
+import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
 import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
@@ -82,7 +82,7 @@ public class I2b2WriterAE extends JCasAnnotator_ImplBase {
 	@SuppressWarnings("unused")
 	private void replaceI2b2Data() {
 		try {
-			final I2b2DataDataSourceManager i2b2DataDataSourceManager = new I2b2DataDataSourceManager();
+			final I2b2DemoDataSourceManager i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
 			final I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
 			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
 			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE2");

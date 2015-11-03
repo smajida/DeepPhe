@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.TreeSet;
 
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.ConceptDimension;
-import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DataDataSourceManager;
+import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.ObservationFact;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.ObservationFactId;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.PatientDimension;
@@ -25,7 +25,7 @@ import org.hibernate.Transaction;
 public class I2B2DataDataWriter {
 
 	private Date timeNow = new Date();
-	private I2b2DataDataSourceManager dataSourceMgr;
+	private I2b2DemoDataSourceManager dataSourceMgr;
 	private List<KbPatient> patients;
 	private KbPatient kbPatient;
 	private KbEncounter kbEncounter;
@@ -46,14 +46,14 @@ public class I2B2DataDataWriter {
 	public static void main(String[] args) {
 		
 		try {
-			I2b2DataDataSourceManager i2b2DataDataSourceManager = new I2b2DataDataSourceManager();
+			I2b2DemoDataSourceManager i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
 			I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
 			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
 			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE2");
 			i2b2DataDataWriter.execute();
 			i2b2DataDataSourceManager.destroy();
 			
-			i2b2DataDataSourceManager = new I2b2DataDataSourceManager();
+			i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
 			i2b2DataDataWriter = new I2B2DataDataWriter();
 			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
 			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE");
@@ -462,11 +462,11 @@ public class I2B2DataDataWriter {
 		this.sourceSystemCd = sourceSystemCd;
 	}
 
-	public I2b2DataDataSourceManager getDataSourceMgr() {
+	public I2b2DemoDataSourceManager getDataSourceMgr() {
 		return dataSourceMgr;
 	}
 
-	public void setDataSourceMgr(I2b2DataDataSourceManager dataSourceMgr) {
+	public void setDataSourceMgr(I2b2DemoDataSourceManager dataSourceMgr) {
 		this.dataSourceMgr = dataSourceMgr;
 	}
 

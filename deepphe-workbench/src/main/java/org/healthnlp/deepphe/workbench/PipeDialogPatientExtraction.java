@@ -36,7 +36,7 @@ import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
 import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
 import org.healthnlp.deepphe.summarization.jess.kb.Patient;
 import org.healthnlp.deepphe.summarization.jess.kb.Summary;
-import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DataDataSourceManager;
+import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
 
 public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 		ActionListener {
@@ -99,7 +99,7 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 
 	private void replaceI2b2Data() {
 		try {
-			final I2b2DataDataSourceManager i2b2DataDataSourceManager = new I2b2DataDataSourceManager();
+			final I2b2DemoDataSourceManager i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
 			setMessage("Initialized a connecton to I2B2");
 			final I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
 			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);

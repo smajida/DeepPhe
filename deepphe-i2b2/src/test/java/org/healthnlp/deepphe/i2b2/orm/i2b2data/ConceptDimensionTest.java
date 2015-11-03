@@ -23,11 +23,11 @@ import org.junit.Before;
  */
 public class ConceptDimensionTest {
 
-    private I2b2DataDataSourceManager i2b2DataDataSourceManager;
+    private I2b2DemoDataSourceManager i2b2DataDataSourceManager;
 
     @Before
     public void setUp() {
-        i2b2DataDataSourceManager = new I2b2DataDataSourceManager();
+        i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
     }
 
     @After
