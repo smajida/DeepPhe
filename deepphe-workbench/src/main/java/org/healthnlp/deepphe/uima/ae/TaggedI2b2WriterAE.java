@@ -3,15 +3,15 @@ package org.healthnlp.deepphe.uima.ae;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.jcas.JCas;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
-import org.healthnlp.deepphe.summarization.jess.kb.Summary;
-import org.healthnlp.deepphe.xfer.CtakesToJessConverter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
+import org.healthnlp.deepphe.xfer.CtakesToDroolsConverter;
 
 public class TaggedI2b2WriterAE extends TaggedSummarizableAE {
 
 	private JCas multiJCas;
 	private JCas patientJCas;
-	private Patient patient;
+	private KbPatient patient;
 
 	@Override
 	public void process(JCas multiJCas) throws AnalysisEngineProcessException {
@@ -30,7 +30,7 @@ public class TaggedI2b2WriterAE extends TaggedSummarizableAE {
 	
 	private void displayPatient() {
 		System.out.println(patient);
-		for (Summary summary : patient.getSummaries()) {
+		for (KbSummary summary : patient.getSummaries()) {
 			System.out.println(summary);
 		}
 		
@@ -38,10 +38,10 @@ public class TaggedI2b2WriterAE extends TaggedSummarizableAE {
 
 	private void uploadPatientDAG()
 			throws CASException {
-		CtakesToJessConverter ctakesToJessConverter = new CtakesToJessConverter();
+		CtakesToDroolsConverter ctakesToJessConverter = new CtakesToDroolsConverter();
 		ctakesToJessConverter.setMultiJCas(multiJCas);
 		ctakesToJessConverter.setPatientJCas(patientJCas);
-		ctakesToJessConverter.setPatient(new Patient());
+		ctakesToJessConverter.setPatient(new KbPatient());
 		ctakesToJessConverter.execute();
 		patient = ctakesToJessConverter.getPatient();
 	}

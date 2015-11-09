@@ -1,20 +1,44 @@
 package org.healthnlp.deepphe.workbench;
 
-import org.healthnlp.deepphe.summarization.jess.kb.Diagnosis;
-import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
-import org.healthnlp.deepphe.summarization.jess.kb.Er;
-import org.healthnlp.deepphe.summarization.jess.kb.Her2;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
-import org.healthnlp.deepphe.summarization.jess.kb.Pr;
-import org.healthnlp.deepphe.summarization.jess.kb.TnmMgrade;
-import org.healthnlp.deepphe.summarization.jess.kb.TnmNgrade;
-import org.healthnlp.deepphe.summarization.jess.kb.TnmTgrade;
-import org.healthnlp.deepphe.summarization.jess.kb.TumorSizeCalculator;
-
+import org.apache.commons.lang.StringUtils;
+import org.healthnlp.deepphe.summarization.drools.kb.BreastAdenocarcinoma;
+import org.healthnlp.deepphe.summarization.drools.kb.EstrogenReceptorStatus;
+import org.healthnlp.deepphe.summarization.drools.kb.GenericDistantMetastasisTnmFinding;
+import org.healthnlp.deepphe.summarization.drools.kb.GenericPrimaryTumorTnmFinding;
+import org.healthnlp.deepphe.summarization.drools.kb.GenericRegionalLymphNodesTnmFinding;
+import org.healthnlp.deepphe.summarization.drools.kb.Her2NeuStatus;
+import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
+import org.healthnlp.deepphe.summarization.drools.kb.MalignantBreastNeoplasm;
+import org.healthnlp.deepphe.summarization.drools.kb.OrdinalInterpretation;
+import org.healthnlp.deepphe.summarization.drools.kb.ProgesteroneReceptorStatus;
+import org.healthnlp.deepphe.summarization.drools.kb.RelationHasinterpretation;
+import org.healthnlp.deepphe.summarization.drools.kb.TumorGreaterThanOrEqualTo21Centimeters;
+import org.healthnlp.deepphe.summarization.drools.kb.TumorLessThanOrEqualTo20Centimeters;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.BreastAdenocarcinomaImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.EstrogenReceptorStatusImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.Her2NeuStatusImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.M0StageFindingImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.M1StageFindingImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.MalignantBreastNeoplasmImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.N0StageFindingImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.N1StageFindingImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.N2StageFindingImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.NegativeImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.PositiveImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.ProgesteroneReceptorStatusImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.RelationHasinterpretationImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.T0StageFindingImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.T1StageFindingImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.T2StageFindingImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.T2bStageFindingImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.TumorGreaterThanOrEqualTo21CentimetersImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.TumorLessThanOrEqualTo20CentimetersImpl;
 
 public class EncounterKnowledgeExtractorStub implements EncounterKnowledgeExtractorInterface {
 	
-	private Patient patient;
+	private KbPatient patient;
 	
 	@Override
 	public void execute() {
@@ -27,31 +51,27 @@ public class EncounterKnowledgeExtractorStub implements EncounterKnowledgeExtrac
 	}
 	
 	private void initializePatientZeroEncounters() {
-		for (Encounter encounter : patient.getEncounters()) {
+		
+		for (KbEncounter encounter : patient.getEncounters()) {
 			
 			if (encounter.getSequence() == 0) {
 				encounter.setKind("Pathology Report");
 				encounter.setPatientId(patient.getId());
 				encounter.setSequence(0);
 				
-				Diagnosis diagnosis = new Diagnosis();
+				MalignantBreastNeoplasm diagnosis = new MalignantBreastNeoplasmImpl();
 				diagnosis.setSummarizableId(encounter.getId());
 				diagnosis.setCode("C0858252");
-				diagnosis.setPreferredTerm("Breast Adenocarcinoma");
-				encounter.addSummary(diagnosis);
+				diagnosis.setPreferredTerm("Malignant Breast Neoplasm");
+				encounter.addSummary((KbSummary) diagnosis);
 				
-				TumorSizeCalculator tumorSize = new TumorSizeCalculator();
+				TumorGreaterThanOrEqualTo21Centimeters tumorSize = new TumorGreaterThanOrEqualTo21CentimetersImpl();
 				tumorSize.setSummarizableId(encounter.getId());
 				tumorSize.setBaseCode("C120286");
 				tumorSize.setCode("C120286");
 				tumorSize.setPreferredTerm("Tumor Greater Than or Equal to 2.1 Centimeters");
-				tumorSize.setGreatestDimension(2.1d);
-				tumorSize.setDimensionOne(2.1d);
-				tumorSize.setDimensionTwo(-1.0d);
-				tumorSize.setDimensionThree(-1.0d);
 				tumorSize.setUnitOfMeasure("cm");
-				encounter.addSummary(tumorSize);
-				
+				encounter.addSummary((KbSummary)tumorSize);
 				
 			}
 			else if (encounter.getSequence() == 1) {
@@ -60,59 +80,103 @@ public class EncounterKnowledgeExtractorStub implements EncounterKnowledgeExtrac
 				encounter.setPatientId(patient.getId());
 				encounter.setSequence(1);				
 				
-				Er estrogenReceptor = new Er();
-				estrogenReceptor.setCode("C0279756");
-				estrogenReceptor.setPreferredTerm("Estrogen Receptor Negative");
+				// Er
+				RelationHasinterpretation receptorStatusSummary = new RelationHasinterpretationImpl();
+				receptorStatusSummary.setBaseCode("C0279756");
+				receptorStatusSummary.setCode("C0279756");
+				receptorStatusSummary.setPreferredTerm("Estrogen Receptor Negative");
+				receptorStatusSummary.setValue("negative");	
+				String formattedId = StringUtils.leftPad(receptorStatusSummary.getId()+"", 7, "0");
+				EstrogenReceptorStatus estrogenReceptor = new EstrogenReceptorStatusImpl();
+				estrogenReceptor.setCode("<D" + formattedId + ">");
+				estrogenReceptor.setPreferredTerm("Estrogen Receptor");
+				OrdinalInterpretation erInterpretation = new NegativeImpl();
+				erInterpretation.setCode("<R" + formattedId + ">");
+				erInterpretation.setPreferredTerm("Negative");				
+				receptorStatusSummary.setDomainId(estrogenReceptor.getId());
+				receptorStatusSummary.setRangeId(erInterpretation.getId());
+				receptorStatusSummary.setSummarizableId(encounter.getId());
+				
+				encounter.addSummary((KbSummary)receptorStatusSummary);
 				estrogenReceptor.setSummarizableId(encounter.getId());
-				estrogenReceptor.setValue("negative");
-				encounter.addSummary(estrogenReceptor);
+				encounter.addSummary((KbSummary)estrogenReceptor);
+				erInterpretation.setSummarizableId(encounter.getId());
+				encounter.addSummary((KbSummary)erInterpretation);
 				
-				Pr progesteroneReceptor = new Pr();
-				progesteroneReceptor.setCode("C0279766");
-				progesteroneReceptor.setPreferredTerm("Progesterone Receptor Negative");
+				// Pr
+				receptorStatusSummary = new RelationHasinterpretationImpl();
+				receptorStatusSummary.setBaseCode("C0279766");
+				receptorStatusSummary.setCode("C0279766");
+				receptorStatusSummary.setPreferredTerm("Progesterone Receptor Negative");
+				receptorStatusSummary.setValue("negative");			
+				formattedId = StringUtils.leftPad(receptorStatusSummary.getId()+"", 7, "0");
+				ProgesteroneReceptorStatus progesteroneReceptor = new ProgesteroneReceptorStatusImpl();
+				progesteroneReceptor.setCode("<D" + formattedId + ">");
+				progesteroneReceptor.setPreferredTerm("Progesterone Receptor");
+				OrdinalInterpretation prInterpretation = new NegativeImpl();
+				prInterpretation.setCode("<R" + formattedId + ">");
+				prInterpretation.setPreferredTerm("Negative");				
+				receptorStatusSummary.setDomainId(progesteroneReceptor.getId());
+				receptorStatusSummary.setRangeId(prInterpretation.getId());			
+				receptorStatusSummary.setSummarizableId(encounter.getId());
+				
+				encounter.addSummary((KbSummary)receptorStatusSummary);
 				progesteroneReceptor.setSummarizableId(encounter.getId());
-				progesteroneReceptor.setValue("negative");
-				encounter.addSummary(progesteroneReceptor);
+				encounter.addSummary((KbSummary)progesteroneReceptor);
+				prInterpretation.setSummarizableId(encounter.getId());
+				encounter.addSummary((KbSummary)prInterpretation);
 				
-				Her2 her2 = new Her2();
-				her2.setCode("C2348909");
-				her2.setPreferredTerm("HER2/Neu Positive");
-				her2.setSummarizableId(encounter.getId());
-				her2.setValue("positive");
-				encounter.addSummary(her2);
 				
-				TnmTgrade tnmTgrade = new TnmTgrade();
+				// Her2/Neu
+				receptorStatusSummary = new RelationHasinterpretationImpl();
+				receptorStatusSummary.setBaseCode("C2348909");
+				receptorStatusSummary.setCode("C2348909");
+				receptorStatusSummary.setPreferredTerm("HER2/Neu Receptor Positive");
+				receptorStatusSummary.setValue("positive");			
+				formattedId = StringUtils.leftPad(receptorStatusSummary.getId()+"", 7, "0");
+				Her2NeuStatus her2NeuReceptor = new Her2NeuStatusImpl();
+				her2NeuReceptor.setCode("<D" + formattedId + ">");
+				her2NeuReceptor.setPreferredTerm("Her2/Neu Receptor");
+				OrdinalInterpretation her2NeuInterpretation = new PositiveImpl();
+				her2NeuInterpretation.setCode("<R" + formattedId + ">");
+				her2NeuInterpretation.setPreferredTerm("Positive");				
+				receptorStatusSummary.setDomainId(her2NeuReceptor.getId());
+				receptorStatusSummary.setRangeId(her2NeuInterpretation.getId());				
+				receptorStatusSummary.setSummarizableId(encounter.getId());
+				
+				encounter.addSummary((KbSummary)receptorStatusSummary);
+				her2NeuReceptor.setSummarizableId(encounter.getId());
+				encounter.addSummary((KbSummary)her2NeuReceptor);
+				her2NeuInterpretation.setSummarizableId(encounter.getId());
+				encounter.addSummary((KbSummary)her2NeuInterpretation);
+				
+				// TNM
+				GenericPrimaryTumorTnmFinding tnmTgrade = new T2StageFindingImpl();
 				tnmTgrade.setBaseCode("C0475373");
 				tnmTgrade.setCode("C0475373");
-				tnmTgrade.setGroupIndex(1);
 				tnmTgrade.setPreferredTerm("T2 Stage Finding");
-				tnmTgrade.setProvidingDepartment("Clinical");
 				tnmTgrade.setSummarizableId(encounter.getId());
 				tnmTgrade.setUnitOfMeasure("NA");
 				tnmTgrade.setValue("T2");
-				encounter.addSummary(tnmTgrade);
+				encounter.addSummary((KbSummary)tnmTgrade);
 				
-				TnmNgrade tnmNgrade = new TnmNgrade();
+				GenericRegionalLymphNodesTnmFinding tnmNgrade = new N0StageFindingImpl();
 				tnmNgrade.setBaseCode("C0441959");
 				tnmNgrade.setCode("C0441959");
-				tnmNgrade.setGroupIndex(1);
-				tnmNgrade.setPreferredTerm("Node stage N0");
-				tnmNgrade.setProvidingDepartment("Clinical");
+				tnmNgrade.setPreferredTerm("N0 Stage Finding");
 				tnmNgrade.setSummarizableId(encounter.getId());
 				tnmNgrade.setUnitOfMeasure("NA");
 				tnmNgrade.setValue("N0");
-				encounter.addSummary(tnmNgrade);
+				encounter.addSummary((KbSummary)tnmNgrade);
 				
-				TnmMgrade tnmMgrade = new TnmMgrade();
+				GenericDistantMetastasisTnmFinding tnmMgrade = new M0StageFindingImpl();
 				tnmMgrade.setBaseCode("C0445034");
 				tnmMgrade.setCode("C0445034");
-				tnmMgrade.setGroupIndex(1);
 				tnmMgrade.setPreferredTerm("M0 Stage Finding");
-				tnmMgrade.setProvidingDepartment("Clinical");
 				tnmMgrade.setSummarizableId(encounter.getId());
 				tnmMgrade.setUnitOfMeasure("NA");
 				tnmMgrade.setValue("M0");
-				encounter.addSummary(tnmMgrade);
+				encounter.addSummary((KbSummary)tnmMgrade);
 			
 			}
 			else if (encounter.getSequence() == 2) {
@@ -121,67 +185,56 @@ public class EncounterKnowledgeExtractorStub implements EncounterKnowledgeExtrac
 				encounter.setPatientId(patient.getId());
 				encounter.setSequence(2);
 				
-				TumorSizeCalculator tumorSize = new TumorSizeCalculator();
+				TumorLessThanOrEqualTo20Centimeters tumorSize = new TumorLessThanOrEqualTo20CentimetersImpl();
 				tumorSize.setSummarizableId(encounter.getId());
 				tumorSize.setBaseCode("C120285");
 				tumorSize.setCode("C120285");
 				tumorSize.setPreferredTerm("Tumor Less Than or Equal to 2.0 Centimeters");
-				tumorSize.setGreatestDimension(0.9d);
-				tumorSize.setDimensionOne(0.9d);
-				tumorSize.setDimensionTwo(-1.0d);
-				tumorSize.setDimensionThree(-1.0d);
 				tumorSize.setUnitOfMeasure("cm");
-				encounter.addSummary(tumorSize);
-				
+				encounter.addSummary((KbSummary)tumorSize);
 			}
 		}
 	}
 	
 	private void initializePatientOneEncounters() {
-		for (Encounter encounter : patient.getEncounters()) {
+		for (KbEncounter encounter : patient.getEncounters()) {
 			
 			if (encounter.getSequence() == 0) {
 				encounter.setKind("Pathology Report");
 				encounter.setPatientId(patient.getId());
 				
-				Diagnosis diagnosis = new Diagnosis();
+				MalignantBreastNeoplasm diagnosis = new MalignantBreastNeoplasmImpl();
 				diagnosis.setSummarizableId(encounter.getId());
 				diagnosis.setCode("C0858252");
-				diagnosis.setPreferredTerm("Breast Adenocarcinoma");
-				encounter.addSummary(diagnosis);
+				diagnosis.setPreferredTerm("Malignant Breast Neoplasm");
+				encounter.addSummary((KbSummary) diagnosis);
 				
-				TnmTgrade tnmTgrade = new TnmTgrade();
+				GenericPrimaryTumorTnmFinding tnmTgrade = new T0StageFindingImpl();
 				tnmTgrade.setBaseCode("C1707025");
 				tnmTgrade.setCode("C1707025");
-				tnmTgrade.setGroupIndex(1);
 				tnmTgrade.setPreferredTerm("Breast Cancer pT0 TNM Finding");
-				tnmTgrade.setProvidingDepartment("Pathology");
 				tnmTgrade.setSummarizableId(encounter.getId());
 				tnmTgrade.setUnitOfMeasure("NA");
 				tnmTgrade.setValue("T0");
-				encounter.addSummary(tnmTgrade);
+				encounter.addSummary((KbSummary)tnmTgrade);
 				
-				TnmNgrade tnmNgrade = new TnmNgrade();
-				tnmNgrade.setBaseCode("C2981868");
-				tnmNgrade.setCode("C2981868");
-				tnmNgrade.setGroupIndex(1);
-				tnmNgrade.setPreferredTerm("Breast Cancer pN0 TNM Finding v7");
-				tnmNgrade.setProvidingDepartment("Pathology");
+				GenericRegionalLymphNodesTnmFinding tnmNgrade = new N0StageFindingImpl();
+				tnmNgrade.setBaseCode("C0441959");
+				tnmNgrade.setCode("C0441959");
+				tnmNgrade.setPreferredTerm("Node stage N0");
 				tnmNgrade.setSummarizableId(encounter.getId());
 				tnmNgrade.setUnitOfMeasure("NA");
 				tnmNgrade.setValue("N0");
-				encounter.addSummary(tnmNgrade);
+				encounter.addSummary((KbSummary)tnmNgrade);
 				
-				TnmMgrade tnmMgrade = new TnmMgrade();
+				GenericDistantMetastasisTnmFinding tnmMgrade = new M1StageFindingImpl();
 				tnmMgrade.setBaseCode("C1707005");
 				tnmMgrade.setCode("C1707005");
-				tnmMgrade.setGroupIndex(1);
 				tnmMgrade.setPreferredTerm("Breast Cancer pM1 TNM Finding");
-				tnmMgrade.setProvidingDepartment("Clinical");
 				tnmMgrade.setSummarizableId(encounter.getId());
 				tnmMgrade.setUnitOfMeasure("NA");
 				tnmMgrade.setValue("M1");
-				encounter.addSummary(tnmMgrade);
+				encounter.addSummary((KbSummary)tnmMgrade);
 				
 			}
 			else if (encounter.getSequence() == 1) {
@@ -189,44 +242,38 @@ public class EncounterKnowledgeExtractorStub implements EncounterKnowledgeExtrac
 				encounter.setKind("Pathology Report");
 				encounter.setPatientId(patient.getId());
 			
-				Diagnosis diagnosis = new Diagnosis();
+				BreastAdenocarcinoma diagnosis = new BreastAdenocarcinomaImpl();
 				diagnosis.setSummarizableId(encounter.getId());
-				diagnosis.setCode("C0858252");
+				diagnosis.setCode("C1707026");
 				diagnosis.setPreferredTerm("Breast Adenocarcinoma");
-				encounter.addSummary(diagnosis);
+				encounter.addSummary((KbSummary) diagnosis);
 				
-				TnmTgrade tnmTgrade = new TnmTgrade();
+				GenericPrimaryTumorTnmFinding tnmTgrade = new T1StageFindingImpl();
 				tnmTgrade.setBaseCode("C1707026");
 				tnmTgrade.setCode("C1707026");
-				tnmTgrade.setGroupIndex(1);
 				tnmTgrade.setPreferredTerm("Breast Cancer pT1 TNM Finding");
-				tnmTgrade.setProvidingDepartment("Pathology");
 				tnmTgrade.setSummarizableId(encounter.getId());
 				tnmTgrade.setUnitOfMeasure("NA");
 				tnmTgrade.setValue("T1");
-				encounter.addSummary(tnmTgrade);
+				encounter.addSummary((KbSummary)tnmTgrade);
 				
-				TnmNgrade tnmNgrade = new TnmNgrade();
+				GenericRegionalLymphNodesTnmFinding tnmNgrade = new N1StageFindingImpl();
 				tnmNgrade.setBaseCode("C2981871");
 				tnmNgrade.setCode("C2981871");
-				tnmNgrade.setGroupIndex(1);
 				tnmNgrade.setPreferredTerm("Breast Cancer pN1 TNM Finding v7");
-				tnmNgrade.setProvidingDepartment("Pathology");
 				tnmNgrade.setSummarizableId(encounter.getId());
 				tnmNgrade.setUnitOfMeasure("NA");
 				tnmNgrade.setValue("N1");
-				encounter.addSummary(tnmNgrade);
+				encounter.addSummary((KbSummary)tnmNgrade);
 				
-				TnmMgrade tnmMgrade = new TnmMgrade();
+				GenericDistantMetastasisTnmFinding tnmMgrade = new M1StageFindingImpl();
 				tnmMgrade.setBaseCode("C1707005");
 				tnmMgrade.setCode("C1707005");
-				tnmMgrade.setGroupIndex(1);
 				tnmMgrade.setPreferredTerm("Breast Cancer pM1 TNM Finding");
-				tnmMgrade.setProvidingDepartment("Clinical");
 				tnmMgrade.setSummarizableId(encounter.getId());
 				tnmMgrade.setUnitOfMeasure("NA");
 				tnmMgrade.setValue("M1");
-				encounter.addSummary(tnmMgrade);
+				encounter.addSummary((KbSummary)tnmMgrade);
 			
 			}
 			else if (encounter.getSequence() == 2) {
@@ -234,44 +281,38 @@ public class EncounterKnowledgeExtractorStub implements EncounterKnowledgeExtrac
 				encounter.setKind("Pathology Report");
 				encounter.setPatientId(patient.getId());
 			
-				Diagnosis diagnosis = new Diagnosis();
+				BreastAdenocarcinoma diagnosis = new BreastAdenocarcinomaImpl();
 				diagnosis.setSummarizableId(encounter.getId());
-				diagnosis.setCode("C0858252");
+				diagnosis.setCode("C1707026");
 				diagnosis.setPreferredTerm("Breast Adenocarcinoma");
-				encounter.addSummary(diagnosis);
+				encounter.addSummary((KbSummary) diagnosis);
 				
-				TnmTgrade tnmTgrade = new TnmTgrade();
+				GenericPrimaryTumorTnmFinding tnmTgrade = new T2StageFindingImpl();
 				tnmTgrade.setBaseCode("C1707031");
 				tnmTgrade.setCode("C1707031");
-				tnmTgrade.setGroupIndex(1);
 				tnmTgrade.setPreferredTerm("Breast Cancer pT2 TNM Finding");
-				tnmTgrade.setProvidingDepartment("Pathology");
 				tnmTgrade.setSummarizableId(encounter.getId());
 				tnmTgrade.setUnitOfMeasure("NA");
 				tnmTgrade.setValue("T2");
-				encounter.addSummary(tnmTgrade);
+				encounter.addSummary((KbSummary)tnmTgrade);
 				
-				TnmNgrade tnmNgrade = new TnmNgrade();
+				GenericRegionalLymphNodesTnmFinding tnmNgrade = new N0StageFindingImpl();
 				tnmNgrade.setBaseCode("C2981876");
 				tnmNgrade.setCode("C2981876");
-				tnmNgrade.setGroupIndex(1);
 				tnmNgrade.setPreferredTerm("Breast Cancer pN2 TNM Finding v7");
-				tnmNgrade.setProvidingDepartment("Clinical");
 				tnmNgrade.setSummarizableId(encounter.getId());
 				tnmNgrade.setUnitOfMeasure("NA");
 				tnmNgrade.setValue("N0");
-				encounter.addSummary(tnmNgrade);
+				encounter.addSummary((KbSummary)tnmNgrade);
 				
-				TnmMgrade tnmMgrade = new TnmMgrade();
+				GenericDistantMetastasisTnmFinding tnmMgrade = new M1StageFindingImpl();
 				tnmMgrade.setBaseCode("C1707005");
 				tnmMgrade.setCode("C1707005");
-				tnmMgrade.setGroupIndex(1);
 				tnmMgrade.setPreferredTerm("Breast Cancer pM1 TNM Finding");
-				tnmMgrade.setProvidingDepartment("Clinical");
 				tnmMgrade.setSummarizableId(encounter.getId());
 				tnmMgrade.setUnitOfMeasure("NA");
 				tnmMgrade.setValue("M1");
-				encounter.addSummary(tnmMgrade);
+				encounter.addSummary((KbSummary)tnmMgrade);
 				
 			}
 		}
@@ -279,7 +320,7 @@ public class EncounterKnowledgeExtractorStub implements EncounterKnowledgeExtrac
 	}
 
 	@Override
-	public void setPatient(Patient patient) {
+	public void setPatient(KbPatient patient) {
 		this.patient = patient;
 		
 	}

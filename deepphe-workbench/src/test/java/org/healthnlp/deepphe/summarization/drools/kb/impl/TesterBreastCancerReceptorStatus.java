@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.summarization.drools.kb.impl;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.net.URL;
 
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
@@ -44,8 +45,8 @@ public class TesterBreastCancerReceptorStatus {
 
 			KnowledgeBuilder builder = KnowledgeBuilderFactory
 					.newKnowledgeBuilder();
-			File autoloadDirectory = new File(
-					"src\\main\\resources\\drools\\autoload");
+			URL autoloadUrl = getClass().getResource("drools/autoload");
+			File autoloadDirectory = new File(autoloadUrl.getPath());
 			if (autoloadDirectory.exists() && autoloadDirectory.isDirectory()) {
 				File[] autoloadFiles = autoloadDirectory.listFiles();
 				for (File autoloadFile : autoloadFiles) {
@@ -542,15 +543,15 @@ public class TesterBreastCancerReceptorStatus {
 		prStatus.setId(idCounter++);
 		prStatus.setSummarizableId(encOne.getId());
 		
-		Negative prPositive = new NegativeImpl();
-		prPositive.setId(idCounter++);
-		prPositive.setSummarizableId(encOne.getId());
+		Negative prNegative = new NegativeImpl();
+		prNegative.setId(idCounter++);
+		prNegative.setSummarizableId(encOne.getId());
 		
 		RelationHasinterpretation prHasInterpretation = new RelationHasinterpretationImpl();
 		prHasInterpretation.setId(idCounter++);
 		prHasInterpretation.setSummarizableId(encOne.getId());
-		erHasInterpretation.setDomainId(prStatus.getId());
-		erHasInterpretation.setRangeId(prPositive.getId());
+		prHasInterpretation.setDomainId(prStatus.getId());
+		prHasInterpretation.setRangeId(prNegative.getId());
 		
 		// Her2Neu-
 		Her2NeuStatus her2NeuStatus = new Her2NeuStatusImpl();
@@ -575,7 +576,7 @@ public class TesterBreastCancerReceptorStatus {
 		session.insert(erNegative);
 		session.insert(erHasInterpretation);
 		session.insert(prStatus);
-		session.insert(prPositive);
+		session.insert(prNegative);
 		session.insert(prHasInterpretation);
 		session.insert(her2NeuStatus);
 		session.insert(her2NeuNegative);

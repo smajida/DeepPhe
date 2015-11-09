@@ -11,15 +11,15 @@ import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.jcas.JCas;
 import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
-import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DataDataSourceManager;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
-import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
-import org.healthnlp.deepphe.summarization.jess.kb.Summary;
+import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
 
 public class I2b2WriterAE extends JCasAnnotator_ImplBase {
 
 	private JCas forI2b2JCas;
-	private Patient patient;
+	private KbPatient patient;
 	
 	static private final Logger logger = Logger
 			.getLogger(I2b2WriterAE.class);
@@ -53,14 +53,14 @@ public class I2b2WriterAE extends JCasAnnotator_ImplBase {
 	private void uploadPatientDAG()
 			throws CASException {
 		try {
-			patient = (Patient) SerializationUtils.deserialize(Base64.getDecoder().decode(forI2b2JCas.getDocumentText()));		
-			for (Summary s : patient.getSummaries()) {
+			patient = (KbPatient) SerializationUtils.deserialize(Base64.getDecoder().decode(forI2b2JCas.getDocumentText()));		
+			for (KbSummary s : patient.getSummaries()) {
 				if (s.getCode().length() > 50) {
 					truncateSummaryCodes(s);
 				}
 			}
-			for (Encounter e : patient.getEncounters()) {
-				for (Summary s : e.getSummaries()) {
+			for (KbEncounter e : patient.getEncounters()) {
+				for (KbSummary s : e.getSummaries()) {
 					if (s.getCode().length() > 50) {
 						truncateSummaryCodes(s);
 					}
@@ -71,7 +71,7 @@ public class I2b2WriterAE extends JCasAnnotator_ImplBase {
 		}
 	}
 	
-	private void truncateSummaryCodes(Summary s) {
+	private void truncateSummaryCodes(KbSummary s) {
 		System.err.println("Truncating summary " + s);
 		String[] parts = s.getCode().split("#");
 		s.setCode(parts[1]);
@@ -79,9 +79,10 @@ public class I2b2WriterAE extends JCasAnnotator_ImplBase {
 		System.out.println("New code is " + s);
 	}
 
+	@SuppressWarnings("unused")
 	private void replaceI2b2Data() {
 		try {
-			final I2b2DataDataSourceManager i2b2DataDataSourceManager = new I2b2DataDataSourceManager();
+			final I2b2DemoDataSourceManager i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
 			final I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
 			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
 			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE2");

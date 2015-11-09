@@ -10,8 +10,10 @@ import javax.swing.JTree;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import org.apache.commons.lang.StringUtils;
 
+import org.apache.commons.lang.StringUtils;
+import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
 import org.healthnlp.deepphe.summarization.jess.kb.Patient;
 
@@ -24,7 +26,7 @@ import org.healthnlp.deepphe.summarization.jess.kb.Patient;
 public class SummarizableTree {
 
 	private JTree tree;
-	private List<Patient> patients;
+	private List<KbPatient> patients;
 	private TreeSelectionListener treeSelectionListener;
 
 	public SummarizableTree() {
@@ -32,19 +34,19 @@ public class SummarizableTree {
 
 	public void build() {
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
-		Iterator<Patient> patientIterator = patients.iterator();
+		Iterator<KbPatient> patientIterator = patients.iterator();
 		while (patientIterator.hasNext()) {
-			Patient kbPatient = patientIterator.next();
+			KbPatient kbPatient = patientIterator.next();
 			String nodeName = "Patient"
 					+ StringUtils.leftPad(kbPatient.getSequence() + "", 4, "0");
 			DefaultMutableTreeNode patientNode = new DefaultMutableTreeNode(
 					nodeName);
 			patientNode.setUserObject(kbPatient);
 			root.add(patientNode);
-			Iterator<Encounter> encounterIterator = kbPatient.getEncounters()
+			Iterator<KbEncounter> encounterIterator = kbPatient.getEncounters()
 					.iterator();
 			while (encounterIterator.hasNext()) {
-				Encounter kbEncounter = encounterIterator.next();
+				KbEncounter kbEncounter = encounterIterator.next();
 				nodeName = "Encounter"
 						+ StringUtils.leftPad(kbEncounter.getSequence() + "", 4, "0");
 				DefaultMutableTreeNode encounterNode = new DefaultMutableTreeNode(
@@ -72,11 +74,11 @@ public class SummarizableTree {
 		return new JScrollPane(tree);
 	}
 
-	public List<Patient> getPatients() {
+	public List<KbPatient> getPatients() {
 		return patients;
 	}
 
-	public void setPatients(List<Patient> patients) {
+	public void setPatients(List<KbPatient> patients) {
 		this.patients = patients;
 	}
 
@@ -92,20 +94,20 @@ public class SummarizableTree {
 	class EncounterTreeCellRenderer extends DefaultTreeCellRenderer {
 		private static final long serialVersionUID = 1L;
 		private ImageIcon malePatientIcon = new ImageIcon(
-				SummarizableTree.class.getResource("/images/16/280-user_0.gif"));
+				SummarizableTree.class.getResource("/images/16f/male.gif"));
 		private ImageIcon femalePatientIcon = new ImageIcon(
 				SummarizableTree.class
-						.getResource("/images/16/289-user_woman.gif"));
+						.getResource("/images/16f/female.gif"));
 		private ImageIcon encounterIcon = new ImageIcon(
-				SummarizableTree.class.getResource("/images/16/002.png"));
+				SummarizableTree.class.getResource("/images/16f/encounter.png"));
 
 		@Override
 		public Component getTreeCellRendererComponent(JTree tree, Object value,
 				boolean sel, boolean exp, boolean leaf, int row,
 				boolean hasFocus) {
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-			if (node.getUserObject() instanceof Patient) {
-				Patient patient = (Patient) node.getUserObject();
+			if (node.getUserObject() instanceof KbPatient) {
+				KbPatient patient = (KbPatient) node.getUserObject();
 				if (patient.getGender().equals("Male")) {
 					setOpenIcon(malePatientIcon);
 					setClosedIcon(malePatientIcon);
@@ -115,7 +117,7 @@ public class SummarizableTree {
 					setClosedIcon(femalePatientIcon);
 					setLeafIcon(femalePatientIcon);
 				}
-			} else if (node.getUserObject() instanceof Encounter) {
+			} else if (node.getUserObject() instanceof KbEncounter) {
 				setOpenIcon(encounterIcon);
 				setClosedIcon(encounterIcon);
 				setLeafIcon(encounterIcon);

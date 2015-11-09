@@ -16,9 +16,9 @@ import org.apache.uima.resource.ResourceConfigurationException;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.Progress;
 import org.apache.uima.util.ProgressImpl;
-import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
-import org.healthnlp.deepphe.summarization.jess.kb.Summarizable;
+import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.summarization.drools.kb.KbSummarizable;
 
 public class TaggedPatientReader extends CollectionReader_ImplBase {
 
@@ -28,10 +28,10 @@ public class TaggedPatientReader extends CollectionReader_ImplBase {
 	 */
 	public static final String PARAM_INPUTDIR = "InputDirectory";
 
-	private final List<Patient> patients = new ArrayList<Patient>();
+	private final List<KbPatient> patients = new ArrayList<>();
 	private PatientListReader patientListReader = null;
-	private List<Summarizable> summarizables = new ArrayList<Summarizable>();
-	private Iterator<Summarizable> summarizableIterator = null;
+	private List<KbSummarizable> summarizables = new ArrayList<>();
+	private Iterator<KbSummarizable> summarizableIterator = null;
 	private int currentIndex = 0;
 
 	/**
@@ -55,11 +55,11 @@ public class TaggedPatientReader extends CollectionReader_ImplBase {
 		patientListReader.setPatients(patients);
 		patientListReader.execute();
 
-		Iterator<Patient> patientIterator = patientListReader.getPatients()
+		Iterator<KbPatient> patientIterator = patientListReader.getPatients()
 				.iterator();
 		while (patientIterator.hasNext()) {
-			Patient patient = patientIterator.next();
-			Iterator<Encounter> encounterIterator = patient.getEncounters()
+			KbPatient patient = patientIterator.next();
+			Iterator<KbEncounter> encounterIterator = patient.getEncounters()
 					.iterator();
 			while (encounterIterator.hasNext()) {
 				summarizables.add(encounterIterator.next());
@@ -73,11 +73,11 @@ public class TaggedPatientReader extends CollectionReader_ImplBase {
 	@Override
 	public void getNext(CAS aCAS) throws IOException, CollectionException {
 		try {
-			Summarizable summarizable = summarizableIterator.next();
+			KbSummarizable summarizable = summarizableIterator.next();
 			JCas jCas = aCAS.getJCas();
 			JCas jCasComponent = jCas.createView(summarizable.toString());
-			if (summarizable instanceof Encounter) {
-				Encounter encounter = (Encounter) summarizable;
+			if (summarizable instanceof KbEncounter) {
+				KbEncounter encounter = (KbEncounter) summarizable;
 				jCasComponent.setDocumentText(encounter.getContent());		
 			}
 			else {

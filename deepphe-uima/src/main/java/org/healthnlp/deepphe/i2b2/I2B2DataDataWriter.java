@@ -8,37 +8,37 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TreeSet;
 
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
-import org.hibernate.Transaction;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
-import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
-import org.healthnlp.deepphe.summarization.jess.kb.Summary;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.ConceptDimension;
-import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DataDataSourceManager;
+import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.ObservationFact;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.ObservationFactId;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.PatientDimension;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.VisitDimension;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.VisitDimensionId;
+import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
+import org.hibernate.Query;
+import org.hibernate.SQLQuery;
+import org.hibernate.Transaction;
 
 public class I2B2DataDataWriter {
 
 	private Date timeNow = new Date();
-	private I2b2DataDataSourceManager dataSourceMgr;
-	private List<Patient> patients;
-	private Patient kbPatient;
-	private Encounter kbEncounter;
-	private Summary kbSummary;
+	private I2b2DemoDataSourceManager dataSourceMgr;
+	private List<KbPatient> patients;
+	private KbPatient kbPatient;
+	private KbEncounter kbEncounter;
+	private KbSummary kbSummary;
 
 	private int uploadId = 0;
 
 	private String sourceSystemCd;
 
-	private final TreeSet<Summary> activeSummaries = new TreeSet<Summary>(
-			new Comparator<Summary>() {
+	private final TreeSet<KbSummary> activeSummaries = new TreeSet<KbSummary>(
+			new Comparator<KbSummary>() {
 				@Override
-				public int compare(Summary o1, Summary o2) {
+				public int compare(KbSummary o1, KbSummary o2) {
 					return o1.getPath().compareTo(o2.getPath());
 				}
 			});
@@ -46,14 +46,14 @@ public class I2B2DataDataWriter {
 	public static void main(String[] args) {
 		
 		try {
-			I2b2DataDataSourceManager i2b2DataDataSourceManager = new I2b2DataDataSourceManager();
+			I2b2DemoDataSourceManager i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
 			I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
 			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
 			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE2");
 			i2b2DataDataWriter.execute();
 			i2b2DataDataSourceManager.destroy();
 			
-			i2b2DataDataSourceManager = new I2b2DataDataSourceManager();
+			i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
 			i2b2DataDataWriter = new I2B2DataDataWriter();
 			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
 			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE");
@@ -242,15 +242,15 @@ public class I2B2DataDataWriter {
 
 	public void writeObservationsForPatient() {
 		fetchOrCreatePatient();
-		for (Summary summary : kbPatient.getSummaries()) {
+		for (KbSummary summary : kbPatient.getSummaries()) {
 			kbSummary = summary;
 			fetchOrCreateConcept();
 			writeObservation(kbPatient, null, kbSummary);
 		}
-		for (Encounter encounter : kbPatient.getEncounters()) {
+		for (KbEncounter encounter : kbPatient.getEncounters()) {
 			kbEncounter = encounter;
 			fetchOrCreateVisit();
-			for (Summary summary : kbEncounter.getSummaries()) {
+			for (KbSummary summary : kbEncounter.getSummaries()) {
 				kbSummary = summary;
 				fetchOrCreateConcept();
 				writeObservation(kbPatient, kbEncounter, kbSummary);
@@ -291,8 +291,9 @@ public class I2B2DataDataWriter {
 		sqlUpdate.executeUpdate();
 	}
 
+	@SuppressWarnings("unused")
 	private void writePatients() throws SQLException {
-		for (Patient patient : patients) {
+		for (KbPatient patient : patients) {
 			kbPatient = patient;
 			PatientDimension patientDimension = newPatient();
 			dataSourceMgr.getSession().saveOrUpdate(patientDimension);
@@ -302,9 +303,10 @@ public class I2B2DataDataWriter {
 		tx.commit();
 	}
 
+	@SuppressWarnings("unused")
 	private void writeEncounters() {
-		for (Patient kbPatient : patients) {
-			for (Encounter kbEncounter : kbPatient.getEncounters()) {
+		for (KbPatient kbPatient : patients) {
+			for (KbEncounter kbEncounter : kbPatient.getEncounters()) {
 				Date timeNow = new Date();
 				VisitDimension visitDimension = new VisitDimension();
 				VisitDimensionId visitId = new VisitDimensionId();
@@ -333,23 +335,24 @@ public class I2B2DataDataWriter {
 		tx.commit();
 	}
 
+	@SuppressWarnings("unused")
 	private void writeConcepts() throws SQLException {
 		activeSummaries.clear();
-		for (Patient kbPatient : patients) {
-			for (Summary kbSummary : kbPatient.getSummaries()) {
+		for (KbPatient kbPatient : patients) {
+			for (KbSummary kbSummary : kbPatient.getSummaries()) {
 				if (kbSummary.getIsActive() == 1) {
 					activeSummaries.add(kbSummary);
 				}
 			}
-			for (Encounter kbEncounter : kbPatient.getEncounters()) {
-				for (Summary kbSummary : kbEncounter.getSummaries()) {
+			for (KbEncounter kbEncounter : kbPatient.getEncounters()) {
+				for (KbSummary kbSummary : kbEncounter.getSummaries()) {
 					if (kbSummary.getIsActive() == 1) {
 						activeSummaries.add(kbSummary);
 					}
 				}
 			}
 		}
-		for (Summary kbSummary : activeSummaries) {
+		for (KbSummary kbSummary : activeSummaries) {
 			ConceptDimension conceptDimension = new ConceptDimension();
 			conceptDimension.setConceptPath(kbSummary.getPath() + "\\");
 			conceptDimension.setConceptCd(kbSummary.getBaseCode());
@@ -367,15 +370,16 @@ public class I2B2DataDataWriter {
 		tx.commit();
 	}
 
+	@SuppressWarnings("unused")
 	private void writeObservations() throws SQLException {
-		for (Patient kbPatient : patients) {
-			for (Summary kbSummary : kbPatient.getSummaries()) {
+		for (KbPatient kbPatient : patients) {
+			for (KbSummary kbSummary : kbPatient.getSummaries()) {
 				if (kbSummary.getIsActive() == 1) {
 					writeObservation(kbPatient, null, kbSummary);
 				}
 			}
-			for (Encounter kbEncounter : kbPatient.getEncounters()) {
-				for (Summary kbSummary : kbEncounter.getSummaries()) {
+			for (KbEncounter kbEncounter : kbPatient.getEncounters()) {
+				for (KbSummary kbSummary : kbEncounter.getSummaries()) {
 					if (kbSummary.getIsActive() == 1) {
 						writeObservation(kbPatient, kbEncounter, kbSummary);
 					}
@@ -399,8 +403,8 @@ public class I2B2DataDataWriter {
 		return result;
 	}
 
-	private void writeObservation(Patient kbPatient, Encounter kbEncounter,
-			Summary kbSummary) {
+	private void writeObservation(KbPatient kbPatient, KbEncounter kbEncounter,
+			KbSummary kbSummary) {
 
 		ObservationFactId observationFactId = new ObservationFactId();
 		if (kbEncounter != null) {
@@ -458,31 +462,31 @@ public class I2B2DataDataWriter {
 		this.sourceSystemCd = sourceSystemCd;
 	}
 
-	public I2b2DataDataSourceManager getDataSourceMgr() {
+	public I2b2DemoDataSourceManager getDataSourceMgr() {
 		return dataSourceMgr;
 	}
 
-	public void setDataSourceMgr(I2b2DataDataSourceManager dataSourceMgr) {
+	public void setDataSourceMgr(I2b2DemoDataSourceManager dataSourceMgr) {
 		this.dataSourceMgr = dataSourceMgr;
 	}
 
-	public List<Patient> getPatients() {
+	public List<KbPatient> getPatients() {
 		return patients;
 	}
 
-	public void setPatients(List<Patient> patients) {
+	public void setPatients(List<KbPatient> patients) {
 		this.patients = patients;
 	}
 
-	public void setPatient(Patient patient) {
-		this.kbPatient = patient;
+	public void setPatient(KbPatient kbPatient) {
+		this.kbPatient = kbPatient;
 	}
 
-	public Encounter getEncounter() {
+	public KbEncounter getEncounter() {
 		return kbEncounter;
 	}
 
-	public void setEncounter(Encounter encounter) {
+	public void setEncounter(KbEncounter encounter) {
 		this.kbEncounter = encounter;
 	}
 
