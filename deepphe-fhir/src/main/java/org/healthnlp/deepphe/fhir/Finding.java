@@ -44,7 +44,7 @@ public class Finding extends Condition  implements Element{
 	 * initialize 
 	 * @param m
 	 */
-	public void initialize(Mention m){
+	public void load(Mention m){
 		setCode(Utils.getCodeableConcept(m));
 		// create identifier
 		Utils.createIdentifier(addIdentifier(),this,m);

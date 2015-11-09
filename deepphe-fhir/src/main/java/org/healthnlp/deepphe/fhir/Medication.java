@@ -34,16 +34,22 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	 * initialize 
 	 * @param m
 	 */
-	public void initialize(Mention m){
+	public void load(Mention m){
 		setCode(Utils.getCodeableConcept(m));
+
+		// add mention text
+		addExtension(Utils.createMentionExtension(m.getText(),m.getStartPosition(),m.getEndPosition()));
 	}
 	
 	/**
 	 * Initialize diagnosis from a DiseaseDisorderMention in cTAKES typesystem
 	 * @param dx
 	 */
-	public void initialize(MedicationMention dm){
+	public void load(MedicationMention dm){
 		setCode(Utils.getCodeableConcept(dm));
+
+		// add mention text
+		addExtension(Utils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
 	}
 	
 	public IClass getConceptClass(){

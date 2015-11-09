@@ -32,8 +32,6 @@ import edu.pitt.dbmi.nlp.noble.ontology.IClass;
  * @author tseytlin
  */
 public class Observation extends org.hl7.fhir.instance.model.Observation implements Element{
-	private Report report;
-	
 	public Observation(){
 		setStatus(ObservationStatus.FINAL);
 		//setLanguage(Utils.DEFAULT_LANGUAGE); // we only care about English
@@ -56,7 +54,6 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	}
 
 	public void setReport(Report r) {
-		report = r;
 		// set patient
 		Patient p = r.getPatient();
 		if(p != null){
@@ -74,7 +71,7 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	 * initialize 
 	 * @param m
 	 */
-	public void initialize(Mention m){
+	public void load(Mention m){
 		// set name for this observation
 		setCode(Utils.getCodeableConcept(m));
 		
@@ -98,13 +95,17 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 				break;
 			}
 		}
+		
+
+		// add mention text
+		addExtension(Utils.createMentionExtension(m.getText(),m.getStartPosition(),m.getEndPosition()));
 	}
 	
 	/**
 	 * Initialize diagnosis from a DiseaseDisorderMention in cTAKES typesystem
 	 * @param dx
 	 */
-	public void initialize(IdentifiedAnnotation dm){
+	public void load(IdentifiedAnnotation dm){
 		// set some properties
 		setCode(Utils.getCodeableConcept(dm));
 		addIdentifier(Utils.createIdentifier(this,dm));
@@ -142,6 +143,10 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 				}
 			}
 		}
+		
+
+		// add mention text
+		addExtension(Utils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
 	}
 
 	public void setValue(SizeMeasurement num){

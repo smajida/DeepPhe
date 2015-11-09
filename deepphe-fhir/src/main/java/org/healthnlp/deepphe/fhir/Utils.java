@@ -36,8 +36,10 @@ import org.hl7.fhir.instance.formats.XmlParser;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DateType;
+import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Narrative;
+import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.utils.NarrativeGenerator.ResourceWithReference;
@@ -67,6 +69,7 @@ public class Utils {
 	public static final String DOCUMENT_HEADER_REPORT_TYPE = "Record Type";
 	public static final String DOCUMENT_HEADER_PRINCIPAL_DATE = "Principal Date";
 	public static final String DOCUMENT_HEADER_PATIENT_NAME = "Patient Name";
+	public static final String MENTION_URL = "http://hl7.org/fhir/mention"; 
 	
 	
 	public static final String ELEMENT = "Element";
@@ -874,7 +877,15 @@ public class Utils {
 		}
 		return false;
 	}
+	
+	public static Extension createExtension(String url, String value) {
+		Extension e = new Extension();
+		e.setUrl(url);
+		e.setValue(new StringType(value));
+		return e;
+	}
 
+	
 	/**
 	 * does this mention has another mention that is more specific?
 	 * @param m
@@ -895,6 +906,11 @@ public class Utils {
 		return false;
 	}
 
+	public static Extension createMentionExtension(String text, int st, int end){
+		return createExtension(MENTION_URL,text+" ["+st+":"+end+"]");
+	}
+	
+	
 	public static void main(String [] args) throws Exception{
 		System.out.println(getHeaderValues(TextTools.getText(new FileInputStream(new File("/home/tseytlin/Work/DeepPhe/data/sample/docs/doc1.txt")))));
 	}

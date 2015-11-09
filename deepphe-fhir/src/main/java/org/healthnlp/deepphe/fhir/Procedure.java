@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Period;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
+
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 
@@ -24,7 +25,7 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	 * initialize 
 	 * @param m
 	 */
-	public void initialize(Mention m){
+	public void load(Mention m){
 		setCode(Utils.getCodeableConcept(m));
 		setStatus(ProcedureStatus.COMPLETED);
 		Utils.createIdentifier(addIdentifier(),this,m);
@@ -34,13 +35,16 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 			CodeableConcept location = addBodySite();
 			Utils.setCodeableConcept(location,al);
 		}
+
+		// add mention text
+		addExtension(Utils.createMentionExtension(m.getText(),m.getStartPosition(),m.getEndPosition()));
 	}
 	
 	/**
 	 * Initialize diagnosis from a DiseaseDisorderMention in cTAKES typesystem
 	 * @param dx
 	 */
-	public void initialize(ProcedureMention dm){
+	public void load(ProcedureMention dm){
 		// set some properties
 		setCode(Utils.getCodeableConcept(dm));
 		setStatus(ProcedureStatus.COMPLETED);
@@ -57,6 +61,9 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 		// now lets add observations
 		//addEvidence();
 		//addRelatedItem();
+
+		// add mention text
+		addExtension(Utils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
 	}
 	
 

@@ -20,7 +20,7 @@ import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 
 public class Stage extends ConditionStageComponent implements Serializable{
-	public void initialize(Mention st) {
+	public void load(Mention st) {
 		CodeableConcept c = Utils.getCodeableConcept(st);
 		c.setText(st.getText());
 		setSummary(c);
@@ -34,7 +34,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 		}
 	}
 	
-	public void initialize(TnmClassification st) {
+	public void load(TnmClassification st) {
 		CodeableConcept c = Utils.getCodeableConcept(st);
 		c.setText(st.getCoveredText());
 		setSummary(c);
@@ -46,6 +46,10 @@ public class Stage extends ConditionStageComponent implements Serializable{
 			setStringExtension(""+o.getClass(Utils.N_STAGE).getURI(),st.getNodeSpread().getCode()+st.getNodeSpread().getValue());
 		if(st.getMetastasis() != null)
 			setStringExtension(""+o.getClass(Utils.M_STAGE).getURI(),st.getMetastasis().getCode()+st.getMetastasis().getValue());
+		
+
+		// add mention text
+		addExtension(Utils.createMentionExtension(st.getCoveredText(),st.getBegin(),st.getEnd()));
 	}
 	
 	private void setStringExtension(String url, String value) {

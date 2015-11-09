@@ -159,7 +159,7 @@ public class ResourceFactory {
 			return null;
 		
 		Report r = new Report();
-		r.setTextSimple(text);
+		r.setText(text);
 		// some hard-coded report type values
 		Map<String,String> header = Utils.getHeaderValues(text);
 		String dt = header.get(Utils.DOCUMENT_HEADER_PRINCIPAL_DATE);
@@ -247,7 +247,7 @@ public class ResourceFactory {
 		List<Diagnosis> list = new ArrayList<Diagnosis>();
 		for(Mention m : Utils.getMentionsByType(doc,Utils.DIAGNOSIS)){
 			Diagnosis  dx = new Diagnosis();
-			dx.initialize(m);
+			dx.load(m);
 			list.add(dx);
 		}
 		return list;
@@ -258,7 +258,7 @@ public class ResourceFactory {
 		List<Procedure> list = new ArrayList<Procedure>();
 		for(Mention m : Utils.getMentionsByType(doc,Utils.PROCEDURE)){
 			Procedure  dx = new Procedure();
-			dx.initialize(m);
+			dx.load(m);
 			list.add(dx);
 		}
 		return list;
@@ -269,7 +269,7 @@ public class ResourceFactory {
 		List<Finding> list = new ArrayList<Finding>();
 		for(Mention m : Utils.getMentionsByType(doc,Utils.FINDING)){
 			Finding  dx = new Finding();
-			dx.initialize(m);
+			dx.load(m);
 			list.add(dx);
 		}
 		return list;
@@ -279,7 +279,7 @@ public class ResourceFactory {
 		List<Observation> list = new ArrayList<Observation>();
 		for(Mention m : Utils.getMentionsByType(doc,Utils.OBSERVATION)){
 			Observation  dx = new Observation();
-			dx.initialize(m);
+			dx.load(m);
 			list.add(dx);
 		}
 		return list;
@@ -289,7 +289,7 @@ public class ResourceFactory {
 		List<Medication> list = new ArrayList<Medication>();
 		for(Mention m : Utils.getMentionsByType(doc,Utils.MEDICATION)){
 			Medication  dx = new Medication();
-			dx.initialize(m);
+			dx.load(m);
 			list.add(dx);
 		}
 		return list;
@@ -300,7 +300,7 @@ public class ResourceFactory {
 		List<Procedure> list = new ArrayList<Procedure>();
 		for(IdentifiedAnnotation m: Utils.getAnnotationsByType(cas, ProcedureMention.type)){
 			Procedure  dx = new Procedure();
-			dx.initialize((ProcedureMention) m);
+			dx.load((ProcedureMention) m);
 			list.add(dx);
 		}
 		return list;
@@ -313,7 +313,7 @@ public class ResourceFactory {
 		List<Diagnosis> list = new ArrayList<Diagnosis>();
 		for(IdentifiedAnnotation m: Utils.getAnnotationsByType(cas, DiseaseDisorderMention.type)){
 			Diagnosis  dx = new Diagnosis();
-			dx.initialize((DiseaseDisorderMention) m);
+			dx.load((DiseaseDisorderMention) m);
 			list.add(dx);
 		}
 		return list;
@@ -323,7 +323,7 @@ public class ResourceFactory {
 		List<Medication> list = new ArrayList<Medication>();
 		for(IdentifiedAnnotation m: Utils.getAnnotationsByType(cas,MedicationMention.type)){
 			Medication  dx = new Medication();
-			dx.initialize((MedicationMention) m);
+			dx.load((MedicationMention) m);
 			list.add(dx);
 		}
 		return list;
@@ -341,7 +341,7 @@ public class ResourceFactory {
 		annotations.addAll(Utils.getAnnotationsByType(cas,ReceptorStatus.type));
 		for(IdentifiedAnnotation m: annotations ){
 			Observation  dx = new Observation();
-			dx.initialize(m);
+			dx.load(m);
 			list.add(dx);
 		}
 		return list;

@@ -13,6 +13,7 @@ import java.util.List;
 
 
 
+
 //import org.apache.ctakes.cancer.type.relation.TnmStageTextRelation;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.type.textsem.TnmClassification;
@@ -27,6 +28,7 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Condition;
+import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.Condition.ConditionEvidenceComponent;
@@ -47,14 +49,13 @@ public class Diagnosis extends Condition implements Element {
 		
 		//setClinicalStatus("active"); // here we only deal with 'confirmed' dx
 		setVerificationStatus(ConditionVerificationStatus.CONFIRMED); //?????
-		//Utils.createIdentifier(addIdentifier(),this);
 	}
 	
 	/**
 	 * Initialize diagnosis from a DiseaseDisorderMention in cTAKES typesystem
 	 * @param dx
 	 */
-	public void initialize(DiseaseDisorderMention dm){
+	public void load(DiseaseDisorderMention dm){
 		// set some properties
 		setCode(Utils.getCodeableConcept(dm));
 		//setCertainty(); --> dm.getConfidence()
@@ -84,10 +85,13 @@ public class Diagnosis extends Condition implements Element {
 		for(Annotation  a: Utils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
 			if(a instanceof TnmClassification){
 				Stage stage = new Stage();
-				stage.initialize((TnmClassification) a);
+				stage.load((TnmClassification) a);
 				setStage(stage);
 			}
 		}
+		
+		// add mention text
+		addExtension(Utils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
 	}
 	
 	
@@ -95,7 +99,7 @@ public class Diagnosis extends Condition implements Element {
 	 * initialize from concept mention
 	 * @param m
 	 */
-	public void initialize(Mention m){
+	public void load(Mention m){
 		setCode(Utils.getCodeableConcept(m));
 		
 		// create identifier
@@ -111,9 +115,12 @@ public class Diagnosis extends Condition implements Element {
 		Mention st = Utils.getNearestMention(m,m.getSentence().getDocument(),Utils.STAGE);
 		if(st != null){
 			Stage stage = new Stage();
-			stage.initialize(st);
+			stage.load(st);
 			setStage(stage);
 		}
+		
+		// add mention text
+		addExtension(Utils.createMentionExtension(m.getText(),m.getStartPosition(),m.getEndPosition()));
 	}
 	
 	/**

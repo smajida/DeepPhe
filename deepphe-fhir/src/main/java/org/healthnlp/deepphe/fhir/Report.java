@@ -40,8 +40,8 @@ public class Report extends Composition implements Element{
 	 * set document text
 	 * @param text
 	 */
-	public void setTextSimple(String text){
-		setText(Utils.getNarrative(text));
+	public void setText(String text){
+		super.setText(Utils.getNarrative(text));
 	}
 	
 	public Composition setTitle(String value) {
