@@ -121,6 +121,7 @@ public class Diagnosis extends Condition implements Element {
 		
 		// add mention text
 		addExtension(Utils.createMentionExtension(m.getText(),m.getStartPosition(),m.getEndPosition()));
+		
 	}
 	
 	/**
@@ -162,6 +163,10 @@ public class Diagnosis extends Condition implements Element {
 		for (ConditionRelatedItemComponent i : c.getRelatedItem())
 			relatedItem.add(i.copy());*/
 		notes = c.getNotesElement();
+		
+		extension = new ArrayList<Extension>();
+		for(Extension e: c.getExtension())
+			extension.add(e);
 
 	}
 	

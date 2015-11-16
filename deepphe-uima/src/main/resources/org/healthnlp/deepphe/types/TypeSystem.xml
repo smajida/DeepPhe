@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <typeSystemDescription xmlns="http://uima.apache.org/resourceSpecifier">
-   <name>TypeSystem</name>
-   <description>DeepPhe Phenotype TypeSystem</description>
-   <version>1.0</version>
-   <vendor/>
-   <types>
+   <name xmlns="">TypeSystem</name>
+   <description xmlns="">DeepPhe Phenotype TypeSystem</description>
+   <version xmlns="">1.0</version>
+   <vendor xmlns=""/>
+   <types xmlns="">
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Annotation</name>
          <description/>
-         <supertypeName>uima.cas.TOP</supertypeName>
+         <supertypeName>uima.tcas.Annotation</supertypeName>
          <features>
             <featureDescription>
                <name>URI</name>
@@ -55,7 +55,7 @@
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Attribute</name>
          <description/>
-         <supertypeName>uima.cas.TOP</supertypeName>
+         <supertypeName>uima.tcas.Annotation</supertypeName>
          <features>
             <featureDescription>
                <name>URI</name>
@@ -130,12 +130,14 @@
          <name>org.healthnlp.deepphe.uima.types.Phenotype</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Annotation</supertypeName>
-         </typeDescription>
+         <features/>
+      </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Finding</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Condition</supertypeName>
-         </typeDescription>
+         <features/>
+      </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.AllergyIntolerance</name>
          <description/>
@@ -246,17 +248,20 @@
          <name>org.healthnlp.deepphe.uima.types.DiseaseDisorder</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Condition</supertypeName>
-         </typeDescription>
+         <features/>
+      </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.PrimaryEpisode</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Episode</supertypeName>
-         </typeDescription>
+         <features/>
+      </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.EpisodeAttribute</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Attribute</supertypeName>
-         </typeDescription>
+         <features/>
+      </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Tumor</name>
          <description/>
@@ -313,17 +318,20 @@
          <name>org.healthnlp.deepphe.uima.types.NumericAttribute</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Attribute</supertypeName>
-         </typeDescription>
+         <features/>
+      </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.SemanticAttribute</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Attribute</supertypeName>
-         </typeDescription>
+         <features/>
+      </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.PhenotypeAttribute</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Attribute</supertypeName>
-         </typeDescription>
+         <features/>
+      </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Episode</name>
          <description/>
@@ -346,7 +354,8 @@
          <name>org.healthnlp.deepphe.uima.types.SignSymptom</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Condition</supertypeName>
-         </typeDescription>
+         <features/>
+      </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Element</name>
          <description/>
@@ -455,6 +464,11 @@
                <rangeTypeName>uima.cas.String</rangeTypeName>
             </featureDescription>
             <featureDescription>
+               <name>hasStage</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
                <name>hasTClassification</name>
                <description/>
                <rangeTypeName>uima.cas.String</rangeTypeName>
@@ -465,12 +479,14 @@
          <name>org.healthnlp.deepphe.uima.types.CompositionAttribute</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Attribute</supertypeName>
-         </typeDescription>
+         <features/>
+      </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.LinguisticAttribute</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Attribute</supertypeName>
-         </typeDescription>
+         <features/>
+      </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Patient</name>
          <description/>
@@ -513,7 +529,8 @@
          <name>org.healthnlp.deepphe.uima.types.RecurrenceEpisode</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Episode</supertypeName>
-         </typeDescription>
+         <features/>
+      </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Procedure</name>
          <description/>
@@ -655,7 +672,8 @@
          <name>org.healthnlp.deepphe.uima.types.Entity</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Element</supertypeName>
-         </typeDescription>
+         <features/>
+      </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.CompositionEvent</name>
          <description/>
@@ -758,6 +776,11 @@
                <name>hasAbatementBoolean</name>
                <description/>
                <rangeTypeName>uima.cas.Boolean</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
+               <name>hasStage</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
             </featureDescription>
          </features>
       </typeDescription>

@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 
 import org.apache.ctakes.typesystem.type.textsem.MedicationMention;
+import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Resource;
 
@@ -74,6 +76,9 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 		manufacturer = p.getManufacturer();
 		product = p.getProduct();
 		package_ = p.getPackage();
+		extension = new ArrayList<Extension>();
+		for(Extension e: p.getExtension())
+			extension.add(e);
 		
 	}
 	public String toString(){

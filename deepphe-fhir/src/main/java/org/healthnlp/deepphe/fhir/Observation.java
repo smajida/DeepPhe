@@ -19,6 +19,7 @@ import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.uima.jcas.cas.FSArray;
 import org.hl7.fhir.instance.model.DecimalType;
+import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Quantity;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.StringType;
@@ -215,6 +216,9 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 		related = new ArrayList();
 		for (ObservationRelatedComponent i : o.getRelated())
 			related.add(i.copy());
+		extension = new ArrayList<Extension>();
+		for(Extension e: o.getExtension())
+			extension.add(e);
 		
 	}
 	public String toString(){

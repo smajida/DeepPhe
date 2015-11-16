@@ -55,7 +55,7 @@ public class SummaryFactory {
 	public static Encounter getEncounter(Report r){
 		// create an encounter representing the document in question
 		Encounter encounter = new Encounter();
-		encounter.setContent(r.getTextSimple());
+		encounter.setContent(r.getReportText());
 		encounter.setKind(r.getType().getText());
 		encounter.setUri(r.getIdentifierSimple());
 					

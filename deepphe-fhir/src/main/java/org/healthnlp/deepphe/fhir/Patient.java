@@ -16,6 +16,7 @@ import org.hl7.fhir.instance.model.Address;
 import org.hl7.fhir.instance.model.Attachment;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.ContactPoint;
+import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.HumanName;
 import org.hl7.fhir.instance.model.Identifier;
@@ -157,6 +158,9 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 		for (PatientLinkComponent i : target.getLink())
 			dst.link.add(i.copy());
 		dst.active = target.getActiveElement();
+		dst.extension = new ArrayList<Extension>();
+		for(Extension e: target.getExtension())
+			dst.extension.add(e);
 	}
 
 	public void save(File dir) throws Exception {

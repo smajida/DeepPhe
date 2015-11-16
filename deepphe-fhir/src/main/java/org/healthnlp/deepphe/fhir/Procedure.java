@@ -11,6 +11,7 @@ import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
 import org.apache.ctakes.typesystem.type.textsem.ProcedureMention;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.DateType;
+import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Period;
 import org.hl7.fhir.instance.model.Reference;
@@ -141,6 +142,9 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 			complication.add(i.copy());
 		followUp = p.getFollowUp();
 		notes = p.getNotes();
+		extension = new ArrayList<Extension>();
+		for(Extension e: p.getExtension())
+			extension.add(e);
 	}	
 	private void writeObject(ObjectOutputStream stream) throws IOException {
 		System.out.println("WTF: "+getClass().getName());

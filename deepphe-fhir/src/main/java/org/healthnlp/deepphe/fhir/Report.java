@@ -23,6 +23,7 @@ import edu.pitt.dbmi.nlp.noble.ontology.IClass;
  *
  */
 public class Report extends Composition implements Element{
+	private int offset;
 	private CompositionEventComponent event;
 	private List<Element> reportElements;
 	
@@ -36,6 +37,19 @@ public class Report extends Composition implements Element{
 	}
 
 	
+	
+	public int getOffset() {
+		return offset;
+	}
+
+
+
+	public void setOffset(int offset) {
+		this.offset = offset;
+	}
+
+
+
 	/**
 	 * set document text
 	 * @param text
@@ -50,7 +64,7 @@ public class Report extends Composition implements Element{
 	}
 
 
-	public String getTextSimple(){
+	public String getReportText(){
 		return Utils.getText(getText());
 	}
 	
@@ -158,7 +172,7 @@ public class Report extends Composition implements Element{
 	
 
 	public String getDisplay() {
-		return getTextSimple();
+		return getReportText();
 	}
 
 	public String getIdentifierSimple() {

@@ -150,6 +150,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 		for(Extension e: getExtension()){
 			dst.setStringExtension(e.getUrl(),((StringType) e.getValue()).asStringValue());
 		}
+	
 		return dst;
 	}
 	

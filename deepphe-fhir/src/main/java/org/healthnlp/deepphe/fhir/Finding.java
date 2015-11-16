@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.Condition.ConditionEvidenceComponent;
 import org.hl7.fhir.instance.model.DateType;
+import org.hl7.fhir.instance.model.Extension;
 
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
@@ -99,6 +100,9 @@ public class Finding extends Condition  implements Element{
 		for (CodeableConcept i : c.getBodySite())
 			bodySite.add(i.copy());
 		notes = c.getNotesElement();
+		extension = new ArrayList<Extension>();
+		for(Extension e: c.getExtension())
+			extension.add(e);
 		
 	}
 	public String toString(){
