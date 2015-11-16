@@ -68,21 +68,21 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	}
 	
 
-	public String getDisplay() {
+	public String getDisplayText() {
 		return getCode().getText();
 	}
 
-	public String getIdentifierSimple() {
+	public String getResourceIdentifier() {
 		return Utils.getIdentifier(getIdentifier());
 	}
 	
 	public String toString(){
-		return getDisplay();
+		return getDisplayText();
 	}
 
-	public String getSummary() {
+	public String getSummaryText() {
 		StringBuffer st = new StringBuffer();
-		st.append("Procedure:\t"+getDisplay());
+		st.append("Procedure:\t"+getDisplayText());
 		for(CodeableConcept l: getBodySite()){
 			st.append(" | location: "+l.getText());
 		}
@@ -93,7 +93,7 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	}
 
 	public void save(File dir) throws Exception {
-		Utils.saveFHIR(this,getIdentifierSimple(),dir);
+		Utils.saveFHIR(this,getResourceIdentifier(),dir);
 		
 	}
 
@@ -116,6 +116,10 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	
 	public IClass getConceptClass(){
 		return Utils.getConceptClass(getCode());
+	}
+	
+	public String getConceptURI(){
+		return Utils.getConceptURI(getCode());
 	}
 
 	public void copy(Resource r) {

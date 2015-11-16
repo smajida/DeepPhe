@@ -80,7 +80,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	}
 	public Reference getReference(Reference r){
 		r.setDisplay(getNameSimple());
-		r.setReference(getIdentifierSimple());
+		r.setReference(getResourceIdentifier());
 		return r;
 	}
 
@@ -93,17 +93,17 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	}
 
 
-	public String getDisplay() {
+	public String getDisplayText() {
 		return getNameSimple();
 	}
 
-	public String getIdentifierSimple() {
+	public String getResourceIdentifier() {
 		return Utils.getIdentifier(getIdentifier());
 	}
 
-	public String getSummary() {
+	public String getSummaryText() {
 		StringBuffer st = new StringBuffer();
-		st.append("Patient:\t"+getDisplay());
+		st.append("Patient:\t"+getDisplayText());
 		if(getGender() != null)
 			st.append(" | gender: "+getGender().getDisplay());
 		if(getAge() > 0)
@@ -164,7 +164,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	}
 
 	public void save(File dir) throws Exception {
-		Utils.saveFHIR(this,getIdentifierSimple(),dir);
+		Utils.saveFHIR(this,getResourceIdentifier(),dir);
 	}
 
 	public void setReport(Report r) {
@@ -173,7 +173,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	}
 	
 	public String toString(){
-		return getDisplay();
+		return getDisplayText();
 	}
 	
 	public int getAge(){
@@ -197,6 +197,11 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	public IClass getConceptClass(){
 		return ResourceFactory.getInstance().getOntology().getClass(Utils.PATIENT);
 	}
+	
+	public String getConceptURI(){
+		return Utils.CANCER_URL+"#"+Utils.PATIENT;
+	}
+	
 	private void writeObject(ObjectOutputStream stream) throws IOException {
 		System.out.println("WTF: "+getClass().getName());
 		stream.defaultWriteObject();

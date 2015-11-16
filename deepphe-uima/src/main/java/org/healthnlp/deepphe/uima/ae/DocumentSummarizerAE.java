@@ -86,7 +86,7 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 				Report report = resourceFactory.getReport(jcas);
 				report.setTitle(TextUtils.stripSuffix(docID.getDocumentID()));
 				System.out.println("\n\n-------------------------------------------------------------------\n");
-				System.out.println(report.getSummary());
+				System.out.println(report.getSummaryText());
 				System.out.println("\n===================================================================\n\n");
 				
 				// save FHIR related data

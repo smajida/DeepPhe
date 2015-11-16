@@ -161,8 +161,13 @@ public class Stage extends ConditionStageComponent implements Serializable{
 			setStringExtension(e.getUrl(),((StringType) e.getValue()).asStringValue());
 		}
 	}
-	public String toString(){
+	
+	public String getDisplayText(){
 		CodeableConcept c =  getSummary();
-		return c != null ? c.getText(): "TNM unknown";
+		return c != null ? c.getText(): "TNM unknown"; 
+	}
+	
+	public String toString(){
+		return getDisplayText();
 	}
 }

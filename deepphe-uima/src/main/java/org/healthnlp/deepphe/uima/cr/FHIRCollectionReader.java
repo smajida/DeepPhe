@@ -95,10 +95,10 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 						offset += text.length();
 						
 						// persist into CAS
-						
+						System.out.println(r.getSummaryText());
 						FHIRResourceFactory.saveReport(r,jcas);
 						
-						System.out.println(r.getSummary());
+						
 						//reports.add(r);
 						/*	Encounter encounter = SummaryFactory.getEncounter(r);
 						patient.addEncounter(encounter);
@@ -174,7 +174,7 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 				System.out.println(f.getName());
 				Report r = ResourceFactory.loadReport(f);
 				if(r != null){
-					System.out.println(r.getSummary());
+					System.out.println(r.getSummaryText());
 					r.save(new File("/home/tseytlin/Output/FHIR/"));
 				}
 			}

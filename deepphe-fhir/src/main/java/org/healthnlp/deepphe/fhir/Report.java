@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Composition;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
+
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 
 /**
@@ -171,37 +172,37 @@ public class Report extends Composition implements Element{
 
 	
 
-	public String getDisplay() {
+	public String getDisplayText() {
 		return getReportText();
 	}
 
-	public String getIdentifierSimple() {
+	public String getResourceIdentifier() {
 		return Utils.getIdentifier(getIdentifier());
 	}
 
 	public String toString(){
-		return getDisplay();
+		return getDisplayText();
 	}
 	
-	public String getSummary() {
+	public String getSummaryText() {
 		StringBuffer st = new StringBuffer();
-		st.append("Report:\n"+getDisplay()+"\n");
+		st.append("Report:\n"+getDisplayText()+"\n");
 		if(getPatient() != null)
-			st.append(getPatient().getSummary()+"\n");
+			st.append(getPatient().getSummaryText()+"\n");
 		for(Diagnosis dx: getDiagnoses()){
-			st.append(dx.getSummary()+"\n");
+			st.append(dx.getSummaryText()+"\n");
 		}
 		for(Procedure p: getProcedures()){
-			st.append(p.getSummary()+"\n");
+			st.append(p.getSummaryText()+"\n");
 		}
 		for(Finding dx: getFindings()){
-			st.append(dx.getSummary()+"\n");
+			st.append(dx.getSummaryText()+"\n");
 		}
 		for(Observation p: getObservations()){
-			st.append(p.getSummary()+"\n");
+			st.append(p.getSummaryText()+"\n");
 		}
 		for(Medication p: getMedications()){
-			st.append(p.getSummary()+"\n");
+			st.append(p.getSummaryText()+"\n");
 		}
 		
 		return st.toString();
@@ -211,7 +212,7 @@ public class Report extends Composition implements Element{
 	public Resource getResource() {
 		return this;
 	}
-	
+
 	/**
 	 * persist this object to a directory
 	 * @param dir
@@ -219,7 +220,7 @@ public class Report extends Composition implements Element{
 	 * @throws FileNotFoundException 
 	 */
 	public void save(File dir) throws Exception{
-		String id = getIdentifierSimple();
+		String id = getResourceIdentifier();
 		
 		dir = new File(dir,TextUtils.stripSuffix(getTitle()));
 		Utils.saveFHIR(this,id,dir);
@@ -239,6 +240,9 @@ public class Report extends Composition implements Element{
 	
 	public IClass getConceptClass(){
 		return ResourceFactory.getInstance().getOntology().getClass(Utils.COMPOSITION);
+	}
+	public String getConceptURI(){
+		return Utils.CANCER_URL+"#"+Utils.COMPOSITION;
 	}
 
 

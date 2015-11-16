@@ -69,6 +69,7 @@ public class FHIRResourceFactory {
 		
 		// do common things
 		if(el != null){
+			el.setURI(e.getConceptURI());
 			for(String m: Utils.getMentionExtensions((DomainResource)e)){
 				int [] ms = Utils.getMentionSpan(m);
 				el.setBegin(ms[0]);
@@ -98,7 +99,7 @@ public class FHIRResourceFactory {
 
 	private static org.healthnlp.deepphe.uima.types.Observation saveObservation(Observation e, JCas jcas) {
 		org.healthnlp.deepphe.uima.types.Observation ob = new  org.healthnlp.deepphe.uima.types.Observation(jcas);
-		ob.setHasNumValue(e.getValueSimple());
+		ob.setHasNumValue(e.getObservationValue());
 		return ob;
 	}
 	
@@ -108,10 +109,8 @@ public class FHIRResourceFactory {
 		try{
 			if(e.getAbatement() != null)
 				dd.setHasAbatementBoolean(((BooleanType)e.getAbatement()).getValue());
-			if(e.getAbatementAge() != null)
-				dd.setHasAgeAbatement(""+e.getAbatementAge().getValue());
-			if(e.getOnsetAge() != null)
-				dd.setHasAgeOnset(""+e.getOnsetAge().getValue());
+			//if(e.getOnsetAge() != null)
+			//	dd.setHasAgeOnset(""+e.getOnsetAge().getValue());
 			if(e.getSeverity() != null)
 				dd.setHasCertainty(""+e.getSeverity().getText());
 			if(e.getCategory() != null)

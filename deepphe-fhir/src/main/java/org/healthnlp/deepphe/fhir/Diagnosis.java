@@ -184,17 +184,17 @@ public class Diagnosis extends Condition implements Element {
 		return s;
 	}
 
-	public String getDisplay() {
+	public String getDisplayText() {
 		return getCode().getText();
 	}
 
-	public String getIdentifierSimple() {
+	public String getResourceIdentifier() {
 		return Utils.getIdentifier(getIdentifier());
 	}
 
-	public String getSummary() {
+	public String getSummaryText() {
 		StringBuffer st = new StringBuffer();
-		st.append("Diagnosis:\t"+getDisplay());
+		st.append("Diagnosis:\t"+getDisplayText());
 		for(CodeableConcept l: getBodySite()){
 			st.append(" | location: "+l.getText());
 		}
@@ -206,7 +206,7 @@ public class Diagnosis extends Condition implements Element {
 		return st.toString();
 	}
 	public void save(File dir) throws Exception {
-		Utils.saveFHIR(this,getIdentifierSimple(),dir);
+		Utils.saveFHIR(this,getResourceIdentifier(),dir);
 		
 	}
 
@@ -232,7 +232,11 @@ public class Diagnosis extends Condition implements Element {
 	public IClass getConceptClass(){
 		return Utils.getConceptClass(getCode());
 	}
+	public String getConceptURI(){
+		return Utils.getConceptURI(getCode());
+	}
+	
 	public String toString(){
-		return getDisplay();
+		return getDisplayText();
 	}
 }
