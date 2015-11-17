@@ -9,7 +9,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
+//import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,12 +22,17 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import org.apache.ctakes.cancer.pipeline.CancerPipelineFactory;
+import org.apache.uima.analysis_engine.AnalysisEngine;
+import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
 import org.healthnlp.deepphe.ontology.OntologyCleaner;
 import org.healthnlp.deepphe.ontology.PartialPath;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
-import org.healthnlp.deepphe.uima.cr.PatientListReader;
+//import org.healthnlp.deepphe.uima.cr.PatientListReader;
+import org.healthnlp.deepphe.workbench.controller.Controller;
+import org.healthnlp.deepphe.workbench.treeview.artifact.AnnotationsTree;
 
 public class Workbench extends JFrame implements ActionListener, PropertyChangeListener {
 	
@@ -54,7 +59,7 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 	private final PatientKnowledgeExtractorInterface patientKnowledgeExtractor = new PatientKnowledgeExtractorDrools();
 	private final DroolsTextInputer droolsInputer = new DroolsTextInputer();
 	private final DroolsTextOutputer droolsOutputer = new DroolsTextOutputer();
-	private final PatientListReader patientListReader = new PatientListReader();
+//	private final PatientListReader patientListReader = new PatientListReader();
 	private final List<KbPatient> patients = new ArrayList<>();
 	
 	private final DroolsKnowledgeBaseAndSession engine = DroolsKnowledgeBaseAndSession.getInstance();
@@ -69,7 +74,11 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 	private InferenceTabPanel inferenceTabPanel;
 	
 	private OntologyCleaner ontologyCleaner;
+	private Controller controller;
+	private AnalysisEngine ae;
+	private AnnotationsTree annotationsTree = new AnnotationsTree();
 	private PipeDialogPatientExtraction patientExtractor;
+	private PipeDialogEncounterExtraction encounterExtractor;
 	
 	public Workbench(String title) {
 		super(title);
@@ -82,11 +91,17 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 		
 		establishWindowControls();
 		
-		String file  = Workbench.PROJECT_LOCATION+File.separator+"src/main/resources/corpora/one";
-		final File encountersDirectory = new File(file);
-		patientListReader.setInputDirectoryPath(encountersDirectory.getAbsolutePath());
-		patientListReader.setPatients(patients);
-		patientListReader.execute();
+//		String file = Workbench.PROJECT_LOCATION+File.separator+"src/main/resources/corpora/one";
+//		final File encountersDirectory = new File(file);
+//		patientListReader.setInputDirectoryPath(encountersDirectory.getAbsolutePath());
+//		patientListReader.setPatients(patients);
+//		patientListReader.execute();
+		
+		controller = new Controller();
+		controller.setKbPatients(patients);
+		controller.constructFastDagFromRdbms();
+		
+		buildCtakesAnalysisEngine();
 		
 		establishExtractor();
 		patientKnowledgeExtractor.setDroolsTextOutputer(droolsOutputer);
@@ -115,6 +130,9 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 						JOptionPane.YES_NO_OPTION);
 				if (res == 0) {
 					// dispose method issues the WINDOW_CLOSED event
+					if (Workbench.this.controller != null) {
+						Workbench.this.controller.closeUp();
+					}
 					Workbench.this.dispose();
 				}
 			}
@@ -129,8 +147,12 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 	}
 	
 	private void buildAnnotationTabPanel() {
+		annotationsTree.setController(controller);
 		annotationTabPanel = new AnnotationTabPanel();
+		annotationTabPanel.setAnnotationsTree(annotationsTree);
 		annotationTabPanel.setPatients(patients);
+		annotationTabPanel.setController(controller);
+		annotationTabPanel.setAnalysisEngine(ae);
 		annotationTabPanel.build();
 	}
 	
@@ -166,8 +188,9 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 		try {
 		    patientKnowledgeExtractor.setKnowledgeBase(engine);
 			patientKnowledgeExtractor.setPatients(patients);		
-			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new EncounterKnowledgeExtractorStub());
-//			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new EncounterKnowledgeExtractorCtakes());
+//			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new EncounterKnowledgeExtractorStub());
+			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new EncounterKnowledgeExtractorCtakes());
+			EncounterKnowlegeExractorFactory.getEncounterKnowledgeExtractor().setAnalysisEngine(ae);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -213,11 +236,13 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 	}
 	
 	private void processExtractEncounters() {
-		EncounterKnowledgeExtractorInterface encounterKnowledgeExtractor = EncounterKnowlegeExractorFactory.getEncounterKnowledgeExtractor();
-		for (KbPatient patient : patients) {
-			encounterKnowledgeExtractor.setPatient(patient);
-			encounterKnowledgeExtractor.execute();
-		}		
+		encounterExtractor = new PipeDialogEncounterExtraction(this);
+		encounterExtractor.setAnnotationTabPanel(annotationTabPanel);
+		encounterExtractor.setPatients(patients);
+		encounterExtractor.setController(controller);
+		encounterExtractor.addPropertyChangeListener(this);
+		encounterExtractor.setVisible(true);
+		(new Thread(encounterExtractor)).start();
 	}
 
 	private void processExtractPatient() {	
@@ -236,8 +261,7 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 	private void processLoadSinglePatientToKb() {
 		EncounterKnowledgeExtractorInterface encounterKnowledgeExtractor = EncounterKnowlegeExractorFactory.getEncounterKnowledgeExtractor();
 		for (KbPatient patient : patients) {
-			encounterKnowledgeExtractor.setPatient(patient);
-			encounterKnowledgeExtractor.execute();
+			encounterKnowledgeExtractor.executePatient(patient);
 			break;
 		}
 		patientKnowledgeExtractor.setPatients(patients);
@@ -246,8 +270,6 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 			patientKnowledgeExtractor.nextPatient();
 			patientKnowledgeExtractor.loadSinglePatient();
 		}
-		
-	
 	}
 
 	private void processPatientClean() {
@@ -276,6 +298,16 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 		(new Thread(ontologyCleaner)).start();
 	}
 	
+	private void buildCtakesAnalysisEngine() {
+		if (ae == null) {
+			try {
+				ae = CancerPipelineFactory.createPipelineEngine();
+			} catch (ResourceInitializationException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (evt.getSource() == ontologyCleaner && evt.getNewValue().equals("Finished")) {
@@ -283,6 +315,9 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 		}
 		else if (evt.getSource() == patientExtractor && evt.getNewValue().equals("Finished")) {
 			patientExtractor.dispose();
+		}
+		else if (evt.getSource() == encounterExtractor && evt.getNewValue().equals("Finished")) {
+			encounterExtractor.dispose();
 		}
 	}
 
