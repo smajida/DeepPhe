@@ -29,6 +29,7 @@ import org.healthnlp.deepphe.summarization.jess.kb.Patient;
 import org.healthnlp.deepphe.summarization.jess.kb.Summary;
 import org.healthnlp.deepphe.summarization.jess.kb.SummaryFactory;
 import org.healthnlp.deepphe.uima.ae.DocumentSummarizerAE;
+import org.healthnlp.deepphe.uima.fhir.FHIRResourceFactory;
 import org.healthnlp.deepphe.util.TextUtils;
 
 public class FHIRCollectionReader extends CollectionReader_ImplBase {
@@ -76,18 +77,32 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 
 			// now we have a subject directory, it should containe report directories.
 			//ArrayList<Report> reports = new ArrayList<Report>();
-			Patient patient = new Patient();
+			//Patient patient = new Patient();
 			//p.setPath(f.getAbsolutePath());
+			
+			
+			int offset = 0;
+			StringBuffer reportText = new StringBuffer();
+			
 			for(File f: file.listFiles()){
 				if(f.isDirectory()){
 					Report r = ResourceFactory.loadReport(f);
-				
 					if(r != null){
-						System.out.println(r.getSummary());
+						// add report to an uber report
+						String text = r.getReportText()+"\n";
+						reportText.append(text);
+						r.setOffset(offset);
+						offset += text.length();
+						
+						// persist into CAS
+						System.out.println(r.getSummaryText());
+						FHIRResourceFactory.saveReport(r,jcas);
+						
+						
 						//reports.add(r);
-						Encounter encounter = SummaryFactory.getEncounter(r);
+						/*	Encounter encounter = SummaryFactory.getEncounter(r);
 						patient.addEncounter(encounter);
-						reIdentifyDAG(patient);
+						reIdentifyDAG(patient);*/
 					}
 				}
 				
@@ -102,8 +117,8 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 			documentIDAnnotation.addToIndexes();
 			
 			// we don't have text (for now)
-			jcas.setDocumentText(Base64.getEncoder().encodeToString(SerializationUtils.serialize(patient)));
-			
+			//jcas.setDocumentText(Base64.getEncoder().encodeToString(SerializationUtils.serialize(patient)));
+			jcas.setDocumentText(reportText.toString());
 		} catch (Exception e) {
 			throw new CollectionException(e);
 		} finally {
@@ -159,7 +174,7 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 				System.out.println(f.getName());
 				Report r = ResourceFactory.loadReport(f);
 				if(r != null){
-					System.out.println(r.getSummary());
+					System.out.println(r.getSummaryText());
 					r.save(new File("/home/tseytlin/Output/FHIR/"));
 				}
 			}

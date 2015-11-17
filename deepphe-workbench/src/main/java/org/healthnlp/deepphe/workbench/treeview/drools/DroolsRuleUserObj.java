@@ -1,4 +1,4 @@
-package org.healthnlp.deepphe.workbench.treeview;
+package org.healthnlp.deepphe.workbench.treeview.drools;
 
 import org.drools.definition.rule.Rule;
 

@@ -1,4 +1,4 @@
-package org.healthnlp.deepphe.workbench.treeview;
+package org.healthnlp.deepphe.workbench.treeview.drools;
 
 import java.awt.Component;
 import java.util.Iterator;

@@ -36,18 +36,17 @@ import org.hl7.fhir.instance.formats.XmlParser;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DateType;
+import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Narrative;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.utils.NarrativeGenerator.ResourceWithReference;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.hl7.fhir.utilities.xml.XMLWriter;
-import org.hl7.fhir.utilities.xml.XmlGenerator;
+
 
 import edu.pitt.dbmi.nlp.noble.coder.model.Document;
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
@@ -70,8 +69,8 @@ public class Utils {
 	public static final String DOCUMENT_HEADER_PRINCIPAL_DATE = "Principal Date";
 	public static final String DOCUMENT_HEADER_PATIENT_NAME = "Patient Name";
 	public static final String MENTION_URL = "http://hl7.org/fhir/mention"; 
-	
-	
+	public static final String CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl";
+		
 	public static final String ELEMENT = "Element";
 	public static final String COMPOSITION = "Composition";
 	public static final String PATIENT = "Patient";
@@ -544,8 +543,8 @@ public class Utils {
 	public static Reference getResourceReference(Reference r,Element model){
 		if(r == null)
 			r = new Reference();
-		r.setDisplay(model.getDisplay());
-		r.setReference(model.getIdentifierSimple());
+		r.setDisplay(model.getDisplayText());
+		r.setReference(model.getResourceIdentifier());
 		return r;
 	}
 	
@@ -597,6 +596,15 @@ public class Utils {
 		for(Coding coding : c.getCoding()){
 			if((""+ontology.getURI()).equals(coding.getSystem())){
 				return ontology.getClass(coding.getCode());
+			}
+		}
+		return null;
+	}
+	
+	public static String getConceptURI(CodeableConcept c){
+		for(Coding coding : c.getCoding()){
+			if(coding.getCode() != null && coding.getCode().startsWith("http://")){
+				return coding.getCode();
 			}
 		}
 		return null;
@@ -909,7 +917,25 @@ public class Utils {
 	public static Extension createMentionExtension(String text, int st, int end){
 		return createExtension(MENTION_URL,text+" ["+st+":"+end+"]");
 	}
-	
+
+	public static List<String> getMentionExtensions(DomainResource r){
+		List<String> mentions = new ArrayList<String>();
+		for(Extension e: r.getExtension()){
+			if(MENTION_URL.equals(e.getUrl())){
+				mentions.add(((StringType)e.getValue()).getValue());
+			}
+		}
+		return mentions;
+	}
+	public static int [] getMentionSpan(String text){
+		int [] s = new int [2];
+		Matcher m = Pattern.compile(".* \\[(\\d+):(\\d+)\\]").matcher(text);
+		if(m.matches()){
+			s[0] = Integer.parseInt(m.group(1));
+			s[1] = Integer.parseInt(m.group(2));
+		}
+		return s;
+	}
 	
 	public static void main(String [] args) throws Exception{
 		System.out.println(getHeaderValues(TextTools.getText(new FileInputStream(new File("/home/tseytlin/Work/DeepPhe/data/sample/docs/doc1.txt")))));

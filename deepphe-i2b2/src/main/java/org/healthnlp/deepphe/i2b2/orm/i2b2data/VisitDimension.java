@@ -3,7 +3,6 @@ package org.healthnlp.deepphe.i2b2.orm.i2b2data;
 // Generated Apr 15, 2015 4:30:25 PM by Hibernate Tools 4.3.1
 
 import java.math.BigDecimal;
-import java.sql.Clob;
 import java.util.Date;
 
 import javax.persistence.AttributeOverride;
@@ -34,7 +33,7 @@ public class VisitDimension implements java.io.Serializable {
 	private String locationCd;
 	private String locationPath;
 	private BigDecimal lengthOfStay;
-	private Clob visitBlob;
+	private String visitBlob;
 	private Date updateDate;
 	private Date downloadDate;
 	private Date importDate;
@@ -50,7 +49,7 @@ public class VisitDimension implements java.io.Serializable {
 
 	public VisitDimension(VisitDimensionId id, String activeStatusCd,
 			Date startDate, Date endDate, String inoutCd, String locationCd,
-			String locationPath, BigDecimal lengthOfStay, Clob visitBlob,
+			String locationPath, BigDecimal lengthOfStay, String visitBlob,
 			Date updateDate, Date downloadDate, Date importDate,
 			String sourcesystemCd, BigDecimal uploadId) {
 		this.id = id;
@@ -148,11 +147,11 @@ public class VisitDimension implements java.io.Serializable {
 
 	@Column(name = "VISIT_BLOB")
 	@Type(type = "org.hibernate.type.MaterializedClobType")
-	public Clob getVisitBlob() {
+	public String getVisitBlob() {
 		return this.visitBlob;
 	}
 
-	public void setVisitBlob(Clob visitBlob) {
+	public void setVisitBlob(String visitBlob) {
 		this.visitBlob = visitBlob;
 	}
 

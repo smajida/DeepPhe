@@ -160,7 +160,7 @@ public class Cancer extends Diagnosis {
 	
 	public String getSummary() {
 		StringBuffer st = new StringBuffer();
-		st.append("Cancer:\t"+getDisplay());
+		st.append("Cancer:\t"+getDisplayText());
 		for(CodeableConcept l: getBodySite()){
 			st.append(" | location: "+l.getText());
 		}

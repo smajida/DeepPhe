@@ -55,9 +55,9 @@ public class SummaryFactory {
 	public static Encounter getEncounter(Report r){
 		// create an encounter representing the document in question
 		Encounter encounter = new Encounter();
-		encounter.setContent(r.getTextSimple());
+		encounter.setContent(r.getReportText());
 		encounter.setKind(r.getType().getText());
-		encounter.setUri(r.getIdentifierSimple());
+		encounter.setUri(r.getResourceIdentifier());
 					
 		// add all report elements to an encounter
 		for(Element e: r.getReportElements()){
@@ -142,7 +142,7 @@ public class SummaryFactory {
 				((TumorSize)summary).setGreatestDimension(q.getValue().doubleValue());
 				((TumorSize)summary).setUnitOfMeasure(q.getUnit());
 			}
-			summary.setValue(o.getValueSimple());
+			summary.setValue(o.getObservationValue());
 		}
 		// setup common parameters
 		if(summary != null && code != null){

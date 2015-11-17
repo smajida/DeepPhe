@@ -1,4 +1,5 @@
-package org.healthnlp.deepphe.workbench;
+
+package org.healthnlp.deepphe.workbench.treeview.artifact;
 
 import java.awt.Component;
 import java.util.Iterator;
@@ -11,11 +12,9 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import org.apache.commons.lang.StringUtils;
 import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
-import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
+import org.healthnlp.deepphe.workbench.controller.Controller;
 
 /**
  * JTree basic tutorial and example
@@ -23,36 +22,48 @@ import org.healthnlp.deepphe.summarization.jess.kb.Patient;
  * @author wwww.codejava.net
  */
 
-public class SummarizableTree {
+public class AnnotationsTree {
 
 	private JTree tree;
 	private List<KbPatient> patients;
 	private TreeSelectionListener treeSelectionListener;
+	private Controller controller;
 
-	public SummarizableTree() {
+	public AnnotationsTree() {
 	}
 
 	public void build() {
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
+		DefaultMutableTreeNode corpusNode = new DefaultMutableTreeNode(new AnnotationsCorporaUserObject());
+		root.add(corpusNode);
 		Iterator<KbPatient> patientIterator = patients.iterator();
 		while (patientIterator.hasNext()) {
 			KbPatient kbPatient = patientIterator.next();
-			String nodeName = "Patient"
-					+ StringUtils.leftPad(kbPatient.getSequence() + "", 4, "0");
+			AnnotationsPatientUserObject patientUserObject = new AnnotationsPatientUserObject();
+			patientUserObject.setPatient(kbPatient);
 			DefaultMutableTreeNode patientNode = new DefaultMutableTreeNode(
-					nodeName);
-			patientNode.setUserObject(kbPatient);
-			root.add(patientNode);
+					patientUserObject);
+			corpusNode.add(patientNode);
 			Iterator<KbEncounter> encounterIterator = kbPatient.getEncounters()
 					.iterator();
 			while (encounterIterator.hasNext()) {
+				
 				KbEncounter kbEncounter = encounterIterator.next();
-				nodeName = "Encounter"
-						+ StringUtils.leftPad(kbEncounter.getSequence() + "", 4, "0");
+				AnnotationsEncounterUserObject encounterUserObject = new AnnotationsEncounterUserObject();
+				encounterUserObject.setEncounter(kbEncounter);
 				DefaultMutableTreeNode encounterNode = new DefaultMutableTreeNode(
-						nodeName);
-				encounterNode.setUserObject(kbEncounter);
+						encounterUserObject);
 				patientNode.add(encounterNode);
+				
+				AnnotationsAnaforaUserObject anaforaUserObject = new AnnotationsAnaforaUserObject();
+				anaforaUserObject.setKbEncounter(kbEncounter);
+				encounterNode.add(new DefaultMutableTreeNode(
+						anaforaUserObject));
+				
+				AnnotationsCtakesUserObject cTakesUserObject = new AnnotationsCtakesUserObject();
+				cTakesUserObject.setKbEncounter(kbEncounter);
+				encounterNode.add(new DefaultMutableTreeNode(
+						cTakesUserObject));
 			}
 		}
 		tree = new JTree(root);
@@ -82,6 +93,14 @@ public class SummarizableTree {
 		this.patients = patients;
 	}
 
+	public Controller getController() {
+		return controller;
+	}
+
+	public void setController(Controller controller) {
+		this.controller = controller;
+	}
+
 	public TreeSelectionListener getTreeSelectionListener() {
 		return treeSelectionListener;
 	}
@@ -94,20 +113,20 @@ public class SummarizableTree {
 	class EncounterTreeCellRenderer extends DefaultTreeCellRenderer {
 		private static final long serialVersionUID = 1L;
 		private ImageIcon malePatientIcon = new ImageIcon(
-				SummarizableTree.class.getResource("/images/16f/male.gif"));
+				AnnotationsTree.class.getResource("/images/16f/male.gif"));
 		private ImageIcon femalePatientIcon = new ImageIcon(
-				SummarizableTree.class
+				AnnotationsTree.class
 						.getResource("/images/16f/female.gif"));
 		private ImageIcon encounterIcon = new ImageIcon(
-				SummarizableTree.class.getResource("/images/16f/encounter.png"));
+				AnnotationsTree.class.getResource("/images/16f/encounter.png"));
 
 		@Override
 		public Component getTreeCellRendererComponent(JTree tree, Object value,
 				boolean sel, boolean exp, boolean leaf, int row,
 				boolean hasFocus) {
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-			if (node.getUserObject() instanceof KbPatient) {
-				KbPatient patient = (KbPatient) node.getUserObject();
+			if (node.getUserObject() instanceof AnnotationsPatientUserObject) {
+				KbPatient patient = ((AnnotationsPatientUserObject) node.getUserObject()).getPatient();
 				if (patient.getGender().equals("Male")) {
 					setOpenIcon(malePatientIcon);
 					setClosedIcon(malePatientIcon);
@@ -117,7 +136,7 @@ public class SummarizableTree {
 					setClosedIcon(femalePatientIcon);
 					setLeafIcon(femalePatientIcon);
 				}
-			} else if (node.getUserObject() instanceof KbEncounter) {
+			} else {
 				setOpenIcon(encounterIcon);
 				setClosedIcon(encounterIcon);
 				setLeafIcon(encounterIcon);
