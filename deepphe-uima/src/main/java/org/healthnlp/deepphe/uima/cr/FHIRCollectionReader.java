@@ -95,7 +95,7 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 						offset += text.length();
 						
 						// persist into CAS
-						System.out.println(r.getSummaryText());
+						//System.out.println(r.getSummaryText());
 						FHIRResourceFactory.saveReport(r,jcas);
 						
 						

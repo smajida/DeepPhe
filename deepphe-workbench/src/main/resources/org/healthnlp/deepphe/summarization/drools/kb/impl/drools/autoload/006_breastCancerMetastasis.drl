@@ -1,0 +1,78 @@
+package org.healthnlp.deepphe.summarization.drools.rules;
+
+//list any import classes here.
+import org.healthnlp.deepphe.summarization.drools.kb.*;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.*;
+
+//
+// Metastasis 
+//
+//
+
+//
+// Met1
+//
+// If there is an instance of M1 stage, then infer 
+// there is a "Tumor" with type="metastasis"
+//    
+rule "006_breastCancerMetastasis Met1"
+	salience 1000
+	when
+         KbGoal (name == "extract-metastasis",
+                isActive > 0)
+         KbPatient($patientId : id)
+         M1StageFinding(summarizableId == $patientId)
+         not Tumor (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> 006_breastCancerMetastasis Met1 Fires... ");
+        Tumor tumor = new TumorImpl();
+		tumor.setSummarizableId($patientId);
+		KbSummary tumorType = new KbSummary();
+		tumorType.setCode("metastasis");
+		tumorType.setSummarizableId($patientId);
+		KbRelation hasTumorType = new KbRelation();
+		hasTumorType.setCode("hasTumorType");
+		hasTumorType.setSummarizableId($patientId);
+		hasTumorType.setDomainId(tumor.getId());
+		hasTumorType.setRangeId(tumorType.getId());
+        insert(tumor);
+        insert(tumorType);
+        insert(hasTumorType);
+    end
+ 
+//
+// Met2
+//
+// If there is an instance of "Tumor" with type="primary" and bodySite=<value1> 
+// already existing, and there is an instance of "Tumor" with bodySite=<value2> and
+// value2 != type of value1, then infer "Tumor" with bodySite=value2 
+// has type="metastasis"
+//
+rule "006_breastCancerMetastasis Met2"
+	salience 1000
+	when
+         KbGoal (name == "extract-metastasis",
+                isActive > 0)
+         KbPatient($patientId : id)
+         // Breast Cancer
+         Tumor ($tumorOneId : id, summarizableId == $patientId)
+         KbSummary ($tumorTypeOneId : id, summarizableId == $patientId, code == "primary")
+         KbRelation(domainId == $tumorOneId, rangeId == $tumorTypeOneId)
+         Breast($breastOneId : id)
+         RelationHasbodyLocation(domainId == $tumorOneId,
+                             rangeId == $breastOneId)
+         // Metastatic Cancer
+         Tumor ($tumorTwoId : id, summarizableId == $patientId,
+                $tumorTwoId != $tumorOneId)
+         $metastaticTumorType :
+            KbSummary ($tumorTwoTypeId : id, summarizableId == $patientId, code == "")
+         KbRelation(domainId == $tumorTwoId, rangeId == $tumorTwoTypeId)
+         BodySite($bodySiteTwoId : id)
+         RelationHasbodyLocation(domainId == $tumorTwoId,
+                             rangeId == $bodySiteTwoId)
+         not Breast(id == $bodySiteTwoId)          
+    then
+        System.out.println("<DROOLS-ENGINE> 006_breastCancerMetastasis Met2 Fires... ");
+        modify ( $metastaticTumorType )  { setCode( "metastatic" ) };
+    end
+    
