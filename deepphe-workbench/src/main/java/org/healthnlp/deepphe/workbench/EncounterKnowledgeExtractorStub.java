@@ -1,6 +1,7 @@
 package org.healthnlp.deepphe.workbench;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.healthnlp.deepphe.summarization.drools.kb.BreastAdenocarcinoma;
 import org.healthnlp.deepphe.summarization.drools.kb.EstrogenReceptorStatus;
 import org.healthnlp.deepphe.summarization.drools.kb.GenericDistantMetastasisTnmFinding;
@@ -24,7 +25,6 @@ import org.healthnlp.deepphe.summarization.drools.kb.impl.M1StageFindingImpl;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.MalignantBreastNeoplasmImpl;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.N0StageFindingImpl;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.N1StageFindingImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.N2StageFindingImpl;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.NegativeImpl;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.PositiveImpl;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.ProgesteroneReceptorStatusImpl;
@@ -32,25 +32,30 @@ import org.healthnlp.deepphe.summarization.drools.kb.impl.RelationHasinterpretat
 import org.healthnlp.deepphe.summarization.drools.kb.impl.T0StageFindingImpl;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.T1StageFindingImpl;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.T2StageFindingImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.T2bStageFindingImpl;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.TumorGreaterThanOrEqualTo21CentimetersImpl;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.TumorLessThanOrEqualTo20CentimetersImpl;
 
 public class EncounterKnowledgeExtractorStub implements EncounterKnowledgeExtractorInterface {
 	
-	private KbPatient patient;
-	
 	@Override
-	public void execute() {
+	public void executePatient(KbPatient patient) {
 		if (patient.getSequence() == 0) {
-			initializePatientZeroEncounters();
+			initializePatientZeroEncounters(patient);
 		}
 		else if (patient.getSequence() == 1) {
-			initializePatientOneEncounters();
+			initializePatientOneEncounters(patient);
 		}
 	}
 	
-	private void initializePatientZeroEncounters() {
+	@Override
+	public void setAnalysisEngine(AnalysisEngine ae) {
+	}
+	
+	@Override
+	public void executeEncounter(KbEncounter kbEncounter) {
+	}
+	
+	private void initializePatientZeroEncounters(KbPatient patient) {
 		
 		for (KbEncounter encounter : patient.getEncounters()) {
 			
@@ -196,7 +201,7 @@ public class EncounterKnowledgeExtractorStub implements EncounterKnowledgeExtrac
 		}
 	}
 	
-	private void initializePatientOneEncounters() {
+	private void initializePatientOneEncounters(KbPatient patient) {
 		for (KbEncounter encounter : patient.getEncounters()) {
 			
 			if (encounter.getSequence() == 0) {
@@ -319,15 +324,8 @@ public class EncounterKnowledgeExtractorStub implements EncounterKnowledgeExtrac
 		
 	}
 
-	@Override
-	public void setPatient(KbPatient patient) {
-		this.patient = patient;
-		
-	}
+	
 
-	@Override
-	public void setProjectLocation(String projectLocation) {
-		// not used
-		
-	}
+
+
 }

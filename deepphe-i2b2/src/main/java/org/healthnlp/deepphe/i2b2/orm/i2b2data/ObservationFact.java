@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.i2b2.orm.i2b2data;
 // Generated Apr 15, 2015 4:30:25 PM by Hibernate Tools 4.3.1
 
 import java.math.BigDecimal;
+import java.sql.Clob;
 import java.util.Date;
 
 import javax.persistence.AttributeOverride;
@@ -10,6 +11,7 @@ import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -163,8 +165,8 @@ public class ObservationFact implements java.io.Serializable {
 		this.locationCd = locationCd;
 	}
 
+	@Lob
 	@Column(name = "OBSERVATION_BLOB")
-	@Type(type = "org.hibernate.type.MaterializedClobType")
 	public String getObservationBlob() {
 		return this.observationBlob;
 	}

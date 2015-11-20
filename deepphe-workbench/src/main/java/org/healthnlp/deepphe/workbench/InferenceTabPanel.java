@@ -17,10 +17,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import org.healthnlp.deepphe.summarization.drools.kb.KbIdentified;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 import org.healthnlp.deepphe.summarization.drools.kb.KbRelation;
-import org.healthnlp.deepphe.workbench.treeview.DroolsFunctionUserObj;
-import org.healthnlp.deepphe.workbench.treeview.DroolsObjectUserObj;
-import org.healthnlp.deepphe.workbench.treeview.DroolsRuleUserObj;
-import org.healthnlp.deepphe.workbench.treeview.DroolsTree;
+import org.healthnlp.deepphe.workbench.treeview.drools.DroolsFunctionUserObj;
+import org.healthnlp.deepphe.workbench.treeview.drools.DroolsObjectUserObj;
+import org.healthnlp.deepphe.workbench.treeview.drools.DroolsRuleUserObj;
+import org.healthnlp.deepphe.workbench.treeview.drools.DroolsTree;
 
 public class InferenceTabPanel extends JPanel implements TreeSelectionListener {
 

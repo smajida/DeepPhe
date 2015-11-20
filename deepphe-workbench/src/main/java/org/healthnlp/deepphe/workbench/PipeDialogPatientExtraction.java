@@ -25,18 +25,15 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
+import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
 import org.healthnlp.deepphe.ontology.I2b2OntologyBuilder;
 import org.healthnlp.deepphe.ontology.PartialPath;
 import org.healthnlp.deepphe.ontology.Utilities;
 import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
-import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
-import org.healthnlp.deepphe.summarization.jess.kb.Summary;
-import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 		ActionListener {
@@ -157,10 +154,7 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 		EncounterKnowledgeExtractorInterface encounterKnowledgeExtractor = EncounterKnowlegeExractorFactory
 				.getEncounterKnowledgeExtractor();
 		for (KbPatient patient : patients) {
-			encounterKnowledgeExtractor
-					.setProjectLocation(Workbench.PROJECT_LOCATION);
-			encounterKnowledgeExtractor.setPatient(patient);
-			encounterKnowledgeExtractor.execute();
+			encounterKnowledgeExtractor.executePatient(patient);
 		}
 		setMessage("Extracted encounter level knowledge.");
 	}
