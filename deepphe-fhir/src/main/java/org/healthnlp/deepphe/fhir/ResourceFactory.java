@@ -296,7 +296,7 @@ public class ResourceFactory {
 	}
 
 
-	private List<Procedure> getProcedures(JCas cas) {
+	public List<Procedure> getProcedures(JCas cas) {
 		List<Procedure> list = new ArrayList<Procedure>();
 		for(IdentifiedAnnotation m: Utils.getAnnotationsByType(cas, ProcedureMention.type)){
 			Procedure  dx = new Procedure();
@@ -309,7 +309,7 @@ public class ResourceFactory {
 	/**
 	 * 
 	 */
-	private List<Diagnosis> getDiagnoses(JCas cas) {
+	public List<Diagnosis> getDiagnoses(JCas cas) {
 		List<Diagnosis> list = new ArrayList<Diagnosis>();
 		for(IdentifiedAnnotation m: Utils.getAnnotationsByType(cas, DiseaseDisorderMention.type)){
 			Diagnosis  dx = new Diagnosis();
@@ -319,7 +319,7 @@ public class ResourceFactory {
 		return list;
 	}
 	
-	private List<Medication> getMedications(JCas cas) {
+	public List<Medication> getMedications(JCas cas) {
 		List<Medication> list = new ArrayList<Medication>();
 		for(IdentifiedAnnotation m: Utils.getAnnotationsByType(cas,MedicationMention.type)){
 			Medication  dx = new Medication();
@@ -329,12 +329,12 @@ public class ResourceFactory {
 		return list;
 	}
 
-	private List<Finding> getFindings(JCas cas) {
+	public List<Finding> getFindings(JCas cas) {
 		// TODO Auto-generated method stub
 		return Collections.EMPTY_LIST;
 	}
 
-	private List<Observation> getObservations(JCas cas) {
+	public List<Observation> getObservations(JCas cas) {
 		List<Observation> list = new ArrayList<Observation>();
 		List<IdentifiedAnnotation> annotations = new ArrayList<IdentifiedAnnotation>();
 		annotations.addAll(Utils.getAnnotationsByType(cas,CancerSize.type));

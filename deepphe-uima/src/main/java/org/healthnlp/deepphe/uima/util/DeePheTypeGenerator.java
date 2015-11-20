@@ -51,9 +51,10 @@ public class DeePheTypeGenerator {
 		
 		Element features = doc.createElement("features");
 		// add TOP level attribute
-		if(superType.equals("uima.tcas.Annotation"))
-			features.appendChild(createFeatureDesciption(doc,"URI"));
-		
+		if(superType.equals("uima.tcas.Annotation")){
+			features.appendChild(createFeatureDesciption(doc,"hasURI"));
+			features.appendChild(createFeatureDesciption(doc,"hasIdentifier"));
+		}
 		
 		
 		// add other features

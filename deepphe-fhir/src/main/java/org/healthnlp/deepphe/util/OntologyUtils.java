@@ -29,6 +29,8 @@ public class OntologyUtils {
 	 * @return
 	 */
 	public IClass getClass(String code){
+		if(code != null && code.startsWith("http://"))
+			return ontology.getClass(code);
 		return getClassMap().get(code);
 	}
 	
