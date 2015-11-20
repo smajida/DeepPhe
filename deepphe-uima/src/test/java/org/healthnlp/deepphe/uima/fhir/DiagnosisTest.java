@@ -25,8 +25,6 @@ import org.healthnlp.deepphe.fhir.ResourceFactory;
 import org.healthnlp.deepphe.uima.ae.DocumentSummarizerAE;
 import org.junit.Test;
 
-import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
-import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 
 public class DiagnosisTest {
 	
