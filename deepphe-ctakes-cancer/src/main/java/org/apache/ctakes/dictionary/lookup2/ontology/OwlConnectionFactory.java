@@ -29,6 +29,7 @@ public enum OwlConnectionFactory {
 
 
    private final Map<String, IOntology> ONTOLOGIES = Collections.synchronizedMap( new HashMap<>() );
+   private String _defaultOntologyPath;
 
    synchronized public Collection<String> listOntologyPaths() {
       return Collections.unmodifiableSet( ONTOLOGIES.keySet() );
@@ -56,7 +57,17 @@ public enum OwlConnectionFactory {
       EOL_LOGGER.info( "" );
       LOGGER.info( "Ontology loaded" );
       ONTOLOGIES.put( fullOwlPath, ontology );
+      if ( ONTOLOGIES.size() == 1 ) {
+         _defaultOntologyPath = fullOwlPath;
+      }
       return ontology;
+   }
+
+   synchronized public IOntology getDefaultOntology() throws IOntologyException, FileNotFoundException {
+      if ( _defaultOntologyPath == null ) {
+         throw new IOntologyException( "No Default Ontology" );
+      }
+      return getOntology( _defaultOntologyPath );
    }
 
 
