@@ -73,7 +73,7 @@ public class GraphDBDocumentConsumerAETest {
 	   String dbPath = TEST_DB + File.separator;
 	   GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
 	   assertTrue("Database connection failed",db.isAvailable(500));
-	   db.beginTx();
+
 	   
 	   GraphDBDocumentConsumerAE ae = new GraphDBDocumentConsumerAE();
 	   
@@ -83,6 +83,7 @@ public class GraphDBDocumentConsumerAETest {
 	   Report report = mocker.getReport();
 	   
 	   ae.processReport(db, patient, report);
+	   
 	   try ( Transaction ignored = db.beginTx();
 			 Result reportResult = db.execute( "match (n {name: '" + report.getTitle() + "'}) return n" ))
 		{
