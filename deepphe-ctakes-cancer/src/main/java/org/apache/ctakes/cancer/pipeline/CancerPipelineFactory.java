@@ -45,6 +45,8 @@ import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.cleartk.ml.jar.GenericJarClassifierFactory;
 
+import java.net.MalformedURLException;
+
 @Immutable
 final public class CancerPipelineFactory {
 
@@ -133,7 +135,11 @@ public static CollectionReader createFilesInDirectoryReader( final String inputD
          throws ResourceInitializationException {
       aggregateBuilder.add( SentenceDetectorAnnotator.getDescription("/org/apache/ctakes/core/sentdetect/model.jar") );
       aggregateBuilder.add( TokenizerAnnotatorPTB.createAnnotatorDescription() );
-      aggregateBuilder.add( LvgAnnotator.createAnnotatorDescription() );
+      try {
+         aggregateBuilder.add( LvgAnnotator.createAnnotatorDescription() );
+      } catch ( MalformedURLException urlE ) {
+         throw new ResourceInitializationException( urlE );
+      }
       aggregateBuilder.add( ContextDependentTokenizerAnnotator.createAnnotatorDescription() );
       aggregateBuilder.add( POSTagger.createAnnotatorDescription() );
       aggregateBuilder.add( Chunker.createAnnotatorDescription() );
