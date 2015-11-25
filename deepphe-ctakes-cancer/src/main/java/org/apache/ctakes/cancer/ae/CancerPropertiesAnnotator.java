@@ -3,12 +3,13 @@ package org.apache.ctakes.cancer.ae;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
+import org.apache.ctakes.cancer.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.receptor.ReceptorStatusFinder;
 import org.apache.ctakes.cancer.size.SizeFinder;
 import org.apache.ctakes.cancer.stage.StageFinder;
 import org.apache.ctakes.cancer.tnm.TnmFinder;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
-import org.apache.ctakes.core.util.IdentifiedAnnotationUtil;
+import org.apache.ctakes.core.util.OntologyConceptUtil;
 import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
 import org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory;
 import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
@@ -61,38 +62,16 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
    @Override
    public void initialize( final UimaContext uimaContext ) throws ResourceInitializationException {
       super.initialize( uimaContext );
-      try {
-         final List<String> ontologyPaths = new ArrayList<>( OwlConnectionFactory.getInstance().listOntologyPaths() );
-         if ( ontologyPaths.size() != 1 ) {
-            throw new ResourceInitializationException(
-                  new IOntologyException( "Need a single Ontology for cancer annotation" ) );
-         }
-         final IOntology ontology = OwlConnectionFactory.getInstance().getOntology( ontologyPaths.get( 0 ) );
 
-         final Function<String, Predicate<IClass>> isClass
-               = name -> iClass -> iClass.getName().equals( name )
-                                   || Arrays.toString( iClass.getSuperClasses() ).contains( name );
+      final Function<String, Predicate<IClass>> isClass
+            = name -> iClass -> iClass.getName().equals( name )
+                                || Arrays.toString( iClass.getSuperClasses() ).contains( name );
 
-         _hasNeoplasm = annotation -> IdentifiedAnnotationUtil.getUmlsConcepts( annotation ).stream()
-               .filter( concept -> OwlConcept.URI.equals( concept.getCodingScheme() ) )
-               .map( OntologyConcept::getCode )
-               .map( ontology::getClass )
-               .filter( isClass.apply( "Breast_Neoplasm" ) )
-               .findAny()
-               .isPresent();
+      _hasNeoplasm = annotation -> OwlOntologyConceptUtil.getOwlClasses( annotation ).stream()
+            .anyMatch( isClass.apply( "Breast_Neoplasm" ) );
 
-         _hasMass = annotation -> IdentifiedAnnotationUtil.getUmlsConcepts( annotation ).stream()
-               .filter( concept -> OwlConcept.URI.equals( concept.getCodingScheme() ) )
-               .map( OntologyConcept::getCode )
-               .map( ontology::getClass )
-               .filter( isClass.apply( "Mass" ) )
-               .findAny()
-               .isPresent();
-
-      } catch ( IOntologyException | FileNotFoundException ontE ) {
-         LOGGER.error( ontE.getMessage() );
-         throw new ResourceInitializationException( ontE.getCause() );
-      }
+      _hasMass = annotation -> OwlOntologyConceptUtil.getOwlClasses( annotation ).stream()
+            .anyMatch( isClass.apply( "Mass" ) );
    }
 
 
