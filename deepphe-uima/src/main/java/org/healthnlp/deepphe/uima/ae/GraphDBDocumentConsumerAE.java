@@ -95,7 +95,7 @@ private static LinkedHashMap<String, Integer> patientNameIDMap = new LinkedHashM
 	   try ( Transaction tx = graphDb.beginTx() )
 		{
 		   
-		    String namedID = patient.getNameSimple();
+		    String namedID = patient.getPatientName();
 			Node patientN = getPatientFactory(graphDb).getOrCreate("name", namedID);
 			Node documentN = getDocumentFromDB(graphDb,namedID,report.getTitle());
 		

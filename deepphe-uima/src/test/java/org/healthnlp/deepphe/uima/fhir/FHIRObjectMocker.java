@@ -46,7 +46,7 @@ public class FHIRObjectMocker {
 		context.checking(new Expectations() {
 			{
 				//Patient
-				allowing(patient).getNameSimple();
+				allowing(patient).getPatientName();
 				will(returnValue("Patient01"));
 				
 				//Report

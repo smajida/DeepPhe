@@ -2,7 +2,9 @@ package org.healthnlp.deepphe.fhir;
 
 import java.io.File;
 import java.io.Serializable;
+import java.net.URI;
 
+import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Resource;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
@@ -17,8 +19,9 @@ public interface Element extends Serializable {
 	public String getResourceIdentifier();
 	public String getSummaryText();
 	public Resource getResource();
+	public CodeableConcept getCode();
 	public IClass getConceptClass();
-	public String getConceptURI();
+	public URI getConceptURI();
 	public void setReport(Report r);
 	public void save(File e) throws Exception;
 	public void copy(Resource r);

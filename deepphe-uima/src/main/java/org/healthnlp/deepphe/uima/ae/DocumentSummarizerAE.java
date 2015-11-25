@@ -63,7 +63,7 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 			for (DocumentID docID : JCasUtil.select(jcas, DocumentID.class)) {
 				Patient patient = resourceFactory.getPatient(jcas);
 
-				String namedID = patient != null?patient.getNameSimple():"unknown";
+				String namedID = patient != null?patient.getPatientName():"unknown";
 				/*
 				 * Integer id = patientNameIDMap.get(namedID);
 				 * 

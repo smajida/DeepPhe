@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 
 import org.apache.ctakes.typesystem.type.textsem.MedicationMention;
@@ -57,7 +58,7 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	public IClass getConceptClass(){
 		return Utils.getConceptClass(getCode());
 	}
-	public String getConceptURI(){
+	public URI getConceptURI(){
 		return Utils.getConceptURI(getCode());
 	}
 	

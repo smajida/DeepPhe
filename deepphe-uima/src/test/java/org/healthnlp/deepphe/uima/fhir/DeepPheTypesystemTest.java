@@ -5,8 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.ctakes.cancer.ae.XMIWriter;
@@ -19,12 +17,15 @@ import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.fit.pipeline.SimplePipeline;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
+import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.uima.cr.FHIRCollectionReader;
 import org.healthnlp.deepphe.uima.types.Composition;
 import org.healthnlp.deepphe.uima.types.DiseaseDisorder;
 import org.healthnlp.deepphe.uima.types.Medication;
 import org.healthnlp.deepphe.uima.types.Observation;
 import org.junit.Test;
+
+import static org.healthnlp.deepphe.uima.fhir.FHIRResourceFactory.*;
 
 public class DeepPheTypesystemTest {
 
@@ -41,8 +42,9 @@ public class DeepPheTypesystemTest {
 			CollectionReader cr = CollectionReaderFactory.createReader(FHIRCollectionReader.class,FHIRCollectionReader.PARAM_INPUTDIR,inputFHIR.getAbsolutePath());
 			AnalysisEngine ae1 = AnalysisEngineFactory.createEngine( XMIWriter.class, XMIWriter.PARAM_OUTPUTDIR, outputTS );
 			AnalysisEngine ae2 = AnalysisEngineFactory.createEngine(DeepPheTypeTester.class);
+			AnalysisEngine ae3 = AnalysisEngineFactory.createEngine(FHIRTester.class);
 			
-			SimplePipeline.runPipeline(cr,ae1,ae2);
+			SimplePipeline.runPipeline(cr,ae1,ae2,ae3);
 	
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -58,14 +60,6 @@ public class DeepPheTypesystemTest {
 	 */
 	
 	public static class DeepPheTypeTester extends JCasAnnotator_ImplBase {
-
-		private List<Annotation> getAnnotations(JCas cas,int type){
-			List<Annotation> a = new ArrayList<Annotation>();
-			Iterator<Annotation> it = cas.getAnnotationIndex(type).iterator();
-			while(it.hasNext())
-				a.add(it.next());
-			return a;
-		}
 		
 		public void process(JCas jcas) throws AnalysisEngineProcessException {
 			
@@ -92,10 +86,24 @@ public class DeepPheTypesystemTest {
 		}
 	
 	}
-	private void runPipeline(String input, String output) throws Exception {
-		CollectionReader cr = CollectionReaderFactory.createReader(FHIRCollectionReader.class,FHIRCollectionReader.PARAM_INPUTDIR, input);
-		AnalysisEngine ae = AnalysisEngineFactory.createEngine( XMIWriter.class, XMIWriter.PARAM_OUTPUTDIR,  output );
-		SimplePipeline.runPipeline(cr, ae);
+	
+	/**
+	 * tester method for typesystem
+	 * @author tseytlin
+	 *
+	 */
+	
+	public static class FHIRTester extends JCasAnnotator_ImplBase {
+		
+		public void process(JCas jcas) throws AnalysisEngineProcessException {
+			
+			List<Report> reports = FHIRResourceFactory.loadReports(jcas);
+			for(Report r: reports ){
+				System.out.println(r.getSummaryText());
+			}
+			
+		}
+	
 	}
 	
 }

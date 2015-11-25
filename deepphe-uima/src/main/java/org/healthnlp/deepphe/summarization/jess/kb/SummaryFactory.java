@@ -142,7 +142,8 @@ public class SummaryFactory {
 				((TumorSize)summary).setGreatestDimension(q.getValue().doubleValue());
 				((TumorSize)summary).setUnitOfMeasure(q.getUnit());
 			}
-			summary.setValue(o.getObservationValue());
+			if(summary != null)
+				summary.setValue(o.getObservationValue());
 		}
 		// setup common parameters
 		if(summary != null && code != null){

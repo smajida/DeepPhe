@@ -19,6 +19,9 @@ import edu.pitt.dbmi.nlp.noble.util.XMLUtils;
 
 public class DeePheTypeGenerator {
 	public static final String TYPE_PREFIX = "org.healthnlp.deepphe.uima.types.";
+	public static final String CLASS_ATTRIBUTE = "Attribute";
+	public static final String CLASS_ANNOTATION = "Annotation";
+	public static final String CLASS_MODIFIER = "Modifier";
 	private IOntology ontology;
 	
 	public DeePheTypeGenerator(IOntology ont){
@@ -26,12 +29,16 @@ public class DeePheTypeGenerator {
 	}
 	
 	
-
+	private String getName(IClass c){
+		return c.getLabels().length > 0? c.getLabels()[0]:c.getName();
+	}
+	
+	
 	private Element createTypeDescription(Document doc, IClass cls) {
 		Element element = doc.createElement("typeDescription");
 		
 		Element e = doc.createElement("name");
-		e.setTextContent(TYPE_PREFIX+cls.getName());
+		e.setTextContent(TYPE_PREFIX+getName(cls));
 		element.appendChild(e);
 	
 		e = doc.createElement("description");
@@ -43,7 +50,7 @@ public class DeePheTypeGenerator {
 		String superType = "uima.tcas.Annotation"; //uima.cas.TOP
 		for(IClass s: cls.getDirectSuperClasses()){
 			if(!s.equals(ontology.getRoot()))
-				superType = TYPE_PREFIX+s.getName(); break;
+				superType = TYPE_PREFIX+getName(s); break;
 		}
 		e = doc.createElement("supertypeName");
 		e.setTextContent(superType);
@@ -53,6 +60,7 @@ public class DeePheTypeGenerator {
 		// add TOP level attribute
 		if(superType.equals("uima.tcas.Annotation")){
 			features.appendChild(createFeatureDesciption(doc,"hasURI"));
+			features.appendChild(createFeatureDesciption(doc,"hasPreferredName"));
 			features.appendChild(createFeatureDesciption(doc,"hasIdentifier"));
 		}
 		
@@ -156,23 +164,26 @@ public class DeePheTypeGenerator {
 		String elementType = null;
 		
 		Object value = r.getParameter().getOperand();
-		if(r.getParameter().size() == 1){
+		
+		//if(r.getParameter().size() == 1){
 			// if type worthy class
-			if(value instanceof IClass && isTypeWorthy((IClass)value)){
-				range = "uima.cas.FSArray"; 
-				elementType = TYPE_PREFIX+((IClass)value).getName(); 
-			}else if( value instanceof Float){
-				range = "uima.cas.Float"; 
-			}else if( value instanceof Double){
-				range = "uima.cas.Double"; 
-			}else if( value instanceof Integer){
-				range = "uima.cas.Integer"; 
-			}else if( value instanceof Boolean){
-				range = "uima.cas.Boolean"; 
-			}
-		}else{
-			System.err.println(r);
+		if(value instanceof IClass && isTypeWorthy((IClass)value)){
+			range = "uima.cas.FSArray"; 
+			elementType = TYPE_PREFIX+getName((IClass)value); 
+		}else if( value instanceof Float){
+			range = "uima.cas.Float"; 
+		}else if( value instanceof Double){
+			range = "uima.cas.Double"; 
+		}else if( value instanceof Integer){
+			range = "uima.cas.Integer"; 
+		}else if( value instanceof Boolean){
+			range = "uima.cas.Boolean"; 
+		}else if("hasSpan".equals(r.getProperty().getName())){
+			range = "uima.cas.StringArray"; 
 		}
+		/*}else{
+			System.err.println(r);
+		}*/
 		e = doc.createElement("rangeTypeName");
 		e.setTextContent(range); 
 		element.appendChild(e);
@@ -204,14 +215,17 @@ public class DeePheTypeGenerator {
 	private boolean isTypeWorthy(IClass cls) {
 		if(cls == null)
 			return false;
-		IClass annotation = ontology.getClass("Annotation");
-		IClass attribute = ontology.getClass("Attribute");
+		IClass annotation = ontology.getClass(CLASS_ANNOTATION);
+		IClass attribute = ontology.getClass(CLASS_ATTRIBUTE);  //"Attribute"
+		IClass modifier = ontology.getClass(CLASS_MODIFIER);
 		
 		if(cls.equals(annotation) || cls.hasSuperClass(annotation))
 			return true;
 		if(cls.equals(attribute) || cls.hasDirectSuperClass(attribute))
 			return true;
-		if(cls.hasSuperClass(attribute)){
+		if(cls.equals(modifier) || cls.hasDirectSuperClass(modifier))
+			return true;
+		if(cls.hasSuperClass(attribute) || cls.hasSuperClass(modifier)){
 			// don't create type for attributes that don't have any useful "slots"
 			if(!cls.getDirectNecessaryRestrictions().isEmpty() || !cls.getEquivalentRestrictions().isEmpty()){
 				return true;
@@ -285,9 +299,11 @@ public class DeePheTypeGenerator {
 		File file = new File(args[0]);
 		if(!file.getParentFile().exists())
 			file.getParentFile().mkdirs();
-		IOntology ont = OOntology.loadOntology("http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl");
+		IOntology ont = OOntology.loadOntology("/home/tseytlin/Work/DeepPhe/data/ontology/cancer.owl"); //"http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl"
+		System.out.println("input: "+ont.getURI());
 		DeePheTypeGenerator dtg = new DeePheTypeGenerator(ont);
 		dtg.save(file);
+		System.out.println("output: "+file.getAbsolutePath());
 	}
 
 }

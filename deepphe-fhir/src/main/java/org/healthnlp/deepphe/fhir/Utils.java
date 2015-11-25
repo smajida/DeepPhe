@@ -4,6 +4,7 @@ package org.healthnlp.deepphe.fhir;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -47,7 +48,6 @@ import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
-
 import edu.pitt.dbmi.nlp.noble.coder.model.Document;
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
@@ -70,7 +70,10 @@ public class Utils {
 	public static final String DOCUMENT_HEADER_PATIENT_NAME = "Patient Name";
 	public static final String MENTION_URL = "http://hl7.org/fhir/mention"; 
 	public static final String CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl";
-		
+
+	public static final String INTERPRETATION_POSITIVE = "Positive";
+	public static final String INTERPRETATION_NEGATIVE = "Negative";
+	
 	public static final String ELEMENT = "Element";
 	public static final String COMPOSITION = "Composition";
 	public static final String PATIENT = "Patient";
@@ -132,6 +135,12 @@ public class Utils {
 		cc.setSystem(scheme);
 		return c;
 	}
+	
+	public static CodeableConcept getCodeableConcept(URI uri){
+		String url = uri.toString();
+		return getCodeableConcept(uri.getFragment(),url,url.substring(0,url.length()-uri.getFragment().length()-1));
+	}
+	
 	
 	/**
 	 * get FHIR date object from cTAKES time mention
@@ -601,10 +610,10 @@ public class Utils {
 		return null;
 	}
 	
-	public static String getConceptURI(CodeableConcept c){
+	public static URI getConceptURI(CodeableConcept c){
 		for(Coding coding : c.getCoding()){
 			if(coding.getCode() != null && coding.getCode().startsWith("http://")){
-				return coding.getCode();
+				return URI.create(coding.getCode());
 			}
 		}
 		return null;
@@ -918,6 +927,11 @@ public class Utils {
 		return createExtension(MENTION_URL,text+" ["+st+":"+end+"]");
 	}
 
+	public static Extension createMentionExtension(String text){
+		return createExtension(MENTION_URL,text);
+	}
+
+	
 	public static List<String> getMentionExtensions(DomainResource r){
 		List<String> mentions = new ArrayList<String>();
 		for(Extension e: r.getExtension()){
@@ -937,8 +951,20 @@ public class Utils {
 		return s;
 	}
 	
+	
+	public static String getOntologyURL(String uri){
+		int x = uri.lastIndexOf("#");
+		if(x > -1)
+			return uri.substring(0,x);
+		x = uri.lastIndexOf("/");
+		if(x > -1)
+			return uri.substring(0,x);
+		return uri;
+	}
+	
 	public static void main(String [] args) throws Exception{
-		System.out.println(getHeaderValues(TextTools.getText(new FileInputStream(new File("/home/tseytlin/Work/DeepPhe/data/sample/docs/doc1.txt")))));
+		//System.out.println(getHeaderValues(TextTools.getText(new FileInputStream(new File("/home/tseytlin/Work/DeepPhe/data/sample/docs/doc1.txt")))));
+		System.out.println(getOntologyURL("http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl#ClinicalPhenotypicComponent"));
 	}
 
 	

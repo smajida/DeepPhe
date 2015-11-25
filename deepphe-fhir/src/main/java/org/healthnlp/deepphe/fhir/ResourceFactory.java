@@ -219,7 +219,9 @@ public class ResourceFactory {
 		String pn = header.get(Utils.DOCUMENT_HEADER_PATIENT_NAME);
 		if(pn != null){
 			Patient p = new Patient();
-			p.setNameSimple(pn);
+			p.setPatientName(pn);
+			int n = text.indexOf(pn);
+			p.addExtension(Utils.createMentionExtension(pn,n,n+pn.length()));
 			return p;
 		}
 		return null;

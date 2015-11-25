@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.lang.SerializationUtils;
@@ -81,31 +83,33 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 			//p.setPath(f.getAbsolutePath());
 			
 			
-			int offset = 0;
+		
 			StringBuffer reportText = new StringBuffer();
 			
+			List<Report> reports = new ArrayList<Report>();
 			for(File f: file.listFiles()){
 				if(f.isDirectory()){
 					Report r = ResourceFactory.loadReport(f);
 					if(r != null){
-						// add report to an uber report
-						String text = r.getReportText()+"\n";
-						reportText.append(text);
-						r.setOffset(offset);
-						offset += text.length();
-						
-						// persist into CAS
-						//System.out.println(r.getSummaryText());
-						FHIRResourceFactory.saveReport(r,jcas);
-						
-						
-						//reports.add(r);
-						/*	Encounter encounter = SummaryFactory.getEncounter(r);
-						patient.addEncounter(encounter);
-						reIdentifyDAG(patient);*/
+						reports.add(r);
 					}
 				}
+			}
+			// sort by date
+			Collections.sort(reports);
+			
+			// add reports to TS
+			int offset = 0;
+			for(Report r: reports){
+				// add report to an uber report
+				String text = r.getReportText()+"\n";
+				reportText.append(text);
+				r.setOffset(offset);
+				offset += text.length();
 				
+				// persist into CAS
+				//System.out.println(r.getSummaryText());
+				FHIRResourceFactory.saveReport(r,jcas);
 			}
 			
 			

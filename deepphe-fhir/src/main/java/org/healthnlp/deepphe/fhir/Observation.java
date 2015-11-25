@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -18,6 +19,7 @@ import org.apache.ctakes.cancer.type.textsem.ReceptorStatus_Type;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.uima.jcas.cas.FSArray;
+import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Quantity;
@@ -121,16 +123,11 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 		
 		// set positive/negative
 		if(dm instanceof ReceptorStatus){
-			/*for(String st: Arrays.asList("Positive", "Negative","Unknown")){
-				if(Utils.getConceptName(dm).contains(st)){
-					setValue(new StringType(st));
-					break;
-				}
-			}
-			*/
 			boolean value = ((ReceptorStatus)dm).getValue();
-			setValue(new StringType(value?"Positive":"Negative"));
-			
+			String i = value?Utils.INTERPRETATION_POSITIVE:Utils.INTERPRETATION_NEGATIVE;
+			String url = ""+ResourceFactory.getInstance().getOntology().getURI();
+			setInterpretation(Utils.getCodeableConcept(i,url+"#"+i,url));
+			// new StringType(value?"Positive":"Negative"));l;// 
 		}
 		
 		// if cancer size, then use their value
@@ -183,6 +180,10 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 			else
 				return t.toString();
 		}
+		if(getInterpretation() != null){
+			return getInterpretation().getText();
+		}
+		
 		return null;
 	}
 	
@@ -224,7 +225,7 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	public String toString(){
 		return getDisplayText();
 	}
-	public String getConceptURI(){
+	public URI getConceptURI(){
 		return Utils.getConceptURI(getCode());
 	}
 }

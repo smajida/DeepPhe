@@ -32,6 +32,7 @@ import org.healthnlp.deepphe.summarization.jess.kb.Identified;
 import org.healthnlp.deepphe.summarization.jess.kb.Patient;
 import org.healthnlp.deepphe.summarization.jess.kb.Summary;
 import org.healthnlp.deepphe.summarization.jess.kb.SummaryFactory;
+import org.healthnlp.deepphe.uima.fhir.FHIRResourceFactory;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
@@ -98,7 +99,15 @@ public class PhenotypeSummarizerAE extends JCasAnnotator_ImplBase {
 	@Override
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
 		try {
-			patient = (Patient) SerializationUtils.deserialize(Base64.getDecoder().decode(jcas.getDocumentText()));
+			Patient patient = new Patient();
+			patient.setId(1);
+			for(Report r: FHIRResourceFactory.loadReports(jcas)){
+				Encounter enc = SummaryFactory.getEncounter(r);
+				enc.setPatientId(patient.getId());
+				patient.addEncounter(enc);
+			}
+			
+			//patient = (Patient) SerializationUtils.deserialize(Base64.getDecoder().decode(jcas.getDocumentText()));
 			disassembleDagToKnowledge();
 			appendGoalEstablishPlan();
 			loadKnowledgeToJess();

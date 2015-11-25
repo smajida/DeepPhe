@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,9 +24,9 @@ import edu.pitt.dbmi.nlp.noble.ontology.IClass;
  * @author tseytlin
  *
  */
-public class Report extends Composition implements Element{
+public class Report extends Composition implements Element, Comparable<Report>{
 	private int offset;
-	private CompositionEventComponent event;
+	//private CompositionEventComponent event;
 	private List<Element> reportElements;
 	
 	/**
@@ -34,7 +35,7 @@ public class Report extends Composition implements Element{
 	public Report(){
 		setStatus(CompositionStatus.FINAL);
 		setLanguage(Utils.DEFAULT_LANGUAGE);
-		event = addEvent();
+		//event = addEvent();
 	}
 
 	
@@ -166,8 +167,9 @@ public class Report extends Composition implements Element{
 		el.setReport(this);
 			
 		// add reference
-		Reference r = event.addDetail();
-		Utils.getResourceReference(r,el);
+		CompositionEventComponent event = addEvent();
+		event.addCode(el.getCode());
+		event.addDetail(Utils.getResourceReference(el));
 	}
 
 	
@@ -186,7 +188,7 @@ public class Report extends Composition implements Element{
 	
 	public String getSummaryText() {
 		StringBuffer st = new StringBuffer();
-		st.append("Report:\n"+getDisplayText()+"\n");
+		st.append("Report:\n"+getDisplayText()+"\n---\n");
 		if(getPatient() != null)
 			st.append(getPatient().getSummaryText()+"\n");
 		for(Diagnosis dx: getDiagnoses()){
@@ -241,8 +243,8 @@ public class Report extends Composition implements Element{
 	public IClass getConceptClass(){
 		return ResourceFactory.getInstance().getOntology().getClass(Utils.COMPOSITION);
 	}
-	public String getConceptURI(){
-		return Utils.CANCER_URL+"#"+Utils.COMPOSITION;
+	public URI getConceptURI(){
+		return URI.create(Utils.CANCER_URL+"#"+Utils.COMPOSITION);
 	}
 
 
@@ -263,13 +265,32 @@ public class Report extends Composition implements Element{
 		for (CompositionAttesterComponent i : c.getAttester())
 			attester.add(i.copy());
 		custodian = c.getCustodian();
-		//event = c.getEvent();
 		encounter = c.getEncounter();
 		section = new ArrayList();
 		for (SectionComponent i : c.getSection())
 			section.add(i.copy());
 		setText(c.getText());
+		event = new ArrayList<Composition.CompositionEventComponent>();
+		for(Composition.CompositionEventComponent e: c.getEvent()){
+			event.add(e.copy());
+		}
 		
+	}
+
+
+
+	public int compareTo(Report r) {
+		if(getDate() != null && r.getDate() != null)
+			return getDate().compareTo(r.getDate());
+		if(getTitle() != null && r.getTitle() != null)
+			return getTitle().compareTo(r.getTitle());
+		return 0;
+	}
+
+
+
+	public CodeableConcept getCode() {
+		return Utils.getCodeableConcept(getConceptURI());
 	}
 	
 	/*private void writeObject(ObjectOutputStream stream) throws IOException {

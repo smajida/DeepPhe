@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -42,7 +43,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	 * set patient name
 	 * @param name
 	 */
-	public void setNameSimple(String name){
+	public void setPatientName(String name){
 		HumanName hn = addName();
 		if(name.contains(",")){
 			String [] p = name.split(",");
@@ -66,7 +67,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	 * get a simple name for a patient
 	 * @return
 	 */
-	public String getNameSimple(){
+	public String getPatientName(){
 		for(HumanName n: getName()){
 			String f = (!n.getGiven().isEmpty())?n.getGiven().get(0).getValue():"";
 			String l = (!n.getFamily().isEmpty())?n.getFamily().get(0).getValue():"";
@@ -75,11 +76,26 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 		return null;
 	}
 
+	public String getGivenName(){
+		for(HumanName n: getName()){
+			return (!n.getGiven().isEmpty())?n.getGiven().get(0).getValue():"";
+		}
+		return "";
+	}
+	
+	public String getFamilyName(){
+		for(HumanName n: getName()){
+			return (!n.getFamily().isEmpty())?n.getFamily().get(0).getValue():"";
+		}
+		return "";
+	}
+	
+	
 	public Reference getReference(){
 		return getReference(new Reference());
 	}
 	public Reference getReference(Reference r){
-		r.setDisplay(getNameSimple());
+		r.setDisplay(getPatientName());
 		r.setReference(getResourceIdentifier());
 		return r;
 	}
@@ -94,7 +110,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 
 
 	public String getDisplayText() {
-		return getNameSimple();
+		return getPatientName();
 	}
 
 	public String getResourceIdentifier() {
@@ -198,8 +214,8 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 		return ResourceFactory.getInstance().getOntology().getClass(Utils.PATIENT);
 	}
 	
-	public String getConceptURI(){
-		return Utils.CANCER_URL+"#"+Utils.PATIENT;
+	public URI getConceptURI(){
+		return URI.create(Utils.CANCER_URL+"#"+Utils.PATIENT);
 	}
 	
 	private void writeObject(ObjectOutputStream stream) throws IOException {
@@ -209,6 +225,10 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
 		stream.defaultReadObject();
+	}
+
+	public CodeableConcept getCode() {
+		return Utils.getCodeableConcept(getConceptURI());
 	}
 
 }
