@@ -13,21 +13,31 @@ import java.util.regex.Pattern;
 // I think that the specifications are case-sensitive ...
 enum TnmClassType {
    // TODO switch to ([a-d][1-2]?)?, ([a-c][1-4]?)?, [a-c]?
-   T( 0, "Size or direct extent of the primary tumor", "C1300486", "T(x|is|a|[0-4][a-z]?)(\\((m|\\d+)?,?(is)?\\))?" ),
-   N( 1, "Degree of spread to regional lymph nodes", "C3250641", "N(x|[0-3][a-z]?)" ),
-   M( 2, "Presence of distant metastasis", "C1272456", "M(x|[0-1][a-z]?)" );
+   T( 0, "Size or direct extent of the primary tumor",
+         "http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl#Generic_Primary_Tumor_TNM_Finding",
+         "C1300486",
+         "T(x|is|a|[0-4][a-z]?)(\\((m|\\d+)?,?(is)?\\))?" ),
+   N( 1, "Degree of spread to regional lymph nodes",
+         "http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl#Generic_Regional_Lymph_Nodes_TNM_Finding",
+         "C3250641",
+         "N(x|[0-3][a-z]?)" ),
+   M( 2, "Presence of distant metastasis",
+         "http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl#Generic_Distant_Metastasis_TNM_Finding",
+         "C1272456",
+         "M(x|[0-1][a-z]?)" );
 
    static private final String TUI = "T033";
 
    final private int _order;
    final private String _title;
+   final private String _uri;
    final private String _cui;
    final private Pattern _pattern;
 
-   TnmClassType( final int order, final String title,
-                 final String cui, final String regex ) {
+   TnmClassType( final int order, final String title, final String uri, final String cui, final String regex ) {
       _order = order;
       _title = title;
+      _uri = uri;
       _cui = cui;
       _pattern = Pattern.compile( regex );
    }
@@ -38,6 +48,10 @@ enum TnmClassType {
 
    String getTitle() {
       return _title;
+   }
+
+   String getUri() {
+      return _uri;
    }
 
    String getCui() {

@@ -7,6 +7,7 @@ import org.apache.ctakes.cancer.type.textsem.TnmOption;
 import org.apache.ctakes.cancer.type.textsem.TnmPrefix;
 import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
+import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
@@ -224,8 +225,8 @@ final public class TnmFinder {
       final UmlsConcept umlsConcept = new UmlsConcept( jcas );
       umlsConcept.setCui( tnmClass.getClassType().getCui() );
       umlsConcept.setTui( tnmClass.getClassType().getTui() );
-//      umlsConcept.setCodingScheme( "SNOMED" );
-//      umlsConcept.setCode( malignantClass.getClassType().getCode() );
+      umlsConcept.setCodingScheme( OwlConcept.URI );
+      umlsConcept.setCode( tnmClass.getClassType().getUri() );
       umlsConcept.setPreferredText( tnmClass.getClassType().getTitle() );
       final FSArray ontologyConcepts = new FSArray( jcas, 1 );
       ontologyConcepts.set( 0, umlsConcept );
