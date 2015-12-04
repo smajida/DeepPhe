@@ -20,7 +20,7 @@ enum ReceptorStatusType {
          "\\b(Progesterone|PR) ?((\\+(pos)?|-(neg)?)|(\\s+(status\\s+)?(is\\s+)?(pos(itive)?|neg(ative)?|N/?A\\b|unknown|indeterminate|equivocal|(not assessed))))",
          "C1514471", "C1514471", "C1514471" ),
    HER2( "Human epidermal growth factor receptor 2",
-         "HER2_Neu_Status",
+         "http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl#HER2_Neu_Status",
          "\\bHER2(/neu)? ?((\\+(pos)?|-(neg)?)|(\\s+(status\\s+)?(is\\s+)?(pos(itive)?|neg(ative)?|N/?A\\b|unknown|indeterminate|equivocal|(not assessed))))",
          "C1512413", "C1512413", "C1512413" );
 
