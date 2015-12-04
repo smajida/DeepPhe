@@ -10,15 +10,14 @@ import org.apache.ctakes.dictionary.lookup2.ontology.OwlParserUtil;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.jcas.JCas;
+import org.apache.uima.jcas.tcas.Annotation;
 
 import java.io.FileNotFoundException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author SPF , chip-nlp
@@ -47,39 +46,19 @@ final public class OwlOntologyConceptUtil {
     * @param annotation -
     * @return all owl URIs that exist for the given annotation
     */
-   static public Collection<String> getOwlUris( final IdentifiedAnnotation annotation ) {
+   static public Collection<String> getUris( final IdentifiedAnnotation annotation ) {
       return OntologyConceptUtil.getCodes( annotation, OwlConcept.URI );
    }
 
    /**
-    * @param annotation -
-    * @return all iClasses for the given annotation
+    *
+    * @param jcas -
+    * @param lookupWindow -
+    * @param <T> type for lookup window
+    * @return all owl URIs that exist for the given window
     */
-   static public Collection<IClass> getOwlClasses( final IdentifiedAnnotation annotation ) {
-//      final Collection<String> uris = getOwlUris( annotation );
-//      if ( uris.isEmpty() ) {
-//         return Collections.emptyList();
-//      }
-//      final Collection<IClass> iClasses = new HashSet<>();
-//      final Collection<String> ontologyPaths = OwlConnectionFactory.getInstance().listOntologyPaths();
-//      for ( String ontologyPath : ontologyPaths ) {
-//         try {
-//            final IOntology ontology = OwlConnectionFactory.getInstance().getOntology( ontologyPath );
-//            uris.stream().map( ontology::getClass ).forEach( iClasses::add );
-//         } catch ( IOntologyException | FileNotFoundException multE ) {
-//            LOGGER.error( multE.getMessage(), multE );
-//         }
-//      }
-//      return iClasses;
-      try {
-         final IOntology ontology = OwlConnectionFactory.getInstance().getDefaultOntology();
-         return getOwlUris( annotation ).stream()
-               .map( ontology::getClass )
-               .collect( Collectors.toSet() );
-      } catch ( IOntologyException | FileNotFoundException multE ) {
-         LOGGER.error( multE.getMessage(), multE );
-      }
-      return Collections.emptyList();
+   static public <T extends Annotation> Collection<String> getUris( final JCas jcas, final T lookupWindow ) {
+      return OntologyConceptUtil.getCodes( jcas, lookupWindow, OwlConcept.URI );
    }
 
    /**
@@ -88,24 +67,47 @@ final public class OwlOntologyConceptUtil {
     * @param jcas -
     * @return all owl URIs that exist for the given annotation
     */
-   static public Collection<String> getOwlUris( final JCas jcas ) {
+   static public Collection<String> getUris( final JCas jcas ) {
       return OntologyConceptUtil.getCodes( jcas, OwlConcept.URI );
+   }
+
+   /**
+    * @param annotation -
+    * @return all iClasses for the given annotation
+    */
+   static public Collection<IClass> getIClasses( final IdentifiedAnnotation annotation ) {
+      return getIClasses( getUris( annotation ) );
+   }
+
+   /**
+    * @param jcas -
+    * @param lookupWindow -
+    * @param <T> type for lookup window
+    * @return all iClasses within the lookup window
+    */
+   static public <T extends Annotation> Collection<IClass> getIClasses( final JCas jcas, final T lookupWindow ) {
+      return getIClasses( getUris( jcas, lookupWindow ) );
    }
 
    /**
     * @param jcas -
     * @return all iClasses in the jcas
     */
-   static public Collection<IClass> getOwlClasses( final JCas jcas ) {
-      try {
-         final IOntology ontology = OwlConnectionFactory.getInstance().getDefaultOntology();
-         return getOwlUris( jcas ).stream()
-               .map( ontology::getClass )
-               .collect( Collectors.toSet() );
-      } catch ( IOntologyException | FileNotFoundException multE ) {
-         LOGGER.error( multE.getMessage(), multE );
-      }
-      return Collections.emptyList();
+   static public Collection<IClass> getIClasses( final JCas jcas ) {
+      return getIClasses( getUris( jcas ) );
+   }
+
+   /**
+    * @param jcas -
+    * @param lookupWindow -
+    * @param uri  uri of interest
+    * @param <T> type for lookup window
+    * @return all IdentifiedAnnotations within the given window that have the given uri
+    */
+   static public <T extends Annotation> Collection<IdentifiedAnnotation> getAnnotationsByUri( final JCas jcas,
+                                                                                              final T lookupWindow,
+                                                                                              final String uri ) {
+      return OntologyConceptUtil.getAnnotationsByCode( jcas, lookupWindow, uri );
    }
 
    /**
@@ -115,34 +117,63 @@ final public class OwlOntologyConceptUtil {
     * @param uri  uri of interest
     * @return all IdentifiedAnnotations that have the given uri
     */
-   static public Collection<IdentifiedAnnotation> getAnnotationsByOwlUri( final JCas jcas,
-                                                                          final String uri ) {
+   static public Collection<IdentifiedAnnotation> getAnnotationsByUri( final JCas jcas,
+                                                                       final String uri ) {
       return OntologyConceptUtil.getAnnotationsByCode( jcas, uri );
+   }
+
+   /**
+    * @param jcas         -
+    * @param lookupWindow -
+    * @param rootUri      uri of interest
+    * @param <T>          type for lookup window
+    * @return all IdentifiedAnnotations within the given window for the given uri and its children
+    */
+   static public <T extends Annotation> Collection<IdentifiedAnnotation> getAnnotationsByUriBranch( final JCas jcas,
+                                                                                                    final T lookupWindow,
+                                                                                                    final String rootUri ) {
+      return getUriBranchStream( rootUri )
+            .map( uri -> getAnnotationsByUri( jcas, lookupWindow, uri ) )
+            .flatMap( Collection::stream )
+            .collect( Collectors.toSet() );
+   }
+
+   /**
+    * @param jcas -
+    * @param rootUri  uri of interest
+    * @return all IdentifiedAnnotations for the given uri and its children
+    */
+   static public Collection<IdentifiedAnnotation> getAnnotationsByUriBranch( final JCas jcas,
+                                                                             final String rootUri ) {
+      return getUriBranchStream( rootUri )
+            .map( uri -> getAnnotationsByUri( jcas, uri ) )
+            .flatMap( Collection::stream )
+            .collect( Collectors.toSet() );
+   }
+
+   /**
+    * @param jcas    -
+    * @param rootUri uri of interest
+    * @return map of uris and IdentifiedAnnotations for the given uri and its children
+    */
+   static public Map<String, Collection<IdentifiedAnnotation>> getUriAnnotationsByUriBranch( final JCas jcas,
+                                                                                             final String rootUri ) {
+      return getUriBranchStream( rootUri )
+            .collect( Collectors.toMap( asSelf, uri -> getAnnotationsByUri( jcas, uri ), mergeSets ) );
+
    }
 
 
    /**
-    * @param jcas -
-    * @param uri  uri of interest
-    * @return all IdentifiedAnnotations for the given uri and its children
+    * @param owlUris -
+    * @return Owl Classes for the given URIs
     */
-   static public Collection<IdentifiedAnnotation> getAnnotationsByOwlUriBranch( final JCas jcas,
-                                                                                final String uri ) {
+   static private Collection<IClass> getIClasses( final Collection<String> owlUris ) {
       try {
          final IOntology ontology = OwlConnectionFactory.getInstance().getDefaultOntology();
-         final IClass branchRoot = ontology.getClass( uri );
-         if ( branchRoot == null ) {
-            LOGGER.error( "No Class exists for URI " + uri );
-            return Collections.emptyList();
-         }
-         final Collection<IdentifiedAnnotation> branch
-               = Arrays.stream( branchRoot.getSubClasses() )
-               .map( OwlParserUtil::getUriString )
-               .map( u -> getAnnotationsByOwlUri( jcas, u ) )
-               .flatMap( Collection::stream )
+         return owlUris.stream()
+               .map( ontology::getClass )
                .collect( Collectors.toSet() );
-         branch.addAll( getAnnotationsByOwlUri( jcas, uri ) );
-         return branch;
       } catch ( IOntologyException | FileNotFoundException multE ) {
          LOGGER.error( multE.getMessage(), multE );
       }
@@ -150,30 +181,50 @@ final public class OwlOntologyConceptUtil {
    }
 
    /**
-    * @param jcas -
-    * @param uri  uri of interest
-    * @return map of uris and IdentifiedAnnotations for the given uri and its children
+    * @param rootUri uri for the root of a branch
+    * @return a stream with all of the uris in the branch, starting with the branch root
     */
-   static public Map<String, Collection<IdentifiedAnnotation>> getUriAnnotationsByOwlUriBranch( final JCas jcas,
-                                                                                                final String uri ) {
+   static public Stream<String> getUriBranchStream( final String rootUri ) {
       try {
          final IOntology ontology = OwlConnectionFactory.getInstance().getDefaultOntology();
-         final IClass branchRoot = ontology.getClass( uri );
+         final IClass branchRoot = ontology.getClass( rootUri );
          if ( branchRoot == null ) {
-            LOGGER.error( "No Class exists for URI " + uri );
-            return Collections.emptyMap();
+            LOGGER.error( "No Class exists for URI " + rootUri );
+            return Stream.empty();
          }
-         final Map<String, Collection<IdentifiedAnnotation>> branch
-               = Arrays.stream( branchRoot.getSubClasses() )
-               .map( OwlParserUtil::getUriString )
-               .collect( Collectors.toMap( asSelf, u -> getAnnotationsByOwlUri( jcas, u ), mergeSets ) );
-         branch.put( uri, getAnnotationsByOwlUri( jcas, uri ) );
-         return branch;
+         final IClass[] branches = branchRoot.getSubClasses();
+         final IClass[] branch = new IClass[ branches.length + 1 ];
+         System.arraycopy( branches, 0, branch, 1, branches.length );
+         branch[ 0 ] = branchRoot;
+         return Arrays.stream( branch ).map( OwlParserUtil::getUriString );
       } catch ( IOntologyException | FileNotFoundException multE ) {
          LOGGER.error( multE.getMessage(), multE );
       }
-      return Collections.emptyMap();
+      return Stream.empty();
    }
+
+//   /**
+//    * @param baseUri uri for the base of a branch
+//    * @return a stream with all of the root uris above the base, starting with the base
+//    */
+//   static public Stream<String> getUriRootsStream( final String baseUri ) {
+//      try {
+//         final IOntology ontology = OwlConnectionFactory.getInstance().getDefaultOntology();
+//         final IClass rootBase = ontology.getClass( baseUri );
+//         if ( rootBase == null ) {
+//            LOGGER.error( "No Class exists for URI " + baseUri );
+//            return Stream.empty();
+//         }
+//         final IClass[] roots = rootBase.getSuperClasses();
+//         final IClass[] root = new IClass[ roots.length+1 ];
+//         System.arraycopy( roots, 0, root, 1, roots.length );
+//         root[0] = rootBase;
+//         return Arrays.stream( root ).map( OwlParserUtil::getUriString );
+//      } catch ( IOntologyException | FileNotFoundException multE ) {
+//         LOGGER.error( multE.getMessage(), multE );
+//      }
+//      return Stream.empty();
+//   }
 
 
 }
