@@ -3,6 +3,7 @@ package org.apache.ctakes.cancer.receptor;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
+import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
@@ -95,8 +96,8 @@ final public class ReceptorStatusFinder {
       final UmlsConcept umlsConcept = new UmlsConcept( jcas );
       umlsConcept.setCui( receptorStatus.getStatusType().getCui( receptorStatus.getStatusValue() ) );
       umlsConcept.setTui( receptorStatus.getStatusType().getTui() );
-//      umlsConcept.setCodingScheme( "SNOMED" ); ---> These are more NCI than SNOMED
-//      umlsConcept.setCode( "385379008" );
+      umlsConcept.setCodingScheme( OwlConcept.URI );
+      umlsConcept.setCode( receptorStatus.getStatusType().getUri() );
       umlsConcept.setPreferredText(
             receptorStatus.getStatusValue().getTitle() + " " + receptorStatus.getStatusType().getTitle() );
       final FSArray ontologyConcepts = new FSArray( jcas, 1 );
