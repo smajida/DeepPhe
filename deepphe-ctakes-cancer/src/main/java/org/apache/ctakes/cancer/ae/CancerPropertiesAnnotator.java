@@ -1,22 +1,14 @@
 package org.apache.ctakes.cancer.ae;
 
-import edu.pitt.dbmi.nlp.noble.ontology.IClass;
-import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
-import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import org.apache.ctakes.cancer.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.receptor.ReceptorStatusFinder;
 import org.apache.ctakes.cancer.size.SizeFinder;
 import org.apache.ctakes.cancer.stage.StageFinder;
 import org.apache.ctakes.cancer.tnm.TnmFinder;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
-import org.apache.ctakes.core.util.OntologyConceptUtil;
-import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
-import org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory;
-import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textspan.Segment;
 import org.apache.log4j.Logger;
-import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.component.JCasAnnotator_ImplBase;
@@ -27,11 +19,7 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.resource.ResourceInitializationException;
 
-import java.io.FileNotFoundException;
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.Collection;
 
 
 /**
@@ -52,29 +40,6 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
    private Class<? extends Annotation> _lookupWindowType = Segment.class;
 
 
-   private Predicate<IdentifiedAnnotation> _hasNeoplasm;
-   private Predicate<IdentifiedAnnotation> _hasMass;
-
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public void initialize( final UimaContext uimaContext ) throws ResourceInitializationException {
-      super.initialize( uimaContext );
-
-      final Function<String, Predicate<IClass>> isClass
-            = name -> iClass -> iClass.getName().equals( name )
-                                || Arrays.toString( iClass.getSuperClasses() ).contains( name );
-
-      _hasNeoplasm = annotation -> OwlOntologyConceptUtil.getOwlClasses( annotation ).stream()
-            .anyMatch( isClass.apply( "Breast_Neoplasm" ) );
-
-      _hasMass = annotation -> OwlOntologyConceptUtil.getOwlClasses( annotation ).stream()
-            .anyMatch( isClass.apply( "Mass" ) );
-   }
-
-
    /**
     * {@inheritDoc}
     */
@@ -84,11 +49,8 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
 
       final Collection<? extends Annotation> lookupWindows = JCasUtil.select( jcas, _lookupWindowType );
       for ( Annotation lookupWindow : lookupWindows ) {
-         final Collection<IdentifiedAnnotation> annotations
-               = JCasUtil.selectCovered( jcas, IdentifiedAnnotation.class, lookupWindow );
-         final Collection<IdentifiedAnnotation> breastNeoplasms = annotations.stream()
-               .filter( _hasNeoplasm )
-               .collect( Collectors.toList() );
+         final Collection<IdentifiedAnnotation> breastNeoplasms
+               = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, "Breast_Neoplasm" );
 
          if ( !breastNeoplasms.isEmpty() ) {
             TnmFinder.addTnmTumorClasses( jcas, lookupWindow, breastNeoplasms );
@@ -96,12 +58,11 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
             StageFinder.addStages( jcas, lookupWindow, breastNeoplasms );
          }
 
-         final Collection<IdentifiedAnnotation> masses = annotations.stream()
-               .filter( _hasMass )
-               .collect( Collectors.toList() );
+         final Collection<IdentifiedAnnotation> masses
+               = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, "Metastasis" );
          SizeFinder.addSizes( jcas, lookupWindow, breastNeoplasms, masses );
 //         if ( LOGGER.isDebugEnabled() ) {
-            printCancerFindings( jcas );
+         printCancerFindings( jcas );
 //         }
       }
 
