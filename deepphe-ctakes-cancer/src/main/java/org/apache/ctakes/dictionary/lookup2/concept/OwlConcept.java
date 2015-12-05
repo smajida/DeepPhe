@@ -19,7 +19,7 @@ final public class OwlConcept implements Concept {
 
    static private final Logger LOGGER = Logger.getLogger( "OwlConcept" );
 
-   static public final String URI = "URI";
+   static public final String URI_CODING_SCHEME = "OWL_URI";
 
    final private IClass _iClass;
    final private int _hashcode;
@@ -64,7 +64,7 @@ final public class OwlConcept implements Concept {
     */
    @Override
    public Collection<String> getCodeNames() {
-      return Arrays.asList( Concept.TUI, URI );
+      return Arrays.asList( Concept.TUI, URI_CODING_SCHEME );
    }
 
    /**
@@ -74,7 +74,7 @@ final public class OwlConcept implements Concept {
    public Collection<String> getCodes( final String codeType ) {
       if ( Concept.TUI.equals( codeType ) ) {
          return Collections.singletonList( OwlParserUtil.getTui( _iClass ) );
-      } else if ( URI.equals( codeType ) ) {
+      } else if ( URI_CODING_SCHEME.equals( codeType ) ) {
          return Collections.singletonList( getUri().toASCIIString() );
       }
       return Collections.emptyList();

@@ -1,6 +1,7 @@
 package org.apache.ctakes.cancer.stage;
 
 
+import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.type.textsem.CancerStage;
 import org.apache.ctakes.cancer.util.FinderUtil;
@@ -91,29 +92,12 @@ final public class StageFinder {
     *
     * @param jCas            - JCas object, needed to create new UIMA types
     * @param cancerStage     - First argument to relation
-    * @param diseaseDisorder - Second argument to relation
+    * @param neoplasm - Second argument to relation
     */
    static private void addStageRelationToCas( final JCas jCas,
                                               final CancerStage cancerStage,
-                                              final IdentifiedAnnotation diseaseDisorder ) {
-      if ( diseaseDisorder == null ) {
-         LOGGER.info( "No Neoplasm discovered to relate to " + cancerStage.getCoveredText() );
-         return;
-      }
-      // add the relation to the CAS
-      final RelationArgument cancerStageArgument = new RelationArgument( jCas );
-      cancerStageArgument.setArgument( cancerStage );
-      cancerStageArgument.setRole( "Argument" );
-      cancerStageArgument.addToIndexes();
-      final RelationArgument disorderMentionArgument = new RelationArgument( jCas );
-      disorderMentionArgument.setArgument( diseaseDisorder );
-      disorderMentionArgument.setRole( "Related_to" );
-      disorderMentionArgument.addToIndexes();
-      final NeoplasmRelation neoplasmRelation = new NeoplasmRelation( jCas );
-      neoplasmRelation.setArg1( cancerStageArgument );
-      neoplasmRelation.setArg2( disorderMentionArgument );
-      neoplasmRelation.setCategory( "Cancer_Stage_of" );
-      neoplasmRelation.addToIndexes();
+                                              final IdentifiedAnnotation neoplasm ) {
+      NeoplasmRelationFactory.createNeoplasmRelation( jCas, cancerStage, neoplasm, "Cancer_Stage_of" );
    }
 
 }

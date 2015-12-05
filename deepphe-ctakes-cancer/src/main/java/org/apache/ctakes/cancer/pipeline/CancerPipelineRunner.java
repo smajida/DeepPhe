@@ -40,6 +40,8 @@ final public class CancerPipelineRunner {
       final AnalysisEngine xmiWriter = CancerPipelineFactory.createXMIWriter( outputDirectory );
       final AnalysisEngine prettyTextWriter = createPrettyTextWriter( outputDirectory );
       SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, prettyTextWriter, xmiWriter );
+//      final AnalysisEngine propertyTextWriter = createPropertyTextWriter( outputDirectory );
+//      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, prettyTextWriter, propertyTextWriter, xmiWriter );
    }
 
 
@@ -47,6 +49,11 @@ final public class CancerPipelineRunner {
          throws ResourceInitializationException {
       return AnalysisEngineFactory.createEngine( PrettyTextWriterFit.createAnnotatorDescription( outputDirectory ) );
    }
+
+//   private static AnalysisEngine createPropertyTextWriter( final String outputDirectory )
+//         throws ResourceInitializationException {
+//      return AnalysisEngineFactory.createEngine( PropertyTextWriterFit.createAnnotatorDescription( outputDirectory ) );
+//   }
 
 
    public static void main( final String... args ) throws UIMAException, IOException {

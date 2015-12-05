@@ -8,5 +8,7 @@ package org.apache.ctakes.cancer.receptor;
 public interface ReceptorStatusValue {
    public String getTitle();
 
+   public String getUri();
+
    public Boolean getBooleanValue();
 }

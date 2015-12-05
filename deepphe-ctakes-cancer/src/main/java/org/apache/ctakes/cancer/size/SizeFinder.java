@@ -1,5 +1,6 @@
 package org.apache.ctakes.cancer.size;
 
+import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
@@ -123,29 +124,12 @@ final public class SizeFinder {
     *
     * @param jCas       - JCas object, needed to create new UIMA types
     * @param cancerSize - First argument to relation
-    * @param annotation - Second argument to relation
+    * @param neoplasm - Second argument to relation
     */
    static private void addCancerSizeRelationToCas( final JCas jCas,
                                                    final CancerSize cancerSize,
-                                                   final IdentifiedAnnotation annotation ) {
-      if ( annotation == null ) {
-         LOGGER.info( "No Neoplasm discovered to relate to " + cancerSize.getCoveredText() );
-         return;
-      }
-      // add the relation to the CAS
-      final RelationArgument cancerSizeArgument = new RelationArgument( jCas );
-      cancerSizeArgument.setArgument( cancerSize );
-      cancerSizeArgument.setRole( "Argument" );
-      cancerSizeArgument.addToIndexes();
-      final RelationArgument annotationArgument = new RelationArgument( jCas );
-      annotationArgument.setArgument( annotation );
-      annotationArgument.setRole( "Related_to" );
-      annotationArgument.addToIndexes();
-      final NeoplasmRelation neoplasmRelation = new NeoplasmRelation( jCas );
-      neoplasmRelation.setArg1( cancerSizeArgument );
-      neoplasmRelation.setArg2( annotationArgument );
-      neoplasmRelation.setCategory( "Size_of" );
-      neoplasmRelation.addToIndexes();
+                                                   final IdentifiedAnnotation neoplasm ) {
+      NeoplasmRelationFactory.createNeoplasmRelation( jCas, cancerSize, neoplasm, "Size_of" );
    }
 
 

@@ -26,6 +26,7 @@ import org.apache.ctakes.coreference.eval.EvaluationOfEventCoreference.RemovePer
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPSemanticRoleLabelerAE;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
+import org.apache.ctakes.dictionary.lookup2.ae.JCasTermAnnotator;
 import org.apache.ctakes.lvg.ae.LvgAnnotator;
 import org.apache.ctakes.postagger.POSTagger;
 import org.apache.ctakes.relationextractor.ae.DegreeOfRelationExtractorAnnotator;
@@ -151,8 +152,14 @@ public static CollectionReader createFilesInDirectoryReader( final String inputD
       aggregateBuilder
             .add( AnalysisEngineFactory.createEngineDescription( CopyNPChunksToLookupWindowAnnotations.class ) );
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( RemoveEnclosedLookupWindows.class ) );
-      aggregateBuilder.add( DefaultJCasTermAnnotator.createAnnotatorDescription(
-            "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml" ) );
+
+      aggregateBuilder.add(
+            AnalysisEngineFactory.createEngineDescription( DefaultJCasTermAnnotator.class,
+                  JCasTermAnnotator.DICTIONARY_DESCRIPTOR_KEY,
+                  "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml",
+                  JCasTermAnnotator.PARAM_MIN_SPAN_KEY, 2 ) );
+//      aggregateBuilder.add( DefaultJCasTermAnnotator.createAnnotatorDescription(
+//            "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml" ) );
    }
 
    static private void addAttributeEngines( final AggregateBuilder aggregateBuilder )

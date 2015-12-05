@@ -1,11 +1,11 @@
 package org.apache.ctakes.cancer.receptor;
 
-import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
+import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
 import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
 import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
+import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
-import org.apache.ctakes.typesystem.type.relation.RelationArgument;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;
@@ -88,23 +88,28 @@ final public class ReceptorStatusFinder {
             = new org.apache.ctakes.cancer.type.textsem.ReceptorStatus( jcas,
             windowStartOffset + receptorStatus.getStartOffset(),
             windowStartOffset + receptorStatus.getEndOffset() );
-      receptorStatusAnnotation.setCode( receptorStatus.getStatusType().name() );
-      receptorStatusAnnotation.setDescription( receptorStatus.getStatusType().getTitle() );
-      receptorStatusAnnotation.setValue( receptorStatus.getStatusValue().getBooleanValue() );
-      // Sets the receptor status annotation to match the umls concept.  I'm not sure that we want/need this
+      final ReceptorStatusType statusType = receptorStatus.getStatusType();
+      final ReceptorStatusValue statusValue = receptorStatus.getStatusValue();
+      receptorStatusAnnotation.setCode( statusType.name() );
+      receptorStatusAnnotation.setDescription( statusType.getTitle() );
+      receptorStatusAnnotation.setValue( statusValue.getBooleanValue() );
       receptorStatusAnnotation.setTypeID( NE_TYPE_ID_FINDING );
+      // Main Umls Concept
       final UmlsConcept umlsConcept = new UmlsConcept( jcas );
-      umlsConcept.setCui( receptorStatus.getStatusType().getCui( receptorStatus.getStatusValue() ) );
-      umlsConcept.setTui( receptorStatus.getStatusType().getTui() );
-      umlsConcept.setCodingScheme( OwlConcept.URI );
-      umlsConcept.setCode( receptorStatus.getStatusType().getUri() );
-      umlsConcept.setPreferredText(
-            receptorStatus.getStatusValue().getTitle() + " " + receptorStatus.getStatusType().getTitle() );
-      final FSArray ontologyConcepts = new FSArray( jcas, 1 );
+      umlsConcept.setCui( statusType.getCui( statusValue ) );
+      umlsConcept.setTui( statusType.getTui() );
+      umlsConcept.setCodingScheme( OwlConcept.URI_CODING_SCHEME );
+      umlsConcept.setCode( statusType.getUri() );
+      umlsConcept.setPreferredText( statusValue.getTitle() + " " + statusType.getTitle() );
+      // Value uri concept
+      final OntologyConcept valueConcept = new OntologyConcept( jcas );
+      valueConcept.setCodingScheme( OwlConcept.URI_CODING_SCHEME );
+      valueConcept.setCode( statusValue.getUri() );
+      // Add to cas
+      final FSArray ontologyConcepts = new FSArray( jcas, 2 );
       ontologyConcepts.set( 0, umlsConcept );
+      ontologyConcepts.set( 1, valueConcept );
       receptorStatusAnnotation.setOntologyConceptArr( ontologyConcepts );
-
-
       receptorStatusAnnotation.addToIndexes();
       return receptorStatusAnnotation;
    }
@@ -117,29 +122,12 @@ final public class ReceptorStatusFinder {
     *
     * @param jCas           - JCas object, needed to create new UIMA types
     * @param receptorStatus - First argument to relation
-    * @param annotation     - Second argument to relation
+    * @param neoplasm     - Second argument to relation
     */
    static private void addReceptorRelationToCas( final JCas jCas,
                                                  final org.apache.ctakes.cancer.type.textsem.ReceptorStatus receptorStatus,
-                                                 final IdentifiedAnnotation annotation ) {
-      if ( annotation == null ) {
-         LOGGER.info( "No Neoplasm discovered to relate to " + receptorStatus.getCoveredText() );
-         return;
-      }
-      // add the relation to the CAS
-      final RelationArgument receptorStatusArgument = new RelationArgument( jCas );
-      receptorStatusArgument.setArgument( receptorStatus );
-      receptorStatusArgument.setRole( "Argument" );
-      receptorStatusArgument.addToIndexes();
-      final RelationArgument annotationArgument = new RelationArgument( jCas );
-      annotationArgument.setArgument( annotation );
-      annotationArgument.setRole( "Related_to" );
-      annotationArgument.addToIndexes();
-      final NeoplasmRelation neoplasmRelation = new NeoplasmRelation( jCas );
-      neoplasmRelation.setArg1( receptorStatusArgument );
-      neoplasmRelation.setArg2( annotationArgument );
-      neoplasmRelation.setCategory( "Receptor_status_of" );
-      neoplasmRelation.addToIndexes();
+                                                 final IdentifiedAnnotation neoplasm ) {
+      NeoplasmRelationFactory.createNeoplasmRelation( jCas, receptorStatus, neoplasm, "Receptor_status_of" );
    }
 
 }

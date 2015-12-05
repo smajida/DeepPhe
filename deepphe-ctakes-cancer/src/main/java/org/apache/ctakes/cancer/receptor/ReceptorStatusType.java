@@ -1,5 +1,7 @@
 package org.apache.ctakes.cancer.receptor;
 
+import org.apache.ctakes.cancer.ontology.OwlOntologyConceptUtil;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,15 +14,15 @@ import java.util.regex.Pattern;
 // http://www.breastcancer.org/symptoms/diagnosis/hormone_status/read_results
 enum ReceptorStatusType {
    ER( "Estrogen receptor",
-         "http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl#Estrogen_Receptor_Status",
+         "Estrogen_Receptor_Status",
          "\\b(Estrogen|ER) ?((\\+(pos)?|-(neg)?)|(\\s+(status\\s+)?(is\\s+)?(pos(itive)?|neg(ative)?|N/?A\\b|unknown|indeterminate|equivocal|(not assessed))))",
          "C1516974", "C1516974", "C1516974" ),
    PR( "Progesterone receptor",
-         "http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl#Progesterone_Receptor_Status",
+         "Progesterone_Receptor_Status",
          "\\b(Progesterone|PR) ?((\\+(pos)?|-(neg)?)|(\\s+(status\\s+)?(is\\s+)?(pos(itive)?|neg(ative)?|N/?A\\b|unknown|indeterminate|equivocal|(not assessed))))",
          "C1514471", "C1514471", "C1514471" ),
    HER2( "Human epidermal growth factor receptor 2",
-         "http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl#HER2_Neu_Status",
+         "HER2_Neu_Status",
          "\\bHER2(/neu)? ?((\\+(pos)?|-(neg)?)|(\\s+(status\\s+)?(is\\s+)?(pos(itive)?|neg(ative)?|N/?A\\b|unknown|indeterminate|equivocal|(not assessed))))",
          "C1512413", "C1512413", "C1512413" );
 
@@ -48,7 +50,7 @@ enum ReceptorStatusType {
    }
 
    public String getUri() {
-      return _uri;
+      return OwlOntologyConceptUtil.BREAST_CANCER_OWL + _uri;
    }
 
    public String getCui( final ReceptorStatusValue statusValue ) {

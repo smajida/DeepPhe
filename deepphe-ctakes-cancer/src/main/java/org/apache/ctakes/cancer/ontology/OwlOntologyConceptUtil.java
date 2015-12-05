@@ -31,6 +31,9 @@ final public class OwlOntologyConceptUtil {
    private OwlOntologyConceptUtil() {
    }
 
+   static public final String CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlp/cancer.owl#";
+   static public final String BREAST_CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlp/breastCancer.owl#";
+
    static private final Function<String, String> asSelf = self -> self;
 
    static private final BinaryOperator<Collection<IdentifiedAnnotation>> mergeSets
@@ -41,13 +44,13 @@ final public class OwlOntologyConceptUtil {
 
 
    /**
-    * Convenience method that calls {@link OntologyConceptUtil#getCodes} with {@link OwlConcept#URI} as the scheme
+    * Convenience method that calls {@link OntologyConceptUtil#getCodes} with {@link OwlConcept#URI_CODING_SCHEME} as the scheme
     *
     * @param annotation -
     * @return all owl URIs that exist for the given annotation
     */
    static public Collection<String> getUris( final IdentifiedAnnotation annotation ) {
-      return OntologyConceptUtil.getCodes( annotation, OwlConcept.URI );
+      return OntologyConceptUtil.getCodes( annotation, OwlConcept.URI_CODING_SCHEME );
    }
 
    /**
@@ -58,17 +61,48 @@ final public class OwlOntologyConceptUtil {
     * @return all owl URIs that exist for the given window
     */
    static public <T extends Annotation> Collection<String> getUris( final JCas jcas, final T lookupWindow ) {
-      return OntologyConceptUtil.getCodes( jcas, lookupWindow, OwlConcept.URI );
+      return OntologyConceptUtil.getCodes( jcas, lookupWindow, OwlConcept.URI_CODING_SCHEME );
    }
 
    /**
-    * Convenience method that calls {@link OntologyConceptUtil#getCodes} with {@link OwlConcept#URI} as the scheme
+    * Convenience method that calls {@link OntologyConceptUtil#getCodes} with {@link OwlConcept#URI_CODING_SCHEME} as the scheme
     *
     * @param jcas -
     * @return all owl URIs that exist for the given annotation
     */
    static public Collection<String> getUris( final JCas jcas ) {
-      return OntologyConceptUtil.getCodes( jcas, OwlConcept.URI );
+      return OntologyConceptUtil.getCodes( jcas, OwlConcept.URI_CODING_SCHEME );
+   }
+
+
+   /**
+    * @param owlUri -
+    * @return Owl Classes for the given URI
+    */
+   static public IClass getIClass( final String owlUri ) {
+      try {
+         final IOntology ontology = OwlConnectionFactory.getInstance().getDefaultOntology();
+         return ontology.getClass( owlUri );
+      } catch ( IOntologyException | FileNotFoundException multE ) {
+         LOGGER.error( multE.getMessage(), multE );
+      }
+      return null;
+   }
+
+   /**
+    * @param owlUris -
+    * @return Owl Classes for the given URIs
+    */
+   static private Collection<IClass> getIClasses( final Collection<String> owlUris ) {
+      try {
+         final IOntology ontology = OwlConnectionFactory.getInstance().getDefaultOntology();
+         return owlUris.stream()
+               .map( ontology::getClass )
+               .collect( Collectors.toSet() );
+      } catch ( IOntologyException | FileNotFoundException multE ) {
+         LOGGER.error( multE.getMessage(), multE );
+      }
+      return Collections.emptyList();
    }
 
    /**
@@ -160,24 +194,6 @@ final public class OwlOntologyConceptUtil {
                                                                                              final String rootUri ) {
       return getUriBranchStream( rootUri )
             .collect( Collectors.toMap( asSelf, uri -> getAnnotationsByUri( jcas, uri ), mergeSets ) );
-
-   }
-
-
-   /**
-    * @param owlUris -
-    * @return Owl Classes for the given URIs
-    */
-   static private Collection<IClass> getIClasses( final Collection<String> owlUris ) {
-      try {
-         final IOntology ontology = OwlConnectionFactory.getInstance().getDefaultOntology();
-         return owlUris.stream()
-               .map( ontology::getClass )
-               .collect( Collectors.toSet() );
-      } catch ( IOntologyException | FileNotFoundException multE ) {
-         LOGGER.error( multE.getMessage(), multE );
-      }
-      return Collections.emptyList();
    }
 
    /**
@@ -203,28 +219,28 @@ final public class OwlOntologyConceptUtil {
       return Stream.empty();
    }
 
-//   /**
-//    * @param baseUri uri for the base of a branch
-//    * @return a stream with all of the root uris above the base, starting with the base
-//    */
-//   static public Stream<String> getUriRootsStream( final String baseUri ) {
-//      try {
-//         final IOntology ontology = OwlConnectionFactory.getInstance().getDefaultOntology();
-//         final IClass rootBase = ontology.getClass( baseUri );
-//         if ( rootBase == null ) {
-//            LOGGER.error( "No Class exists for URI " + baseUri );
-//            return Stream.empty();
-//         }
-//         final IClass[] roots = rootBase.getSuperClasses();
-//         final IClass[] root = new IClass[ roots.length+1 ];
-//         System.arraycopy( roots, 0, root, 1, roots.length );
-//         root[0] = rootBase;
-//         return Arrays.stream( root ).map( OwlParserUtil::getUriString );
-//      } catch ( IOntologyException | FileNotFoundException multE ) {
-//         LOGGER.error( multE.getMessage(), multE );
-//      }
-//      return Stream.empty();
-//   }
+   /**
+    * @param baseUri uri for the base of a branch
+    * @return a stream with all of the root uris above the base, starting with the base
+    */
+   static public Stream<String> getUriRootsStream( final String baseUri ) {
+      try {
+         final IOntology ontology = OwlConnectionFactory.getInstance().getDefaultOntology();
+         final IClass rootBase = ontology.getClass( baseUri );
+         if ( rootBase == null ) {
+            LOGGER.error( "No Class exists for URI " + baseUri );
+            return Stream.empty();
+         }
+         final IClass[] roots = rootBase.getSuperClasses();
+         final IClass[] root = new IClass[ roots.length + 1 ];
+         System.arraycopy( roots, 0, root, 1, roots.length );
+         root[ 0 ] = rootBase;
+         return Arrays.stream( root ).map( OwlParserUtil::getUriString );
+      } catch ( IOntologyException | FileNotFoundException multE ) {
+         LOGGER.error( multE.getMessage(), multE );
+      }
+      return Stream.empty();
+   }
 
 
 }

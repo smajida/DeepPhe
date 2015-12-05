@@ -1,6 +1,8 @@
 package org.apache.ctakes.cancer.tnm;
 
-import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
+import edu.pitt.dbmi.nlp.noble.ontology.IClass;
+import org.apache.ctakes.cancer.ontology.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
 import org.apache.ctakes.cancer.type.textsem.TnmClassification;
 import org.apache.ctakes.cancer.type.textsem.TnmFeature;
 import org.apache.ctakes.cancer.type.textsem.TnmOption;
@@ -8,8 +10,8 @@ import org.apache.ctakes.cancer.type.textsem.TnmPrefix;
 import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
 import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
+import org.apache.ctakes.dictionary.lookup2.ontology.OwlParserUtil;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
-import org.apache.ctakes.typesystem.type.relation.RelationArgument;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;
@@ -216,18 +218,26 @@ final public class TnmFinder {
 
    static private TnmFeature createTnmFeature( final JCas jcas, final TnmClass tnmClass ) {
       final TnmFeature tnmFeatureFeature = new TnmFeature( jcas );
+      final TnmClassType classType = tnmClass.getClassType();
       tnmFeatureFeature.setPrefix( createTnmPrefix( jcas, tnmClass ) );
-      tnmFeatureFeature.setCode( tnmClass.getClassType().name() );
-      tnmFeatureFeature.setDescription( tnmClass.getClassType().getTitle() );
+      tnmFeatureFeature.setCode( classType.name() );
+      tnmFeatureFeature.setDescription( classType.getTitle() );
       tnmFeatureFeature.setValue( tnmClass.getValue() );
 
       tnmFeatureFeature.setTypeID( NE_TYPE_ID_FINDING );
       final UmlsConcept umlsConcept = new UmlsConcept( jcas );
-      umlsConcept.setCui( tnmClass.getClassType().getCui() );
-      umlsConcept.setTui( tnmClass.getClassType().getTui() );
-      umlsConcept.setCodingScheme( OwlConcept.URI );
-      umlsConcept.setCode( tnmClass.getClassType().getUri() );
-      umlsConcept.setPreferredText( tnmClass.getClassType().getTitle() );
+      umlsConcept.setCui( classType.getCui() );
+      umlsConcept.setTui( classType.getTui() );
+      umlsConcept.setCodingScheme( OwlConcept.URI_CODING_SCHEME );
+      // Attempt to use a URI specific to value
+      final String valueUri = classType.name() + tnmClass.getValue() + "_Stage_Finding";
+      final IClass iClass = OwlOntologyConceptUtil.getIClass( valueUri );
+      if ( iClass != null ) {
+         umlsConcept.setCode( OwlParserUtil.getUriString( iClass ) );
+      } else {
+         umlsConcept.setCode( classType.getUri() );
+      }
+      umlsConcept.setPreferredText( classType.getTitle() );
       final FSArray ontologyConcepts = new FSArray( jcas, 1 );
       ontologyConcepts.set( 0, umlsConcept );
       tnmFeatureFeature.setOntologyConceptArr( ontologyConcepts );
@@ -242,29 +252,12 @@ final public class TnmFinder {
     *
     * @param jCas              - JCas object, needed to create new UIMA types
     * @param tnmClassification - First argument to relation
-    * @param disorderMention   - Second argument to relation
+    * @param neoplasm   - Second argument to relation
     */
    static private void addTnmRelationToCas( final JCas jCas,
                                             final TnmClassification tnmClassification,
-                                            final IdentifiedAnnotation disorderMention ) {
-      if ( disorderMention == null ) {
-         LOGGER.info( "No Neoplasm discovered to relate to " + tnmClassification.getCoveredText() );
-         return;
-      }
-      // add the relation to the CAS
-      final RelationArgument tnmClassificationArgument = new RelationArgument( jCas );
-      tnmClassificationArgument.setArgument( tnmClassification );
-      tnmClassificationArgument.setRole( "Argument" );
-      tnmClassificationArgument.addToIndexes();
-      final RelationArgument disorderMentionArgument = new RelationArgument( jCas );
-      disorderMentionArgument.setArgument( disorderMention );
-      disorderMentionArgument.setRole( "Related_to" );
-      disorderMentionArgument.addToIndexes();
-      final NeoplasmRelation neoplasmRelation = new NeoplasmRelation( jCas );
-      neoplasmRelation.setArg1( tnmClassificationArgument );
-      neoplasmRelation.setArg2( disorderMentionArgument );
-      neoplasmRelation.setCategory( "TNM_of" );
-      neoplasmRelation.addToIndexes();
+                                            final IdentifiedAnnotation neoplasm ) {
+      NeoplasmRelationFactory.createNeoplasmRelation( jCas, tnmClassification, neoplasm, "TNM_of" );
    }
 
 }

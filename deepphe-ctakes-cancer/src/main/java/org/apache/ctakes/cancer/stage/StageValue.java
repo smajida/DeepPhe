@@ -34,7 +34,6 @@ public enum StageValue {
    private StageValue( final String title, final String cui, final String regex ) {
       _title = title;
       _cui = cui;
-//      _pattern = Pattern.compile( STAGE_PREFIX + "(" + regex + ")" );
       _pattern = Pattern.compile( STAGE_PREFIX + regex, Pattern.CASE_INSENSITIVE );
    }
 

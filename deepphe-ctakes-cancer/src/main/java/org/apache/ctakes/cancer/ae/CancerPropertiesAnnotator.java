@@ -66,6 +66,15 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
 //         }
       }
 
+      OwlOntologyConceptUtil.getUris( jcas ).stream().forEach( System.out::println );
+      OwlOntologyConceptUtil.getUris( jcas ).stream()
+            .map( uri -> OwlOntologyConceptUtil.getAnnotationsByUri( jcas, uri ) )
+            .flatMap( Collection::stream )
+            .map( Annotation::getCoveredText )
+            .forEach( System.out::println );
+//      OwlOntologyConceptUtil.getUriRootsStream( "Negative" ).forEach( System.out::println );
+//      OwlOntologyConceptUtil.getUriBranchStream( "OrdinalInterpretation" ).forEach( System.out::println );
+
       LOGGER.info( "Finished processing" );
    }
 
@@ -81,6 +90,15 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
                       + " " + relation.getArg2().getArgument().getCoveredText()
                       + "\t is: \t" + relation.getArg1().getArgument().getCoveredText() );
       }
+//      final Collection<BinaryTextRelation> binaryRelations = JCasUtil.select( jcas, BinaryTextRelation.class );
+//      for ( BinaryTextRelation relation : binaryRelations ) {
+//         if ( relation instanceof NeoplasmRelation ) {
+//            continue;
+//         }
+//         LOGGER.info( "RELATION! \t" + relation.getCategory().replace( '_', ' ' )
+//                      + " " + relation.getArg2().getArgument().getCoveredText()
+//                      + "\t is: \t" + relation.getArg1().getArgument().getCoveredText() );
+//      }
    }
 
    public static AnalysisEngineDescription createAnnotatorDescription() throws ResourceInitializationException {
