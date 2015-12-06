@@ -1,6 +1,6 @@
 package org.healthnlp.deepphe.uima.ae;
 
-import org.apache.ctakes.cancer.ontology.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.log4j.Logger;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.component.JCasAnnotator_ImplBase;

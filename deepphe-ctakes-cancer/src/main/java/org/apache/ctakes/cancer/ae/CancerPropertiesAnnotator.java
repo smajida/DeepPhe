@@ -1,6 +1,6 @@
 package org.apache.ctakes.cancer.ae;
 
-import org.apache.ctakes.cancer.ontology.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.receptor.ReceptorStatusFinder;
 import org.apache.ctakes.cancer.size.SizeFinder;
 import org.apache.ctakes.cancer.stage.StageFinder;

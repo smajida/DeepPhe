@@ -1,7 +1,7 @@
 package org.apache.ctakes.cancer.tnm;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
-import org.apache.ctakes.cancer.ontology.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
 import org.apache.ctakes.cancer.type.textsem.TnmClassification;
 import org.apache.ctakes.cancer.type.textsem.TnmFeature;

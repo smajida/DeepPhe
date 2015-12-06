@@ -1,6 +1,6 @@
 package org.apache.ctakes.cancer.receptor;
 
-import org.apache.ctakes.cancer.ontology.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

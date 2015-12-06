@@ -1,4 +1,4 @@
-package org.apache.ctakes.cancer.ontology;
+package org.apache.ctakes.cancer.owl;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
