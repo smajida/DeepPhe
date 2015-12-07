@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.receptor.StatusType;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
-import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
+//import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
 import org.apache.ctakes.cancer.type.textsem.TnmClassification;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
@@ -108,8 +110,10 @@ public class CasPreLoadedEncounterAE extends JCasAnnotator_ImplBase {
 				TnmClassification.type));
 		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
 				CancerSize.type));
-		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
-				ReceptorStatus.type));
+//		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
+//				ReceptorStatus.type));
+		identifiedAnnotations.addAll(
+				OwlOntologyConceptUtil.getAnnotationsByUriBranch( ctakesJCas, StatusType.PARENT_URI ) );
 
 		for (IdentifiedAnnotation idAnnot : identifiedAnnotations) {
 			logger.debug(getClass().getSimpleName() + " found a "

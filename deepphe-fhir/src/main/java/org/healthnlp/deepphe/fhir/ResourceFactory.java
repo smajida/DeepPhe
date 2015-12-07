@@ -3,12 +3,15 @@ package org.healthnlp.deepphe.fhir;
 import java.io.File;
 import java.util.*;
 
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.receptor.StatusType;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
-import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
+//import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.MedicationMention;
 import org.apache.ctakes.typesystem.type.textsem.ProcedureMention;
+import org.apache.log4j.Logger;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.jcas.tcas.DocumentAnnotation;
@@ -28,18 +31,24 @@ import edu.pitt.dbmi.nlp.noble.terminology.Concept;
  * @author tseytlin
  *
  */
-public class ResourceFactory {
-	private static ResourceFactory instance;
+// Use enum with a single instance for Singletons.
+// That forces the existance of one and only one, plus full instantiation before use is forced, helping thread safety
+public enum ResourceFactory {
+	INSTANCE;
+
+	//	private static ResourceFactory instance;
 	private IOntology ontology;
 	private OntologyUtils ontologyUtils;
-	
-	public ResourceFactory(IOntology ont){
-		ontology = ont;
-		instance = this;
-	}
+
+	// public instantiators such as this allow instance to be created and recreated multiple times,
+	// breaking the contract/purpose of a Singleton
+//	public ResourceFactory(IOntology ont){
+//		ontology = ont;
+//		instance = this;
+//	}
 	
 	public static ResourceFactory getInstance(){
-		return instance;
+		return INSTANCE;
 	}
 	
 	
@@ -48,6 +57,10 @@ public class ResourceFactory {
 	}
 
 	public void setOntology(IOntology ontology) {
+		if ( this.ontology != null && !this.ontology.equals( ontology ) ) {
+			Logger.getLogger( getClass().getName() ).warn( "Changing ontology from " + this.ontology.getURI()
+																		  + " to " + ontology.getURI() );
+		}
 		this.ontology = ontology;
 	}
 
@@ -60,7 +73,7 @@ public class ResourceFactory {
 	
 	/**
 	 * create a Report object from DocumentAnnotation
-	 * @param doc
+	 * @param cas
 	 * @return
 	 */
 	public Report getReport(JCas cas) {
@@ -151,7 +164,7 @@ public class ResourceFactory {
 
 	/**
 	 * create a Report object from DocumentAnnotation
-	 * @param doc
+	 * @param text
 	 * @return
 	 */
 	public Report getReport(String text) {
@@ -198,7 +211,7 @@ public class ResourceFactory {
 	
 	/**
 	 * get patient from the document
-	 * @param doc
+	 * @param p
 	 * @return
 	 */
 	public static Patient getPatient(org.hl7.fhir.instance.model.Patient p) {
@@ -209,7 +222,7 @@ public class ResourceFactory {
 	
 	/**
 	 * get patient from the document
-	 * @param doc
+	 * @param text
 	 * @return
 	 */
 	public Patient getPatient(String text) {
@@ -340,7 +353,8 @@ public class ResourceFactory {
 		List<Observation> list = new ArrayList<Observation>();
 		List<IdentifiedAnnotation> annotations = new ArrayList<IdentifiedAnnotation>();
 		annotations.addAll(Utils.getAnnotationsByType(cas,CancerSize.type));
-		annotations.addAll(Utils.getAnnotationsByType(cas,ReceptorStatus.type));
+//		annotations.addAll(Utils.getAnnotationsByType(cas,ReceptorStatus.type));
+		annotations.addAll( OwlOntologyConceptUtil.getAnnotationsByUriBranch( cas, StatusType.PARENT_URI ) );
 		for(IdentifiedAnnotation m: annotations ){
 			Observation  dx = new Observation();
 			dx.load(m);
@@ -411,7 +425,7 @@ public class ResourceFactory {
 	
 	/**
 	 * if possible re-create Report FHIR object from REPORT file directory that has FHIR XML files
-	 * @param dir
+	 * @param reportDir
 	 * @return
 	 */
 	public static Report loadReport(File reportDir) throws Exception{

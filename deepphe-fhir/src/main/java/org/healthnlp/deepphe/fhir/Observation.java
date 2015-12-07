@@ -13,11 +13,15 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.ctakes.cancer.receptor.ReceptorStatusUtil;
+import org.apache.ctakes.cancer.receptor.StatusValue;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
-import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
-import org.apache.ctakes.cancer.type.textsem.ReceptorStatus_Type;
+//import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
+//import org.apache.ctakes.cancer.type.textsem.ReceptorStatus_Type;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
+import org.apache.log4j.Logger;
+import org.apache.uima.UIMAException;
 import org.apache.uima.jcas.cas.FSArray;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.DecimalType;
@@ -106,7 +110,7 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	
 	/**
 	 * Initialize diagnosis from a DiseaseDisorderMention in cTAKES typesystem
-	 * @param dx
+	 * @param dm
 	 */
 	public void load(IdentifiedAnnotation dm){
 		// set some properties
@@ -122,14 +126,28 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 		}
 		
 		// set positive/negative
-		if(dm instanceof ReceptorStatus){
-			boolean value = ((ReceptorStatus)dm).getValue();
-			String i = value?Utils.INTERPRETATION_POSITIVE:Utils.INTERPRETATION_NEGATIVE;
-			String url = ""+ResourceFactory.getInstance().getOntology().getURI();
-			setInterpretation(Utils.getCodeableConcept(i,url+"#"+i,url));
-			// new StringType(value?"Positive":"Negative"));l;// 
+//		if(dm instanceof ReceptorStatus){
+//			boolean value = ((ReceptorStatus)dm).getValue();
+//			String i = value?Utils.INTERPRETATION_POSITIVE:Utils.INTERPRETATION_NEGATIVE;
+//			String url = ""+ResourceFactory.getInstance().getOntology().getURI();
+//			setInterpretation(Utils.getCodeableConcept(i,url+"#"+i,url));
+//			// new StringType(value?"Positive":"Negative"));l;//
+//		}
+		if ( ReceptorStatusUtil.isReceptorStatus( dm ) ) {
+			StatusValue value = null;
+			try {
+				value = ReceptorStatusUtil.getStatusValue( dm.getCAS().getJCas(), dm );
+			} catch ( UIMAException uimaE ) {
+				Logger.getLogger( getClass().getName() ).error( "Could not get Receptor Status Value for "
+																				+ dm.getCoveredText() );
+			}
+			if ( value != null ) {
+				final String title = value.getTitle();
+				String url = "" + ResourceFactory.getInstance().getOntology().getURI();
+				setInterpretation( Utils.getCodeableConcept( title, url + "#" + title, url ) );
+			}
 		}
-		
+
 		// if cancer size, then use their value
 		if(dm instanceof CancerSize){
 			FSArray arr = ((CancerSize)dm).getMeasurements();

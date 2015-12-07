@@ -1,15 +1,20 @@
 package org.healthnlp.deepphe.xfer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.receptor.StatusType;
+import org.apache.ctakes.cancer.receptor.StatusValue;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
-import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
+//import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.cancer.type.textsem.TnmClassification;
+import org.apache.ctakes.core.util.OntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
@@ -86,8 +91,9 @@ public class CtakesToDroolsConverter {
 				TnmClassification.type));
 		identifiedAnnotations.addAll(getAnnotationsByType(summarizableJCas,
 				CancerSize.type));
-		identifiedAnnotations.addAll(getAnnotationsByType(summarizableJCas,
-				ReceptorStatus.type));
+		// Why build a list like this and then iterate with a switch by type?
+//		identifiedAnnotations.addAll(getAnnotationsByType(summarizableJCas,
+//				ReceptorStatus.type));
 
 		int groupIndex = 0;
 
@@ -120,6 +126,12 @@ public class CtakesToDroolsConverter {
 
 			}
 		}
+
+		OwlOntologyConceptUtil.getAnnotationsByUriBranch( summarizableJCas, StatusType.PARENT_URI )
+				.stream()
+				.map( OntologyConceptUtil::getConcepts )
+				.flatMap( Collection::stream )
+				.forEach( umls -> processReceptorStatus( summarizable, umls ) );
 	}
 
 	private void processDiseaseDisorderMention(KbSummarizable summarizable,
@@ -141,9 +153,12 @@ public class CtakesToDroolsConverter {
 			UmlsConcept umlsConcept) {
 		
 		String cui = getCuiForUmlsConcept(umlsConcept);
-		
+
 		switch (cui) {
-		case "C0279756": // Negative Estrogen Receptor	
+			// It might be better to use self-documenting constants here
+			// Could -- import static StatusType.*;   import static StatusValue.*;
+			// Could use -- case ER.getCui( NEGATIVE ) :
+			case "C0279756": // Negative Estrogen Receptor
 			RelationHasinterpretation receptorStatusSummary = new RelationHasinterpretationImpl();
 			EstrogenReceptorStatus erStatus = new EstrogenReceptorStatusImpl();
 			OrdinalInterpretation erInterpretation = new NegativeImpl();
@@ -156,7 +171,8 @@ public class CtakesToDroolsConverter {
 			receptorStatusSummary.setValue("negative");			
 			summarizable.addSummary((KbSummary)receptorStatusSummary);
 			break;
-		case "C0279766": // Negative Progesterone Receptor
+			// Could use -- case PR.getCui( NEGATIVE ) :
+			case "C0279766": // Negative Progesterone Receptor
 			receptorStatusSummary = new RelationHasinterpretationImpl();
 			ProgesteroneReceptorStatus prStatus = new ProgesteroneReceptorStatusImpl();
 			OrdinalInterpretation prInterpretation = new NegativeImpl();
@@ -169,7 +185,8 @@ public class CtakesToDroolsConverter {
 			receptorStatusSummary.setValue("negative");			
 			summarizable.addSummary((KbSummary)receptorStatusSummary);
 			break;
-		case "C1960398": // Positive Human epidermal growth factor receptor 2
+			// Could use -- case HER2.getCui( POSITIVE ) :
+			case "C1960398": // Positive Human epidermal growth factor receptor 2
 			receptorStatusSummary = new RelationHasinterpretationImpl();
 			Her2NeuStatus her2NeuStatus = new Her2NeuStatusImpl();
 			OrdinalInterpretation her2NeuInterpretation = new PositiveImpl();
