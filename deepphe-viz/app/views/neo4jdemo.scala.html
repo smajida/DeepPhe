@@ -1,0 +1,12 @@
+@(status: Boolean)
+
+@main("Welcome to Neo4J Demo") {
+	
+	<h1>Neo4J Connection Test</h1>
+	@if(status.booleanValue()){
+    	<h3>Neo4J Connection Successful</h3>
+   	} else{
+  		<h3>Neo4J Connection Failed</h3>
+	}
+
+}
