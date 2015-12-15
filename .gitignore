@@ -1,7 +1,10 @@
 /bin
 /target/
 /.idea/
+/.settings/
 /DeepPhe.iml
+/.classpath
+/.project
 /deepphe-ctakes-cancer/deepphe-ctakes-cancer.iml
 /deepphe-demo/deepphe-demo.iml
 /deepphe-fhir/deepphe-fhir.iml

@@ -1,4 +1,5 @@
 /target/
+/.settings/
 /.classpath
 /.project
 /src/main/java/org/healthnlp/deepphe/uima/types/*.java
