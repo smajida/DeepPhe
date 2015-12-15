@@ -143,8 +143,10 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 			}
 			if ( value != null ) {
 				final String title = value.getTitle();
-				String url = "" + ResourceFactory.getInstance().getOntology().getURI();
+				String url = ResourceFactory.getInstance().getOntology().getURI().toASCIIString();
 				setInterpretation( Utils.getCodeableConcept( title, url + "#" + title, url ) );
+				// could also use
+				// setInterpretation( Utils.getCodeableConcept( title, value.getUri(), OwlOntologyConceptUtil.BREAST_CANCER_OWL ) );
 			}
 		}
 

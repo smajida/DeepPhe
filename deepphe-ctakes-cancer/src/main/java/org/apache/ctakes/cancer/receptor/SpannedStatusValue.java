@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
  * @version %I%
  * @since 12/6/2015
  */
-public class SpannedStatusValue implements SpannedEntity {
+final class SpannedStatusValue implements SpannedEntity {
 
    static private final Logger LOGGER = Logger.getLogger( "SpannedStatusValue" );
 
