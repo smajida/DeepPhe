@@ -24,14 +24,14 @@ import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.Progress;
 import org.apache.uima.util.ProgressImpl;
 import org.healthnlp.deepphe.fhir.Report;
-import org.healthnlp.deepphe.fhir.ResourceFactory;
 import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
 import org.healthnlp.deepphe.summarization.jess.kb.Identified;
 import org.healthnlp.deepphe.summarization.jess.kb.Patient;
 import org.healthnlp.deepphe.summarization.jess.kb.Summary;
 import org.healthnlp.deepphe.summarization.jess.kb.SummaryFactory;
 import org.healthnlp.deepphe.uima.ae.DocumentSummarizerAE;
-import org.healthnlp.deepphe.uima.fhir.FHIRResourceFactory;
+import org.healthnlp.deepphe.uima.fhir.DocumentResourceFactory;
+import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.TextUtils;
 
 public class FHIRCollectionReader extends CollectionReader_ImplBase {
@@ -89,7 +89,7 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 			List<Report> reports = new ArrayList<Report>();
 			for(File f: file.listFiles()){
 				if(f.isDirectory()){
-					Report r = ResourceFactory.loadReport(f);
+					Report r = DocumentResourceFactory.loadReport(f);
 					if(r != null){
 						reports.add(r);
 					}
@@ -109,7 +109,7 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 				
 				// persist into CAS
 				//System.out.println(r.getSummaryText());
-				FHIRResourceFactory.saveReport(r,jcas);
+				PhenotypeResourceFactory.saveReport(r,jcas);
 			}
 			
 			
@@ -176,7 +176,7 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 		for(File f: file.listFiles()){
 			if(f.isDirectory()){
 				System.out.println(f.getName());
-				Report r = ResourceFactory.loadReport(f);
+				Report r = DocumentResourceFactory.loadReport(f);
 				if(r != null){
 					System.out.println(r.getSummaryText());
 					r.save(new File("/home/tseytlin/Output/FHIR/"));

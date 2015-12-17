@@ -4,6 +4,7 @@ package org.healthnlp.deepphe.fhir;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,7 +62,7 @@ public class Utils {
 	public static final String DEFAULT_LANGUAGE = "English";
 	public static final String SCHEMA_UMLS = "NCI Metathesaurus";
 	public static final String SCHEMA_RXNORM = "RxNORM";
-	public static final CodeableConcept CONDITION_CATEGORY_DIAGNOSIS = getCodeableConcept("Diagnosis","diagnosis","http://hl7.org/fhir/condition-category");
+	public static final CodeableConcept CONDITION_CATEGORY_DIAGNOSIS = getCodeableConcept("Disease","diagnosis","http://hl7.org/fhir/condition-category");
 	public static final CodeableConcept CONDITION_CATEGORY_FINDING = getCodeableConcept("Finding","finding","http://hl7.org/fhir/condition-category");
 	public static final CodeableConcept CONDITION_CATEGORY_SYMPTOM = getCodeableConcept("Symptom","symptom","http://hl7.org/fhir/condition-category");
 	public static final CodeableConcept CONDITION_CATEGORY_COMPLAINT = getCodeableConcept("Complaint","complaint","http://hl7.org/fhir/condition-category");
@@ -188,10 +189,11 @@ public class Utils {
 			List<String> cuis = new ArrayList<String>();
 			for(int i=0;i<ia.getOntologyConceptArr().size();i++){
 				OntologyConcept c = ia.getOntologyConceptArr(i);
+				
 				// add coding for this concept
 				Coding ccc = cc.addCoding();
 				ccc.setCode(c.getCode());
-				ccc.setDisplay(ia.getCoveredText());
+				ccc.setDisplay(getConceptName(ia));
 				ccc.setSystem(c.getCodingScheme());
 				cuis.add(c.getCode());
 				
@@ -210,6 +212,7 @@ public class Utils {
 		}
 		
 		// add coding for class
+		/*
 		IClass cls = getConceptClass(ia);
 		if(cls != null){
 			// add class URI
@@ -227,7 +230,7 @@ public class Utils {
 				c2.setSystem(SCHEMA_RXNORM);
 			}
 		
-		}
+		}*/
 		
 		
 		return cc;
@@ -260,20 +263,34 @@ public class Utils {
 	 * @return
 	 */
 	public static String getConceptName(IdentifiedAnnotation ia){
-		IClass cls = getConceptClass(ia);
-		return cls != null?cls.getConcept().getName():ia.getCoveredText();
-		/*String name = null;
+		//IClass cls = getConceptClass(ia);
+		//return cls != null?cls.getConcept().getName():ia.getCoveredText();
+		String name = null;
 		for(int i=0;i<ia.getOntologyConceptArr().size();i++){
 			OntologyConcept c = ia.getOntologyConceptArr(i);
-			if(c instanceof UmlsConcept){
-				name = ((UmlsConcept)c).getPreferredText();
+			if(c instanceof UmlsConcept &&  "URI".equals(c.getCodingScheme())){
+				//name = ((UmlsConcept)c).getPreferredText();
+				name = getConceptName(URI.create(c.getCode()));
 			}
 			if(name != null)
 				break;
 		}
-		return name == null?ia.getCoveredText():name;*/
+		return name == null?ia.getCoveredText():name;
 	}
 	
+	/**
+	 * get concept class from a default ontology based on Concept
+	 * @param c
+	 * @return
+	 */
+	public static String getConceptName(URI u){
+		try {
+			return u.toURL().getRef().replaceAll("_"," ");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return u.toString();
+	}
 	/**
 	 * get preferred concept code for a given codable concept
 	 * @param c
@@ -311,13 +328,13 @@ public class Utils {
 	 * get codeblce concept form OntologyConcept annotation
 	 * @param c
 	 * @return
-	 */
+	 *
 	public static CodeableConcept getCodeableConcept(Mention c){
 		CodeableConcept cc = new CodeableConcept();
 		setCodeableConcept(cc, c);
 		return cc;
 	}
-	
+	*/
 	/**
 	 * get codeblce concept form OntologyConcept annotation
 	 * @param c
@@ -333,7 +350,7 @@ public class Utils {
 	 * get codeblce concept form OntologyConcept annotation
 	 * @param c
 	 * @return
-	 */
+	 *
 	public static CodeableConcept setCodeableConcept(CodeableConcept cc,Mention mm){
 		Concept c = mm.getConcept();
 		cc.setText(c.getName());
@@ -366,6 +383,7 @@ public class Utils {
 		
 		return cc;
 	}
+	*/
 	/**
 	 * get codeblce concept form OntologyConcept annotation
 	 * @param c
@@ -646,37 +664,20 @@ public class Utils {
 		return cui;
 	}
 	
-	/**
-	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
-	 */
-	public static IClass getConceptClass(Mention m){
-		return getConceptClass(ResourceFactory.getInstance().getOntology(), m);
-	}
-	/**
-	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
-	 */
-	public static IClass getConceptClass(CodeableConcept m){
-		return getConceptClass(ResourceFactory.getInstance().getOntology(), m);
-	}
-	
 	
 	/**
 	 * get concept class from a default ontology based on Concept
 	 * @param c
 	 * @return
 	 */
-	public static IClass getConceptClass(IdentifiedAnnotation m){
+	public static IClass getConceptClass(IOntology ont, IdentifiedAnnotation m){
 		// CancerSize doesn't have a CUI, but can be mapped
 		if(m instanceof CancerSize){
-			return ResourceFactory.getInstance().getOntology().getClass(TUMOR_SIZE);
+			return ont.getClass(TUMOR_SIZE);
 		}
 		
 		String cui = getConceptCode(m);
-		return cui != null?ResourceFactory.getInstance().getOntologyUtils().getClass(cui):null;
+		return cui != null?ont.getClass(cui):null;
 	}
 	
 	public static boolean isDiagnosis(IClass cls){
@@ -704,16 +705,17 @@ public class Utils {
 	 * @param doc
 	 * @param type
 	 * @return
-	 */
+	 *
 	public static List<Mention> getMentionsByType(Document doc, String type){
 		return getMentionsByType(doc,type,true);
 	}
+	*/
 	/**
 	 * get a set of concept by type from the annotated document
 	 * @param doc
 	 * @param type
 	 * @return
-	 */
+	 *
 	public static List<Mention> getMentionsByType(Document doc, String type, boolean elementOnly){
 		List<Mention> list = new ArrayList<Mention>();
 		for(Mention m: doc.getMentions()){
@@ -730,12 +732,13 @@ public class Utils {
 		}
 		return filter(list);
 	}
+	*/
 	
 	/**
 	 * filter a list of mentions to include the most specific
 	 * @param list
 	 * @return
-	 */
+	 *
 	public static List<Mention> filter(List<Mention> list){
 		if(list.isEmpty() || list.size() == 1)
 			return list;
@@ -746,13 +749,13 @@ public class Utils {
 		}
 		return list;
 	}
-	
+	*/
 	/**
 	 * does this mention has another mention that is more specific?
 	 * @param m
 	 * @param list
 	 * @return
-	 */
+	 *
 	
 	private static boolean hasMoreSpecific(Mention mm, List<Mention> list) {
 		IClass cc = getConceptClass(mm);
@@ -763,6 +766,7 @@ public class Utils {
 		}
 		return false;
 	}
+	*/
 
 	/**
 	 * get nearest mention to a target mention 
@@ -770,7 +774,7 @@ public class Utils {
 	 * @param doc
 	 * @param type
 	 * @return
-	 */
+	 *
 	public static Mention getNearestMention(Mention target, Document doc, String type){
 		List<Mention> mentions = getMentionsByType(doc, type);
 		Mention nearest = null;
@@ -783,7 +787,7 @@ public class Utils {
 		}
 		return nearest;
 	}
-	
+	*/
 
 	/**
 	 * get a set of concept by type from the annotated document
@@ -797,8 +801,8 @@ public class Utils {
 		while(it.hasNext()){
 			IdentifiedAnnotation ia = (IdentifiedAnnotation) it.next();
 			// don't add stuff that doesn't have a Class or ontology array
-			if(getConceptClass(ia) != null) 
-				list.add(ia);
+			//if(getConceptClass(ia) != null) 
+			list.add(ia);
 		}
 		return filterAnnotations(list);
 	}
@@ -881,8 +885,8 @@ public class Utils {
 				continue;
 			
 			// filter out if something more specific exists
-			if(hasMoreSpecific(m,list) || hasIdenticalSpan(m,list))
-				it.remove();
+			//if(hasMoreSpecific(m,list) || hasIdenticalSpan(m,list))
+			//	it.remove();
 		}
 		return list;
 	}
@@ -908,7 +912,7 @@ public class Utils {
 	 * @param m
 	 * @param list
 	 * @return
-	 */
+	 
 	
 	private static boolean hasMoreSpecific(IdentifiedAnnotation mm, List<IdentifiedAnnotation> list) {
 		IClass cc = getConceptClass(mm);
@@ -922,6 +926,7 @@ public class Utils {
 		}
 		return false;
 	}
+	*/
 
 	public static Extension createMentionExtension(String text, int st, int end){
 		return createExtension(MENTION_URL,text+" ["+st+":"+end+"]");

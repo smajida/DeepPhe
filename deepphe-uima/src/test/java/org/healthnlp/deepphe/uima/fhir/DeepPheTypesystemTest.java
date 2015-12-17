@@ -25,7 +25,7 @@ import org.healthnlp.deepphe.uima.types.Medication;
 import org.healthnlp.deepphe.uima.types.Observation;
 import org.junit.Test;
 
-import static org.healthnlp.deepphe.uima.fhir.FHIRResourceFactory.*;
+import static org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory.*;
 
 public class DeepPheTypesystemTest {
 
@@ -97,7 +97,7 @@ public class DeepPheTypesystemTest {
 		
 		public void process(JCas jcas) throws AnalysisEngineProcessException {
 			
-			List<Report> reports = FHIRResourceFactory.loadReports(jcas);
+			List<Report> reports = PhenotypeResourceFactory.loadReports(jcas);
 			for(Report r: reports ){
 				System.out.println(r.getSummaryText());
 			}

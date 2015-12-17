@@ -2,9 +2,6 @@ package org.healthnlp.deepphe.fhir;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,11 +13,10 @@ import org.hl7.fhir.instance.model.Composition;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
 
-import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 
 /**
  * represents a medical document that contains a set of 
- * Diagnosis along with Evidence, Signs and Symptoms
+ * Disease along with Evidence, Signs and Symptoms
  * @author tseytlin
  *
  */
@@ -88,8 +84,11 @@ public class Report extends Composition implements Element, Comparable<Report>{
 			return null;
 		if(r instanceof Patient)
 			return (Patient) r;
-		if(r instanceof org.hl7.fhir.instance.model.Patient)
-			return ResourceFactory.getPatient((org.hl7.fhir.instance.model.Patient) r);
+		if(r instanceof org.hl7.fhir.instance.model.Patient){
+			Patient p = new Patient();
+			p.copy((org.hl7.fhir.instance.model.Patient) r);
+			return p;
+		}
 		return null;
 	}
 	
@@ -126,8 +125,8 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * get a set of defined diagnoses for this report
 	 * @return
 	 */
-	public List<Diagnosis> getDiagnoses(){
-		return (List<Diagnosis>) Utils.getSubList(getReportElements(),Diagnosis.class);
+	public List<Disease> getDiagnoses(){
+		return (List<Disease>) Utils.getSubList(getReportElements(),Disease.class);
 	}
 	
 	/**
@@ -191,7 +190,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		st.append("Report:\n"+getDisplayText()+"\n---\n");
 		if(getPatient() != null)
 			st.append(getPatient().getSummaryText()+"\n");
-		for(Diagnosis dx: getDiagnoses()){
+		for(Disease dx: getDiagnoses()){
 			st.append(dx.getSummaryText()+"\n");
 		}
 		for(Procedure p: getProcedures()){
@@ -239,10 +238,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 
 	public void setReport(Report r) {
 	}
-	
-	public IClass getConceptClass(){
-		return ResourceFactory.getInstance().getOntology().getClass(Utils.COMPOSITION);
-	}
+
 	public URI getConceptURI(){
 		return URI.create(Utils.CANCER_URL+"#"+Utils.COMPOSITION);
 	}

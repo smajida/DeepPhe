@@ -3,12 +3,9 @@ package org.healthnlp.deepphe.summarization.jess.kb;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.healthnlp.deepphe.fhir.Cancer;
-import org.healthnlp.deepphe.fhir.Cancer.Tumor;
 import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Observation;
 import org.healthnlp.deepphe.fhir.Report;
-import org.healthnlp.deepphe.fhir.ResourceFactory;
 import org.healthnlp.deepphe.fhir.Stage;
 import org.healthnlp.deepphe.fhir.Utils;
 import org.healthnlp.deepphe.util.OntologyUtils;
@@ -70,8 +67,8 @@ public class SummaryFactory {
 			encounter.addSummary(summary);
 			
 			// if Dx, add Stage as well (if available)
-			if(e instanceof org.healthnlp.deepphe.fhir.Diagnosis){
-				for(Summary s: getStageSummary(((org.healthnlp.deepphe.fhir.Diagnosis)e).getStage())){
+			if(e instanceof org.healthnlp.deepphe.fhir.Disease){
+				for(Summary s: getStageSummary(((org.healthnlp.deepphe.fhir.Disease)e).getStage())){
 					s.setSummarizableId(encounter.getId());
 					encounter.addSummary(s);
 				}
@@ -123,8 +120,8 @@ public class SummaryFactory {
 	public static Summary getSummary(Element e) {
 		CodeableConcept code = null;
 		Summary summary = null;
-		if(e instanceof org.healthnlp.deepphe.fhir.Diagnosis){
-			code = ((org.healthnlp.deepphe.fhir.Diagnosis)e).getCode();
+		if(e instanceof org.healthnlp.deepphe.fhir.Disease){
+			code = ((org.healthnlp.deepphe.fhir.Disease)e).getCode();
 			summary = new Diagnosis();
 		}else if(e instanceof Observation){
 			Observation o = (Observation) e;
@@ -166,7 +163,7 @@ public class SummaryFactory {
 	 * get FHIR cancer phenotype object from summary patient object
 	 * @param patient
 	 * @return
-	 */
+	 *
 	public static Cancer getCancerPhenotype(Patient patient){
 		IOntology ont = ResourceFactory.getInstance().getOntology();
 		OntologyUtils ou = ResourceFactory.getInstance().getOntologyUtils();
@@ -208,5 +205,6 @@ public class SummaryFactory {
 		
 		return cancer;
 	}
+	*/
 	
 }

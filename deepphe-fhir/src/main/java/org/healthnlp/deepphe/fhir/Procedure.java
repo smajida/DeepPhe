@@ -8,8 +8,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
-import org.apache.ctakes.typesystem.type.textsem.ProcedureMention;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.Extension;
@@ -18,56 +16,8 @@ import org.hl7.fhir.instance.model.Period;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
 
-import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
-import edu.pitt.dbmi.nlp.noble.ontology.IClass;
-
 public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements Element{
-	
-	/**
-	 * initialize 
-	 * @param m
-	 */
-	public void load(Mention m){
-		setCode(Utils.getCodeableConcept(m));
-		setStatus(ProcedureStatus.COMPLETED);
-		Utils.createIdentifier(addIdentifier(),this,m);
-		// find annatomic location
-		Mention al = Utils.getNearestMention(m,m.getSentence().getDocument(),Utils.ANATOMICAL_SITE);
-		if(al != null){
-			CodeableConcept location = addBodySite();
-			Utils.setCodeableConcept(location,al);
-		}
 
-		// add mention text
-		addExtension(Utils.createMentionExtension(m.getText(),m.getStartPosition(),m.getEndPosition()));
-	}
-	
-	/**
-	 * Initialize diagnosis from a DiseaseDisorderMention in cTAKES typesystem
-	 * @param dx
-	 */
-	public void load(ProcedureMention dm){
-		// set some properties
-		setCode(Utils.getCodeableConcept(dm));
-		setStatus(ProcedureStatus.COMPLETED);
-		Utils.createIdentifier(addIdentifier(),this,dm);
-				
-		// now lets take a look at the location of this diagnosis
-		AnatomicalSiteMention as = (AnatomicalSiteMention) Utils.getRelatedItem(dm,dm.getBodyLocation());
-		if(as == null)
-			as = Utils.getAnatimicLocation(dm);
-		if(as != null){
-			CodeableConcept location = addBodySite();
-			Utils.setCodeableConcept(location,as);
-		}
-		// now lets add observations
-		//addEvidence();
-		//addRelatedItem();
-
-		// add mention text
-		addExtension(Utils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
-	}
-	
 
 	public String getDisplayText() {
 		return getCode().getText();
@@ -113,10 +63,6 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 		if( d != null){
 			setPerformed(new DateType(d));
 		}
-	}
-	
-	public IClass getConceptClass(){
-		return Utils.getConceptClass(getCode());
 	}
 	
 	public URI getConceptURI(){

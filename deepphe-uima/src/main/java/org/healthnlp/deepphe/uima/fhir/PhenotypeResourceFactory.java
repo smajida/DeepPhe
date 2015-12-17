@@ -17,11 +17,10 @@ import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.cas.StringArray;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.healthnlp.deepphe.fhir.AnatomicalSite;
-import org.healthnlp.deepphe.fhir.Diagnosis;
+import org.healthnlp.deepphe.fhir.Disease;
 import org.healthnlp.deepphe.fhir.Observation;
 import org.healthnlp.deepphe.fhir.Procedure;
 import org.healthnlp.deepphe.fhir.Report;
-import org.healthnlp.deepphe.fhir.ResourceFactory;
 import org.healthnlp.deepphe.fhir.Stage;
 import org.healthnlp.deepphe.fhir.Utils;
 import org.healthnlp.deepphe.uima.types.BodySite;
@@ -41,7 +40,7 @@ import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Quantity;
 
-public class FHIRResourceFactory {
+public class PhenotypeResourceFactory {
 	/**
 	 * save FHIR report in JCas
 	 * @param r
@@ -87,8 +86,8 @@ public class FHIRResourceFactory {
 
 	public static org.healthnlp.deepphe.uima.types.Mention saveElement(Element e, JCas jcas) {
 		org.healthnlp.deepphe.uima.types.Mention el = null;
-		if(e instanceof Diagnosis){
-			el = saveDiagnosis((Diagnosis)e,jcas);
+		if(e instanceof Disease){
+			el = saveDiagnosis((Disease)e,jcas);
 		}else if(e instanceof Observation){
 			el = saveObservation((Observation)e,jcas);
 		}else if(e instanceof Finding){
@@ -250,7 +249,7 @@ public class FHIRResourceFactory {
 		return ob;
 	}
 	
-	private static DiseaseDisorder saveDiagnosis(Diagnosis e, JCas jcas) {
+	private static DiseaseDisorder saveDiagnosis(Disease e, JCas jcas) {
 		DiseaseDisorder dd = new DiseaseDisorder(jcas);
 		
 		try{
@@ -359,11 +358,11 @@ public class FHIRResourceFactory {
 	}
 
 	
-	private static Diagnosis loadDiagnosis(DiseaseDisorder e) {
-		Diagnosis dx = new Diagnosis();
+	private static Disease loadDiagnosis(DiseaseDisorder e) {
+		Disease dx = new Disease();
 		dx.setCode(getCodeableConcept(e));
 		
-		// now lets take a look at the location of this diagnosis
+		// now lets take a look at the location of this disease
 		if(e.getHasBodyLocation() != null){
 			for(int i=0;i<e.getHasBodyLocation().size();i++){
 				BodySite bs = e.getHasBodyLocation(i);

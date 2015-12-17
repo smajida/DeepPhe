@@ -23,7 +23,6 @@ import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.fhir.Report;
-import org.healthnlp.deepphe.fhir.ResourceFactory;
 import org.healthnlp.deepphe.summarization.jess.DagToKnowledgeDisassembler;
 import org.healthnlp.deepphe.summarization.jess.KnowledgeToDagAssembler;
 import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
@@ -32,7 +31,7 @@ import org.healthnlp.deepphe.summarization.jess.kb.Identified;
 import org.healthnlp.deepphe.summarization.jess.kb.Patient;
 import org.healthnlp.deepphe.summarization.jess.kb.Summary;
 import org.healthnlp.deepphe.summarization.jess.kb.SummaryFactory;
-import org.healthnlp.deepphe.uima.fhir.FHIRResourceFactory;
+import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
@@ -58,13 +57,13 @@ public class PhenotypeSummarizerAE extends JCasAnnotator_ImplBase {
 		        (String) aContext.getConfigParameterValue(PARAM_ONTOLOGY_PATH);
 		
 		File ontologyFile = new File(ontologyPath);
-		IOntology ontology;
+	/*	IOntology ontology;
 		try {
 			ontology = OOntology.loadOntology(ontologyFile);
 			new ResourceFactory(ontology);
 		} catch (IOntologyException e) {
 			throw new ResourceInitializationException(e);
-		}
+		}*/
 	}
 
 	private void loadProductionClipsFiles(String clipsDirectoryPath) {
@@ -101,7 +100,7 @@ public class PhenotypeSummarizerAE extends JCasAnnotator_ImplBase {
 		try {
 			Patient patient = new Patient();
 			patient.setId(1);
-			for(Report r: FHIRResourceFactory.loadReports(jcas)){
+			for(Report r: PhenotypeResourceFactory.loadReports(jcas)){
 				Encounter enc = SummaryFactory.getEncounter(r);
 				enc.setPatientId(patient.getId());
 				patient.addEncounter(enc);

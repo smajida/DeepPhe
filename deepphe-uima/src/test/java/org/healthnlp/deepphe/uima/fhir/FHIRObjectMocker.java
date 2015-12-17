@@ -2,7 +2,7 @@ package org.healthnlp.deepphe.uima.fhir;
 
 import java.util.Collections;
 
-import org.healthnlp.deepphe.fhir.Diagnosis;
+import org.healthnlp.deepphe.fhir.Disease;
 import org.healthnlp.deepphe.fhir.Finding;
 import org.healthnlp.deepphe.fhir.Medication;
 import org.healthnlp.deepphe.fhir.Observation;
@@ -22,7 +22,7 @@ public class FHIRObjectMocker {
     }};
 	final Report report = context.mock(Report.class);
 	final Patient patient = context.mock(Patient.class);
-	final Diagnosis diagnosis = context.mock(Diagnosis.class);
+	final Disease disease = context.mock(Disease.class);
 	final Procedure procedure = context.mock(Procedure.class);
 	final Finding finding = context.mock(Finding.class);
 	final Observation observation = context.mock(Observation.class);
@@ -58,7 +58,7 @@ public class FHIRObjectMocker {
 						+ "PR-neg, HER2+, now undergoing neoadjuvant chemo with taxotere, carboplatin, Herceptin, and pertuzumab."));
 				
 				allowing(report).getDiagnoses();
-				will(returnValue(Collections.singletonList(diagnosis)));
+				will(returnValue(Collections.singletonList(disease)));
 				
 				allowing(report).getFindings();
 				will(returnValue(Collections.singletonList(finding)));
@@ -82,14 +82,14 @@ public class FHIRObjectMocker {
 				allowing(stageCC).getText();
 				will(returnValue("T2N0M0"));
 				
-				//Diagnosis
-				allowing(diagnosis).getDisplayText();
+				//Disease
+				allowing(disease).getDisplayText();
 				will(returnValue("Malignant Breast Neoplasm"));
 				
-				allowing(diagnosis).getBodySite();
+				allowing(disease).getBodySite();
 				will(returnValue(Collections.singletonList(bodySiteCC)));
 				
-				allowing(diagnosis).getStage();
+				allowing(disease).getStage();
 				will(returnValue(stage));
 				
 				//Procedure
@@ -135,8 +135,8 @@ public class FHIRObjectMocker {
 
 
 
-	public Diagnosis getDiagnosis() {
-		return diagnosis;
+	public Disease getDiagnosis() {
+		return disease;
 	}
 
 

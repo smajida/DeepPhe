@@ -1,19 +1,12 @@
 package org.healthnlp.deepphe.fhir;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 
-import org.apache.ctakes.typesystem.type.textsem.MedicationMention;
 import org.hl7.fhir.instance.model.Extension;
-import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Resource;
 
-import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
-import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 
 public class Medication extends org.hl7.fhir.instance.model.Medication implements Element {
 	public String getDisplayText() {
@@ -33,31 +26,7 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 		return this;
 	}
 
-	/**
-	 * initialize 
-	 * @param m
-	 */
-	public void load(Mention m){
-		setCode(Utils.getCodeableConcept(m));
 
-		// add mention text
-		addExtension(Utils.createMentionExtension(m.getText(),m.getStartPosition(),m.getEndPosition()));
-	}
-	
-	/**
-	 * Initialize diagnosis from a DiseaseDisorderMention in cTAKES typesystem
-	 * @param dx
-	 */
-	public void load(MedicationMention dm){
-		setCode(Utils.getCodeableConcept(dm));
-
-		// add mention text
-		addExtension(Utils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
-	}
-	
-	public IClass getConceptClass(){
-		return Utils.getConceptClass(getCode());
-	}
 	public URI getConceptURI(){
 		return Utils.getConceptURI(getCode());
 	}
