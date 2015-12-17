@@ -1,27 +1,31 @@
-package org.healthnlp.deepphe.fhir;
+package org.healthnlp.deepphe.uima.fhir;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
+
 import org.apache.ctakes.cancer.receptor.ReceptorStatusUtil;
 import org.apache.ctakes.cancer.receptor.StatusType;
 import org.apache.ctakes.cancer.receptor.StatusValue;
+import org.apache.ctakes.cancer.type.textsem.CancerSize;
+import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
 import org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.uima.UIMAException;
 import org.apache.uima.fit.factory.JCasFactory;
 import org.apache.uima.jcas.JCas;
+import org.healthnlp.deepphe.fhir.Observation;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
-
 import static org.apache.ctakes.cancer.receptor.StatusType.*;
 import static org.apache.ctakes.cancer.receptor.StatusValue.*;
 
@@ -77,7 +81,7 @@ public class ResourceFactoryTester {
    static public void loadOntology() {
       try {
          OwlConnectionFactory.getInstance().getOntology( "data/ontology/breastCancer.owl" );
-         ResourceFactory.getInstance().setOntology( OwlConnectionFactory.getInstance().getDefaultOntology() );
+        // ResourceFactory.getInstance().setOntology( OwlConnectionFactory.getInstance().getDefaultOntology() );
       } catch ( IOntologyException | FileNotFoundException multE ) {
          LOGGER.error( multE.getMessage() );
       }
@@ -96,13 +100,15 @@ public class ResourceFactoryTester {
 
 
    static private Stream<String> getUriStream( final Predicate<String> filterType ) {
-      return ResourceFactory.getInstance().getObservations( _testCas )
+      return DocumentResourceFactory.getObservations( _testCas )
             .stream()
             .map( Observation::getConceptURI )
             .map( URI::toASCIIString )
             .filter( filterType );
    }
 
+ 
+   
    @Test
    public void testGetObservationsReceptorStatus() {
       final long pr_count = getUriStream( PR.getUri()::equals ).count();
