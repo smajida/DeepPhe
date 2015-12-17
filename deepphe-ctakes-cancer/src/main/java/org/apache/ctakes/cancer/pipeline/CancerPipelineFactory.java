@@ -27,7 +27,6 @@ import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPSemanticRoleLabelerAE;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.JCasTermAnnotator;
-import org.apache.ctakes.lvg.ae.LvgAnnotator;
 import org.apache.ctakes.postagger.POSTagger;
 import org.apache.ctakes.relationextractor.ae.DegreeOfRelationExtractorAnnotator;
 import org.apache.ctakes.relationextractor.ae.LocationOfRelationExtractorAnnotator;
@@ -136,11 +135,6 @@ public static CollectionReader createFilesInDirectoryReader( final String inputD
          throws ResourceInitializationException {
       aggregateBuilder.add( SentenceDetectorAnnotator.getDescription("/org/apache/ctakes/core/sentdetect/model.jar") );
       aggregateBuilder.add( TokenizerAnnotatorPTB.createAnnotatorDescription() );
-      try {
-         aggregateBuilder.add( LvgAnnotator.createAnnotatorDescription() );
-      } catch ( MalformedURLException urlE ) {
-         throw new ResourceInitializationException( urlE );
-      }
       aggregateBuilder.add( ContextDependentTokenizerAnnotator.createAnnotatorDescription() );
       aggregateBuilder.add( POSTagger.createAnnotatorDescription() );
       aggregateBuilder.add( Chunker.createAnnotatorDescription() );
@@ -201,7 +195,7 @@ public static CollectionReader createFilesInDirectoryReader( final String inputD
             AnalysisEngineFactory.createEngineDescription(
                   LocationOfRelationExtractorAnnotator.class,
                   GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
-                  getModelPath( "relationextractor/models/location_of" ) ) );
+                  CTAKES_DIR_PREFIX + "relation/extractor/location_of.jar" ) );
    }
 
    private static void addCorefEngines(AggregateBuilder aggregateBuilder) throws ResourceInitializationException {

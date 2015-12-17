@@ -31,8 +31,8 @@ final public class OwlOntologyConceptUtil {
    private OwlOntologyConceptUtil() {
    }
 
-   static public final String CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlp/cancer.owl#";
-   static public final String BREAST_CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlp/breastCancer.owl#";
+   static public final String CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#";
+   static public final String BREAST_CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#";
 
    static private final Function<String, String> asSelf = self -> self;
 

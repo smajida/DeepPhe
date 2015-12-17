@@ -6,6 +6,23 @@ import java.math.MathContext;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
+<<<<<<< HEAD
+=======
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.ctakes.cancer.receptor.ReceptorStatusUtil;
+import org.apache.ctakes.cancer.receptor.StatusValue;
+import org.apache.ctakes.cancer.type.textsem.CancerSize;
+//import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
+//import org.apache.ctakes.cancer.type.textsem.ReceptorStatus_Type;
+import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
+import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
+import org.apache.log4j.Logger;
+import org.apache.uima.UIMAException;
+import org.apache.uima.jcas.cas.FSArray;
+import org.hl7.fhir.instance.model.CodeableConcept;
+>>>>>>> branch 'master' of https://github.com/DeepPhe/DeepPhe.git
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Quantity;
@@ -53,6 +70,108 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 			setIssued(d);
 		}
 	}
+<<<<<<< HEAD
+=======
+
+	/**
+	 * initialize 
+	 * @param m
+	 */
+	public void load(Mention m){
+		// set name for this observation
+		setCode(Utils.getCodeableConcept(m));
+		
+		// create identifier
+		addIdentifier(Utils.createIdentifier(this,m));
+				
+		
+		//TODO: this should be defined in the ontology
+		// extract value if available
+		// for NOW, lets just hard-coded it
+		String text = m.getText();
+		Pattern pp = Pattern.compile("(?i)(\\d*\\.\\d+)\\s*([cm]{1,2})");
+		Matcher mm = pp.matcher(text);
+		if(mm.find()){
+			setValue(mm.group(1),mm.group(2));
+		}
+		// set positive/negative
+		for(String st: Arrays.asList("Positive", "Negative","Unknown")){
+			if(m.getConcept().getName().endsWith(st)){
+				setValue(new StringType(st));
+				break;
+			}
+		}
+		
+
+		// add mention text
+		addExtension(Utils.createMentionExtension(m.getText(),m.getStartPosition(),m.getEndPosition()));
+	}
+	
+	/**
+	 * Initialize diagnosis from a DiseaseDisorderMention in cTAKES typesystem
+	 * @param dm
+	 */
+	public void load(IdentifiedAnnotation dm){
+		// set some properties
+		setCode(Utils.getCodeableConcept(dm));
+		addIdentifier(Utils.createIdentifier(this,dm));
+		
+		// extract value using free text if necessary
+		String text = dm.getCoveredText();
+		Pattern pp = Pattern.compile("(?i)(\\d*\\.\\d+)\\s*([cm]{1,2})");
+		Matcher mm = pp.matcher(text);
+		if(mm.find()){
+			setValue(mm.group(1),mm.group(2));
+		}
+		
+		// set positive/negative
+//		if(dm instanceof ReceptorStatus){
+//			boolean value = ((ReceptorStatus)dm).getValue();
+//			String i = value?Utils.INTERPRETATION_POSITIVE:Utils.INTERPRETATION_NEGATIVE;
+//			String url = ""+ResourceFactory.getInstance().getOntology().getURI();
+//			setInterpretation(Utils.getCodeableConcept(i,url+"#"+i,url));
+//			// new StringType(value?"Positive":"Negative"));l;//
+//		}
+		if ( ReceptorStatusUtil.isReceptorStatus( dm ) ) {
+			StatusValue value = null;
+			try {
+				value = ReceptorStatusUtil.getStatusValue( dm.getCAS().getJCas(), dm );
+			} catch ( UIMAException uimaE ) {
+				Logger.getLogger( getClass().getName() ).error( "Could not get Receptor Status Value for "
+																				+ dm.getCoveredText() );
+			}
+			if ( value != null ) {
+				final String title = value.getTitle();
+				String url = ResourceFactory.getInstance().getOntology().getURI().toASCIIString();
+				setInterpretation( Utils.getCodeableConcept( title, url + "#" + title, url ) );
+				// could also use
+				// setInterpretation( Utils.getCodeableConcept( title, value.getUri(), OwlOntologyConceptUtil.BREAST_CANCER_OWL ) );
+			}
+		}
+
+		// if cancer size, then use their value
+		if(dm instanceof CancerSize){
+			FSArray arr = ((CancerSize)dm).getMeasurements();
+			if(arr != null){
+				for(int i=0;i<arr.size();i++){
+					SizeMeasurement sm = (SizeMeasurement) arr.get(i);
+					setValue(sm);
+					break;
+				}
+			}
+		}
+		
+
+		// add mention text
+		addExtension(Utils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
+	}
+
+	public void setValue(SizeMeasurement num){
+		setValue(num.getValue(),num.getUnit());
+		String ident = getClass().getSimpleName().toUpperCase()+"_"+getDisplayText(); 
+		addIdentifier(Utils.createIdentifier((ident+"_"+getObservationValue()).replaceAll("\\W+","_")));
+	}
+>>>>>>> branch 'master' of https://github.com/DeepPhe/DeepPhe.git
 	
 	public void setValue(String value, String unit){
 		setValue(Double.parseDouble(value),unit);

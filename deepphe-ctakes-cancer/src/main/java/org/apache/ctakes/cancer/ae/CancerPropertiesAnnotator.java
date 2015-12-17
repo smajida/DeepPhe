@@ -72,8 +72,6 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
             .flatMap( Collection::stream )
             .map( Annotation::getCoveredText )
             .forEach( System.out::println );
-//      OwlOntologyConceptUtil.getUriRootsStream( "Negative" ).forEach( System.out::println );
-//      OwlOntologyConceptUtil.getUriBranchStream( "OrdinalInterpretation" ).forEach( System.out::println );
 
       LOGGER.info( "Finished processing" );
    }

@@ -12,39 +12,35 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 final class ReceptorStatus implements SpannedEntity {
 
-   private final ReceptorStatusType _statusType;
-   private final int _startOffset;
-   private final int _endOffset;
-   private final ReceptorStatusValue _statusValue;
+   private final SpannedStatusType _statusType;
+   private final SpannedStatusValue _statusValue;
 
-   ReceptorStatus( final ReceptorStatusType statusType, final int startOffset, final int endOffset,
-                   final ReceptorStatusValue statusValue ) {
+   ReceptorStatus( final SpannedStatusType statusType, final SpannedStatusValue statusValue ) {
       _statusType = statusType;
-      _startOffset = startOffset;
-      _endOffset = endOffset;
       _statusValue = statusValue;
    }
 
-   ReceptorStatusType getStatusType() {
+   SpannedStatusType getStatusType() {
       return _statusType;
+   }
+
+   SpannedStatusValue getStatusValue() {
+      return _statusValue;
    }
 
    @Override
    public int getStartOffset() {
-      return _startOffset;
+      return _statusType.getStartOffset();
    }
 
    @Override
    public int getEndOffset() {
-      return _endOffset;
+      return _statusValue.getEndOffset();
    }
 
-   ReceptorStatusValue getStatusValue() {
-      return _statusValue;
-   }
-
+   @Override
    public String toString() {
-      return _statusType.getTitle() + ": " + _statusValue.getTitle() + " at " + getStartOffset() + "-" + getEndOffset();
+      return _statusType.toString() + " is " + _statusValue.toString();
    }
 
 }

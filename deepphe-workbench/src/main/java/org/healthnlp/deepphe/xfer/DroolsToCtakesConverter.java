@@ -5,12 +5,10 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDI
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.ctakes.cancer.type.textsem.CancerSize;
-import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
-import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
-import org.apache.ctakes.cancer.type.textsem.TnmClassification;
-import org.apache.ctakes.cancer.type.textsem.TnmFeature;
-import org.apache.ctakes.cancer.type.textsem.TnmPrefix;
+import org.apache.ctakes.cancer.receptor.ReceptorStatusUtil;
+import org.apache.ctakes.cancer.receptor.StatusType;
+import org.apache.ctakes.cancer.receptor.StatusValue;
+import org.apache.ctakes.cancer.type.textsem.*;
 import org.apache.ctakes.typesystem.type.constants.CONST;
 import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
@@ -83,24 +81,38 @@ public class DroolsToCtakesConverter {
 		neAnnot.addToIndexes();
 	}
 
-	private void cacheReceptorStatus(KbSummary summary) {
-		final ReceptorStatus receptorStatusAnnotation = new ReceptorStatus(
-				patientJCas, 0, 0);
-		receptorStatusAnnotation.setCode(summary.getCode());
-		receptorStatusAnnotation.setDescription(summary.getPreferredTerm());
-		final boolean value = (summary.getValue().equals("positive")) ? true
-				: false;
-		receptorStatusAnnotation.setValue(value);
-		receptorStatusAnnotation.setTypeID(NE_TYPE_ID_FINDING);
-		final UmlsConcept umlsConcept = new UmlsConcept(patientJCas);
-		umlsConcept.setCui(summary.getCode());
-		umlsConcept.setTui("T000");
-		umlsConcept.setPreferredText(summary.getPreferredTerm());
-		final FSArray ontologyConcepts = new FSArray(patientJCas, 1);
-		ontologyConcepts.set(0, umlsConcept);
-		receptorStatusAnnotation.setOntologyConceptArr(ontologyConcepts);
-		receptorStatusAnnotation.addToIndexes();
+	//	private void cacheReceptorStatus(KbSummary summary) {
+//		final ReceptorStatus receptorStatusAnnotation = new ReceptorStatus(
+//				patientJCas, 0, 0);
+//		receptorStatusAnnotation.setCode(summary.getCode());
+//		receptorStatusAnnotation.setDescription(summary.getPreferredTerm());
+//		final boolean value = (summary.getValue().equals("positive")) ? true
+//				: false;
+//		receptorStatusAnnotation.setValue(value);
+//		receptorStatusAnnotation.setTypeID(NE_TYPE_ID_FINDING);
+//		final UmlsConcept umlsConcept = new UmlsConcept(patientJCas);
+//		umlsConcept.setCui(summary.getCode());
+//		umlsConcept.setTui("T000");
+//		umlsConcept.setPreferredText(summary.getPreferredTerm());
+//		final FSArray ontologyConcepts = new FSArray(patientJCas, 1);
+//		ontologyConcepts.set(0, umlsConcept);
+//		receptorStatusAnnotation.setOntologyConceptArr(ontologyConcepts);
+//		receptorStatusAnnotation.addToIndexes();
+//	}
+	private void cacheReceptorStatus( final KbSummary summary ) {
+		final StatusValue statusValue = summary.getValue().equals( "positive" )
+												  ? StatusValue.POSITIVE : StatusValue.NEGATIVE;
+		// TODO Test -- This depends upon the summary.getCode returning the constants declared in StatusType
+		StatusType statusType = StatusType.PR;
+		for ( StatusType type : StatusType.values() ) {
+			if ( type.getCui( statusValue ).equals( summary.getCode() ) ) {
+				statusType = type;
+				break;
+			}
+		}
+		ReceptorStatusUtil.createFullReceptorStatusMention( patientJCas, 0, 0, statusType, 0, 0, statusValue );
 	}
+
 
 	private void cacheTumorSize(KbSummary summary) {
 		
