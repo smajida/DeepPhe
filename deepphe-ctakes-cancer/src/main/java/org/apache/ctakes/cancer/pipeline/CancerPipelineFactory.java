@@ -195,8 +195,7 @@ public static CollectionReader createFilesInDirectoryReader( final String inputD
             AnalysisEngineFactory.createEngineDescription(
                   LocationOfRelationExtractorAnnotator.class,
                   GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
-//                  getModelPath( "relationextractor/models/location_of" ) ) );
-                  getModelPath( "cancer/relationextractor/models/location_of" ) ) );
+                  CTAKES_DIR_PREFIX + "relation/extractor/location_of.jar" ) );
    }
 
    private static void addCorefEngines(AggregateBuilder aggregateBuilder) throws ResourceInitializationException {
