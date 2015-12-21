@@ -20,47 +20,47 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>deepphe-uima</artifactId>
-	<name>deepphe-uima</name>
-	<parent>
-		<groupId>org.healthnlp</groupId>
-		<artifactId>deepphe</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-	</parent>
-	<dependencies>
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-distribution</artifactId>
-			<version>3.5.0</version>
-		</dependency>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <artifactId>deepphe-uima</artifactId>
+   <name>deepphe-uima</name>
+   <parent>
+      <groupId>org.healthnlp</groupId>
+      <artifactId>deepphe</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+   </parent>
+   <dependencies>
+      <dependency>
+         <groupId>net.sourceforge.owlapi</groupId>
+         <artifactId>owlapi-distribution</artifactId>
+         <version>3.5.0</version>
+      </dependency>
 
       <dependency>
-			<groupId>org.healthnlp</groupId>
-			<artifactId>deepphe-ctakes-cancer</artifactId>
-			<version>${project.version}</version>
+         <groupId>org.healthnlp</groupId>
+         <artifactId>deepphe-ctakes-cancer</artifactId>
+         <version>${project.version}</version>
 
-      </dependency>	
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<version>9.2.10.v20150310</version>
-		</dependency>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.jetty</groupId>
+         <artifactId>jetty-server</artifactId>
+         <version>9.2.10.v20150310</version>
+      </dependency>
 
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
-			<scope>provided</scope>
-		</dependency>
+      <dependency>
+         <groupId>javax.servlet</groupId>
+         <artifactId>servlet-api</artifactId>
+         <version>2.5</version>
+         <scope>provided</scope>
+      </dependency>
 
-		<dependency>
-			<groupId>org.healthnlp</groupId>
-			<artifactId>deepphe-fhir</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		
+      <dependency>
+         <groupId>org.healthnlp</groupId>
+         <artifactId>deepphe-fhir</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+
       <dependency>
          <groupId>org.healthnlp</groupId>
          <artifactId>deepphe-i2b2</artifactId>
@@ -90,35 +90,58 @@
          <scope>system</scope>
          <systemPath>${project.basedir}/lib/modgen.jar</systemPath>
       </dependency>
-      	 <dependency>
-	       <groupId>org.drools</groupId>
-	       <artifactId>drools-compiler</artifactId>
-	       <version>${droolsVersion}</version>
-        </dependency>
-      	 <dependency>
-      	 	<groupId>org.neo4j</groupId>
-      	 	<artifactId>neo4j</artifactId>
-      	 	<version>2.3.1</version>
-      	 </dependency>
-      	 <dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-core</artifactId>
-			<version>3.6.2</version>
-		</dependency>
-      	 <dependency>
-      	 	<groupId>org.jmock</groupId>
-      	 	<artifactId>jmock-junit4</artifactId>
-      	 	<version>2.8.1</version>
-      	 </dependency>
-      	 <dependency>
-			<groupId>org.jmock</groupId>
-			<artifactId>jmock-legacy</artifactId>
-			<version>2.8.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.objenesis</groupId>
-			<artifactId>objenesis</artifactId>
-			<version>2.2</version>
-		</dependency>
-	</dependencies>
+      <dependency>
+         <groupId>org.drools</groupId>
+         <artifactId>drools-compiler</artifactId>
+         <version>${droolsVersion}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.neo4j</groupId>
+         <artifactId>neo4j</artifactId>
+         <version>2.3.1</version>
+      </dependency>
+      <dependency>
+         <groupId>org.apache.lucene</groupId>
+         <artifactId>lucene-core</artifactId>
+         <version>3.6.2</version>
+      </dependency>
+      <dependency>
+         <groupId>org.jmock</groupId>
+         <artifactId>jmock-junit4</artifactId>
+         <version>2.8.1</version>
+      </dependency>
+      <dependency>
+         <groupId>org.jmock</groupId>
+         <artifactId>jmock-legacy</artifactId>
+         <version>2.8.1</version>
+      </dependency>
+      <dependency>
+         <groupId>org.objenesis</groupId>
+         <artifactId>objenesis</artifactId>
+         <version>2.2</version>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.apache.uima</groupId>
+            <artifactId>jcasgen-maven-plugin</artifactId>
+            <version>2.5.0</version>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>generate</goal>
+                  </goals>
+                  <configuration>
+                     <typeSystemIncludes>
+                        <typeSystemInclude>src/main/resources/org/healthnlp/deepphe/types/TypeSystem.xml</typeSystemInclude>
+                     </typeSystemIncludes>
+                     <limitToProject>false</limitToProject>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+      </plugins>
+   </build>
 </project>
