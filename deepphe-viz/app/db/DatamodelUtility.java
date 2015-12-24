@@ -28,46 +28,46 @@ public class DatamodelUtility extends Neo4JRESTCaller{
 			List<LinkedHashMap<String,Object>> docrows = getIncomingNodesWithRelationshipType(p.getId()+"", "hasSubject");
 			
 			for(LinkedHashMap<String,Object> docdatamap:docrows){
-				Document d = new Document();
-				d.setId((int) docdatamap.get("id"));
-				d.setName((String) docdatamap.get("name"));
-				d.setText((String)docdatamap.get("text"));
+				Document document = new Document();
+				document.setId((int) docdatamap.get("id"));
+				document.setName((String) docdatamap.get("name"));
+				document.setText((String)docdatamap.get("text"));
 				
-				d.setDiagnoses(new ArrayList<Diagnosis>());
-				d.setProcedures(new ArrayList<Procedure>());
-				d.setMedications(new ArrayList<Medication>());
+				document.setDiagnoses(new ArrayList<Diagnosis>());
+				document.setProcedures(new ArrayList<Procedure>());
+				document.setMedications(new ArrayList<Medication>());
 				
-				d.setSubject(p);
-				p.getDocuments().add(d);
+				document.setSubject(p);
+				p.getDocuments().add(document);
 				
-				List<LinkedHashMap<String,Object>> drows = getOutgoingNodesWithRelationshipType(d.getId()+"", "hasDiagnosis");
+				List<LinkedHashMap<String,Object>> drows = getOutgoingNodesWithRelationshipType(document.getId()+"", "hasDiagnosis");
 			
 				for(LinkedHashMap<String,Object> dmap:drows){
 					Diagnosis di = new Diagnosis();
 					di.setId((int) dmap.get("id"));
 					di.setName((String) dmap.get("name"));
 					
-					d.getDiagnoses().add(di);
+					document.getDiagnoses().add(di);
 				}
 				
-				drows = getOutgoingNodesWithRelationshipType(d.getId()+"", "hasProcedure");
+				drows = getOutgoingNodesWithRelationshipType(document.getId()+"", "hasProcedure");
 				
 				for(LinkedHashMap<String,Object> dmap:drows){
 					Procedure di = new Procedure();
 					di.setId((int) dmap.get("id"));
 					di.setName((String) dmap.get("name"));
 					
-					d.getProcedures().add(di);
+					document.getProcedures().add(di);
 				}
 				
-				drows = getOutgoingNodesWithRelationshipType(d.getId()+"", "hasMedication");
+				drows = getOutgoingNodesWithRelationshipType(document.getId()+"", "hasMedication");
 				
 				for(LinkedHashMap<String,Object> dmap:drows){
 					Medication di = new Medication();
 					di.setId((int) dmap.get("id"));
 					di.setName((String) dmap.get("name"));
 					
-					d.getMedications().add(di);
+					document.getMedications().add(di);
 				}
 			}
 		}
