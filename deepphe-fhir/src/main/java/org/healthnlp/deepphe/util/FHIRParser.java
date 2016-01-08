@@ -36,7 +36,6 @@ import org.hl7.fhir.instance.formats.XmlParser;
 import org.hl7.fhir.instance.model.*;
 import org.hl7.fhir.utilities.Utilities;
 
-import org.healthnlp.deepphe.fhir.Cancer;
 
 /**
  * a copy of XML Composer to take care of CancerPhenotype

@@ -112,10 +112,10 @@ public class GraphDBDocumentConsumerAETest {
 		    	   }
 		    	   
 		    	   if(n.hasLabel(GraphDBConstants.Nodes.Diagnosis)){
-		    		   assertTrue("Relationship type is incorrect for document - diagnosis",r.isType(GraphDBConstants.Relationships.hasDiagnosis));
+		    		   assertTrue("Relationship type is incorrect for document - disease",r.isType(GraphDBConstants.Relationships.hasDiagnosis));
 		    		   diagNode = n;
 		    		   Object value = n.getProperty("name");
-		    		   assertEquals("Diagnosis name property is incorrect",report.getDiagnoses().get(0).getDisplayText(),value);
+		    		   assertEquals("Disease name property is incorrect",report.getDiagnoses().get(0).getDisplayText(),value);
 		    	   }
 		    	   
 		    	   if(n.hasLabel(GraphDBConstants.Nodes.Procedure)){
@@ -148,7 +148,7 @@ public class GraphDBDocumentConsumerAETest {
 		    	   
 		       }
 		       assertNotNull("Patient not linked to Document",patientNode);
-		       assertNotNull("Diagnosis not linked to Document",diagNode);
+		       assertNotNull("Disease not linked to Document",diagNode);
 		       assertNotNull("Procedure not linked to Document",procNode);
 		       assertNotNull("Finding not linked to Document",findingNode);
 		       assertNotNull("Observation not linked to Document",obsNode);

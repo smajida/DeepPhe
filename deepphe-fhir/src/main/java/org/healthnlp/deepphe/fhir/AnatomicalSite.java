@@ -4,54 +4,58 @@ import java.io.File;
 import java.net.URI;
 
 import org.hl7.fhir.instance.model.BodySite;
+import org.hl7.fhir.instance.model.CodeableConcept;
+import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Resource;
 
-import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 
 public class AnatomicalSite extends BodySite implements Element{
 
 	public String getDisplayText() {
-		// TODO Auto-generated method stub
-		return null;
+		return getCode().getText();
 	}
 
 	public String getResourceIdentifier() {
-		// TODO Auto-generated method stub
-		return null;
+		return Utils.getIdentifier(getIdentifier());
 	}
 
 	public String getSummaryText() {
-		// TODO Auto-generated method stub
-		return null;
+		return getDisplayText();
 	}
 
 	public Resource getResource() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public IClass getConceptClass() {
-		// TODO Auto-generated method stub
-		return null;
+		return this;
 	}
 
 	public URI getConceptURI() {
-		// TODO Auto-generated method stub
-		return null;
+		return Utils.getConceptURI(getCode());
 	}
 
 	public void setReport(Report r) {
-		// TODO Auto-generated method stub
-		
+		Patient p = r.getPatient();
+		if(p != null){
+			setPatient(Utils.getResourceReference(p));
+			setPatientTarget(p);
+		}
 	}
 
-	public void save(File e) throws Exception {
-		// TODO Auto-generated method stub
-		
+	public void save(File dir) throws Exception {
+		Utils.saveFHIR(this,getResourceIdentifier(),dir);
 	}
 
 	public void copy(Resource r) {
-		// TODO Auto-generated method stub
+		BodySite bs = (BodySite)r;
+		setCode(bs.getCode());
+		setDescription(bs.getDescription());
+		setLanguage(bs.getLanguage());
+		setPatient(bs.getPatient());
+		setPatientTarget(bs.getPatientTarget());
+		for(CodeableConcept c: bs.getModifier()){
+			addModifier(c);
+		}
+		for(Extension ex: bs.getExtension()){
+			addExtension(ex);
+		}
 		
 	}
 

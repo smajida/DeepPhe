@@ -20,7 +20,7 @@ public interface Element extends Serializable {
 	public String getSummaryText();
 	public Resource getResource();
 	public CodeableConcept getCode();
-	public IClass getConceptClass();
+	//public IClass getConceptClass();
 	public URI getConceptURI();
 	public void setReport(Report r);
 	public void save(File e) throws Exception;

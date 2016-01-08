@@ -1,15 +1,9 @@
 package org.apache.ctakes.cancer.pipeline;
 
 
-import javax.annotation.concurrent.Immutable;
-
 import org.apache.ctakes.assertion.medfacts.cleartk.PolarityCleartkAnalysisEngine;
 import org.apache.ctakes.assertion.medfacts.cleartk.UncertaintyCleartkAnalysisEngine;
-import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
-import org.apache.ctakes.cancer.ae.PittHeaderAnnotator;
-import org.apache.ctakes.cancer.ae.PittHeaderCleaner;
-import org.apache.ctakes.cancer.ae.PropertyToEventCopier;
-import org.apache.ctakes.cancer.ae.XMIWriter;
+import org.apache.ctakes.cancer.ae.*;
 import org.apache.ctakes.chunker.ae.Chunker;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.CopyNPChunksToLookupWindowAnnotations;
@@ -27,16 +21,11 @@ import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPSemanticRoleLabelerAE;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.JCasTermAnnotator;
-import org.apache.ctakes.lvg.ae.LvgAnnotator;
 import org.apache.ctakes.postagger.POSTagger;
 import org.apache.ctakes.relationextractor.ae.DegreeOfRelationExtractorAnnotator;
 import org.apache.ctakes.relationextractor.ae.LocationOfRelationExtractorAnnotator;
 import org.apache.ctakes.relationextractor.ae.ModifierExtractorAnnotator;
-import org.apache.ctakes.temporal.ae.BackwardsTimeAnnotator;
-import org.apache.ctakes.temporal.ae.DocTimeRelAnnotator;
-import org.apache.ctakes.temporal.ae.EventAnnotator;
-import org.apache.ctakes.temporal.ae.EventEventRelationAnnotator;
-import org.apache.ctakes.temporal.ae.EventTimeRelationAnnotator;
+import org.apache.ctakes.temporal.ae.*;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReader;
@@ -46,7 +35,8 @@ import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.cleartk.ml.jar.GenericJarClassifierFactory;
 
-import java.net.MalformedURLException;
+import javax.annotation.concurrent.Immutable;
+
 
 @Immutable
 final public class CancerPipelineFactory {
@@ -96,23 +86,20 @@ final public class CancerPipelineFactory {
       // Kludge to clean out unwanted annotations from the pittsburgh header
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( PittHeaderCleaner.class ) );
       addUmlsRelationEngines( aggregateBuilder );
-      // coreference?
-      //	    aggregateBuilder.add(
-      //	        AnalysisEngineFactory.createEngineDescriptionFromPath("../ctakes/ctakes-coreference/desc/MipacqSvmCoreferenceResolverAggregate.xml"));
+      // coreference
+      addCorefEngines( aggregateBuilder );
 
-      addCorefEngines(aggregateBuilder);
-      
       return aggregateBuilder;
    }
 
 
-public static CollectionReader createFilesInDirectoryReader( final String inputDirectory )
+   public static CollectionReader createFilesInDirectoryReader( final String inputDirectory )
          throws ResourceInitializationException {
       return CollectionReaderFactory.createReader( FilesInDirectoryCollectionReader.class,
             FilesInDirectoryCollectionReader.PARAM_INPUTDIR,
             inputDirectory,
             FilesInDirectoryCollectionReader.PARAM_RECURSE,
-            true);
+            true );
    }
 
    public static AnalysisEngine createXMIWriter( final String outputDirectory )
@@ -134,13 +121,9 @@ public static CollectionReader createFilesInDirectoryReader( final String inputD
 
    static private void addCoreEngines( final AggregateBuilder aggregateBuilder )
          throws ResourceInitializationException {
-      aggregateBuilder.add( SentenceDetectorAnnotator.getDescription("/org/apache/ctakes/core/sentdetect/model.jar") );
+      aggregateBuilder
+            .add( SentenceDetectorAnnotator.getDescription( "/org/apache/ctakes/core/sentdetect/model.jar" ) );
       aggregateBuilder.add( TokenizerAnnotatorPTB.createAnnotatorDescription() );
-      try {
-         aggregateBuilder.add( LvgAnnotator.createAnnotatorDescription() );
-      } catch ( MalformedURLException urlE ) {
-         throw new ResourceInitializationException( urlE );
-      }
       aggregateBuilder.add( ContextDependentTokenizerAnnotator.createAnnotatorDescription() );
       aggregateBuilder.add( POSTagger.createAnnotatorDescription() );
       aggregateBuilder.add( Chunker.createAnnotatorDescription() );
@@ -149,17 +132,15 @@ public static CollectionReader createFilesInDirectoryReader( final String inputD
 
    static private void addDictionaryEngines( final AggregateBuilder aggregateBuilder )
          throws ResourceInitializationException {
-      aggregateBuilder
-            .add( AnalysisEngineFactory.createEngineDescription( CopyNPChunksToLookupWindowAnnotations.class ) );
-      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( RemoveEnclosedLookupWindows.class ) );
-
+      aggregateBuilder.add(
+            AnalysisEngineFactory.createEngineDescription( CopyNPChunksToLookupWindowAnnotations.class ) );
+      aggregateBuilder.add(
+            AnalysisEngineFactory.createEngineDescription( RemoveEnclosedLookupWindows.class ) );
       aggregateBuilder.add(
             AnalysisEngineFactory.createEngineDescription( DefaultJCasTermAnnotator.class,
                   JCasTermAnnotator.DICTIONARY_DESCRIPTOR_KEY,
                   "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml",
                   JCasTermAnnotator.PARAM_MIN_SPAN_KEY, 2 ) );
-//      aggregateBuilder.add( DefaultJCasTermAnnotator.createAnnotatorDescription(
-//            "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml" ) );
    }
 
    static private void addAttributeEngines( final AggregateBuilder aggregateBuilder )
@@ -201,14 +182,17 @@ public static CollectionReader createFilesInDirectoryReader( final String inputD
             AnalysisEngineFactory.createEngineDescription(
                   LocationOfRelationExtractorAnnotator.class,
                   GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
-                  getModelPath( "relationextractor/models/location_of" ) ) );
+                  CTAKES_DIR_PREFIX + "relation/extractor/location_of.jar" ) );
    }
 
-   private static void addCorefEngines(AggregateBuilder aggregateBuilder) throws ResourceInitializationException {
-	   aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(DeterministicMarkableAnnotator.class));
-	   aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(RemovePersonMarkables.class));
-	   aggregateBuilder.add(MarkableSalienceAnnotator.createAnnotatorDescription("/org/apache/ctakes/temporal/ae/salience/model.jar"));
-	   aggregateBuilder.add(MentionClusterCoreferenceAnnotator.createAnnotatorDescription("/org/apache/ctakes/coreference/mention-cluster/model.jar"));
+   private static void addCorefEngines( final AggregateBuilder aggregateBuilder )
+         throws ResourceInitializationException {
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( DeterministicMarkableAnnotator.class ) );
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( RemovePersonMarkables.class ) );
+      aggregateBuilder.add( MarkableSalienceAnnotator
+            .createAnnotatorDescription( "/org/apache/ctakes/temporal/ae/salience/model.jar" ) );
+      aggregateBuilder.add( MentionClusterCoreferenceAnnotator
+            .createAnnotatorDescription( "/org/apache/ctakes/coreference/mention-cluster/model.jar" ) );
    }
 
 

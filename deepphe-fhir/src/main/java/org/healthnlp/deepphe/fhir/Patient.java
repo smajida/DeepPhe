@@ -1,35 +1,23 @@
 package org.healthnlp.deepphe.fhir;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.apache.uima.jcas.JCas;
 import org.hl7.fhir.instance.model.Address;
 import org.hl7.fhir.instance.model.Attachment;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.ContactPoint;
 import org.hl7.fhir.instance.model.Extension;
-import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.HumanName;
 import org.hl7.fhir.instance.model.Identifier;
-import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.Patient.ContactComponent;
-import org.hl7.fhir.instance.model.Patient.PatientLinkComponent;
 import org.hl7.fhir.instance.model.Reference;
+import org.hl7.fhir.instance.model.Resource;
 
-import edu.pitt.dbmi.nlp.noble.coder.model.Document;
-import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
-import edu.pitt.dbmi.nlp.noble.ontology.IClass;
-import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 
 public class Patient extends org.hl7.fhir.instance.model.Patient implements Element{
 	private int yearsOld;
@@ -196,30 +184,12 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 		return yearsOld;
 	}
 
-	public void setAge(Mention m) {
-		Pattern pp = Pattern.compile("\\d+");
-		Matcher mm = pp.matcher(m.getText());
-		if(mm.find())
-			yearsOld = TextTools.parseIntegerValue(mm.group());
-	}
-
-	public void setGender(Mention m) {
-		try {
-			setGender(AdministrativeGender.fromCode(m.getText()));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	public IClass getConceptClass(){
-		return ResourceFactory.getInstance().getOntology().getClass(Utils.PATIENT);
-	}
 	
 	public URI getConceptURI(){
 		return URI.create(Utils.CANCER_URL+"#"+Utils.PATIENT);
 	}
 	
 	private void writeObject(ObjectOutputStream stream) throws IOException {
-		System.out.println("WTF: "+getClass().getName());
 		stream.defaultWriteObject();
 	}
 

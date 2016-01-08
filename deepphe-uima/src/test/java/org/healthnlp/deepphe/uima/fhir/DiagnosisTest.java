@@ -20,8 +20,7 @@ import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.healthnlp.deepphe.fhir.Diagnosis;
-import org.healthnlp.deepphe.fhir.ResourceFactory;
+import org.healthnlp.deepphe.fhir.Disease;
 import org.healthnlp.deepphe.uima.ae.DocumentSummarizerAE;
 import org.junit.Test;
 
@@ -105,7 +104,7 @@ public class DiagnosisTest {
 			lt.addToIndexes();
 			
 			// process AE
-			for(Diagnosis dx : ResourceFactory.getInstance().getDiagnoses(jcas)){
+			for(Disease dx : DocumentResourceFactory.getDiagnoses(jcas)){
 				System.out.println(dx.getSummaryText());
 			}
 			

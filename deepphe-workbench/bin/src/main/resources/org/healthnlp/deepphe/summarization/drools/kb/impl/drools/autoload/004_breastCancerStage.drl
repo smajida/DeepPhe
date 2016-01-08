@@ -1,0 +1,551 @@
+package org.healthnlp.deepphe.summarization.drools.rules;
+
+//list any import classes here.
+import org.healthnlp.deepphe.summarization.drools.kb.*;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.*;
+
+// ==========================================================
+// Stage0-1	If document has pTis, pN0, pM0 then Stage 0 Breast Cancer	
+//
+// ==========================================================
+rule "004_breastCancerStage Stage0-1-1"
+	salience 1500
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+        $pTis : TisStageFinding (summarizableId == $patientId)
+        $pN0 : N0StageFinding (summarizableId == $patientId)
+        $pM0 : M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage0-1-1 Assigning Stage0 cancer for patient ");      
+        CancerStage cancerStage = new Stage0Impl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+//
+//Stage0-2	If document has primary dx ONLY DCIS OR (DCIS & Pagets), then Stage 0 Breast Cancer	
+//
+// ==========================================================
+rule "004_breastCancerStage Stage0-2-1"
+	salience 1400
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+        IntraductalBreastNeoplasm ($dcisId : id, summarizableId == $patientId)
+        not DiseaseDisorder (id != $dcisId, summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage0-2-1 Assigning Stage0 cancer for patient ");      
+        CancerStage cancerStage = new Stage0Impl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+rule "004_breastCancerStage Stage0-2-2"
+	salience 1350
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+        IntraductalBreastNeoplasm ($dcisId : id, summarizableId == $patientId)
+        PagetDiseaseOfTheBreast ($pagetsId : id,  summarizableId == $patientId)
+        not DiseaseDisorder (id != $dcisId && id != $pagetsId, summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage0-2-2 Assigning Stage0 cancer for patient ");      
+        CancerStage cancerStage = new Stage0Impl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+
+// ==========================================================
+//
+//Stage0-3	If document has primary dx ONLY LCIS OR (LCIS & Pagets),  then Stage 0 Breast 
+//
+// ==========================================================
+rule "004_breastCancerStage Stage0-3-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+        LobularBreastCarcinomaInSitu ($lcisId : id, summarizableId == $patientId)
+        not DiseaseDisorder (id != $lcisId, summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage0-3-1 Assigning Stage0 cancer for patient ");      
+        CancerStage cancerStage = new Stage0Impl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+rule "004_breastCancerStage Stage0-3-2"
+	salience 1150
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+        LobularBreastCarcinomaInSitu ($lcisId : id, summarizableId == $patientId)
+        PagetDiseaseOfTheBreast ($pagetsId : id,  summarizableId == $patientId)
+        not DiseaseDisorder (id != $lcisId && id != $pagetsId, summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage0-3-2 Assigning Stage0 cancer for patient ");      
+        CancerStage cancerStage = new Stage0Impl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+//
+//Stage0-4	If document has primary dx ONLY (DCIS & LCIS) OR (DCIS & LCIS & Paget's), then Stage 0 Breast Cancer	
+//
+// ==========================================================
+rule "004_breastCancerStage Stage0-4-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    IntraductalBreastNeoplasm ($dcisId : id, summarizableId == $patientId)
+        LobularBreastCarcinomaInSitu ($lcisId : id, summarizableId == $patientId)
+        not DiseaseDisorder (id != $lcisId, id != $dcisId, summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage0-4-1 Assigning Stage0 cancer for patient ");      
+        CancerStage cancerStage = new Stage0Impl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+rule "004_breastCancerStage Stage0-4-2"
+	salience 1150
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+        IntraductalBreastNeoplasm ($dcisId : id, summarizableId == $patientId)
+        LobularBreastCarcinomaInSitu ($lcisId : id, summarizableId == $patientId)
+        PagetDiseaseOfTheBreast ($pagetsId : id,  summarizableId == $patientId)
+        not DiseaseDisorder (id != $dcisId, id != $lcisId, id != $pagetsId, summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage0-4-2 Assigning Stage0 cancer for patient ");      
+        CancerStage cancerStage = new Stage0Impl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+//
+//Stage 0-5   If document has primary dx ONLY Paget's Disease, then Stage 0 Breast Cancer
+//
+// ==========================================================
+rule "004_breastCancerStage Stage0-5-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    PagetDiseaseOfTheBreast ($pagetsId : id,  summarizableId == $patientId)
+        not DiseaseDisorder (id != $pagetsId, summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage0-5-1 Assigning Stage0 cancer for patient ");      
+        CancerStage cancerStage = new Stage0Impl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+//
+// Stage1a-1	If document has pT1, pN0, pM0, then Stage IA Breast Cancer	
+//
+// Note: This could be a little confusing - any M0 is clinical. Path cannot tell	
+//
+// ==========================================================
+rule "004_breastCancerStage Stage1a-1-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T1StageFinding (summarizableId == $patientId)
+	    N0StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage1a-1-1 Assigning Stage1a cancer for patient ");      
+        CancerStage cancerStage = new StageIaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+//
+// Stage1b-1	If document has pT0, pN1mi, pM0, then Stage IB Breast Cancer
+//	
+// ==========================================================
+rule "004_breastCancerStage Stage1b-1-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T0StageFinding (summarizableId == $patientId)
+	    N1miStageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage1b-1-1 Assigning Stage1b cancer for patient ");      
+        CancerStage cancerStage = new StageIbImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+//
+// Stage1b-2	If document has pT1, pN1mi, pM0, then Stage IB Breast Cancer
+//	
+// ==========================================================
+rule "004_breastCancerStage Stage1b-2-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T1StageFinding (summarizableId == $patientId)
+	    N1miStageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage1b-2-1 Assigning Stage1b cancer for patient ");      
+        CancerStage cancerStage = new StageIbImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+//
+// Stage2a-1	If document has pT0, pN1, pM0, then Stage IIA Breast Cancer
+//
+// ==========================================================
+rule "004_breastCancerStage Stage2a-1-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T0StageFinding (summarizableId == $patientId)
+	    N1StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage2a-1-1 Assigning Stage2a cancer for patient ");      
+        CancerStage cancerStage = new StageIiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+    
+// ==========================================================
+//
+// Stage2a-2	If document has pT1, pN1, pM0, then Stage IIA Breast Cancer
+//
+// ==========================================================
+rule "004_breastCancerStage Stage2a-2-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T1StageFinding (summarizableId == $patientId)
+	    N1StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage2a-2-1 Assigning Stage2a cancer for patient ");      
+        CancerStage cancerStage = new StageIiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+  
+
+// ==========================================================
+//
+// Stage2a-3	If document has pT2, pN0, pM0, then Stage IIA Breast Cancer
+//
+// ==========================================================
+rule "004_breastCancerStage Stage2a-3-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T2StageFinding (summarizableId == $patientId)
+	    N0StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage2a-3-1 Assigning Stage2a cancer for patient ");      
+        CancerStage cancerStage = new StageIiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+
+// ==========================================================
+//
+// Stage2b-1	If document has pT2, pN1, pM0, then Stage IIB Breast Cancer
+//
+// ==========================================================
+rule "004_breastCancerStage Stage2b-1-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T2StageFinding (summarizableId == $patientId)
+	    N1StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage2b-1-1 Assigning Stage2b cancer for patient ");      
+        CancerStage cancerStage = new StageIibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+//
+// Stage2b-2	If document has pT3, pN0, pM0, then Stage IIB Breast Cancer	
+//
+// ==========================================================
+rule "004_breastCancerStage Stage2b-2-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T3StageFinding (summarizableId == $patientId)
+	    N0StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage2b-2-1 Assigning Stage2b cancer for patient ");      
+        CancerStage cancerStage = new StageIibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+
+// ==========================================================
+//
+// Stage3a-1	If document has pT0, pN2, pM0, then Stage IIIA Breast Cancer
+//	
+// ==========================================================
+rule "004_breastCancerStage Stage3a-1-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T0StageFinding (summarizableId == $patientId)
+	    N2StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage3a-1-1 Assigning Stage3a cancer for patient ");      
+        CancerStage cancerStage = new StageIiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+//
+// Stage3a-2	If document has pT1, pN2, pM0, then Stage IIIA Breast Cancer	
+//
+// ==========================================================
+rule "004_breastCancerStage Stage3a-2-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T1StageFinding (summarizableId == $patientId)
+	    N2StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage3a-2-1 Assigning Stage3a cancer for patient ");      
+        CancerStage cancerStage = new StageIiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+
+// ==========================================================
+//
+// Stage3a-3	If document has pT2, pN2, pM0, then Stage IIIA Breast Cancer	
+//
+// ==========================================================
+rule "004_breastCancerStage Stage3a-3-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T2StageFinding (summarizableId == $patientId)
+	    N2StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage3a-3-1 Assigning Stage3a cancer for patient ");      
+        CancerStage cancerStage = new StageIiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+//
+// Stage3a-4	If document has pT3, pN1, pM0, then Stage IIIA Breast Cancer
+//
+// ==========================================================
+rule "004_breastCancerStage Stage3a-4-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T3StageFinding (summarizableId == $patientId)
+	    N1StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage3a-4-1 Assigning Stage3a cancer for patient ");      
+        CancerStage cancerStage = new StageIiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+//
+// Stage3a-5	If document has pT3, pN2, pM0, then Stage IIIA Breast Cancer
+//
+// ==========================================================
+rule "004_breastCancerStage Stage3a-5-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T3StageFinding (summarizableId == $patientId)
+	    N2StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage3a-5-1 Assigning Stage3a cancer for patient ");      
+        CancerStage cancerStage = new StageIiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+
+// ==========================================================
+//
+// Stage3b-1	If document has pT4, pN0, pM0, then Stage IIIB Breast Cancer	
+//
+// ==========================================================
+rule "004_breastCancerStage Stage3b-1-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T4StageFinding (summarizableId == $patientId)
+	    N0StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage3b-1-1 Assigning Stage3b cancer for patient ");      
+        CancerStage cancerStage = new StageIiibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+//
+// Stage3b-2	If document has pT4, pN1, pM0, then Stage IIIB Breast Cancer
+//
+// ==========================================================
+rule "004_breastCancerStage Stage3b-2-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T4StageFinding (summarizableId == $patientId)
+	    N1StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage3b-2-1 Assigning Stage3b cancer for patient ");      
+        CancerStage cancerStage = new StageIiibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+//
+// Stage3b-3	If document has pT4, pN2, pM0, then Stage IIIB Breast Cancer
+//
+// ==========================================================
+ rule "004_breastCancerStage Stage3b-3-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T4StageFinding (summarizableId == $patientId)
+	    N2StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage3b-3-1 Assigning Stage3b cancer for patient ");      
+        CancerStage cancerStage = new StageIiibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+ 
+// ==========================================================
+//	
+// Stage3c-1	If document has any pT value, pN3, pM0, then Stage IIIC Breast Cancer
+//
+// ========================================================== 
+ rule "004_breastCancerStage Stage3c-1-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    GenericPrimaryTumorTnmFinding (summarizableId == $patientId)
+	    N3StageFinding (summarizableId == $patientId)
+	    M0StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage3c-1-1 Assigning Stage3c cancer for patient ");      
+        CancerStage cancerStage = new StageIiicImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end 
+    
+// ==========================================================
+//
+// Stage4-1	If document has any pT value, any pN value, pM1, then Stage IV Breast Cancer
+//
+// ==========================================================
+rule "004_breastCancerStage Stage4-1-1"
+	salience 1200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    GenericPrimaryTumorTnmFinding (summarizableId == $patientId)
+	    GenericRegionalLymphNodesTnmFinding (summarizableId == $patientId)
+	    M1StageFinding (summarizableId == $patientId)
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage4-1-1 Assigning Stage4 cancer for patient ");      
+        CancerStage cancerStage = new StageIvImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end   
+    
+rule "004_breastCancerStage Transition Goal State"
+	salience 500
+	when
+	    $g : KbGoal (name == "extract-stage",
+                isActive > 0)
+    then
+        System.out.println("<DROOLS-ENGINE> Achieved goal " + $g.getName());
+    	retract($g);
+    end
+    
+
+
+    
