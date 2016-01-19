@@ -70,14 +70,14 @@ public class Neo4JRESTCaller {
 
 	public List<LinkedHashMap<String, Object>>	getOutgoingNodesWithRelationshipType(String id, String relationType) throws JsonParseException, JsonMappingException, IOException{
 		 List<LinkedHashMap<String, Object>> out = new ArrayList<LinkedHashMap<String, Object>>();
-//		http://localhost:7474/db/data/node/10354/relationships/in
+//		http://localhost:7474/db/data/node/10354/relationships/out
 		String restURI = serverRootURI + "node/" + id + OUTGOING_RELATIONS_SUFFIX + "/" + relationType;
-		
+		System.out.println(restURI);
 		String jsonStr = makeRESTCall(restURI);
 	   
 	    List<LinkedHashMap<String, Object>> rows = objectifyRelationshipJSON(jsonStr);
 	    for(LinkedHashMap<String,Object> datamap:rows){
-	    	restURI = (String) datamap.get("start");
+	    	restURI = (String) datamap.get("end");
 	    	jsonStr = makeRESTCall(restURI);
 	    	
 	    	out.addAll(objectifyNodeJSON(jsonStr));
