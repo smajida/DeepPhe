@@ -80,7 +80,7 @@ public class ResourceFactoryTester {
    @BeforeClass
    static public void loadOntology() {
       try {
-         OwlConnectionFactory.getInstance().getOntology( "data/ontology/breastCancer.owl" );
+         OwlConnectionFactory.getInstance().getOntology( "data/ontology/nlpBreastCancer.owl" );
         // ResourceFactory.getInstance().setOntology( OwlConnectionFactory.getInstance().getDefaultOntology() );
       } catch ( IOntologyException | FileNotFoundException multE ) {
          LOGGER.error( multE.getMessage() );
