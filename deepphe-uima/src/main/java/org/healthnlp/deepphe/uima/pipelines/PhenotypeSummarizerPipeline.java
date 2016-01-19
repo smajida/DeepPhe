@@ -1,9 +1,11 @@
 package org.healthnlp.deepphe.uima.pipelines;
 
+import java.io.File;
 import java.io.IOException;
 
 import javax.annotation.concurrent.Immutable;
 
+import org.apache.ctakes.cancer.ae.XMIWriter;
 import org.apache.uima.UIMAException;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.collection.CollectionReader;
@@ -11,6 +13,7 @@ import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.fit.pipeline.SimplePipeline;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.healthnlp.deepphe.uima.ae.CompositionCancerSummaryAE;
 import org.healthnlp.deepphe.uima.ae.I2b2WriterAE;
 import org.healthnlp.deepphe.uima.ae.PhenotypeSummarizerAE;
 import org.healthnlp.deepphe.uima.cr.FHIRCollectionReader;
@@ -32,25 +35,30 @@ final public class PhenotypeSummarizerPipeline {
 		@Option(shortName = "m", description = "specify the path to the model ontology file to be used.")
 		public String getOntologyPath();
 
-		@Option(shortName = "c", description = "specify the path to the jess clips files to be used.")
-		public String getClipsDirectoryPath();
+		//@Option(shortName = "c", description = "specify the path to the jess clips files to be used.")
+		//public String getClipsDirectoryPath();
+		
+	    @Option(shortName = "o", description = "specify the path to the directory where the output xmi files are to be saved" )
+	    public String getOutputDirectory();
 	}
 
 	public static void main(final String... args) throws UIMAException,
 			IOException {
 		final Options options = CliFactory.parseArguments(Options.class, args);
 		runPhenotypeSummarizerPipeline(options.getInputDirectory(),
-				options.getOntologyPath(), options.getClipsDirectoryPath());
+				options.getOntologyPath(), options.getOutputDirectory());
 	}
 
 	public static void runPhenotypeSummarizerPipeline(
-			final String inputDirectory, final String ontologyPath, final String clipsDirectoryPath)
+			final String inputDirectory, final String ontologyPath, final String outputDirectory)
 			throws UIMAException, IOException {
 		final CollectionReader collectionReader = createCollectionReader(inputDirectory);
-		final AnalysisEngine phenotypeSummarizerAE = createPhenotypeSummarizerAE(clipsDirectoryPath,ontologyPath);
-		final AnalysisEngine i2B2OutputAE = createI2B2OutputAE();
-
-		SimplePipeline.runPipeline(collectionReader, phenotypeSummarizerAE, i2B2OutputAE);
+		final AnalysisEngine compositionSummarizerAE =AnalysisEngineFactory.createEngine(CompositionCancerSummaryAE.class,CompositionCancerSummaryAE.PARAM_ONTOLOGY_PATH,ontologyPath);
+		//final AnalysisEngine phenotypeSummarizerAE = createPhenotypeSummarizerAE(clipsDirectoryPath,ontologyPath);
+		//final AnalysisEngine i2B2OutputAE = createI2B2OutputAE();
+		final AnalysisEngine xmiWriter = AnalysisEngineFactory.createEngine( XMIWriter.class, XMIWriter.PARAM_OUTPUTDIR, outputDirectory);
+		//SimplePipeline.runPipeline(collectionReader, phenotypeSummarizerAE, i2B2OutputAE);
+		SimplePipeline.runPipeline(collectionReader,compositionSummarizerAE,xmiWriter);
 	}
 
 	private static CollectionReader createCollectionReader(String inputDirectory)

@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.fhir;
 import java.io.File;
 import java.net.URI;
 
+import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.BodySite;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Extension;
@@ -16,7 +17,7 @@ public class AnatomicalSite extends BodySite implements Element{
 	}
 
 	public String getResourceIdentifier() {
-		return Utils.getIdentifier(getIdentifier());
+		return FHIRUtils.getIdentifier(getIdentifier());
 	}
 
 	public String getSummaryText() {
@@ -28,19 +29,19 @@ public class AnatomicalSite extends BodySite implements Element{
 	}
 
 	public URI getConceptURI() {
-		return Utils.getConceptURI(getCode());
+		return FHIRUtils.getConceptURI(getCode());
 	}
 
 	public void setReport(Report r) {
 		Patient p = r.getPatient();
 		if(p != null){
-			setPatient(Utils.getResourceReference(p));
+			setPatient(FHIRUtils.getResourceReference(p));
 			setPatientTarget(p);
 		}
 	}
 
 	public void save(File dir) throws Exception {
-		Utils.saveFHIR(this,getResourceIdentifier(),dir);
+		FHIRUtils.saveFHIR(this,getResourceIdentifier(),dir);
 	}
 
 	public void copy(Resource r) {

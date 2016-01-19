@@ -30,8 +30,9 @@ import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Procedure;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.Stage;
-import org.healthnlp.deepphe.fhir.Utils;
+import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.OntologyUtils;
+import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Composition;
 import org.hl7.fhir.instance.model.Condition;
@@ -78,7 +79,7 @@ public class DocumentResourceFactory {
 	 * @return
 	 */
 	public static Report getReport(JCas cas) {
-		Report r = getReport(Utils.getDocumentText(cas));
+		Report r = getReport(FHIRUtils.getDocumentText(cas));
 		
 		// oh, well no document title available
 		//r.setTitle(value);
@@ -132,11 +133,11 @@ public class DocumentResourceFactory {
 		Report r = new Report();
 		r.setText(text);
 		// some hard-coded report type values
-		Map<String,String> header = Utils.getHeaderValues(text);
-		String dt = header.get(Utils.DOCUMENT_HEADER_PRINCIPAL_DATE);
+		Map<String,String> header = FHIRUtils.getHeaderValues(text);
+		String dt = header.get(FHIRUtils.DOCUMENT_HEADER_PRINCIPAL_DATE);
 		if(dt != null)
-			r.setDate(Utils.getDate(dt));
-		String tp = header.get(Utils.DOCUMENT_HEADER_REPORT_TYPE);
+			r.setDate(FHIRUtils.getDate(dt));
+		String tp = header.get(FHIRUtils.DOCUMENT_HEADER_REPORT_TYPE);
 		if(tp != null)
 			r.setType(tp);
 		return r;
@@ -144,7 +145,7 @@ public class DocumentResourceFactory {
 	
 	
 	public static Patient getPatient(JCas cas) {
-		Patient p =  getPatient(Utils.getDocumentText(cas));
+		Patient p =  getPatient(FHIRUtils.getDocumentText(cas));
 		// TODO: age and gender
 		return p;
 	}
@@ -168,13 +169,13 @@ public class DocumentResourceFactory {
 	public static Patient getPatient(String text) {
 		if(text == null)
 			return null;
-		Map<String,String> header = Utils.getHeaderValues(text);
-		String pn = header.get(Utils.DOCUMENT_HEADER_PATIENT_NAME);
+		Map<String,String> header = FHIRUtils.getHeaderValues(text);
+		String pn = header.get(FHIRUtils.DOCUMENT_HEADER_PATIENT_NAME);
 		if(pn != null){
 			Patient p = new Patient();
 			p.setPatientName(pn);
 			int n = text.indexOf(pn);
-			p.addExtension(Utils.createMentionExtension(pn,n,n+pn.length()));
+			p.addExtension(FHIRUtils.createMentionExtension(pn,n,n+pn.length()));
 			return p;
 		}
 		return null;
@@ -197,7 +198,7 @@ public class DocumentResourceFactory {
 
 	public static List<Procedure> getProcedures(JCas cas) {
 		List<Procedure> list = new ArrayList<Procedure>();
-		for(IdentifiedAnnotation m: Utils.getAnnotationsByType(cas, ProcedureMention.type)){
+		for(IdentifiedAnnotation m: FHIRUtils.getAnnotationsByType(cas, ProcedureMention.type)){
 			list.add(createProcedure((ProcedureMention) m));
 		}
 		return list;
@@ -208,7 +209,7 @@ public class DocumentResourceFactory {
 	 */
 	public static List<Disease> getDiagnoses(JCas cas) {
 		List<Disease> list = new ArrayList<Disease>();
-		for(IdentifiedAnnotation m: Utils.getAnnotationsByType(cas, DiseaseDisorderMention.type)){
+		for(IdentifiedAnnotation m: FHIRUtils.getAnnotationsByType(cas, DiseaseDisorderMention.type)){
 			list.add(createDiagnosis((DiseaseDisorderMention) m));
 		}
 		return list;
@@ -216,7 +217,7 @@ public class DocumentResourceFactory {
 	
 	public static List<Medication> getMedications(JCas cas) {
 		List<Medication> list = new ArrayList<Medication>();
-		for(IdentifiedAnnotation m: Utils.getAnnotationsByType(cas,MedicationMention.type)){
+		for(IdentifiedAnnotation m: FHIRUtils.getAnnotationsByType(cas,MedicationMention.type)){
 			list.add(createMedication((MedicationMention) m));
 		}
 		return list;
@@ -230,8 +231,8 @@ public class DocumentResourceFactory {
 	public static List<Observation> getObservations(JCas cas) {
 		List<Observation> list = new ArrayList<Observation>();
 		List<IdentifiedAnnotation> annotations = new ArrayList<IdentifiedAnnotation>();
-		annotations.addAll(Utils.getAnnotationsByType(cas,CancerSize.type));
-		annotations.addAll(Utils.getAnnotationsByType(cas,ReceptorStatus.type));
+		annotations.addAll(FHIRUtils.getAnnotationsByType(cas,CancerSize.type));
+		annotations.addAll(FHIRUtils.getAnnotationsByType(cas,ReceptorStatus.type));
 		for(IdentifiedAnnotation m: annotations ){
 			list.add(createObservation(m));
 		}
@@ -311,9 +312,9 @@ public class DocumentResourceFactory {
 			// find report & patient first
 			for(File f: reportDir.listFiles()){
 				if(isType(f, Report.class)){
-					report =  getReport((Composition) Utils.loadFHIR(f));
+					report =  getReport((Composition) FHIRUtils.loadFHIR(f));
 				}else if(isType(f, Patient.class)){
-					patient = getPatient((org.hl7.fhir.instance.model.Patient)Utils.loadFHIR(f));
+					patient = getPatient((org.hl7.fhir.instance.model.Patient)FHIRUtils.loadFHIR(f));
 				}
 			}
 			// add patient to report
@@ -324,15 +325,15 @@ public class DocumentResourceFactory {
 			// load other components into report
 			for(File f: reportDir.listFiles()){
 				if(isType(f, Finding.class)){
-					report.addReportElement(getFinding((Condition) Utils.loadFHIR(f)));
+					report.addReportElement(getFinding((Condition) FHIRUtils.loadFHIR(f)));
 				}else if(isType(f, Disease.class)){
-					report.addReportElement(getDiagnosis((Condition)Utils.loadFHIR(f)));
+					report.addReportElement(getDiagnosis((Condition)FHIRUtils.loadFHIR(f)));
 				}else if(isType(f, Procedure.class)){
-					report.addReportElement(getProcedure((org.hl7.fhir.instance.model.Procedure)Utils.loadFHIR(f)));
+					report.addReportElement(getProcedure((org.hl7.fhir.instance.model.Procedure)FHIRUtils.loadFHIR(f)));
 				}else if(isType(f, Observation.class)){
-					report.addReportElement(getObservation((org.hl7.fhir.instance.model.Observation)Utils.loadFHIR(f)));
+					report.addReportElement(getObservation((org.hl7.fhir.instance.model.Observation)FHIRUtils.loadFHIR(f)));
 				}else if(isType(f, Medication.class)){
-					report.addReportElement(getMedication((org.hl7.fhir.instance.model.Medication)Utils.loadFHIR(f)));
+					report.addReportElement(getMedication((org.hl7.fhir.instance.model.Medication)FHIRUtils.loadFHIR(f)));
 				}
 			}
 		}
@@ -352,39 +353,39 @@ public class DocumentResourceFactory {
 	 */
 	public static Disease load(Disease dx, DiseaseDisorderMention dm){
 		// set some properties
-		dx.setCode(Utils.getCodeableConcept(dm));
+		dx.setCode(FHIRUtils.getCodeableConcept(dm));
 		//setCertainty(); --> dm.getConfidence()
 		//setSeverity(value); -- > dm.getSeverity()???
 		
 		// create identifier
-		Utils.createIdentifier(dx.addIdentifier(),dx,dm);
+		FHIRUtils.createIdentifier(dx.addIdentifier(),dx,dm);
 		
 		
 		// perhaps have annotation from Document time
 		TimeMention tm = dm.getStartTime();
 		if(tm != null){
-			dx.setDateRecorded(Utils.getDate(tm));
+			dx.setDateRecorded(FHIRUtils.getDate(tm));
 		}
 			
 		// now lets take a look at the location of this disease
-		AnatomicalSiteMention as = (AnatomicalSiteMention) Utils.getRelatedItem(dm,dm.getBodyLocation());
+		AnatomicalSiteMention as = (AnatomicalSiteMention) FHIRUtils.getRelatedItem(dm,dm.getBodyLocation());
 		if(as == null){
-			as = Utils.getAnatimicLocation(dm);
+			as = FHIRUtils.getAnatimicLocation(dm);
 		}
 		if(as != null){
 			// TODO: create body-site object as well
-			dx.addBodySite(Utils.getCodeableConcept(as));
+			dx.addBodySite(FHIRUtils.getCodeableConcept(as));
 		}
 	
 		// now lets get the location relationships
-		for(Annotation  a: Utils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
+		for(Annotation  a: FHIRUtils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
 			if(a instanceof TnmClassification){
 				dx.setStage(createStage((TnmClassification) a));
 			}
 		}
 		
 		// add mention text
-		dx.addExtension(Utils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
+		dx.addExtension(FHIRUtils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
 		
 		return dx;
 	}
@@ -400,8 +401,8 @@ public class DocumentResourceFactory {
 	 * @return
 	 */
 	public static Medication load(Medication md, MedicationMention dm){
-		md.setCode(Utils.getCodeableConcept(dm));
-		md.addExtension(Utils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
+		md.setCode(FHIRUtils.getCodeableConcept(dm));
+		md.addExtension(FHIRUtils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
 		return md;
 	}
 	
@@ -416,8 +417,8 @@ public class DocumentResourceFactory {
 	 */
 	public static Observation load(Observation ob,IdentifiedAnnotation dm){
 		// set some properties
-		ob.setCode(Utils.getCodeableConcept(dm));
-		ob.addIdentifier(Utils.createIdentifier(ob,dm));
+		ob.setCode(FHIRUtils.getCodeableConcept(dm));
+		ob.addIdentifier(FHIRUtils.createIdentifier(ob,dm));
 		
 		// extract value using free text if necessary
 		String text = dm.getCoveredText();
@@ -430,14 +431,15 @@ public class DocumentResourceFactory {
 		// set positive/negative
 		if(dm instanceof ReceptorStatus){
 			boolean value = ((ReceptorStatus)dm).getValue();
-			String i = value?Utils.INTERPRETATION_POSITIVE:Utils.INTERPRETATION_NEGATIVE;
-			String url = Utils.CANCER_URL;
-			ob.setInterpretation(Utils.getCodeableConcept(i,url+"#"+i,"URI"));
+			String i = value?FHIRUtils.INTERPRETATION_POSITIVE:FHIRUtils.INTERPRETATION_NEGATIVE;
+			String url = FHIRUtils.CANCER_URL;
+			ob.setInterpretation(FHIRUtils.getCodeableConcept(i,url+"#"+i,"URI"));
 			// new StringType(value?"Positive":"Negative"));l;// 
 		}
 		
 		// if cancer size, then use their value
 		if(dm instanceof CancerSize){
+			//ob.setCode(FHIRUtils.getCodeableConcept(FHIRConstants.TUMOR_SIZE_URI));
 			FSArray arr = ((CancerSize)dm).getMeasurements();
 			if(arr != null){
 				for(int i=0;i<arr.size();i++){
@@ -445,7 +447,7 @@ public class DocumentResourceFactory {
 					ob.setValue(num.getValue(),num.getUnit());
 					
 					String ident = ob.getClass().getSimpleName().toUpperCase()+"_"+ob.getDisplayText(); 
-					ob.addIdentifier(Utils.createIdentifier((ident+"_"+ob.getObservationValue()).replaceAll("\\W+","_")));
+					ob.addIdentifier(FHIRUtils.createIdentifier((ident+"_"+ob.getObservationValue()).replaceAll("\\W+","_")));
 					break;
 				}
 			}
@@ -453,7 +455,7 @@ public class DocumentResourceFactory {
 		
 
 		// add mention text
-		ob.addExtension(Utils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
+		ob.addExtension(FHIRUtils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
 		return ob;
 	}
 	
@@ -468,24 +470,24 @@ public class DocumentResourceFactory {
 	 */
 	public static Procedure load(Procedure pr,ProcedureMention dm){
 		// set some properties
-		pr.setCode(Utils.getCodeableConcept(dm));
+		pr.setCode(FHIRUtils.getCodeableConcept(dm));
 		pr.setStatus(ProcedureStatus.COMPLETED);
-		Utils.createIdentifier(pr.addIdentifier(),pr,dm);
+		FHIRUtils.createIdentifier(pr.addIdentifier(),pr,dm);
 				
 		// now lets take a look at the location of this disease
-		AnatomicalSiteMention as = (AnatomicalSiteMention) Utils.getRelatedItem(dm,dm.getBodyLocation());
+		AnatomicalSiteMention as = (AnatomicalSiteMention) FHIRUtils.getRelatedItem(dm,dm.getBodyLocation());
 		if(as == null)
-			as = Utils.getAnatimicLocation(dm);
+			as = FHIRUtils.getAnatimicLocation(dm);
 		if(as != null){
 			CodeableConcept location = pr.addBodySite();
-			Utils.setCodeableConcept(location,as);
+			FHIRUtils.setCodeableConcept(location,as);
 		}
 		// now lets add observations
 		//addEvidence();
 		//addRelatedItem();
 
 		// add mention text
-		pr.addExtension(Utils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
+		pr.addExtension(FHIRUtils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
 		return pr;
 	}
 	
@@ -502,20 +504,20 @@ public class DocumentResourceFactory {
 	
 	public static Stage load(Stage stage, TnmClassification st) {
 	
-		CodeableConcept c = Utils.getCodeableConcept(st);
+		CodeableConcept c = FHIRUtils.getCodeableConcept(st);
 		c.setText(st.getCoveredText());
 		stage.setSummary(c);
 		// extract individual Stage levels if values are conflated
 		if(st.getSize() != null)
-			stage.setStringExtension(Utils.CANCER_URL+"#"+Utils.T_STAGE,st.getSize().getCode()+st.getSize().getValue());
+			stage.setStringExtension(FHIRUtils.CANCER_URL+"#"+FHIRUtils.T_STAGE,st.getSize().getCode()+st.getSize().getValue());
 		if(st.getNodeSpread() != null)
-			stage.setStringExtension(Utils.CANCER_URL+"#"+Utils.N_STAGE,st.getNodeSpread().getCode()+st.getNodeSpread().getValue());
+			stage.setStringExtension(FHIRUtils.CANCER_URL+"#"+FHIRUtils.N_STAGE,st.getNodeSpread().getCode()+st.getNodeSpread().getValue());
 		if(st.getMetastasis() != null)
-			stage.setStringExtension(Utils.CANCER_URL+"#"+Utils.M_STAGE,st.getMetastasis().getCode()+st.getMetastasis().getValue());
+			stage.setStringExtension(FHIRUtils.CANCER_URL+"#"+FHIRUtils.M_STAGE,st.getMetastasis().getCode()+st.getMetastasis().getValue());
 		
 
 		// add mention text
-		stage.addExtension(Utils.createMentionExtension(st.getCoveredText(),st.getBegin(),st.getEnd()));
+		stage.addExtension(FHIRUtils.createMentionExtension(st.getCoveredText(),st.getBegin(),st.getEnd()));
 		
 		return stage;
 	}
