@@ -1,7 +1,7 @@
 package org.healthnlp.deepphe.workbench.treeview.artifact;
 
-public class AnnotationsCorporaUserObject {
+public class AnnotationsCohortUserObject {
 	public String toString() {
-		return "Corpus";
+		return "Breast Cancer Patients";
 	}
 }

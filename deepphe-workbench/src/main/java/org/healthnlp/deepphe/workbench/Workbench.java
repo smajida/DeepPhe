@@ -24,24 +24,31 @@ import javax.swing.JTabbedPane;
 
 import org.apache.ctakes.cancer.pipeline.CancerPipelineFactory;
 import org.apache.uima.analysis_engine.AnalysisEngine;
+import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
+import org.healthnlp.deepphe.ontology.I2b2OntologyBuilder;
+import org.healthnlp.deepphe.ontology.MetaDataDbManager;
 import org.healthnlp.deepphe.ontology.OntologyCleaner;
 import org.healthnlp.deepphe.ontology.PartialPath;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 //import org.healthnlp.deepphe.uima.cr.PatientListReader;
 import org.healthnlp.deepphe.workbench.controller.Controller;
+import org.healthnlp.deepphe.workbench.form.FormDataBean;
+import org.healthnlp.deepphe.workbench.form.FormPanel;
 import org.healthnlp.deepphe.workbench.treeview.artifact.AnnotationsTree;
 
-public class Workbench extends JFrame implements ActionListener, PropertyChangeListener {
-	
+public class Workbench extends JFrame implements ActionListener,
+		PropertyChangeListener {
+
 	private static final long serialVersionUID = 1L;
-	
+
 	public static String PROJECT_LOCATION = null;
-	
+
 	public static void main(String[] args) {
-		if(args.length > 0)
+		if (args.length > 0)
 			PROJECT_LOCATION = args[0];
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -53,66 +60,84 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 	private static void createAndShowGUI() {
 		new Workbench("DeepPhe Summarization");
 	}
+
+	private final I2b2DemoDataSourceManager i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
+	private final I2b2OntologyBuilder i2b2OntologyBuilder = new I2b2OntologyBuilder();
+	private final I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
+	private final MetaDataDbManager metaDataDbManager = new MetaDataDbManager();
+	private final List<String> topLevelClses = new ArrayList<String>();
 	
 	private final TreeSet<PartialPath> partialPathTreeSet = new TreeSet<PartialPath>();
 	private final HashMap<String, PartialPath> partialPathMap = new HashMap<>();
 	private final PatientKnowledgeExtractorInterface patientKnowledgeExtractor = new PatientKnowledgeExtractorDrools();
 	private final DroolsTextInputer droolsInputer = new DroolsTextInputer();
 	private final DroolsTextOutputer droolsOutputer = new DroolsTextOutputer();
-//	private final PatientListReader patientListReader = new PatientListReader();
 	private final List<KbPatient> patients = new ArrayList<>();
-	
-	private final DroolsKnowledgeBaseAndSession engine = DroolsKnowledgeBaseAndSession.getInstance();
+
+	private final DroolsKnowledgeBaseAndSession engine = DroolsKnowledgeBaseAndSession
+			.getInstance();
 
 	private WindowAdapter windowAdapter;
 
 	private JPanel mainPanel;
-	private ImageIcon iconOne =  new ImageIcon(
+	private ImageIcon iconOne = new ImageIcon(
 			Workbench.class.getResource("/images/24f/dashboardico.gif"));
 	private JTabbedPane mainTabbedPane = new JTabbedPane();
 	private AnnotationTabPanel annotationTabPanel;
 	private InferenceTabPanel inferenceTabPanel;
 	
+	private FormPanel formPanel = new FormPanel();
+	private FormDataBean formData = new FormDataBean();
+
 	private OntologyCleaner ontologyCleaner;
 	private Controller controller;
-	private AnalysisEngine ae;
+	private AnalysisEngine cTakesAnalysisEngine;
 	private AnnotationsTree annotationsTree = new AnnotationsTree();
 	private PipeDialogPatientExtraction patientExtractor;
 	private PipeDialogEncounterExtraction encounterExtractor;
-	
+
 	public Workbench(String title) {
 		super(title);
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		
+
 		WorkbenchMenu mainMenu = new WorkbenchMenu();
 		mainMenu.setActionListener(this);
 		mainMenu.injectActionListener();
 		setJMenuBar(mainMenu);
-		
+
 		establishWindowControls();
+
+		i2b2OntologyBuilder
+				.setOntologyPath("http://ontologies.dbmi.pitt.edu/deepphe/modelBreastCancer.owl");
+		i2b2OntologyBuilder.setSourceSystemCode("DpheAnafora");
+		i2b2OntologyBuilder.setPartialPathTreeSet(partialPathTreeSet);
+		i2b2OntologyBuilder.setPartialPathMap(partialPathMap);
+		topLevelClses.add("http://www.w3.org/2002/07/owl#Thing");
+		i2b2OntologyBuilder.setTopLevelClses(topLevelClses);
 		
-//		String file = Workbench.PROJECT_LOCATION+File.separator+"src/main/resources/corpora/one";
-//		final File encountersDirectory = new File(file);
-//		patientListReader.setInputDirectoryPath(encountersDirectory.getAbsolutePath());
-//		patientListReader.setPatients(patients);
-//		patientListReader.execute();
-		
+		formPanel.setPartialPathMap(partialPathMap);
+		formPanel.setPartialPathTreeSet(partialPathTreeSet);
+		formPanel.setTopLevelClses(topLevelClses);
+		formPanel.setI2b2OntologyBuilder(i2b2OntologyBuilder);
+		formPanel.setFormDataBean(formData);
+		formPanel.buildPanel();
+
 		controller = new Controller();
 		controller.setKbPatients(patients);
 		controller.constructFastDagFromRdbms();
-		
-		buildCtakesAnalysisEngine();
-		
+
+//		buildCtakesAnalysisEngine();
+
 		establishExtractor();
 		patientKnowledgeExtractor.setDroolsTextOutputer(droolsOutputer);
 		droolsInputer.setDroolsTextOutputer(droolsOutputer);
 		droolsInputer.setKnowledgeExtractor(patientKnowledgeExtractor);
-		
+
 		buildAnnotationTabPanel();
 		buildInferenceTabPanel();
 		buildMainPanel();
 		JPanel mainPanel = getMainPanel();
-		
+
 		getContentPane().add(mainPanel);
 		pack();
 		setLocationRelativeTo(null);
@@ -136,6 +161,7 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 					Workbench.this.dispose();
 				}
 			}
+
 			@Override
 			public void windowClosed(WindowEvent e) {
 				super.windowClosed(e);
@@ -145,17 +171,22 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 
 		addWindowListener(windowAdapter);
 	}
-	
+
 	private void buildAnnotationTabPanel() {
 		annotationsTree.setController(controller);
 		annotationTabPanel = new AnnotationTabPanel();
+		String cTakesTypes = "../deepphe-ctakes-cancer/src/main/resources/org/apache/ctakes/cancer/types/TypeSystem.xml";
+		TypeSystemDescription typeSystemDescription = TypeSystemDescriptionFactory
+				.createTypeSystemDescriptionFromPath(cTakesTypes);
+		annotationTabPanel.setTypeSystemDescription(typeSystemDescription);
 		annotationTabPanel.setAnnotationsTree(annotationsTree);
 		annotationTabPanel.setPatients(patients);
 		annotationTabPanel.setController(controller);
-		annotationTabPanel.setAnalysisEngine(ae);
+		annotationTabPanel.setAnalysisEngine(cTakesAnalysisEngine);
+		annotationTabPanel.setFormPanel(formPanel);
 		annotationTabPanel.build();
 	}
-	
+
 	private void buildInferenceTabPanel() {
 		inferenceTabPanel = new InferenceTabPanel();
 		inferenceTabPanel.setDroolsInputer(droolsInputer);
@@ -165,20 +196,23 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 		inferenceTabPanel.setPatients(patients);
 		inferenceTabPanel.build();
 	}
-	
+
 	private void rebuildInferencePanel() {
 		int selectedIdx = mainTabbedPane.getSelectedIndex();
 		mainTabbedPane.remove(1);
 		buildInferenceTabPanel();
-		mainTabbedPane.addTab("Inference", iconOne, inferenceTabPanel, "InferenceTab");
+		mainTabbedPane.addTab("Inference", iconOne, inferenceTabPanel,
+				"InferenceTab");
 		mainTabbedPane.setSelectedIndex(selectedIdx);
 	}
 
 	private void buildMainPanel() {
 		mainPanel = new JPanel();
-		mainTabbedPane.addTab("Annotation", iconOne, annotationTabPanel, "AnnotateTab");
+		mainTabbedPane.addTab("Annotation", iconOne, annotationTabPanel,
+				"AnnotateTab");
 		mainTabbedPane.setSelectedIndex(0);
-		mainTabbedPane.addTab("Inference", iconOne, inferenceTabPanel, "InferenceTab");
+		mainTabbedPane.addTab("Inference", iconOne, inferenceTabPanel,
+				"InferenceTab");
 		mainPanel.setLayout(new GridLayout(1, 1));
 		mainPanel.add(mainTabbedPane);
 		mainPanel.setPreferredSize(new Dimension(1200, 900));
@@ -186,12 +220,15 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 
 	private void establishExtractor() {
 		try {
-		    patientKnowledgeExtractor.setKnowledgeBase(engine);
-			patientKnowledgeExtractor.setPatients(patients);		
-//			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new EncounterKnowledgeExtractorStub());
-			EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new EncounterKnowledgeExtractorCtakes());
-			EncounterKnowlegeExractorFactory.getEncounterKnowledgeExtractor().setAnalysisEngine(ae);
-			
+			patientKnowledgeExtractor.setKnowledgeBase(engine);
+			patientKnowledgeExtractor.setPatients(patients);
+			// EncounterKnowlegeExractorFactory.setEncounterKnowledgeExtractor(new
+			// EncounterKnowledgeExtractorStub());
+			EncounterKnowlegeExractorFactory
+					.setEncounterKnowledgeExtractor(new EncounterKnowledgeExtractorCtakes());
+			EncounterKnowlegeExractorFactory.getEncounterKnowledgeExtractor()
+					.setAnalysisEngine(cTakesAnalysisEngine);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -215,7 +252,7 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 		} else if (actionCommand.equals("Load Single Patient To KB")) {
 			processLoadSinglePatientToKb();
 			rebuildInferencePanel();
-		}  else if (actionCommand.equals("Extract Encounters")) {
+		} else if (actionCommand.equals("Extract Encounters")) {
 			processExtractEncounters();
 		} else if (actionCommand.equals("Ontology Clean")) {
 			processOntologyClean();
@@ -234,7 +271,7 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 			engine.displayFacts();
 		}
 	}
-	
+
 	private void processExtractEncounters() {
 		encounterExtractor = new PipeDialogEncounterExtraction(this);
 		encounterExtractor.setAnnotationTabPanel(annotationTabPanel);
@@ -245,8 +282,12 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 		(new Thread(encounterExtractor)).start();
 	}
 
-	private void processExtractPatient() {	
+	private void processExtractPatient() {
 		patientExtractor = new PipeDialogPatientExtraction(this);
+		patientExtractor
+				.setI2b2DataDataSourceManager(i2b2DataDataSourceManager);
+		patientExtractor.setI2b2DataDataWriter(i2b2DataDataWriter);
+		patientExtractor.setI2b2OntologyBuilder(i2b2OntologyBuilder);
 		patientExtractor.setAnnotationTabPanel(annotationTabPanel);
 		patientExtractor.setKnowledgeExtractor(patientKnowledgeExtractor);
 		patientExtractor.setPatients(patients);
@@ -257,9 +298,10 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 		patientExtractor.setVisible(true);
 		(new Thread(patientExtractor)).start();
 	}
-	
+
 	private void processLoadSinglePatientToKb() {
-		EncounterKnowledgeExtractorInterface encounterKnowledgeExtractor = EncounterKnowlegeExractorFactory.getEncounterKnowledgeExtractor();
+		EncounterKnowledgeExtractorInterface encounterKnowledgeExtractor = EncounterKnowlegeExractorFactory
+				.getEncounterKnowledgeExtractor();
 		for (KbPatient patient : patients) {
 			encounterKnowledgeExtractor.executePatient(patient);
 			break;
@@ -287,36 +329,33 @@ public class Workbench extends JFrame implements ActionListener, PropertyChangeL
 		}
 	}
 
-	private void processOntologyClean() {		
+	private void processOntologyClean() {
 		partialPathTreeSet.clear();
 		partialPathMap.clear();
 		ontologyCleaner = new OntologyCleaner(this);
+		ontologyCleaner.setI2b2DataDataSourceManager(i2b2DataDataSourceManager);
+		ontologyCleaner.setI2b2DataDataWriter(i2b2DataDataWriter);
+		ontologyCleaner.setI2b2OntologyBuilder(i2b2OntologyBuilder);
+		ontologyCleaner.setMetaDataDbManager(metaDataDbManager);
 		ontologyCleaner.setPartialPathTreeSet(partialPathTreeSet);
 		ontologyCleaner.setPartialPathMap(partialPathMap);
 		ontologyCleaner.addPropertyChangeListener(this);
 		ontologyCleaner.setVisible(true);
 		(new Thread(ontologyCleaner)).start();
 	}
+
 	
-	private void buildCtakesAnalysisEngine() {
-		if (ae == null) {
-			try {
-				ae = CancerPipelineFactory.createPipelineEngine();
-			} catch (ResourceInitializationException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		if (evt.getSource() == ontologyCleaner && evt.getNewValue().equals("Finished")) {
+		if (evt.getSource() == ontologyCleaner
+				&& evt.getNewValue().equals("Finished")) {
 			ontologyCleaner.dispose();
-		}
-		else if (evt.getSource() == patientExtractor && evt.getNewValue().equals("Finished")) {
+		} else if (evt.getSource() == patientExtractor
+				&& evt.getNewValue().equals("Finished")) {
 			patientExtractor.dispose();
-		}
-		else if (evt.getSource() == encounterExtractor && evt.getNewValue().equals("Finished")) {
+		} else if (evt.getSource() == encounterExtractor
+				&& evt.getNewValue().equals("Finished")) {
 			encounterExtractor.dispose();
 		}
 	}

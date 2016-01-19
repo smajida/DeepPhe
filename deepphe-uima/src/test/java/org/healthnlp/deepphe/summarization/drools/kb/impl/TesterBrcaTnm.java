@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
@@ -14,16 +16,14 @@ import org.drools.io.Resource;
 import org.drools.io.ResourceFactory;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.FactHandle;
-import org.healthnlp.deepphe.summarization.drools.kb.Has1dimension;
-import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
 import org.healthnlp.deepphe.summarization.drools.kb.KbGoal;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
-import org.healthnlp.deepphe.summarization.drools.kb.TumorSize;
+import org.healthnlp.deepphe.summarization.drools.kb.M1;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TesterBreastCancerTumorSize {
+public class TesterBrcaTnm {
 
 	private StatefulKnowledgeSession session = null;
 
@@ -33,7 +33,7 @@ public class TesterBreastCancerTumorSize {
 
 			KnowledgeBuilder builder = KnowledgeBuilderFactory
 					.newKnowledgeBuilder();
-			URL autoloadUrl = getClass().getResource("drools/autoload");
+			URL autoloadUrl = getClass().getResource("drools/autoload2");
 			File autoloadDirectory = new File(autoloadUrl.getPath());
 			if (autoloadDirectory.exists() && autoloadDirectory.isDirectory()) {
 				File[] autoloadFiles = autoloadDirectory.listFiles();
@@ -64,51 +64,48 @@ public class TesterBreastCancerTumorSize {
 	}
 
 	@Test
-	public void testTumorSize() {
+	public void testMoneDashOne() {
 
 		int idCounter = 0;
 
-		System.out.println("\nRunning testTumorSize\n");
+		System.out.println("\nRunning test M1-1\n");
 		
+		final List<FactHandle> factHandles = new ArrayList<FactHandle>();
+
 		KbGoal goal = new KbGoal();
 		goal.setId(idCounter++);
+		goal.setName("extract-tnm");
 		goal.setIsActive(1);
-		goal.setName("extract-tumor-size");
-
+		factHandles.add(session.insert(goal));
+	
 		KbPatient patient = new KbPatient();
 		patient.setId(idCounter++);
-
-		KbEncounter encOne = new KbEncounter();
-		encOne.setId(idCounter++);
-		encOne.setPatientId(patient.getId());
-		encOne.setSequence(0);
-		encOne.setIsActive(1);
-		encOne.setKind("Pathology Report");
-
-		TumorSize gte21Centimeters = new TumorSizeImpl();
-		gte21Centimeters.setId(idCounter++);
-		gte21Centimeters.setSummarizableId(encOne.getId());
-
-		session.insert(goal);
-		FactHandle handlePatient = session.insert(patient);
-		FactHandle handleEncOne = session.insert(encOne);
-		FactHandle handleGte21Centimeters = session.insert(gte21Centimeters);
-
+		factHandles.add(session.insert(patient));
+		
+		M1 m1 = new M1Impl();
+		m1.setId(idCounter++);
+		m1.setSummarizableId(patient.getId());
+		factHandles.add(session.insert(m1));
+	
 		long numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 4);
+		assertEquals(numberOfFactsInSession, factHandles.size());
 
-		final String[] rulesToTest = { "002_breastCancerTumorSize Tumor Size From First Reliable Encounter" };
+		final String[] rulesToTest = { "003_M1-1" };
 		CustomAgendaFilter customAgendaFilter = new CustomAgendaFilter(
 				rulesToTest);
 		int numRulesFired = session.fireAllRules(customAgendaFilter);
 		assertEquals(1, numRulesFired);
-
+	
 		numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 5);
+		assertEquals(numberOfFactsInSession, factHandles.size() + 3);
 
-		session.retract(handlePatient);
-		session.retract(handleEncOne);
-		session.retract(handleGte21Centimeters);
+		for (FactHandle factHandle : factHandles) {
+			session.retract(factHandle);
+		}
+		
+		numberOfFactsInSession = session.getFactCount();
+		assertEquals(numberOfFactsInSession, 3);
 	}
+
 
 }

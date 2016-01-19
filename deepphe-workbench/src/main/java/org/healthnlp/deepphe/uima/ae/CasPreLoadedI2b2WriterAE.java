@@ -11,7 +11,6 @@ import org.apache.uima.jcas.JCas;
 import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
 import org.healthnlp.deepphe.xfer.CtakesToDroolsConverter;
 
 public class CasPreLoadedI2b2WriterAE extends JCasAnnotator_ImplBase {
@@ -44,7 +43,7 @@ public class CasPreLoadedI2b2WriterAE extends JCasAnnotator_ImplBase {
 	
 	private void uploadPatientDAG()
 			throws CASException {
-		CtakesToDroolsConverter ctakesToJessConverter = new CtakesToDroolsConverter();
+		CtakesToDroolsConverter ctakesToJessConverter = CtakesToDroolsConverter.getInstance();
 		ctakesToJessConverter.setMultiJCas(multiJCas);
 		ctakesToJessConverter.setPatientJCas(patientJCas);
 		ctakesToJessConverter.setPatient(new KbPatient());

@@ -34,8 +34,8 @@ public class AnnotationsTree {
 
 	public void build() {
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
-		DefaultMutableTreeNode corpusNode = new DefaultMutableTreeNode(new AnnotationsCorporaUserObject());
-		root.add(corpusNode);
+		DefaultMutableTreeNode cohortNode = new DefaultMutableTreeNode(new AnnotationsCohortUserObject());
+		root.add(cohortNode);
 		Iterator<KbPatient> patientIterator = patients.iterator();
 		while (patientIterator.hasNext()) {
 			KbPatient kbPatient = patientIterator.next();
@@ -43,7 +43,10 @@ public class AnnotationsTree {
 			patientUserObject.setPatient(kbPatient);
 			DefaultMutableTreeNode patientNode = new DefaultMutableTreeNode(
 					patientUserObject);
-			corpusNode.add(patientNode);
+			cohortNode.add(patientNode);
+			
+			DefaultMutableTreeNode corporaNode = new DefaultMutableTreeNode(new AnnotationsCorporaUserObject());
+			patientNode.add(corporaNode);
 			Iterator<KbEncounter> encounterIterator = kbPatient.getEncounters()
 					.iterator();
 			while (encounterIterator.hasNext()) {
@@ -53,7 +56,7 @@ public class AnnotationsTree {
 				encounterUserObject.setEncounter(kbEncounter);
 				DefaultMutableTreeNode encounterNode = new DefaultMutableTreeNode(
 						encounterUserObject);
-				patientNode.add(encounterNode);
+				corporaNode.add(encounterNode);
 				
 				AnnotationsAnaforaUserObject anaforaUserObject = new AnnotationsAnaforaUserObject();
 				anaforaUserObject.setKbEncounter(kbEncounter);
@@ -65,6 +68,20 @@ public class AnnotationsTree {
 				encounterNode.add(new DefaultMutableTreeNode(
 						cTakesUserObject));
 			}
+			
+			AnnotationsSummaryUserObject summaryUserObject = new AnnotationsSummaryUserObject();
+			summaryUserObject.setPatient(kbPatient);
+			summaryUserObject.setProvider("DpheProvider:expert");
+			DefaultMutableTreeNode summaryNode = new DefaultMutableTreeNode(
+					summaryUserObject);
+			patientNode.add(summaryNode);
+			
+			summaryUserObject = new AnnotationsSummaryUserObject();
+			summaryUserObject.setPatient(kbPatient);
+			summaryUserObject.setProvider("DpheProvider:dphe");
+			summaryNode = new DefaultMutableTreeNode(
+					summaryUserObject);
+			patientNode.add(summaryNode);
 		}
 		tree = new JTree(root);
 

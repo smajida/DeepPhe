@@ -51,6 +51,10 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 
 	private boolean isSlicingOntology = false;
 
+	private I2b2DemoDataSourceManager i2b2DataDataSourceManager;
+	private I2b2OntologyBuilder i2b2OntologyBuilder;
+	private I2B2DataDataWriter i2b2DataDataWriter;
+
 	private AnnotationTabPanel annotationTabPanel;
 
 	private JButton confirmationButton = new JButton("Ok");
@@ -96,9 +100,7 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 
 	private void replaceI2b2Data() {
 		try {
-			final I2b2DemoDataSourceManager i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
-			setMessage("Initialized a connecton to I2B2");
-			final I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
+			setMessage("Initialized a connecton to I2B2");			
 			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
 			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE2");
 			setMessage("Clean out old data.");
@@ -172,8 +174,7 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 	private void sliceOntology() {
 		try {
 			if (partialPathTreeSet.isEmpty()) {
-				setMessage("Begin Ontology Slicing");
-				final I2b2OntologyBuilder i2b2OntologyBuilder = new I2b2OntologyBuilder();
+				setMessage("Begin Ontology Slicing");				
 				i2b2OntologyBuilder
 						.setOntologyPath(Workbench.PROJECT_LOCATION
 								+ ("\\src\\main\\resources\\ontology\\breastCancer.owl"));
@@ -191,7 +192,6 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 						.add("http://dbmi.pitt.edu/deepphe/ontologies/breastCancer.owl#Tumor_Size");
 				topLevelClses
 						.add("http://blulab.chpc.utah.edu/ontologies/SchemaOntology.owl#Stage");
-
 				i2b2OntologyBuilder.setTopLevelClses(topLevelClses);
 				i2b2OntologyBuilder.setPartialPathTreeSet(partialPathTreeSet);
 				i2b2OntologyBuilder.setPartialPathMap(partialPathMap);
@@ -297,6 +297,19 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 
 	public void setSlicingOntology(boolean isSlicingOntology) {
 		this.isSlicingOntology = isSlicingOntology;
+	}
+
+	public void setI2b2DataDataSourceManager(
+			I2b2DemoDataSourceManager i2b2DataDataSourceManager) {
+		this.i2b2DataDataSourceManager = i2b2DataDataSourceManager;
+	}
+
+	public void setI2b2OntologyBuilder(I2b2OntologyBuilder i2b2OntologyBuilder) {
+		this.i2b2OntologyBuilder = i2b2OntologyBuilder;
+	}
+
+	public void setI2b2DataDataWriter(I2B2DataDataWriter i2b2DataDataWriter) {
+		this.i2b2DataDataWriter = i2b2DataDataWriter;
 	}
 
 }

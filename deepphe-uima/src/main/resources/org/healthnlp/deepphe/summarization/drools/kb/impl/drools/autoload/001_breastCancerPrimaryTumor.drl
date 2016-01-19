@@ -1,0 +1,166 @@
+package org.healthnlp.deepphe.summarization.drools.rules;
+
+//list any import classes here.
+import org.healthnlp.deepphe.summarization.drools.kb.*;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+//declare any global variables here
+
+rule "001_breastCancerPrimaryTumor From First Encounter"
+    salience 1000
+    when
+        KbGoal (name == "extract-primary-tumor",
+                isActive > 0)
+        KbPatient( $patientId : id ) 
+        KbEncounter ($encounterOneId : id,
+                     $encounterOneSequence : sequence)
+        $encounterTumorRecent : Tumor ( summarizableId == $encounterOneId )
+        not
+        	Tumor (summarizableId == $patientId)  
+        not 
+        	(
+        	KbEncounter ($encounterTwoId : id,
+                     $encounterTwoSequence : sequence,
+                     $encounterTwoId != $encounterOneId,
+                     $encounterTwoSequence < $encounterOneSequence)             
+             and Tumor ( summarizableId == $encounterTwoId )
+             )
+    then           
+        Tumor patientTumor = beanCopyTumor($encounterTumorRecent);   
+        System.out.println("<DROOLS-ENGINE> Linking a " + patientTumor.getClass().getSimpleName() + " to the patient ");   
+        patientTumor.setSummarizableId($patientId);
+        Realizes realizes = new RealizesImpl();
+        realizes.setDomainId(patientTumor.getId());
+        realizes.setRangeId($encounterTumorRecent.getId());
+        realizes.setSummarizableId($patientId);
+        insert(patientTumor);
+        insert(realizes);
+end
+
+rule "001_breastCancerPrimaryTumor Transfer Attributes"
+    salience 950
+    when
+        KbGoal (name == "extract-primary-tumor",
+                isActive > 0)
+        KbPatient( $patientId : id ) 
+        KbEncounter ($encounterId : id)
+        Tumor ($patientTumorId : id, summarizableId == $patientId )
+        $encounterTumor : Tumor ($encounterTumorId : id, summarizableId == $encounterId )
+        Realizes(domainId == $encounterTumorId, rangeId == $patientTumorId)
+        $encounterRange : KbSummary($encounterRangeId : id,
+                              $encounterRangeCode : code,
+                              summarizableId == $encounterId,
+                isActive > 0)
+        $encounterRelation : KbRelation ($encounterRelationCode : code,
+                                  domainId == $encounterTumorId,
+                                  rangeId == $encounterRangeId,
+                                  summarizableId == $encounterId,
+                isActive > 0)      
+        not (
+            KbSummary ($patientRangeId : id,
+                       code == $encounterRangeCode,
+                       summarizableId == $patientId)            
+        	and KbRelation (code == $encounterRelationCode,
+                        domainId == $patientTumorId,
+                        rangeId == $patientRangeId,
+                        summarizableId == $patientId)
+            )
+    then     
+        KbSummary patientRange = (KbSummary) beanCopy($encounterRange);
+        KbRelation patientRelation = (KbRelation) beanCopy($encounterRelation);
+        patientRange.setSummarizableId($patientId);
+        patientRelation.setSummarizableId($patientId);
+        patientRelation.setDomainId($patientTumorId);
+        patientRelation.setRangeId(patientRange.getId());
+        insert(patientRange);
+        insert(patientRelation);
+        System.out.println("<DROOLS-ENGINE> Copied relation and range " +
+                patientRelation.getClass().getSimpleName() +
+                 " and " +
+                 patientRange.getClass().getSimpleName());
+        modify($encounterRelation) { setIsActive(0); }
+        modify($encounterRange) { setIsActive(0); }
+end
+
+rule "001_breastCancerPrimaryTumor Deactivate Encounter Tumor Attributes"
+    salience 900
+    when
+        KbGoal (name == "extract-primary-tumor",
+                isActive > 0)
+        KbEncounter ($encounterId : id)
+        Tumor ($encounterTumorId : id, summarizableId == $encounterId,
+                isActive > 0)
+        $encounterRange : KbSummary($encounterRangeId : id,
+                              summarizableId == $encounterId,
+                isActive > 0)
+        $encounterRelation : KbRelation (
+                                  domainId == $encounterTumorId,
+                                  rangeId == $encounterRangeId,
+                                  summarizableId == $encounterId,
+                isActive > 0)      
+        
+    then     
+            System.out.println("<DROOLS-ENGINE> Deactivating " +
+                $encounterRange.getClass().getSimpleName() +
+                 " and " +
+                 $encounterRelation.getClass().getSimpleName());
+        modify($encounterRange) { setIsActive(0); }
+        modify($encounterRelation) { setIsActive(0); }   
+end
+
+rule "001_breastCancerPrimaryTumor Deactivate Encounter Tumors"
+    salience 850
+    when
+        KbGoal (name == "extract-primary-tumor",
+                isActive > 0)
+        KbEncounter ($encounterId : id)
+        $encounterTumor : Tumor ($encounterTumorId : id, summarizableId == $encounterId,
+                isActive > 0 )    
+    then     
+        System.out.println("<DROOLS-ENGINE> Deactivating " +
+                $encounterTumor.getClass().getSimpleName());
+        modify($encounterTumor) { setIsActive(0); }   
+end
+
+rule "001_breastCancerPrimaryTumor Deactivate Realizes Re"
+    salience 800
+    when
+        KbGoal (name == "extract-primary-tumor",
+                isActive > 0)
+        $realizes : Realizes()
+    then     
+        System.out.println("<DROOLS-ENGINE> Removing Relizes Relation ");
+        retract($realizes);
+end
+
+rule "001_breastCancerPrimaryTumor Transition Goal State"
+	salience 500
+	when
+	    $g : KbGoal (name == "extract-primary-tumor",
+                isActive > 0)
+    then
+        System.out.println("<DROOLS-ENGINE> Achieved goal " + $g.getName());
+    	retract($g);
+    	
+    end
+    
+function KbSummaryInterface beanCopy(KbSummaryInterface summary) {
+			KbSummaryInterface result = null;
+		try {
+			Class<?> cls = summary.getClass();
+			Class<?>[] emptyClsParameters = {};
+			Constructor<?> constructor = cls.getConstructor(emptyClsParameters);
+			Object[] emptyObjParameters = {};
+			result = (KbSummaryInterface) constructor
+					.newInstance(emptyObjParameters);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+function Tumor beanCopyTumor(Tumor disease) {
+        return (Tumor) beanCopy(disease);
+        }
