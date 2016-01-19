@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Condition.ConditionStageComponent;
 import org.hl7.fhir.instance.model.Extension;
@@ -25,7 +26,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	 * @return
 	 */
 	public String getPrimaryTumorStage(){
-		Extension e = getExtension(Utils.CANCER_URL+"#"+Utils.T_STAGE);
+		Extension e = getExtension(FHIRUtils.CANCER_URL+"#"+FHIRUtils.T_STAGE);
 		return e != null? ((StringType)e.getValue()).getValue():null;
 	}
 	
@@ -39,7 +40,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	 * @return
 	 */
 	public CodeableConcept getPrimaryTumorStageCode(){
-		return getStageValue(Utils.T_STAGE);
+		return getStageValue(FHIRUtils.T_STAGE);
 	}
 	
 	
@@ -48,7 +49,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	 * @return
 	 */
 	public CodeableConcept getDistantMetastasisStageCode(){
-		return getStageValue(Utils.M_STAGE);
+		return getStageValue(FHIRUtils.M_STAGE);
 	}
 	
 	/**
@@ -56,7 +57,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	 * @return
 	 */
 	public CodeableConcept getRegionalLymphNodeStageCode(){
-		return getStageValue(Utils.N_STAGE);
+		return getStageValue(FHIRUtils.N_STAGE);
 	}
 	
 	
@@ -73,7 +74,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 		for(IClass c : cls.getSubClasses()){
 			for(String s: c.getConcept().getSynonyms()){
 				if(s.matches("\\b"+val+"\\b")){
-					return Utils.getCodeableConcept(c);
+					return FHIRUtils.getCodeableConcept(c);
 				}
 			}
 		}
@@ -86,7 +87,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	 * @return
 	 */
 	public String getDistantMetastasisStage(){
-		Extension e = getExtension(Utils.CANCER_URL+"#"+Utils.M_STAGE);
+		Extension e = getExtension(FHIRUtils.CANCER_URL+"#"+FHIRUtils.M_STAGE);
 		return e != null? ((StringType)e.getValue()).getValue():null;
 	}
 	
@@ -95,7 +96,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	 * @return
 	 */
 	public String getRegionalLymphNodeStage(){
-		Extension e = getExtension(Utils.CANCER_URL+"#"+Utils.N_STAGE);
+		Extension e = getExtension(FHIRUtils.CANCER_URL+"#"+FHIRUtils.N_STAGE);
 		return e != null? ((StringType)e.getValue()).getValue():null;
 	}
 	

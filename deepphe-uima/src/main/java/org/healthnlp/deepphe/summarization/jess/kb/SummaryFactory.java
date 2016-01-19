@@ -7,8 +7,8 @@ import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Observation;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.Stage;
-import org.healthnlp.deepphe.fhir.Utils;
 import org.healthnlp.deepphe.util.OntologyUtils;
+import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Condition;
 import org.hl7.fhir.instance.model.Quantity;
@@ -30,8 +30,8 @@ public class SummaryFactory {
 	 * @param s
 	 */
 	private static void setSummaryFromCode(CodeableConcept code, Summary s){
-		String cui = Utils.getConceptCode(code);
-		String name = Utils.getConceptName(code);
+		String cui = FHIRUtils.getConceptCode(code);
+		String name = FHIRUtils.getConceptName(code);
 		s.setCode(cui);
 		s.setBaseCode(cui);
 		s.setPreferredTerm(name);
@@ -187,18 +187,18 @@ public class SummaryFactory {
 				Condition.ConditionEvidenceComponent factor = null;
 				
 				// classify the evidence into several factories
-				if(cls.hasSuperClass(ont.getClass(Utils.PHENOTYPIC_FACTOR))){
+				if(cls.hasSuperClass(ont.getClass(FHIRUtils.PHENOTYPIC_FACTOR))){
 					factor = tumor.addPhenotypicFactors();
-				}else if(cls.hasSuperClass(ont.getClass(Utils.GENOMIC_FACTOR))){
+				}else if(cls.hasSuperClass(ont.getClass(FHIRUtils.GENOMIC_FACTOR))){
 					factor = tumor.addGenomicFactors();
-				}else if(cls.hasSuperClass(ont.getClass(Utils.TREATMENT_FACTOR))){
+				}else if(cls.hasSuperClass(ont.getClass(FHIRUtils.TREATMENT_FACTOR))){
 					factor = tumor.addTreatmentFactors();
 				}else{
 					factor = tumor.addRelatedFactors();
 				}
 				
 				if(factor != null){
-					factor.setCode(Utils.getCodeableConcept(cls));
+					factor.setCode(FHIRUtils.getCodeableConcept(cls));
 				}
 			}
 		}

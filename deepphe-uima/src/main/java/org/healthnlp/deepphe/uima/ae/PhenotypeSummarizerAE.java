@@ -98,7 +98,7 @@ public class PhenotypeSummarizerAE extends JCasAnnotator_ImplBase {
 	@Override
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
 		try {
-			Patient patient = new Patient();
+			patient = new Patient();
 			patient.setId(1);
 			for(Report r: PhenotypeResourceFactory.loadReports(jcas)){
 				Encounter enc = SummaryFactory.getEncounter(r);

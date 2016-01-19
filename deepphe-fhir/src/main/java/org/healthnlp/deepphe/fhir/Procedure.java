@@ -8,6 +8,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.Extension;
@@ -24,7 +25,7 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	}
 
 	public String getResourceIdentifier() {
-		return Utils.getIdentifier(getIdentifier());
+		return FHIRUtils.getIdentifier(getIdentifier());
 	}
 	
 	public String toString(){
@@ -44,7 +45,7 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	}
 
 	public void save(File dir) throws Exception {
-		Utils.saveFHIR(this,getResourceIdentifier(),dir);
+		FHIRUtils.saveFHIR(this,getResourceIdentifier(),dir);
 		
 	}
 
@@ -55,7 +56,7 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	public void setReport(Report r) {
 		Patient p = r.getPatient();
 		if(p != null){
-			setSubject(Utils.getResourceReference(p));
+			setSubject(FHIRUtils.getResourceReference(p));
 			setSubjectTarget(p);
 		}
 		// set date
@@ -66,7 +67,7 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	}
 	
 	public URI getConceptURI(){
-		return Utils.getConceptURI(getCode());
+		return FHIRUtils.getConceptURI(getCode());
 	}
 
 	public void copy(Resource r) {

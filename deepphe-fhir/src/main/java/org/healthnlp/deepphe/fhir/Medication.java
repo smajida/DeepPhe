@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 
+import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Resource;
 
@@ -28,7 +29,7 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 
 
 	public URI getConceptURI(){
-		return Utils.getConceptURI(getCode());
+		return FHIRUtils.getConceptURI(getCode());
 	}
 	
 	/**
@@ -40,7 +41,7 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	
 	
 	public void save(File dir) throws Exception {
-		Utils.saveFHIR(this,getResourceIdentifier(),dir);
+		FHIRUtils.saveFHIR(this,getResourceIdentifier(),dir);
 	}
 
 	public void copy(Resource r) {

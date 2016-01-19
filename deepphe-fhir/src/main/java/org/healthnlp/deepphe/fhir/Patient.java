@@ -8,6 +8,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.Address;
 import org.hl7.fhir.instance.model.Attachment;
 import org.hl7.fhir.instance.model.CodeableConcept;
@@ -24,7 +25,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	
 	public Patient(){
 		setActive(true);
-		//Utils.createIdentifier(addIdentifier(),this);
+		//FHIRUtils.createIdentifier(addIdentifier(),this);
 	}
 	
 	/**
@@ -49,7 +50,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 			hn.addFamily(name);
 		}
 		String id = getClass().getSimpleName().toUpperCase()+"_"+name.replaceAll("\\W+","_");
-		Utils.createIdentifier(addIdentifier(),id);
+		FHIRUtils.createIdentifier(addIdentifier(),id);
 	}
 	/**
 	 * get a simple name for a patient
@@ -91,7 +92,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	public void setCurrentDate(Date currentDate) {
 		// derive birhdate if available
 		if(yearsOld > 0){
-			Date bday = new Date(currentDate.getTime()-Utils.MILLISECONDS_IN_YEAR* yearsOld);
+			Date bday = new Date(currentDate.getTime()-FHIRUtils.MILLISECONDS_IN_YEAR* yearsOld);
 			setBirthDate(bday);
 		}
 	}
@@ -102,7 +103,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	}
 
 	public String getResourceIdentifier() {
-		return Utils.getIdentifier(getIdentifier());
+		return FHIRUtils.getIdentifier(getIdentifier());
 	}
 
 	public String getSummaryText() {
@@ -168,7 +169,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	}
 
 	public void save(File dir) throws Exception {
-		Utils.saveFHIR(this,getResourceIdentifier(),dir);
+		FHIRUtils.saveFHIR(this,getResourceIdentifier(),dir);
 	}
 
 	public void setReport(Report r) {
@@ -186,7 +187,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 
 	
 	public URI getConceptURI(){
-		return URI.create(Utils.CANCER_URL+"#"+Utils.PATIENT);
+		return URI.create(FHIRUtils.CANCER_URL+"#"+FHIRUtils.PATIENT);
 	}
 	
 	private void writeObject(ObjectOutputStream stream) throws IOException {
@@ -198,7 +199,7 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 	}
 
 	public CodeableConcept getCode() {
-		return Utils.getCodeableConcept(getConceptURI());
+		return FHIRUtils.getCodeableConcept(getConceptURI());
 	}
 
 }

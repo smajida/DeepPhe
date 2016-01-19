@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.util.TextUtils;
+import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Composition;
 import org.hl7.fhir.instance.model.Reference;
@@ -24,13 +27,14 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	private int offset;
 	//private CompositionEventComponent event;
 	private List<Element> reportElements;
+	private List<Summary> compositionSummary;
 	
 	/**
 	 * create a default report object
 	 */
 	public Report(){
 		setStatus(CompositionStatus.FINAL);
-		setLanguage(Utils.DEFAULT_LANGUAGE);
+		setLanguage(FHIRUtils.DEFAULT_LANGUAGE);
 		//event = addEvent();
 	}
 
@@ -53,17 +57,17 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * @param text
 	 */
 	public void setText(String text){
-		super.setText(Utils.getNarrative(text));
+		super.setText(FHIRUtils.getNarrative(text));
 	}
 	
 	public Composition setTitle(String value) {
-		setIdentifier(Utils.createIdentifier(getClass().getSimpleName().toUpperCase()+"_"+TextUtils.stripSuffix(value)));
+		setIdentifier(FHIRUtils.createIdentifier(getClass().getSimpleName().toUpperCase()+"_"+TextUtils.stripSuffix(value)));
 		return super.setTitle(value);
 	}
 
 
 	public String getReportText(){
-		return Utils.getText(getText());
+		return FHIRUtils.getText(getText());
 	}
 	
 	/**
@@ -97,7 +101,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * @param type
 	 */
 	public void setType(String type){
-		CodeableConcept tp = Utils.getDocumentType(type);
+		CodeableConcept tp = FHIRUtils.getDocumentType(type);
 		if(tp != null)
 			setType(tp);
 	}
@@ -118,7 +122,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * @return
 	 */
 	public List<Procedure> getProcedures() {
-		return (List<Procedure>) Utils.getSubList(getReportElements(),Procedure.class);
+		return (List<Procedure>) FHIRUtils.getSubList(getReportElements(),Procedure.class);
 	}
 
 	/**
@@ -126,7 +130,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * @return
 	 */
 	public List<Disease> getDiagnoses(){
-		return (List<Disease>) Utils.getSubList(getReportElements(),Disease.class);
+		return (List<Disease>) FHIRUtils.getSubList(getReportElements(),Disease.class);
 	}
 	
 	/**
@@ -134,7 +138,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * @return
 	 */
 	public List<Observation> getObservations(){
-		return (List<Observation>) Utils.getSubList(getReportElements(),Observation.class);
+		return (List<Observation>) FHIRUtils.getSubList(getReportElements(),Observation.class);
 	}
 	
 	/**
@@ -142,7 +146,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * @return
 	 */
 	public List<Finding> getFindings(){
-		return (List<Finding>) Utils.getSubList(getReportElements(),Finding.class);
+		return (List<Finding>) FHIRUtils.getSubList(getReportElements(),Finding.class);
 	}
 
 	/**
@@ -150,7 +154,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * @return
 	 */
 	public List<Medication> getMedications(){
-		return (List<Medication>) Utils.getSubList(getReportElements(),Medication.class);
+		return (List<Medication>) FHIRUtils.getSubList(getReportElements(),Medication.class);
 	}
 	
 	/**
@@ -168,7 +172,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		// add reference
 		CompositionEventComponent event = addEvent();
 		event.addCode(el.getCode());
-		event.addDetail(Utils.getResourceReference(el));
+		event.addDetail(FHIRUtils.getResourceReference(el));
 	}
 
 	
@@ -178,7 +182,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	}
 
 	public String getResourceIdentifier() {
-		return Utils.getIdentifier(getIdentifier());
+		return FHIRUtils.getIdentifier(getIdentifier());
 	}
 
 	public String toString(){
@@ -205,6 +209,13 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		for(Medication p: getMedications()){
 			st.append(p.getSummaryText()+"\n");
 		}
+		if(!getCompositionSummary().isEmpty()){
+			st.append("---\nSummaries:\n");
+			for(Summary s: getCompositionSummary()){
+				st.append(s.getSummaryText()+"\n");
+			}
+			st.append("---");
+		}
 		
 		return st.toString();
 	}
@@ -224,7 +235,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		String id = getResourceIdentifier();
 		
 		dir = new File(dir,TextUtils.stripSuffix(getTitle()));
-		Utils.saveFHIR(this,id,dir);
+		FHIRUtils.saveFHIR(this,id,dir);
 		
 		// go over components
 		Patient pt = getPatient();
@@ -240,7 +251,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	}
 
 	public URI getConceptURI(){
-		return URI.create(Utils.CANCER_URL+"#"+Utils.COMPOSITION);
+		return URI.create(FHIRUtils.CANCER_URL+"#"+FHIRUtils.COMPOSITION);
 	}
 
 
@@ -286,7 +297,20 @@ public class Report extends Composition implements Element, Comparable<Report>{
 
 
 	public CodeableConcept getCode() {
-		return Utils.getCodeableConcept(getConceptURI());
+		return FHIRUtils.getCodeableConcept(getConceptURI());
+	}
+	
+	public List<Summary> getCompositionSummary(){
+		if(compositionSummary == null)
+			compositionSummary = new ArrayList<Summary>();
+		return compositionSummary;
+	}
+	
+	public void addCompositionSummary(Summary s){
+		getCompositionSummary().add(s);
+	}
+	public void addCompositionSummaries(List<? extends Summary> s){
+		getCompositionSummary().addAll(s);
 	}
 	
 	/*private void writeObject(ObjectOutputStream stream) throws IOException {
