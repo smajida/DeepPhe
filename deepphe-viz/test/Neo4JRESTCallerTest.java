@@ -25,7 +25,7 @@ public class Neo4JRESTCallerTest {
 
 	
 	@Test
-	public void testGetNodesWithLabel() {
+	public void testGetPatients() {
 		String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
     	String username = "neo4j";
     	String password = "neo4jpass";
