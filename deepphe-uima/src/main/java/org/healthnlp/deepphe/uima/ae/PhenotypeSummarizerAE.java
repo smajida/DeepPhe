@@ -23,6 +23,7 @@ import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 public class PhenotypeSummarizerAE extends JCasAnnotator_ImplBase {
 
 	public static final String PARAM_CLIPS_DIRECTORY_PATH = "CLIPS_DIRECTORY_PATH";
+	
 	public static final String PARAM_ONTOLOGY_PATH = "ONTOLOGY_PATH";
 
 	private DroolsKnowledgeBaseAndSession engine;
