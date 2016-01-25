@@ -1,5 +1,6 @@
 package org.healthnlp.deepphe.uima.ae;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.uima.UimaContext;
@@ -43,7 +44,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		CancerSummary cancerSummary =  null;
 		
 		for(Report report: PhenotypeResourceFactory.loadReports(jcas)){
-			List<Summary> summaries = report.getCompositionSummary(); 
+			Collection<Summary> summaries = report.getCompositionSummaries(); 
 			
 			//TODO: this is where you can start with RULES
 			

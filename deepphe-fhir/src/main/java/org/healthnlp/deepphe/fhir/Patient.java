@@ -49,8 +49,8 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 		}else{
 			hn.addFamily(name);
 		}
-		String id = getClass().getSimpleName().toUpperCase()+"_"+name.replaceAll("\\W+","_");
-		FHIRUtils.createIdentifier(addIdentifier(),id);
+		//String id = getClass().getSimpleName().toUpperCase()+"_"+name.replaceAll("\\W+","_");
+		FHIRUtils.createIdentifier(addIdentifier(),this);
 	}
 	/**
 	 * get a simple name for a patient

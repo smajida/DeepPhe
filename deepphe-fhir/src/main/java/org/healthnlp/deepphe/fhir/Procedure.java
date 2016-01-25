@@ -106,4 +106,5 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
 		stream.defaultReadObject();
 	}
+	
 }

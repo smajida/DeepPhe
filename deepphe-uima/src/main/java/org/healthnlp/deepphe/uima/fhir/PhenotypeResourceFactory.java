@@ -135,8 +135,8 @@ public class PhenotypeResourceFactory {
 		
 		// save summaries for this report
 		i = 0;
-		comp.setHasCompositionSummary(new FSArray(jcas,r.getCompositionSummary().size()));		
-		for(Summary ss: r.getCompositionSummary()){
+		comp.setHasCompositionSummary(new FSArray(jcas,r.getCompositionSummaries().size()));		
+		for(Summary ss: r.getCompositionSummaries()){
 			org.healthnlp.deepphe.uima.types.Summary el = saveSummary(ss,jcas);
 			if(el != null){
 				comp.setHasCompositionSummary(i++,el);

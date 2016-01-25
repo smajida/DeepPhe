@@ -9,6 +9,8 @@ import java.net.URI;
 public class FHIRConstants {
 	public static final String MODEL_CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/modelCancer.owl";
 	public static final String NLP_CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl";
+	public static final String SCHEMA_URL = "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl";
+	
 	
 	public static final String INTERPRETATION_POSITIVE = "Positive";
 	public static final String INTERPRETATION_NEGATIVE = "Negative";
@@ -22,11 +24,11 @@ public class FHIRConstants {
 	public static final String CANCER_PHENOTYPE = "CancerPhenotype";
 	
 	public static final String DIAGNOSIS = "DiseaseDisorder";
-	public static final String PROCEDURE = "ProcedureIntervention";
+	public static final String PROCEDURE = "Procedure";
 	public static final String OBSERVATION = "Observation";
 	public static final String FINDING = "Finding";
-	public static final String MEDICATION = "Medication_FHIR";
-	public static final String ANATOMICAL_SITE = "AnatomicalSite";
+	public static final String MEDICATION = "MedicationStatement";
+	public static final String BODY_SITE = "BodySite";
 	public static final String TUMOR_SIZE = "Tumor_Size";
 	public static final String STAGE = "Generic_TNM_Finding";
 	public static final String AGE = "Age";
@@ -47,6 +49,18 @@ public class FHIRConstants {
 	public static final URI TUMOR_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"/"+TUMOR);
 	public static final URI CANCER_PHENOTYPE_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"/"+CANCER_PHENOTYPE);
 	public static final URI TUMOR_PHENOTYPE_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"/"+TUMOR_PHENOTYPE);
+	
+	
+	// mention level URIs
+	public static final URI OBSERVATION_URI = URI.create(SCHEMA_URL+"#"+OBSERVATION);
+	public static final URI FINDING_URI = URI.create(SCHEMA_URL+"#"+FINDING);
+	public static final URI DIAGNOSIS_URI = URI.create(SCHEMA_URL+"#"+DIAGNOSIS);
+	public static final URI PROCEDURE_URI = URI.create(SCHEMA_URL+"#"+PROCEDURE);
+	public static final URI MEDICATION_URI = URI.create(SCHEMA_URL+"#"+MEDICATION);
+	public static final URI BODY_SITE_URI = URI.create(SCHEMA_URL+"#"+BODY_SITE);
+	public static final URI PATIENT_URI = URI.create(SCHEMA_URL+"#"+PATIENT);
+	
+	
 	
 	//public static final URI TUMOR_SIZE_URI = URI.create(MODEL_CANCER_URL+"/"+TUMOR_PHENOTYPE);
 	

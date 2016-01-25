@@ -6,9 +6,12 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.healthnlp.deepphe.fhir.summary.Summary;
+import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.TextUtils;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
@@ -26,8 +29,8 @@ import org.hl7.fhir.instance.model.Resource;
 public class Report extends Composition implements Element, Comparable<Report>{
 	private int offset;
 	//private CompositionEventComponent event;
-	private List<Element> reportElements;
-	private List<Summary> compositionSummary;
+	private Map<String,Element> reportElements;
+	private Map<String,Summary> compositionSummary;
 	
 	/**
 	 * create a default report object
@@ -61,7 +64,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	}
 	
 	public Composition setTitle(String value) {
-		setIdentifier(FHIRUtils.createIdentifier(getClass().getSimpleName().toUpperCase()+"_"+TextUtils.stripSuffix(value)));
+		setIdentifier(FHIRUtils.createIdentifier(getClass().getSimpleName().toUpperCase()+"_"+TextUtils.stripSuffix(value)+"_"+Math.abs(getReportText().hashCode())));
 		return super.setTitle(value);
 	}
 
@@ -80,6 +83,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		Date dt = getDate();
 		if(dt != null)
 			p.setCurrentDate(dt);
+		addReportElement(p);
 	}
 	
 	public Patient getPatient(){
@@ -110,12 +114,19 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * get report elements
 	 * @return
 	 */
-	public List<Element> getReportElements() {
-		if(reportElements == null)
-			reportElements = new ArrayList<Element>();
-		return reportElements;
+	public Collection<Element> getReportElements() {
+		return getReportElementMap().values();
 	}
 
+	public Map<String,Element> getReportElementMap(){
+		if(reportElements == null)
+			reportElements = new LinkedHashMap<String,Element>();
+		return reportElements;
+	}
+	
+	public Element getReportElement(String id){
+		return getReportElementMap().get(id);
+	}
 
 	/**
 	 * get procedures
@@ -162,11 +173,11 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * @param dx
 	 */
 	public void addReportElement(Element el){
-		if(getReportElements().contains(el))
-			return;
+		//if(getReportElements().contains(el))
+		//	return;
 		
 		// add to list of diagnosis
-		getReportElements().add(el);
+		getReportElementMap().put(el.getResourceIdentifier(),el);
 		el.setReport(this);
 			
 		// add reference
@@ -209,9 +220,9 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		for(Medication p: getMedications()){
 			st.append(p.getSummaryText()+"\n");
 		}
-		if(!getCompositionSummary().isEmpty()){
+		if(!getCompositionSummaries().isEmpty()){
 			st.append("---\nSummaries:\n");
-			for(Summary s: getCompositionSummary()){
+			for(Summary s: getCompositionSummaries()){
 				st.append(s.getSummaryText()+"\n");
 			}
 			st.append("---");
@@ -300,17 +311,24 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		return FHIRUtils.getCodeableConcept(getConceptURI());
 	}
 	
-	public List<Summary> getCompositionSummary(){
+	public Collection<Summary> getCompositionSummaries(){
+		return getCompositionSummaryMap().values();
+	}
+	
+	public Map<String,Summary> getCompositionSummaryMap(){
 		if(compositionSummary == null)
-			compositionSummary = new ArrayList<Summary>();
+			compositionSummary = new LinkedHashMap<String,Summary>();
 		return compositionSummary;
 	}
 	
+	
 	public void addCompositionSummary(Summary s){
-		getCompositionSummary().add(s);
+		getCompositionSummaryMap().put(s.getResourceIdentifier(),s);
 	}
 	public void addCompositionSummaries(List<? extends Summary> s){
-		getCompositionSummary().addAll(s);
+		for(Summary ss: s){
+			addCompositionSummary(ss);
+		}
 	}
 	
 	/*private void writeObject(ObjectOutputStream stream) throws IOException {
