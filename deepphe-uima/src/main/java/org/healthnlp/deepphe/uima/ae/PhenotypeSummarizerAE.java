@@ -4,8 +4,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import jess.JessException;
-
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
