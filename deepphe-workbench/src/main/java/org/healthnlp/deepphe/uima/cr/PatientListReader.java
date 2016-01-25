@@ -7,8 +7,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
-import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
 
 public class PatientListReader {
 	
