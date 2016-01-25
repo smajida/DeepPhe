@@ -16,12 +16,14 @@ import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.uima.fhir.DocumentResourceFactory;
 import org.healthnlp.deepphe.util.TextUtils;
 
-import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
-import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
-import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
+/**
+ * create FHIR represetnation of documen mention level data in 
+ * document centric cTAKES pipeline
+ * @author tseytlin
+ *
+ */
 
 public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
-	public static final String POJO_TYPE = "POJO";
 	public static final String FHIR_TYPE = "FHIR";
 	public static final String XMI_TYPE = "XMI";
 	private String outputDir;
@@ -57,20 +59,9 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 				Patient patient = DocumentResourceFactory.getPatient(jcas);
 
 				String namedID = patient != null?patient.getPatientName():"unknown";
-				/*
-				 * Integer id = patientNameIDMap.get(namedID);
-				 * 
-				 * if(id==null){ patientID++; patientNameIDMap.put(namedID,
-				 * patientID);
-				 * 
-				 * id = patientID; }
-				 */
 				Report report = DocumentResourceFactory.getReport(jcas);
 				report.setTitle(TextUtils.stripSuffix(docID.getDocumentID()));
-				//System.out.println("\n\n-------------------------------------------------------------------\n");
-				//System.out.println(report.getSummaryText());
-				//System.out.println("\n===================================================================\n\n");
-
+		
 				// save FHIR related data
 				File patientDir = new File(new File(outputDir, FHIR_TYPE), namedID);
 				if (!patientDir.exists()) {

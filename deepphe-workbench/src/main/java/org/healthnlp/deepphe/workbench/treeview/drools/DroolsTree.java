@@ -11,12 +11,8 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import org.drools.KnowledgeBase;
 import org.drools.definition.rule.Rule;
-import org.drools.definition.type.FactType;
-import org.healthnlp.deepphe.summarization.drools.kb.KbIdentified;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
 import org.healthnlp.deepphe.workbench.DroolsKnowledgeBaseAndSession;
 import org.healthnlp.deepphe.workbench.IdentifiedObjectFilter;
 

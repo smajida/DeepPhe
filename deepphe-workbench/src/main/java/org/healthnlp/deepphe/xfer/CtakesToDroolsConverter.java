@@ -1,67 +1,140 @@
+
 package org.healthnlp.deepphe.xfer;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
-import org.apache.ctakes.cancer.receptor.StatusType;
-import org.apache.ctakes.cancer.receptor.StatusValue;
-import org.apache.ctakes.cancer.type.textsem.CancerSize;
-//import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
-import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
-import org.apache.ctakes.cancer.type.textsem.TnmClassification;
-import org.apache.ctakes.core.util.OntologyConceptUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
-import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
+import org.apache.ctakes.typesystem.type.relation.BinaryTextRelation;
+import org.apache.ctakes.typesystem.type.relation.RelationArgument;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.cas.FeatureStructure;
+import org.apache.uima.cas.Type;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.tcas.Annotation;
-import org.healthnlp.deepphe.summarization.drools.kb.EstrogenReceptorStatus;
-import org.healthnlp.deepphe.summarization.drools.kb.GenericDistantMetastasisTnmFinding;
-import org.healthnlp.deepphe.summarization.drools.kb.GenericPrimaryTumorTnmFinding;
-import org.healthnlp.deepphe.summarization.drools.kb.GenericRegionalLymphNodesTnmFinding;
-import org.healthnlp.deepphe.summarization.drools.kb.Her2NeuStatus;
-import org.healthnlp.deepphe.summarization.drools.kb.InvasiveBreastCarcinoma;
+import org.healthnlp.deepphe.summarization.drools.kb.HasAttribute;
 import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbIdentified;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 import org.healthnlp.deepphe.summarization.drools.kb.KbSummarizable;
 import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
-import org.healthnlp.deepphe.summarization.drools.kb.OrdinalInterpretation;
-import org.healthnlp.deepphe.summarization.drools.kb.ProgesteroneReceptorStatus;
-import org.healthnlp.deepphe.summarization.drools.kb.RelationHasinterpretation;
-import org.healthnlp.deepphe.summarization.drools.kb.TumorSize;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.EstrogenReceptorStatusImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.GenericDistantMetastasisTnmFindingImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.GenericPrimaryTumorTnmFindingImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.GenericRegionalLymphNodesTnmFindingImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.Her2NeuStatusImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.InvasiveBreastCarcinomaImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.NegativeImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.PositiveImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.ProgesteroneReceptorStatusImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.RelationHasinterpretationImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.TumorGreaterThanOrEqualTo21CentimetersImpl;
-import org.healthnlp.deepphe.summarization.drools.kb.impl.TumorLessThanOrEqualTo20CentimetersImpl;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.HasAttributeImpl;
 import org.healthnlp.deepphe.uima.ae.CasDetector;
 
+import com.google.common.reflect.ClassPath;
+import com.google.common.reflect.Reflection;
+
 public class CtakesToDroolsConverter {
-	
+
+	private static CtakesToDroolsConverter singleton = null;
+
 	private JCas multiJCas;
 	private JCas patientJCas;
 	private KbPatient patient;
-	
-	public CtakesToDroolsConverter() {
-		;
+
+	private final Map<String, ClassPath.ClassInfo> clazzInfoMap = new HashMap<>();
+
+	public static void main(String[] args) throws ClassNotFoundException {
+		try {
+			CtakesToDroolsConverter converter = CtakesToDroolsConverter
+					.getInstance();
+			converter.displayClazzes();
+			converter.testDagConversion();
+		} catch (NoSuchMethodException | SecurityException
+				| InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
+			e.printStackTrace();
+		}
 	}
-	
-	public void execute() throws CASException {
+
+	public static CtakesToDroolsConverter getInstance() {
+		if (singleton == null) {
+			singleton = new CtakesToDroolsConverter();
+		}
+		return singleton;
+	}
+
+	public CtakesToDroolsConverter() {
+		try {
+			ClassLoader classloader = getClass().getClassLoader();
+			String pkgName = Reflection.getPackageName(KbIdentified.class)
+					+ ".impl";
+			ClassPath classpath = ClassPath.from(classloader);
+			for (ClassPath.ClassInfo clazzInfo : classpath
+					.getTopLevelClasses(pkgName)) {
+				String simpleClazzName = StringUtils.substringAfterLast(
+						clazzInfo.toString(), ".");
+				clazzInfoMap.put(simpleClazzName, clazzInfo);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void displayClazzes() {
+		if (!clazzInfoMap.isEmpty()) {
+			final TreeSet<String> sortedKeys = new TreeSet<>();
+			sortedKeys.addAll(clazzInfoMap.keySet());
+			for (String key : sortedKeys) {
+				System.out.println(key + " ==> " + clazzInfoMap.get(key));
+			}
+		}
+	}
+
+	private void testDagConversion() throws NoSuchMethodException,
+			SecurityException, InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException,
+			ClassNotFoundException {
+		KbEncounter summarizable = new KbEncounter();
+		final TreeSet<String> sortedKeys = new TreeSet<>();
+		sortedKeys.addAll(clazzInfoMap.keySet());
+		for (String key : sortedKeys) {
+			ClassPath.ClassInfo clsInfo = (ClassPath.ClassInfo) clazzInfoMap
+					.get(key);
+			KbSummary domainSummary = constructKbSummaryFromClassInfo(clsInfo);
+			KbSummary rangeSummary = constructKbSummaryFromClassInfo(clsInfo);
+			HasAttribute hasAttribute = new HasAttributeImpl();
+			hasAttribute.setSummarizableId(summarizable.getId());
+			hasAttribute.setDomainId(domainSummary.getId());
+			hasAttribute.setRangeId(rangeSummary.getId());
+			summarizable.addSummary(domainSummary);
+			summarizable.addSummary((KbSummary) hasAttribute);
+			summarizable.addSummary(rangeSummary);
+		}
+		System.out.println(summarizable.fetchInfo());
+
+	}
+
+	public void execute() {
+		try {
+			tryExecute();
+		} catch (CASException | NoSuchMethodException | SecurityException
+				| InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException
+				| ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void tryExecute() throws CASException, NoSuchMethodException,
+			SecurityException, InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException,
+			ClassNotFoundException {
 		patient.setId(parseIdFromViewKey(patientJCas.getViewName()));
 		for (Iterator<JCas> iterator = multiJCas.getViewIterator(); iterator
 				.hasNext();) {
@@ -69,204 +142,130 @@ public class CtakesToDroolsConverter {
 			System.out.println(summarizableCas.getViewName());
 			if (CasDetector.isPatientJCas(summarizableCas)) {
 				getSummariesForSummarizable(patient, summarizableCas);
-			}
-			else if (CasDetector.isEncounterJCas(summarizableCas)) {
+			} else if (CasDetector.isEncounterJCas(summarizableCas)) {
 				KbEncounter encounter = new KbEncounter();
 				encounter.setPatientId(patient.getId());
-				encounter.setId(parseIdFromViewKey(summarizableCas.getViewName()));
+				encounter.setId(parseIdFromViewKey(summarizableCas
+						.getViewName()));
 				encounter.setSequence(encounter.getId());
 				encounter.setKind("Pathology Report");
 				getSummariesForSummarizable(encounter, summarizableCas);
-				patient.addEncounter(encounter);			
+				patient.addEncounter(encounter);
 			}
 		}
 	}
-	
-	public void getSummariesForSummarizable(KbSummarizable summarizable, JCas summarizableJCas) {
 
-		List<IdentifiedAnnotation> identifiedAnnotations = new ArrayList<IdentifiedAnnotation>();
-		identifiedAnnotations.addAll(getAnnotationsByType(summarizableJCas,
-				DiseaseDisorderMention.type));
-		identifiedAnnotations.addAll(getAnnotationsByType(summarizableJCas,
-				TnmClassification.type));
-		identifiedAnnotations.addAll(getAnnotationsByType(summarizableJCas,
-				CancerSize.type));
-		// Why build a list like this and then iterate with a switch by type?
-//		identifiedAnnotations.addAll(getAnnotationsByType(summarizableJCas,
-//				ReceptorStatus.type));
+	private Type getUimaTypeFromJavaClass(JCas cas, Class<?> uimaJavaCls) {
+		Type result = null;
+		try {
+			Constructor<?> constructorType = uimaJavaCls
+					.getDeclaredConstructor(JCas.class);
+			Object o = constructorType.newInstance(cas);
+			Method getTypeMethod = uimaJavaCls.getMethod("getType");
+			result = (Type) getTypeMethod.invoke(o);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 
-		int groupIndex = 0;
+	public void getSummariesForSummarizable(KbSummarizable summarizable,
+			JCas summarizableJCas) {
+		try {
+			tryGetSummariesForSummarizable(summarizable, summarizableJCas);
+		} catch (NoSuchMethodException | SecurityException
+				| InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException
+				| ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
 
-		for (IdentifiedAnnotation identifiedAnnotation : identifiedAnnotations) {
+	private void tryGetSummariesForSummarizable(KbSummarizable summarizable,
+			JCas summarizableJCas) throws NoSuchMethodException,
+			SecurityException, InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException,
+			ClassNotFoundException {
+		final Set<IdentifiedAnnotation> touchedAnnotations = new HashSet<IdentifiedAnnotation>();
+		Type binaryTextRelationType = getUimaTypeFromJavaClass(
+				summarizableJCas, BinaryTextRelation.class);
+		Iterator<FeatureStructure> it = summarizableJCas.getFSIndexRepository()
+				.getAllIndexedFS(binaryTextRelationType);
+		while (it.hasNext()) {
+			BinaryTextRelation br = (BinaryTextRelation) it.next();
+			RelationArgument domainArg = br.getArg1();
+			RelationArgument rangeArg = br.getArg2();
+			Annotation domainAnnotation = domainArg.getArgument();
+			Annotation rangeAnnotation = rangeArg.getArgument();
+			if (IdentifiedAnnotation.class.isAssignableFrom(domainAnnotation
+					.getClass())
+					&& IdentifiedAnnotation.class
+							.isAssignableFrom(rangeAnnotation.getClass())) {
 
-			UmlsConcept umlsConcept = getUmlsConceptForIdentifiedAnnotation(identifiedAnnotation);
-			switch (identifiedAnnotation.getClass().getSimpleName()) {
+				IdentifiedAnnotation domainIdentifiedAnnot = (IdentifiedAnnotation) domainAnnotation;
+				IdentifiedAnnotation rangeIdentifiedAnnot = (IdentifiedAnnotation) rangeAnnotation;
+				KbSummary domainSummary = xferIdentifiedAnnotationToKbSummary(domainIdentifiedAnnot);
+				KbSummary rangeSummary = xferIdentifiedAnnotationToKbSummary(rangeIdentifiedAnnot);
 
-			case "DiseaseDisorderMention":
-				processDiseaseDisorderMention(summarizable, summarizableJCas, identifiedAnnotation, umlsConcept);
-				break;
-				
-			case "TnmClassification":
-				processTnmClassification(summarizable, summarizableJCas,
-						identifiedAnnotation, umlsConcept, groupIndex);
-				groupIndex++;
-				break;
-
-			case "CancerSize":
-				processCancerSize(summarizable, summarizableJCas,
-						identifiedAnnotation, umlsConcept);
-				break;
-
-			case "ReceptorStatus":
-				processReceptorStatus(summarizable, umlsConcept);
-				break;
-
-			default:
-				break;
-
+				if (domainSummary != null && rangeSummary != null) {
+					touchedAnnotations.add(domainIdentifiedAnnot);
+					touchedAnnotations.add(rangeIdentifiedAnnot);
+					domainSummary.setSummarizableId(summarizable.getId());
+					rangeSummary.setSummarizableId(summarizable.getId());
+					HasAttribute hasAttribute = new HasAttributeImpl();
+					hasAttribute.setSummarizableId(summarizable.getId());
+					hasAttribute.setDomainId(domainSummary.getId());
+					hasAttribute.setRangeId(rangeSummary.getId());
+					summarizable.addSummary(domainSummary);
+					summarizable.addSummary((KbSummary) hasAttribute);
+					summarizable.addSummary(rangeSummary);
+				}
+			}
+			List<IdentifiedAnnotation> identifiedAnnotations = new ArrayList<IdentifiedAnnotation>();
+			identifiedAnnotations.addAll(getAnnotationsByType(summarizableJCas,
+					IdentifiedAnnotation.type));
+			for (IdentifiedAnnotation identifiedAnnotation : identifiedAnnotations) {
+				KbSummary summary = xferIdentifiedAnnotationToKbSummary(identifiedAnnotation);
+				if (!touchedAnnotations.contains(identifiedAnnotation)) {
+					summarizable.addSummary(summary);
+				}
 			}
 		}
-
-		OwlOntologyConceptUtil.getAnnotationsByUriBranch( summarizableJCas, StatusType.PARENT_URI )
-				.stream()
-				.map( OntologyConceptUtil::getConcepts )
-				.flatMap( Collection::stream )
-				.forEach( umls -> processReceptorStatus( summarizable, umls ) );
 	}
 
-	private void processDiseaseDisorderMention(KbSummarizable summarizable,
-			JCas encounterJCas, IdentifiedAnnotation identifiedAnnotation,
-			UmlsConcept umlsConcept) {
-		String cui = getCuiForUmlsConcept(umlsConcept);
-		if (cui.equals("C1134719")) {
-			InvasiveBreastCarcinoma diagnosis = new InvasiveBreastCarcinomaImpl();
-			diagnosis.setSummarizableId(summarizable.getId());
-			diagnosis.setBaseCode(cui);
-			diagnosis.setCode(cui);
-			diagnosis.setPreferredTerm("Invasive Ductal Breast Carcinoma");
-			diagnosis.setValue("NA");			
-			summarizable.addSummary((KbSummary) diagnosis);
+	private KbSummary xferIdentifiedAnnotationToKbSummary(
+			IdentifiedAnnotation identifiedAnnot) throws NoSuchMethodException,
+			SecurityException, InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException,
+			ClassNotFoundException {
+		UmlsConcept umlsConcept = getUmlsConceptForIdentifiedAnnotation(identifiedAnnot);
+		String uri = getUriForOntologyConcept(umlsConcept);
+		ClassPath.ClassInfo classInfo = clazzInfoMap.get(uri);
+		KbSummary result = null;
+		if (classInfo == null) {
+			System.err.println("No mapping available for uri = " + uri);
+		} else {
+			result = constructKbSummaryFromClassInfo(classInfo);
+			result.setSpos(identifiedAnnot.getBegin());
+			result.setEpos(identifiedAnnot.getEnd());
 		}
+		return result;
 	}
 
-	private void processReceptorStatus(KbSummarizable summarizable,
-			UmlsConcept umlsConcept) {
-		
-		String cui = getCuiForUmlsConcept(umlsConcept);
-
-		switch (cui) {
-			// It might be better to use self-documenting constants here
-			// Could -- import static StatusType.*;   import static StatusValue.*;
-			// Could use -- case ER.getCui( NEGATIVE ) :
-			case "C0279756": // Negative Estrogen Receptor
-			RelationHasinterpretation receptorStatusSummary = new RelationHasinterpretationImpl();
-			EstrogenReceptorStatus erStatus = new EstrogenReceptorStatusImpl();
-			OrdinalInterpretation erInterpretation = new NegativeImpl();
-			receptorStatusSummary.setDomainId(erStatus.getId());
-			receptorStatusSummary.setRangeId(erInterpretation.getId());
-			receptorStatusSummary.setSummarizableId(summarizable.getId());
-			receptorStatusSummary.setBaseCode(cui);
-			receptorStatusSummary.setCode(cui);
-			receptorStatusSummary.setPreferredTerm(getPreferredTermForUmlsConcept(umlsConcept));
-			receptorStatusSummary.setValue("negative");			
-			summarizable.addSummary((KbSummary)receptorStatusSummary);
-			break;
-			// Could use -- case PR.getCui( NEGATIVE ) :
-			case "C0279766": // Negative Progesterone Receptor
-			receptorStatusSummary = new RelationHasinterpretationImpl();
-			ProgesteroneReceptorStatus prStatus = new ProgesteroneReceptorStatusImpl();
-			OrdinalInterpretation prInterpretation = new NegativeImpl();
-			receptorStatusSummary.setDomainId(prStatus.getId());
-			receptorStatusSummary.setRangeId(prInterpretation.getId());
-			receptorStatusSummary.setSummarizableId(summarizable.getId());
-			receptorStatusSummary.setBaseCode(cui);
-			receptorStatusSummary.setCode(cui);
-			receptorStatusSummary.setPreferredTerm(getPreferredTermForUmlsConcept(umlsConcept));
-			receptorStatusSummary.setValue("negative");			
-			summarizable.addSummary((KbSummary)receptorStatusSummary);
-			break;
-			// Could use -- case HER2.getCui( POSITIVE ) :
-			case "C1960398": // Positive Human epidermal growth factor receptor 2
-			receptorStatusSummary = new RelationHasinterpretationImpl();
-			Her2NeuStatus her2NeuStatus = new Her2NeuStatusImpl();
-			OrdinalInterpretation her2NeuInterpretation = new PositiveImpl();
-			receptorStatusSummary.setDomainId(her2NeuStatus.getId());
-			receptorStatusSummary.setRangeId(her2NeuInterpretation.getId());
-			receptorStatusSummary.setSummarizableId(summarizable.getId());
-			receptorStatusSummary.setBaseCode(cui);
-			receptorStatusSummary.setCode(cui);
-			receptorStatusSummary.setPreferredTerm(getPreferredTermForUmlsConcept(umlsConcept));
-			receptorStatusSummary.setValue("positive");			
-			summarizable.addSummary((KbSummary)receptorStatusSummary);
-			break;
-		default:
-			break;
-		}
-
+	private KbSummary constructKbSummaryFromClassInfo(
+			ClassPath.ClassInfo classInfo) throws NoSuchMethodException,
+			SecurityException, InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException,
+			ClassNotFoundException {
+		final Class<?>[] emptyClsSignature = {};
+		final Object[] emptyObjs = {};
+		Constructor<?> constructor = Class.forName(classInfo.getName())
+				.getConstructor(emptyClsSignature);
+		return (KbSummary) constructor.newInstance(emptyObjs);
 	}
 
-	private void processCancerSize(KbSummarizable summarizable, JCas encounterJCas,
-			IdentifiedAnnotation identifiedAnnotation, UmlsConcept umlsConcept) {
-	
-		CancerSize cancerSize = (CancerSize) identifiedAnnotation;
-		FSArray measurementsArray = cancerSize.getMeasurements();
-		double maxSize = -1.0d;
-		for (int idx = 0; idx < measurementsArray.size(); idx++) {
-			SizeMeasurement sizeMeasurement = cancerSize.getMeasurements(idx);
-			float valueAsFloat = sizeMeasurement.getValue();
-			double valueAsDouble = (double) valueAsFloat;
-			if (valueAsDouble  > maxSize) {
-				maxSize = valueAsDouble;
-			}			
-		}
-		
-		if (maxSize > 0.0d) {
-			System.out.println("Got size measurement of " + maxSize);		
-			TumorSize tumorSize;
-			if (maxSize >= 2.0d) {
-				tumorSize = new TumorGreaterThanOrEqualTo21CentimetersImpl();
-				tumorSize.setBaseCode("C120286");
-				tumorSize.setCode("C120286");
-				tumorSize
-						.setPreferredTerm("Tumor Greater Than or Equal to 2.1 Centimeters");
-			} else {
-				tumorSize = new TumorLessThanOrEqualTo20CentimetersImpl();
-				tumorSize.setBaseCode("C120285");
-				tumorSize.setCode("C120285");
-				tumorSize
-						.setPreferredTerm("Tumor Less Than or Equal to 2.0 Centimeters");
-			}
-			summarizable.addSummary((KbSummary)tumorSize);
-		}
-		
-	}
-
-	private void processTnmClassification(KbSummarizable summarizable,
-			JCas encounterJCas, IdentifiedAnnotation identifiedAnnotation,
-			UmlsConcept umlsConcept, int groupIndex) {
-
-		GenericPrimaryTumorTnmFinding tnmTgrade = new GenericPrimaryTumorTnmFindingImpl();
-		tnmTgrade.setSummarizableId(summarizable.getId());
-		tnmTgrade.setCode(getCuiForUmlsConcept(umlsConcept));
-		tnmTgrade.setBaseCode("T");
-		tnmTgrade.setIsActive(1);
-		tnmTgrade.setUnitOfMeasure("NA");
-		summarizable.getSummaries().add((KbSummary)tnmTgrade);
-
-		GenericRegionalLymphNodesTnmFinding tnmNgrade = new GenericRegionalLymphNodesTnmFindingImpl();
-		tnmNgrade.setSummarizableId(summarizable.getId());
-		tnmNgrade.setBaseCode("N");
-		tnmNgrade.setCode(getCuiForUmlsConcept(umlsConcept));
-		tnmNgrade.setUnitOfMeasure("NA");
-		summarizable.addSummary((KbSummary)tnmNgrade);
-
-		GenericDistantMetastasisTnmFinding tnmMgrade = new GenericDistantMetastasisTnmFindingImpl();
-		tnmMgrade.setSummarizableId(summarizable.getId());
-		tnmMgrade.setBaseCode("M");
-		tnmMgrade.setCode(getCuiForUmlsConcept(umlsConcept));
-		tnmMgrade.setUnitOfMeasure("NA");
-		summarizable.addSummary((KbSummary)tnmMgrade);
-
+	private String getUriForOntologyConcept(UmlsConcept umlsConcept) {
+		return (umlsConcept == null) ? "UNKNOWN" : umlsConcept.getCui();
 	}
 
 	public UmlsConcept getUmlsConceptForIdentifiedAnnotation(
@@ -279,15 +278,6 @@ public class CtakesToDroolsConverter {
 			}
 		}
 		return result;
-	}
-
-	private String getCuiForUmlsConcept(UmlsConcept umlsConcept) {
-		return (umlsConcept == null) ? "UNKNOWN" : umlsConcept.getCui();
-	}
-
-	private String getPreferredTermForUmlsConcept(UmlsConcept umlsConcept) {
-		return (umlsConcept == null) ? "UNKNOWN" : umlsConcept
-				.getPreferredText();
 	}
 
 	private FeatureStructure[] getFeatureStructures(
@@ -342,6 +332,5 @@ public class CtakesToDroolsConverter {
 	public void setPatient(KbPatient patient) {
 		this.patient = patient;
 	}
-
 
 }

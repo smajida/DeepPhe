@@ -6,6 +6,8 @@ import java.math.MathContext;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
+
+import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Quantity;
@@ -21,7 +23,7 @@ import org.hl7.fhir.instance.model.Type;
 public class Observation extends org.hl7.fhir.instance.model.Observation implements Element{
 	public Observation(){
 		setStatus(ObservationStatus.FINAL);
-		//setLanguage(Utils.DEFAULT_LANGUAGE); // we only care about English
+		//setLanguage(FHIRUtils.DEFAULT_LANGUAGE); // we only care about English
 	}
 	
 	public String getDisplayText() {
@@ -29,7 +31,7 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	}
 
 	public String getResourceIdentifier() {
-		return Utils.getIdentifier(getIdentifier());
+		return FHIRUtils.getIdentifier(getIdentifier());
 	}
 
 	public String getSummaryText() {
@@ -44,7 +46,7 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 		// set patient
 		Patient p = r.getPatient();
 		if(p != null){
-			setSubject(Utils.getResourceReference(p));
+			setSubject(FHIRUtils.getResourceReference(p));
 			setSubjectTarget(p);
 		}
 		// set date
@@ -57,7 +59,7 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	public void setValue(String value, String unit){
 		setValue(Double.parseDouble(value),unit);
 		String ident = getClass().getSimpleName().toUpperCase()+"_"+getDisplayText(); 
-		addIdentifier(Utils.createIdentifier((ident+"_"+getObservationValue()).replaceAll("\\W+","_")));
+		addIdentifier(FHIRUtils.createIdentifier((ident+"_"+getObservationValue()).replaceAll("\\W+","_")));
 	}
 	
 	public void setValue(double value, String unit){
@@ -88,7 +90,7 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	
 	
 	public void save(File dir) throws Exception {
-		Utils.saveFHIR(this,getResourceIdentifier(),dir);
+		FHIRUtils.saveFHIR(this,getResourceIdentifier(),dir);
 	}
 
 	public void copy(Resource r) {
@@ -125,6 +127,6 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 		return getDisplayText();
 	}
 	public URI getConceptURI(){
-		return Utils.getConceptURI(getCode());
+		return FHIRUtils.getConceptURI(getCode());
 	}
 }

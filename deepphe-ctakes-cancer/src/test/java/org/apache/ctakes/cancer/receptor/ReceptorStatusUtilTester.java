@@ -78,7 +78,8 @@ public class ReceptorStatusUtilTester {
    @BeforeClass
    static public void loadOntology() {
       try {
-         OwlConnectionFactory.getInstance().getOntology( "data/ontology/breastCancer.owl" );
+    	  // "data/ontology/breastCancer.owl" 
+         OwlConnectionFactory.getInstance().getOntology("http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl");
       } catch ( IOntologyException | FileNotFoundException multE ) {
          LOGGER.error( multE.getMessage() );
       }

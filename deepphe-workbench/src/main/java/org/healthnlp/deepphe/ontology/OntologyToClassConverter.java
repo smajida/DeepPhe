@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.healthnlp.deepphe.summarization.jess.kb.Summary;
+import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
 
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
@@ -45,18 +45,18 @@ public class OntologyToClassConverter {
 	}
 
 	private void tryExcecute() throws IOException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Class<?> kbCls = Summary.class;
+		Class<?> kbCls = KbSummary.class;
 		String kbPkg = kbCls.getPackage().getName();
 		ClassPath classPath = ClassPath.from(kbCls.getClassLoader());
 		Set<ClassInfo> clsInfos = classPath
 				.getTopLevelClassesRecursive(kbPkg);
 		for (ClassInfo clsInfo : clsInfos) {
 			Class<?> cls = clsInfo.load();
-			if (Summary.class.isAssignableFrom(cls)) {
+			if (KbSummary.class.isAssignableFrom(cls)) {
 				Class<?>[] emptyParameters = {};
 				Constructor<?> constructor = cls.getConstructor(emptyParameters);
 				Object[] emptyObjects = {};
-				Summary summary = (Summary) constructor.newInstance(emptyObjects);
+				KbSummary summary = (KbSummary) constructor.newInstance(emptyObjects);
 				String umlsCode = summary.getCode();
 				if (umlsCode.startsWith("umls:")) {
 					umlsCode = StringUtils.substringAfter(umlsCode, "umls:");

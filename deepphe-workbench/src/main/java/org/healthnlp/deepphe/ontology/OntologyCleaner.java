@@ -16,6 +16,8 @@ import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
+import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
+import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class OntologyCleaner extends JDialog implements Runnable {
@@ -25,6 +27,11 @@ public class OntologyCleaner extends JDialog implements Runnable {
 	private String message;
 	private TreeSet<PartialPath> partialPathTreeSet;
 	private HashMap<String, PartialPath> partialPathMap;
+	
+	private I2b2DemoDataSourceManager i2b2DataDataSourceManager;
+	private I2b2OntologyBuilder i2b2OntologyBuilder;
+	private I2B2DataDataWriter i2b2DataDataWriter;
+	private MetaDataDbManager metaDataDbManager;
 
 	private JTextPane messageText;
 	private JScrollPane paneScrollPane;
@@ -45,7 +52,6 @@ public class OntologyCleaner extends JDialog implements Runnable {
 	public void run() {
 		try {
 			setMessage("Begin Ontology Slicing");
-			final I2b2OntologyBuilder i2b2OntologyBuilder = new I2b2OntologyBuilder();
 			i2b2OntologyBuilder
 					.setOntologyPath("..\\ontologies\\BreastCancer.owl");
 			i2b2OntologyBuilder.setSourceSystemCode("DEEPPHE2");
@@ -70,7 +76,7 @@ public class OntologyCleaner extends JDialog implements Runnable {
 			setMessage("Done slicing Ontology");
 
 			setMessage("Populating metadata database");
-			final MetaDataDbManager metaDataDbManager = new MetaDataDbManager();
+			metaDataDbManager = new MetaDataDbManager();
 			metaDataDbManager.setOntologyTableName("DEEPPHE2_ONTOLOGY");
 			metaDataDbManager.setSourceSystemCode("DEEPPHE2");
 			metaDataDbManager.setPartialPaths(partialPathTreeSet);
@@ -110,6 +116,38 @@ public class OntologyCleaner extends JDialog implements Runnable {
 
 	public void setPartialPathMap(HashMap<String, PartialPath> partialPathMap) {
 		this.partialPathMap = partialPathMap;
+	}
+
+	public I2b2DemoDataSourceManager getI2b2DataDataSourceManager() {
+		return i2b2DataDataSourceManager;
+	}
+
+	public void setI2b2DataDataSourceManager(I2b2DemoDataSourceManager i2b2DataDataSourceManager) {
+		this.i2b2DataDataSourceManager = i2b2DataDataSourceManager;
+	}
+
+	public I2b2OntologyBuilder getI2b2OntologyBuilder() {
+		return i2b2OntologyBuilder;
+	}
+
+	public void setI2b2OntologyBuilder(I2b2OntologyBuilder i2b2OntologyBuilder) {
+		this.i2b2OntologyBuilder = i2b2OntologyBuilder;
+	}
+
+	public I2B2DataDataWriter getI2b2DataDataWriter() {
+		return i2b2DataDataWriter;
+	}
+
+	public void setI2b2DataDataWriter(I2B2DataDataWriter i2b2DataDataWriter) {
+		this.i2b2DataDataWriter = i2b2DataDataWriter;
+	}
+
+	public MetaDataDbManager getMetaDataDbManager() {
+		return metaDataDbManager;
+	}
+
+	public void setMetaDataDbManager(MetaDataDbManager metaDataDbManager) {
+		this.metaDataDbManager = metaDataDbManager;
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {

@@ -1,14 +1,17 @@
 package org.healthnlp.deepphe.workbench.controller;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.uima.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.ConceptDimension;
@@ -24,6 +27,7 @@ import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
 import org.healthnlp.deepphe.workbench.digestion.ExpertDocument;
+import org.healthnlp.deepphe.workbench.form.FormDataBean;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -46,7 +50,7 @@ public class Controller {
 	private String parsedPatientLimsId;
 	private String parsedVisitLimsId;
 	private String parsedNoteKind;
-	private long idCounter = 0L;
+	private long idCounter = 1000000L;
 	
 	// Roving window of the star
 	private PatientDimension currentDbPatient;
@@ -78,8 +82,8 @@ public class Controller {
 	public Controller() {
 		i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
 		i2b2DataSession = i2b2DataDataSourceManager.getSession();
-		findMaxIdFromObservationFact();
-		findMaxIdFromProviderDimension();
+//		findMaxIdFromObservationFact();
+//		findMaxIdFromProviderDimension();
 		findOrCreateProvider("DpheProvider:cTakes");
 		findOrCreateConcept("DpheConcept:coded");
 		cTakesDbProvider = currentDbProvider;
@@ -101,6 +105,43 @@ public class Controller {
 	public void uploadFsDirectoryToRdbms() throws IOException {
 		uploadFsDirectoryRawTexts();
 		uploadFsDirectoryAnaforaTexts();
+		buildSummaryFormsForPatients();
+	}
+
+	private void buildSummaryFormsForPatients() throws IOException {
+		File goldDirectory = new File(CONST_PATH_TO_GOLD_SET);
+		File[] patientFolders = goldDirectory.listFiles();
+		for (File patientFolder : patientFolders) {
+			cachePatientParametersFromFileName(patientFolder);
+			findOrCreatePatient(parsedPatientLimsId);
+			findOrCreateVisit("DpheVisit:sentinel");
+			findOrCreateConcept("DpheConcept:sentinel");
+			currentDbModifier = "DpheModifier:sentinel";
+			
+			// Stores the expert summarization for the patient
+			findOrCreateProvider("DpheProvider:expert");
+			currentTextToStore = serializeFormDataBean(new FormDataBean());
+			findOrCreateObservation();
+			
+			// Stores DeepPhe's summarization for the patient
+			findOrCreateProvider("DpheProvider:dphe");
+			currentTextToStore = serializeFormDataBean(new FormDataBean());
+			findOrCreateObservation();
+		}
+	}
+	
+	private String serializeFormDataBean(FormDataBean formDataBean) {
+		byte[] formDataBeanByteArray = SerializationUtils.serialize(formDataBean);
+		return Base64.getEncoder().encodeToString(
+				formDataBeanByteArray);
+	}
+	
+	private FormDataBean deSerializeFormDataBean(String utfFormDataBeanString) {
+		FormDataBean formBean = null;
+		byte[] objectAsBytes = Base64.getDecoder().decode(utfFormDataBeanString);
+		ByteArrayInputStream bais = new ByteArrayInputStream(objectAsBytes);
+		formBean =  (FormDataBean) SerializationUtils.deserialize(bais);
+		return formBean;
 	}
 
 	private void uploadFsDirectoryAnaforaTexts() throws IOException {
@@ -476,6 +517,24 @@ public class Controller {
 		String result = (currentDbObservation != null) ? currentDbObservation.getObservationBlob() : null;
 		return result;
 	}
+	
+	public FormDataBean findFormDataByInstanceNum(long instanceNum) {
+		findObservationByInstanceNum(instanceNum);
+		String blobAsString = (currentDbObservation != null) ? currentDbObservation.getObservationBlob() : null;
+		return deSerializeFormDataBean(blobAsString);
+	}
+	
+	public void saveObservationFormData(long observationInstanceNumber,
+			FormDataBean formDataBean) {
+		findObservationByInstanceNum(observationInstanceNumber);
+		String utfFormDataBeanString = serializeFormDataBean(formDataBean);
+		currentDbObservation.setObservationBlob(utfFormDataBeanString);
+		Transaction tx = i2b2DataSession.beginTransaction();
+		i2b2DataSession.saveOrUpdate(currentDbObservation);
+		i2b2DataSession.flush();
+		tx.commit();
+		i2b2DataSession.clear();
+	}
 
 	private void findOrCreateProvider(String providerNameChar) {
 		currentDbProvider = findProviderByNameChar(providerNameChar);
@@ -733,6 +792,24 @@ public class Controller {
 		}
 		return result;
 	}
+	
+	public long findObservationInstanceNumberForForm(KbPatient patient,
+			String provider) {
+		i2b2DataSession = i2b2DataDataSourceManager.getSession();
+		currentDbProvider = findProviderByNameChar(provider);
+		String hql = "from ObservationFact o where ";
+		hql += " o.id.patientNum = :patientNum and ";
+		hql += " o.id.providerId = :providerId and ";
+		hql += " o.sourcesystemCd = :sourceSystemCd ";
+		Query query = i2b2DataSession.createQuery(hql);
+		query.setBigDecimal("patientNum", new BigDecimal(patient.getId()));
+		query.setString("providerId", currentDbProvider.getId().getProviderId());
+		query.setString("sourceSystemCd", sourcesystemCd);
+		ObservationFact observation = (ObservationFact) query
+				.uniqueResult();
+		long result = (observation != null) ? observation.getId().getInstanceNum() : -1L;
+		return result;
+	}
 
 	private void nullSafeEvict(Object dbObject) {
 		if (dbObject != null) {
@@ -751,5 +828,12 @@ public class Controller {
 	public void setKbPatients(List<KbPatient> kbPatients) {
 		this.kbPatients = kbPatients;
 	}
+
+	
+
+	
+
+	
+	
 
 }

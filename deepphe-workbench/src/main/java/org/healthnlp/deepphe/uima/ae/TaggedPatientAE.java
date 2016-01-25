@@ -101,12 +101,12 @@ public class TaggedPatientAE extends TaggedSummarizableAE {
 
 	private void uploadPatientDAG()
 			throws CASException {
-		CtakesToDroolsConverter ctakesToJessConverter = new CtakesToDroolsConverter();
-		ctakesToJessConverter.setMultiJCas(multiJCas);
-		ctakesToJessConverter.setPatientJCas(patientJCas);
-		ctakesToJessConverter.setPatient(new KbPatient());
-		ctakesToJessConverter.execute();
-		patient = ctakesToJessConverter.getPatient();
+		CtakesToDroolsConverter ctakesToDroolsConverter = CtakesToDroolsConverter.getInstance();
+		ctakesToDroolsConverter.setMultiJCas(multiJCas);
+		ctakesToDroolsConverter.setPatientJCas(patientJCas);
+		ctakesToDroolsConverter.setPatient(new KbPatient());
+		ctakesToDroolsConverter.execute();
+		patient = ctakesToDroolsConverter.getPatient();
 	}
 
 	private void loadKnowledgeToJess() throws JessException {

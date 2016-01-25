@@ -1,3 +1,4 @@
+
 package org.healthnlp.deepphe.workbench;
 
 import java.io.File;
@@ -144,7 +145,6 @@ public class DroolsKnowledgeBaseAndSession implements WorkingMemoryEventListener
 		return session;
 	}
 
-	
-
 
 }
+

@@ -1,0 +1,357 @@
+package org.healthnlp.deepphe.summarization.drools.rules;
+
+//list any import classes here.
+import org.healthnlp.deepphe.summarization.drools.kb.*;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+// ============================================================
+//  
+//   If populating a TNM target template, and there exists a
+// latest TNM document level mention for the patient
+// and not in the past then use this as the TNM
+//
+// ============================================================
+
+rule "003_breastCancerTnm T Grade From Last Encounter"
+	salience 1000
+	when
+	    KbGoal (name == "extract-tnm", isActive > 0)
+	    KbPatient( $patientId : id )
+        KbEncounter($encounterOneId : id, 
+                    patientId == $patientId,
+                    $encounterOneSequence : sequence,                         
+                    ( kind == "Pathology Report" || kind == "Progress Note" ))
+         $encounterTumorGrade : PrimaryTumorClassification (summarizableId == $encounterOneId)
+         not PrimaryTumorClassification (summarizableId == $patientId)
+         not ( KbEncounter ($encounterTwoId : id,
+                            patientId == $patientId,
+                            sequence > $encounterOneSequence) and 
+               PrimaryTumorClassification (summarizableId == $encounterTwoId) )
+    then
+        System.out.println("<DROOLS-ENGINE> Extrcting T grade for patient ");
+    	PrimaryTumorClassification patientTumorGrade = beanCopyPrimaryTumorClassification($encounterTumorGrade);
+    	patientTumorGrade.setSummarizableId($patientId);
+        insert(patientTumorGrade);
+    end
+    
+rule "003_breastCancerTnm N Grade From Last Encounter"
+	salience 1000
+	when
+	    KbGoal (name == "extract-tnm", isActive > 0)
+	    KbPatient( $patientId : id )
+        KbEncounter($encounterOneId : id, 
+                    patientId == $patientId,
+                    $encounterOneSequence : sequence,                         
+                    ( kind == "Pathology Report" || kind == "Progress Note" ))
+        $encounterNodeGrade : ClinicalRegionalLymphNodeClassification (summarizableId == $encounterOneId)
+        not ClinicalRegionalLymphNodeClassification (summarizableId == $patientId)
+        not ( KbEncounter ($encounterTwoId : id, sequence > $encounterOneSequence) and 
+               ClinicalRegionalLymphNodeClassification (summarizableId == $encounterTwoId) )
+    then
+        System.out.println("<DROOLS-ENGINE> Extrcting N grade for patient ");
+    	ClinicalRegionalLymphNodeClassification patientNodeGrade = beanCopyClinicalRegionalLymphNodeClassification($encounterNodeGrade);
+    	patientNodeGrade.setSummarizableId($patientId);
+        insert(patientNodeGrade);
+    end
+ 
+ rule "003_breastCancerTnm M Grade From Last Encounter"
+	salience 1000
+	when
+        KbGoal (name == "extract-tnm", isActive > 0)
+	    KbPatient( $patientId : id )
+        KbEncounter($encounterOneId : id, 
+                    patientId == $patientId,
+                    $encounterOneSequence : sequence,                         
+                    ( kind == "Pathology Report" || kind == "Progress Note" ))
+        $encounterMetastaticGrade : DistantMetastasisClassification (summarizableId == $encounterOneId)
+        not DistantMetastasisClassification (summarizableId == $patientId)
+        not ( KbEncounter ($encounterTwoId : id, sequence > $encounterOneSequence) and 
+                DistantMetastasisClassification (summarizableId == $encounterTwoId) )
+    then
+        System.out.println("<DROOLS-ENGINE> Extrcting M grade for patient ");
+    	DistantMetastasisClassification patientMetastaticGrade = beanCopyDistantMetastasisClassification($encounterMetastaticGrade);
+    	patientMetastaticGrade.setSummarizableId($patientId);
+        insert(patientMetastaticGrade);
+    end   
+
+// ============================================================
+//  
+//    TNM Inferring tumor/tumor types from the TNM levels 
+//    ref: https://healthnlp.hms.harvard.edu/cancer/wiki/index.php?title=Recurrence/Metastasis
+//
+// ============================================================
+
+//
+// M1-1
+// 	
+// If there is an instance of M1, then create instance of tumor with tumor type = "metastasis".
+//
+// 	M1(?m1), Tumor(?tumor), DistantRecurrence(?met), 
+//  swrlx:makeOWLThing(?m1, ?tumor, ?met) -> hasTumorType(?tumor, ?met)
+//
+ rule "003_M1-1"
+	salience 750
+	when
+        KbGoal (name == "extract-tnm", isActive > 0)
+	    KbPatient( $patientId : id )
+        M1(summarizableId == $patientId)
+        not (
+             Tumor($tumor : id, summarizableId == $patientId) and
+             DistantRecurrence($met : id, summarizableId == $patientId) and
+             HasTumorType(domainId == $tumor, rangeId == $met)
+        )
+    then
+        System.out.println("<DROOLS-ENGINE> 003_M1-1 fires");
+        Tumor tumorInstance = new TumorImpl();
+        tumorInstance.setSummarizableId($patientId);
+        insert(tumorInstance);       
+        DistantRecurrence metInstance = new DistantRecurrenceImpl();       
+        metInstance.setSummarizableId($patientId);
+        insert(metInstance);  
+    	HasTumorType hasTumorType = new HasTumorTypeImpl();
+    	hasTumorType.setDomainId(tumorInstance.getId());
+    	hasTumorType.setRangeId(metInstance.getId());
+        insert(hasTumorType);
+    end
+    
+//
+// pN1-1 	
+//
+// If there is an instance of pN1, then create an instance of positive lymph node.
+//
+// pN1(?pn1), Positive(?pos), LymphNodeInvolvement(?lni), Tumor(?tumor),
+// LocalRecurrence(?locrec), TumorPhenotype(?tumphen),
+// swrlx:makeOWLThing(?pn1, ?lni, ?tumor, ?tumphen) -> 
+//   hasInterpretation(?lni, ?pos), 
+//   hasTumorType(?tumor, ?locrec),
+//   hasPhenotype(?tumor, ?tumphen),
+//   hasManifestation(?tumphen, ?lni)
+//
+ rule "003_pN1-1"
+	salience 750
+	when
+        KbGoal (name == "extract-tnm", isActive > 0)
+	    KbPatient( $patientId : id )
+        Pn1(summarizableId == $patientId)
+        not (
+           Tumor($tumor : id) and
+           LocalRecurrence($locrec : id) and
+           TumorPhenotype($tumphen : id) and
+           LymphNode($ln : id) and  
+           Positive($pos : id) and
+           HasBodySite(domainId == $tumor, rangeId == $ln) and
+           HasTumorType(domainId == $tumor, rangeId == $locrec) and
+           HasPhenotype(domainId == $tumor, rangeId == $tumphen) and
+           HasManifestation(domainId == $tumphen, rangeId == $ln) and
+           HasInterpretation(domainId == $ln, rangeId == $pos)
+           )
+    then
+        System.out.println("<DROOLS-ENGINE> 003_pN1-1 fires");
+        Tumor tumorInstance = new TumorImpl();
+        tumorInstance.setSummarizableId($patientId);
+        insert(tumorInstance);       
+        LocalRecurrence locrecInstance = new LocalRecurrenceImpl();       
+        locrecInstance.setSummarizableId($patientId);
+        insert(locrecInstance);  
+        TumorPhenotype tumphenInstance = new TumorPhenotypeImpl();
+        tumphenInstance.setSummarizableId($patientId);
+        insert(tumphenInstance); 
+        LymphNode lniInstance = new LymphNodeImpl();
+        lniInstance.setSummarizableId($patientId);
+        insert(lniInstance); 
+        Positive posInstance = new PositiveImpl();
+        posInstance.setSummarizableId($patientId);
+        insert(posInstance); 
+    	HasTumorType hasTumorType = new HasTumorTypeImpl();
+    	hasTumorType.setSummarizableId($patientId);
+    	hasTumorType.setDomainId(tumorInstance.getId());
+    	hasTumorType.setRangeId(locrecInstance.getId());
+        insert(hasTumorType);
+        HasPhenotype hasPhenotype = new HasPhenotypeImpl();
+        hasPhenotype.setSummarizableId($patientId);
+    	hasPhenotype.setDomainId(tumorInstance.getId());
+    	hasPhenotype.setRangeId(tumphenInstance.getId());
+        insert(hasPhenotype);
+        HasManifestation hasManifestation = new HasManifestationImpl();
+        hasManifestation.setSummarizableId($patientId);
+    	hasManifestation.setDomainId(tumphenInstance.getId());
+    	hasManifestation.setRangeId(lniInstance.getId());
+        insert(hasManifestation);
+        HasInterpretation hasInterpretation = new HasInterpretationImpl();
+        hasInterpretation.setSummarizableId($patientId);
+    	hasInterpretation.setDomainId(lniInstance.getId());
+    	hasInterpretation.setRangeId(posInstance.getId());
+    	insert(hasInterpretation);
+    end     
+
+//
+// Tis-1
+// 	
+//  If there is an instance of Tis, then create an instance of tumor
+//  with tumor type="primary" that has a tumor phenotype
+//  with tumor extent="in-situ". 	
+//
+//  Tis(?tis), Tumor(?tumor), TumorPhenotype(?tumphen),
+//  PrimaryTumor(?primary), In-Situ(?insitu),
+//  swrlx:makeOWLThing(?tis, ?tumor, ?tumorphen, ?insitu)
+//  -> hasTumorType(?tumor, ?primary),
+//     hasPhenotype(?tumor, ?tumorphen),
+//     hasTumorExtent(?tumorphen, ?insitu) 
+//
+ rule "003_Tis-1"
+	salience 750
+	when
+        KbGoal (name == "extract-tnm", isActive > 0)
+	    KbPatient( $patientId : id )
+        Tis(summarizableId == $patientId)
+        not (
+           Tumor($tumor : id) and
+           PrimaryTumor($primary : id) and
+           TumorPhenotype($tumphen : id) and         
+           InSitu($insitu : id) and
+           HasTumorType(domainId == $tumor, rangeId == $primary) and
+           HasPhenotype(domainId == $tumor, rangeId == $tumphen) and
+           HasTumorExtent(domainId == $tumphen, rangeId == $insitu)
+           )
+    then
+        System.out.println("<DROOLS-ENGINE> 003_Tis-1 fires");
+        Tumor tumorInstance = new TumorImpl();
+        tumorInstance.setSummarizableId($patientId);
+        insert(tumorInstance);
+        PrimaryTumor primaryInstance = new PrimaryTumorImpl();       
+        primaryInstance.setSummarizableId($patientId);
+        insert(primaryInstance);  
+        TumorPhenotype tumphenInstance = new TumorPhenotypeImpl();
+        tumphenInstance.setSummarizableId($patientId);
+        insert(tumphenInstance);        
+        InSitu insituInstance = new InSituImpl();
+        insituInstance.setSummarizableId($patientId);
+        insert(insituInstance);
+    	HasTumorType hasTumorType = new HasTumorTypeImpl();
+    	hasTumorType.setSummarizableId($patientId);
+    	hasTumorType.setDomainId(tumorInstance.getId());
+    	hasTumorType.setRangeId(primaryInstance.getId());
+        insert(hasTumorType);
+        HasPhenotype hasPhenotype = new HasPhenotypeImpl();
+        hasPhenotype.setSummarizableId($patientId);
+    	hasPhenotype.setDomainId(tumorInstance.getId());
+    	hasPhenotype.setRangeId(tumphenInstance.getId());
+        insert(hasPhenotype);
+        HasTumorExtent hasTumorExtent = new HasTumorExtentImpl();
+        hasTumorExtent.setSummarizableId($patientId);
+    	hasTumorExtent.setDomainId(tumphenInstance.getId());
+    	hasTumorExtent.setRangeId(insituInstance.getId());
+        insert(hasTumorExtent);
+    end
+ 
+// 
+// pN1m1-1
+// 	
+// If there is an instance of pN1mi, then create an instance of tumors
+// with tumor type ="distant recurrence" and body site = "lymph node"
+//
+// pN1mi(?pn), Tumor(?tumor), DistantRecurrence(?distant), 
+//'Lymph Node'(?ln), BreastCancerTumorPhenotype(?tumorphen),
+// Micrometastasis(?micromet) ->
+// hasTumorType(?tumor, ?distant),
+// hasPhenotype(?tumor, ?tumorphen),
+// hasManifestation(?tumorphen, ?micromet) 
+// hasBodySite(?tumor, ?ln)
+//
+ rule "003_pN1m1-1"
+	salience 750
+	when
+        KbGoal (name == "extract-tnm", isActive > 0)
+	    KbPatient( $patientId : id )
+        Pn1mi(summarizableId == $patientId)
+        not (
+           Tumor($tumor : id) and
+           DistantRecurrence($distant : id) and
+           LymphNode($ln : id) and
+           BreastCancerTumorPhenotype($tumorphen : id) and         
+           Micrometastasis($micromet : id) and
+           HasTumorType(domainId == $tumor, rangeId == $distant) and
+           HasBodySite(domainId == $tumor, rangeId == $ln) and
+           HasPhenotype(domainId == $tumor, rangeId == $tumorphen) and
+           HasManifestation(domainId == $tumorphen, rangeId == $micromet)
+           )
+    then
+        System.out.println("<DROOLS-ENGINE> 003_pN1m1-1 fires");
+        Tumor tumorInstance = new TumorImpl();
+        tumorInstance.setSummarizableId($patientId);
+        insert(tumorInstance);
+        DistantRecurrence distantInstance = new DistantRecurrenceImpl();       
+        distantInstance.setSummarizableId($patientId);
+        insert(distantInstance);  
+        LymphNode lnInstance = new LymphNodeImpl();
+        lnInstance.setSummarizableId($patientId);
+        insert(lnInstance);
+        BreastCancerTumorPhenotype tumorphenInstance = new BreastCancerTumorPhenotypeImpl();
+        tumorphenInstance.setSummarizableId($patientId);
+        insert(tumorphenInstance);        
+        Micrometastasis micrometInstance = new MicrometastasisImpl();
+        micrometInstance.setSummarizableId($patientId);
+        insert(micrometInstance);      
+    	HasTumorType hasTumorType = new HasTumorTypeImpl();
+    	hasTumorType.setSummarizableId($patientId);
+    	hasTumorType.setDomainId(tumorInstance.getId());
+    	hasTumorType.setRangeId(distantInstance.getId());
+        insert(hasTumorType);
+        HasBodySite hasBodySite = new HasBodySiteImpl();
+    	hasBodySite.setSummarizableId($patientId);
+    	hasBodySite.setDomainId(tumorInstance.getId());
+    	hasBodySite.setRangeId(lnInstance.getId());
+        insert(hasBodySite);
+        HasPhenotype hasPhenotype = new HasPhenotypeImpl();
+        hasPhenotype.setSummarizableId($patientId);
+    	hasPhenotype.setDomainId(tumorInstance.getId());
+    	hasPhenotype.setRangeId(tumorphenInstance.getId());
+        insert(hasPhenotype);
+        HasManifestation hasManifestation = new HasManifestationImpl();
+        hasManifestation.setSummarizableId($patientId);
+    	hasManifestation.setDomainId(tumorphenInstance.getId());
+    	hasManifestation.setRangeId(micrometInstance.getId());
+        insert(hasManifestation);
+    end
+    
+rule "003_breastCancerTnm Transition Goal State"
+	salience 500
+	when
+	    $g : KbGoal (name == "extract-tnm",
+                isActive > 0)
+    then
+        System.out.println("<DROOLS-ENGINE> Achieved goal " + $g.getName());
+    	retract($g);
+    end
+    
+function KbSummaryInterface beanCopy(KbSummaryInterface summary) {
+			KbSummaryInterface result = null;
+		try {
+			Class<?> cls = summary.getClass();
+			Class<?>[] emptyClsParameters = {};
+			Constructor<?> constructor = cls.getConstructor(emptyClsParameters);
+			Object[] emptyObjParameters = {};
+			result = (KbSummaryInterface) constructor
+					.newInstance(emptyObjParameters);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+function Tumor beanCopyTumor(Tumor disease) {
+        return (Tumor) beanCopy(disease);
+        }
+
+function PrimaryTumorClassification beanCopyPrimaryTumorClassification(PrimaryTumorClassification primaryTumorClassification) {
+        return (PrimaryTumorClassification) beanCopy(primaryTumorClassification);
+}
+function ClinicalRegionalLymphNodeClassification beanCopyClinicalRegionalLymphNodeClassification(ClinicalRegionalLymphNodeClassification clinicalRegionalLymphNodeClassification) {
+        return (ClinicalRegionalLymphNodeClassification) beanCopy(clinicalRegionalLymphNodeClassification);
+}    
+function DistantMetastasisClassification beanCopyDistantMetastasisClassification(DistantMetastasisClassification distantMetastasisClassification) {
+        return (DistantMetastasisClassification) beanCopy(distantMetastasisClassification);
+}        
+
