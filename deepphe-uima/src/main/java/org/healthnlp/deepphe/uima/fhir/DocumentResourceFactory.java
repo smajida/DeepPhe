@@ -481,17 +481,9 @@ public class DocumentResourceFactory {
 		}
 	
 		// now lets get the location relationships
-		for(Annotation  a: cTAKESUtils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
-			if(a instanceof TnmClassification){
-				TnmClassification tnm = (TnmClassification) a;
-				dx.setStage(createStage(tnm));
-				
-				// now add additional findings
-				if(tnm.getSize() != null){
-					Finding pTumor = createFinding(tnm.getSize());
-					
-				}
-			}
+		TnmClassification tnm = cTAKESUtils.getTnmClassification(dm);
+		if(tnm != null){
+			dx.setStage(createStage(tnm));
 		}
 		
 		// add mention text
@@ -632,12 +624,30 @@ public class DocumentResourceFactory {
 		stage.setSummary(c);
 		
 		// extract individual Stage levels if values are conflated
-		if(st.getSize() != null)
+		if(st.getSize() != null){
+			Finding f = (Finding) FHIRRegistry.getInstance().getResource(st.getSize());
+			if(f == null)
+				f = createFinding(st.getSize());
+			stage.addAssessment(FHIRUtils.getResourceReference(f));
+			stage.getAssessmentTarget().add(f);
 			stage.setStringExtension(Stage.TNM_PRIMARY_TUMOR,cTAKESUtils.getConceptURI(st.getSize()));
-		if(st.getNodeSpread() != null)
+		}
+		if(st.getNodeSpread() != null){
+			Finding f = (Finding) FHIRRegistry.getInstance().getResource(st.getNodeSpread());
+			if(f == null)
+				f = createFinding(st.getNodeSpread());
+			stage.addAssessment(FHIRUtils.getResourceReference(f));
+			stage.getAssessmentTarget().add(f);
 			stage.setStringExtension(Stage.TNM_REGIONAL_LYMPH_NODES,cTAKESUtils.getConceptURI(st.getNodeSpread()));
-		if(st.getMetastasis() != null)
+		}
+		if(st.getMetastasis() != null){
+			Finding f = (Finding) FHIRRegistry.getInstance().getResource(st.getMetastasis());
+			if(f == null)
+				f = createFinding(st.getMetastasis());
+			stage.addAssessment(FHIRUtils.getResourceReference(f));
+			stage.getAssessmentTarget().add(f);
 			stage.setStringExtension(Stage.TNM_DISTANT_METASTASIS,cTAKESUtils.getConceptURI(st.getMetastasis()));
+		}
 		
 
 		// add mention text

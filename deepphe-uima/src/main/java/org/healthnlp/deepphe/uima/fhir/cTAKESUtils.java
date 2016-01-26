@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
+import org.apache.ctakes.cancer.type.textsem.TnmClassification;
 import org.apache.ctakes.typesystem.type.refsem.*;
 import org.apache.ctakes.typesystem.type.relation.*;
 import org.apache.ctakes.typesystem.type.textsem.*;
@@ -21,6 +23,7 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.jcas.tcas.DocumentAnnotation;
+import org.healthnlp.deepphe.uima.types.TNMClassification;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
@@ -382,6 +385,15 @@ public class cTAKESUtils {
 				return true;
 		}
 		return false;
+	}
+	
+	public static TnmClassification getTnmClassification(IdentifiedAnnotation dm){
+		for(Annotation  a: cTAKESUtils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
+			if(a instanceof TnmClassification){
+				return (TnmClassification) a;
+			}
+		}
+		return null;
 	}
 	
 }

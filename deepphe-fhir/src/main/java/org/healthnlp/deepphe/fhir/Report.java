@@ -79,11 +79,14 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	public void setPatient(Patient p){
 		setSubject(p.getReference());
 		setSubjectTarget(p);
+		
 		// set DateTime
 		Date dt = getDate();
 		if(dt != null)
 			p.setCurrentDate(dt);
-		addReportElement(p);
+		
+		getReportElementMap().put(p.getResourceIdentifier(),p);
+		//addReportElement(p);
 	}
 	
 	public Patient getPatient(){
