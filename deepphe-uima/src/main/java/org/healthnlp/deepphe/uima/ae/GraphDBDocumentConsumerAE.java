@@ -113,11 +113,14 @@ public class GraphDBDocumentConsumerAE extends JCasAnnotator_ImplBase {
 				for (CodeableConcept c : cc) {
 					ccnames.add(c.getText());
 				}
-				n.setProperty("bodySites", ccnames.toArray().toString());
+				if(ccnames.size()>0)
+					n.setProperty("bodySites", ccnames.toArray().toString());
 
 				Stage s = dx.getStage();
-				String stage = s.getSummary().getText();
-				n.setProperty("stage", stage);
+				if(s!=null){
+					String stage = s.getSummary().getText();
+					n.setProperty("stage", stage);
+				}
 
 				documentN.createRelationshipTo(n, GraphDBConstants.Relationships.hasDiagnosis);
 			}

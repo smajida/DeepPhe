@@ -8,7 +8,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
 
@@ -38,7 +37,7 @@ public class GraphDBDocumentConsumerAETest {
    
 
 	
-	private static final String TEST_DB = "neo4jtestdb";
+	private static final String TEST_DB = "testdb";
 
 
 	@BeforeClass
@@ -53,7 +52,7 @@ public class GraphDBDocumentConsumerAETest {
 		   String dbPath = TEST_DB + File.separator;
 		   AnalysisEngine neo4jConsumerAE = AnalysisEngineFactory.createEngine(GraphDBDocumentConsumerAE.class,GraphDBDocumentConsumerAE.PARAM_DBPATH,dbPath);
 		   JCas jCas = neo4jConsumerAE.newJCas();
-		   jCas.setDocumentText("Does not matter");
+		   jCas.setDocumentText("lorem ipsum");
 		   
 		   neo4jConsumerAE.process(jCas);
 		   neo4jConsumerAE.destroy();
