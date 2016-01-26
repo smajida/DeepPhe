@@ -57,6 +57,7 @@ public class FHIRUtils {
 	public static final String DOCUMENT_HEADER_PRINCIPAL_DATE = "Principal Date";
 	public static final String DOCUMENT_HEADER_PATIENT_NAME = "Patient Name";
 	public static final String MENTION_URL = "http://hl7.org/fhir/mention"; 
+	public static final String STAGE_URL = "http://hl7.org/fhir/stage"; 
 	public static final String CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl";
 
 	public static final String INTERPRETATION_POSITIVE = "Positive";

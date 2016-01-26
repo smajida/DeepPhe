@@ -249,6 +249,20 @@ public class DocumentResourceFactory {
 		for(IdentifiedAnnotation m: cTAKESUtils.getAnnotationsByType(cas, FHIRConstants.FINDING_URI) ){
 			list.add(createFinding(m));
 		}
+		//TODO: add TNM stuff for now
+		for(Annotation  a: cTAKESUtils.getAnnotationsByType(cas, TnmClassification.type)){
+			TnmClassification tnm = (TnmClassification) a;
+			if(tnm.getSize() != null){
+				list.add(createFinding(tnm.getSize()));
+			}
+			if(tnm.getMetastasis() != null){
+				list.add(createFinding(tnm.getMetastasis()));
+			}
+			if(tnm.getNodeSpread() != null){
+				list.add(createFinding(tnm.getNodeSpread()));
+			}
+		}
+		
 		return list;
 	}
 	
@@ -469,7 +483,14 @@ public class DocumentResourceFactory {
 		// now lets get the location relationships
 		for(Annotation  a: cTAKESUtils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
 			if(a instanceof TnmClassification){
-				dx.setStage(createStage((TnmClassification) a));
+				TnmClassification tnm = (TnmClassification) a;
+				dx.setStage(createStage(tnm));
+				
+				// now add additional findings
+				if(tnm.getSize() != null){
+					Finding pTumor = createFinding(tnm.getSize());
+					
+				}
 			}
 		}
 		
@@ -609,13 +630,14 @@ public class DocumentResourceFactory {
 		CodeableConcept c = cTAKESUtils.getCodeableConcept(st);
 		c.setText(st.getCoveredText());
 		stage.setSummary(c);
+		
 		// extract individual Stage levels if values are conflated
 		if(st.getSize() != null)
-			stage.setStringExtension(FHIRUtils.CANCER_URL+"#"+FHIRUtils.T_STAGE,st.getSize().getCode()+st.getSize().getValue());
+			stage.setStringExtension(Stage.TNM_PRIMARY_TUMOR,cTAKESUtils.getConceptURI(st.getSize()));
 		if(st.getNodeSpread() != null)
-			stage.setStringExtension(FHIRUtils.CANCER_URL+"#"+FHIRUtils.N_STAGE,st.getNodeSpread().getCode()+st.getNodeSpread().getValue());
+			stage.setStringExtension(Stage.TNM_REGIONAL_LYMPH_NODES,cTAKESUtils.getConceptURI(st.getNodeSpread()));
 		if(st.getMetastasis() != null)
-			stage.setStringExtension(FHIRUtils.CANCER_URL+"#"+FHIRUtils.M_STAGE,st.getMetastasis().getCode()+st.getMetastasis().getValue());
+			stage.setStringExtension(Stage.TNM_DISTANT_METASTASIS,cTAKESUtils.getConceptURI(st.getMetastasis()));
 		
 
 		// add mention text

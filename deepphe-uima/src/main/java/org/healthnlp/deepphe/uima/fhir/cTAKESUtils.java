@@ -94,27 +94,15 @@ public class cTAKESUtils {
 				}
 			}
 		}
-		
-		// add coding for class
-		/*
-		IClass cls = getConceptClass(ia);
-		if(cls != null){
-			// add class URI
-			Coding ccc = cc.addCoding();
-			ccc.setCode(cls.getURI().toString());
-			ccc.setDisplay(cls.getName());
-			ccc.setSystem(cls.getOntology().getURI().toString());
-			cc.setText(cls.getConcept().getName());
-		
-			// add RxNORM codes
-			for(String rxcode: OntologyUtils.getRXNORM_Codes(cls)){
-				Coding c2 = cc.addCoding();
-				c2.setCode(rxcode);
-				c2.setDisplay(cls.getName());
-				c2.setSystem(SCHEMA_RXNORM);
+		// set display text if unavialble
+		if(cc.getText() == null){
+			for(Coding ccc: cc.getCoding()){
+				if(ccc.getDisplay() != null){
+					cc.setText(ccc.getDisplay());
+					break;
+				}
 			}
-		
-		}*/
+		}
 		
 		
 		return cc;
@@ -146,23 +134,29 @@ public class cTAKESUtils {
 	 * @param c
 	 * @return
 	 */
+	public static String getConceptURI(IdentifiedAnnotation ia){
+		String cui = null;
+		for(int i=0;i<ia.getOntologyConceptArr().size();i++){
+			OntologyConcept c = ia.getOntologyConceptArr(i);
+			cui = c.getCode();
+			if(cui != null && cui.startsWith("http://"))
+				break;
+		}
+		return cui;
+	}
+	
+	
+	/**
+	 * get concept class from a default ontology based on Concept
+	 * @param c
+	 * @return
+	 */
 	public static String getConceptName(IdentifiedAnnotation ia){
 		if(ia == null)
 			return null;
-		//IClass cls = getConceptClass(ia);
-		//return cls != null?cls.getConcept().getName():ia.getCoveredText();
-		String name = null;
-		if(ia.getOntologyConceptArr() != null){
-			for(int i=0;i<ia.getOntologyConceptArr().size();i++){
-				OntologyConcept c = ia.getOntologyConceptArr(i);
-				if(c instanceof UmlsConcept &&  "URI".equals(c.getCodingScheme())){
-					//name = ((UmlsConcept)c).getPreferredText();
-					name = FHIRUtils.getConceptName(URI.create(c.getCode()));
-				}
-				if(name != null)
-					break;
-			}
-		}
+		String name = getConceptURI(ia);
+		if(name != null)
+			name = FHIRUtils.getConceptName(URI.create(name));
 		return name == null?ia.getCoveredText():name;
 	}
 	
@@ -209,7 +203,7 @@ public class cTAKESUtils {
 			return ont.getClass(TUMOR_SIZE);
 		}*/
 		
-		String cui = getConceptCode(m);
+		String cui = getConceptURI(m);
 		return cui != null?ont.getClass(cui):null;
 	}
 	
