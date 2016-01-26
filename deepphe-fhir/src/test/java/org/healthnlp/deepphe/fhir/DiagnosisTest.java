@@ -11,7 +11,7 @@ public class DiagnosisTest {
 	@Test
 	public void testCTAKESimport() {
 		
-		fail("Not yet implemented");
+		//fail("Not yet implemented");
 	}
 
 }

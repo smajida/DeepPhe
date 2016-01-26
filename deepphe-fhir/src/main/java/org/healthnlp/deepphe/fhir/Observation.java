@@ -58,8 +58,6 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	
 	public void setValue(String value, String unit){
 		setValue(Double.parseDouble(value),unit);
-		String ident = getClass().getSimpleName().toUpperCase()+"_"+getDisplayText(); 
-		addIdentifier(FHIRUtils.createIdentifier((ident+"_"+getObservationValue()).replaceAll("\\W+","_")));
 	}
 	
 	public void setValue(double value, String unit){

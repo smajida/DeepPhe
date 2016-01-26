@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,22 +17,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.ctakes.cancer.type.textsem.CancerSize;
-import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
-import org.apache.ctakes.typesystem.type.refsem.Time;
-import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
-import org.apache.ctakes.typesystem.type.relation.BinaryTextRelation;
-import org.apache.ctakes.typesystem.type.relation.LocationOfTextRelation;
-import org.apache.ctakes.typesystem.type.relation.Relation;
-import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
-import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
-import org.apache.ctakes.typesystem.type.textsem.TimeMention;
-import org.apache.uima.cas.CASException;
-import org.apache.uima.cas.FeatureStructure;
-import org.apache.uima.cas.Type;
-import org.apache.uima.jcas.JCas;
-import org.apache.uima.jcas.tcas.Annotation;
-import org.apache.uima.jcas.tcas.DocumentAnnotation;
+import org.healthnlp.deepphe.fhir.AnatomicalSite;
 import org.healthnlp.deepphe.fhir.Element;
 import org.hl7.fhir.instance.formats.XmlParser;
 import org.hl7.fhir.instance.model.CodeableConcept;
@@ -61,6 +47,8 @@ public class FHIRUtils {
 	public static final String DEFAULT_LANGUAGE = "English";
 	public static final String SCHEMA_UMLS = "NCI Metathesaurus";
 	public static final String SCHEMA_RXNORM = "RxNORM";
+	public static final String SCHEMA_OWL = "OWL_URI";
+	public static final String SCHEMA_REFERENCE = "FHIR_ID";
 	public static final CodeableConcept CONDITION_CATEGORY_DIAGNOSIS = getCodeableConcept("Disease","diagnosis","http://hl7.org/fhir/condition-category");
 	public static final CodeableConcept CONDITION_CATEGORY_FINDING = getCodeableConcept("Finding","finding","http://hl7.org/fhir/condition-category");
 	public static final CodeableConcept CONDITION_CATEGORY_SYMPTOM = getCodeableConcept("Symptom","symptom","http://hl7.org/fhir/condition-category");
@@ -69,6 +57,7 @@ public class FHIRUtils {
 	public static final String DOCUMENT_HEADER_PRINCIPAL_DATE = "Principal Date";
 	public static final String DOCUMENT_HEADER_PATIENT_NAME = "Patient Name";
 	public static final String MENTION_URL = "http://hl7.org/fhir/mention"; 
+	public static final String STAGE_URL = "http://hl7.org/fhir/stage"; 
 	public static final String CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl";
 
 	public static final String INTERPRETATION_POSITIVE = "Positive";
@@ -144,24 +133,11 @@ public class FHIRUtils {
 	
 	public static CodeableConcept getCodeableConcept(URI uri){
 		String url = uri.toString();
-		return getCodeableConcept(uri.getFragment(),url,url.substring(0,url.length()-uri.getFragment().length()-1));
+		//return getCodeableConcept(uri.getFragment(),url,url.substring(0,url.length()-uri.getFragment().length()-1));
+		return getCodeableConcept(uri.getFragment(),url,SCHEMA_OWL);
 	}
 	
-	
-	/**
-	 * get FHIR date object from cTAKES time mention
-	 * @param tm
-	 * @return
-	 */
-	public static Date getDate(TimeMention tm){
-		//Date dt = tm.getDate();
-		Time t  = tm.getTime();
-		org.apache.ctakes.typesystem.type.refsem.Date dt = tm.getDate();
-		//dt.getYear();
-		//TODO: //
-		return new Date();
-	}
-	
+
 	
 	/**
 	 * parse date from string
@@ -172,120 +148,6 @@ public class FHIRUtils {
 		return TextTools.parseDate(text);
 	}
 	
-	/**
-	 * get codeblce concept form OntologyConcept annotation
-	 * @param c
-	 * @return
-	 */
-	public static CodeableConcept getCodeableConcept(IdentifiedAnnotation ia){
-		return setCodeableConcept(new CodeableConcept(),ia);
-	}
-	
-	/**
-	 * get codeblce concept form OntologyConcept annotation
-	 * @param c
-	 * @return
-	 */
-	public static CodeableConcept setCodeableConcept(CodeableConcept cc,IdentifiedAnnotation ia){
-		cc.setText(ia.getCoveredText());
-		
-		// go over mapped concepts (merge them into multiple coding systems)
-		if(ia.getOntologyConceptArr() != null){
-			List<String> cuis = new ArrayList<String>();
-			for(int i=0;i<ia.getOntologyConceptArr().size();i++){
-				OntologyConcept c = ia.getOntologyConceptArr(i);
-				
-				// add coding for this concept
-				Coding ccc = cc.addCoding();
-				ccc.setCode(c.getCode());
-				ccc.setDisplay(getConceptName(ia));
-				ccc.setSystem(c.getCodingScheme());
-				cuis.add(c.getCode());
-				
-				// add codign for UMLS
-				if(c instanceof UmlsConcept){
-					String cui = ((UmlsConcept)c).getCui();
-					if(!cuis.contains(cui)){
-						Coding cccc = cc.addCoding();
-						cccc.setCode(cui);
-						cccc.setDisplay(((UmlsConcept)c).getPreferredText());
-						cccc.setSystem(SCHEMA_UMLS);
-						cuis.add(cui);
-					}
-				}
-			}
-		}
-		
-		// add coding for class
-		/*
-		IClass cls = getConceptClass(ia);
-		if(cls != null){
-			// add class URI
-			Coding ccc = cc.addCoding();
-			ccc.setCode(cls.getURI().toString());
-			ccc.setDisplay(cls.getName());
-			ccc.setSystem(cls.getOntology().getURI().toString());
-			cc.setText(cls.getConcept().getName());
-		
-			// add RxNORM codes
-			for(String rxcode: OntologyUtils.getRXNORM_Codes(cls)){
-				Coding c2 = cc.addCoding();
-				c2.setCode(rxcode);
-				c2.setDisplay(cls.getName());
-				c2.setSystem(SCHEMA_RXNORM);
-			}
-		
-		}*/
-		
-		
-		return cc;
-	}
-	
-	
-	/**
-	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
-	 */
-	public static String getConceptCode(IdentifiedAnnotation ia){
-		String cui = null;
-		for(int i=0;i<ia.getOntologyConceptArr().size();i++){
-			OntologyConcept c = ia.getOntologyConceptArr(i);
-			if(c instanceof UmlsConcept){
-				cui = ((UmlsConcept)c).getCui();
-			}else{
-				cui = c.getCode();
-			}
-			if(cui != null && cui.matches("CL?\\d{6,7}"))
-				break;
-		}
-		return cui;
-	}
-	
-	/**
-	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
-	 */
-	public static String getConceptName(IdentifiedAnnotation ia){
-		if(ia == null)
-			return null;
-		//IClass cls = getConceptClass(ia);
-		//return cls != null?cls.getConcept().getName():ia.getCoveredText();
-		String name = null;
-		if(ia.getOntologyConceptArr() != null){
-			for(int i=0;i<ia.getOntologyConceptArr().size();i++){
-				OntologyConcept c = ia.getOntologyConceptArr(i);
-				if(c instanceof UmlsConcept &&  "URI".equals(c.getCodingScheme())){
-					//name = ((UmlsConcept)c).getPreferredText();
-					name = getConceptName(URI.create(c.getCode()));
-				}
-				if(name != null)
-					break;
-			}
-		}
-		return name == null?ia.getCoveredText():name;
-	}
 	
 	/**
 	 * get concept class from a default ontology based on Concept
@@ -431,26 +293,7 @@ public class FHIRUtils {
 		return cc;
 	}
 	
-	
-	
-	/**
-	 * get related item from cTAKES
-	 * @param source
-	 * @param relation
-	 * @return
-	 */
-	public static IdentifiedAnnotation getRelatedItem(IdentifiedAnnotation source , Relation relation){
-		if(relation != null ){
-			if(relation instanceof BinaryTextRelation){
-				BinaryTextRelation r = (BinaryTextRelation) relation;
-				if(r.getArg1().getArgument().equals(source))
-					return (IdentifiedAnnotation) r.getArg2().getArgument();
-				else
-					return (IdentifiedAnnotation) r.getArg1().getArgument();
-			}
-		}
-		return null;
-	}
+
 
 	/**
 	 * create a narrative from the text
@@ -489,18 +332,7 @@ public class FHIRUtils {
 		return map;
 	}
 	
-	/**
-	 * get document text for a given annotated JCas
-	 * @param cas
-	 * @return
-	 */
-	public static String getDocumentText(JCas cas){
-		Iterator<Annotation> it = cas.getAnnotationIndex(DocumentAnnotation.type).iterator();
-		if(it.hasNext())
-			return it.next().getCoveredText();
-		return null;
-	}
-	
+
 	public static String getIdentifier(Identifier id){
 		if(id==null)
 			return null;
@@ -525,11 +357,22 @@ public class FHIRUtils {
 		return id;
 	}
 	
+	/**
+	 * create a string resource identifier for a given element
+	 * @param e - element
+	 * @return
+	 */
+	public static String createResourceIdentifier(Element e){
+		int hash = FHIRUtils.getMentionExtensions((DomainResource)e.getResource()).hashCode();  
+		return e.getClass().getSimpleName().toUpperCase()+"_"+e.getDisplayText().replaceAll("\\W+","_")+"_"+Math.abs(hash);
+	}
+	
+	
 	public static Identifier createIdentifier(Object obj,Mention m){
 		return createIdentifier(new Identifier(), obj,m);
 	}
-	public static Identifier createIdentifier(Object obj,IdentifiedAnnotation m){
-		return createIdentifier(new Identifier(), obj,m);
+	public static Identifier createIdentifier(Element el){
+		return createIdentifier(new Identifier(),el);
 	}
 
 	public static Identifier createIdentifier(Identifier id, Object obj,Mention m){
@@ -545,10 +388,15 @@ public class FHIRUtils {
 		return createIdentifier(id, ident);
 	}
 	
+	/*
 	public static Identifier createIdentifier(Identifier id, Object obj,IdentifiedAnnotation m){
 		String dn = getConceptName(m).replaceAll("\\W+","_");
 		String ident = obj.getClass().getSimpleName().toUpperCase()+"_"+dn; //+"_"+m.getStartPosition()
 		return createIdentifier(id, ident);
+	}
+	*/
+	public static Identifier createIdentifier(Identifier id, Element e){
+		return createIdentifier(id, createResourceIdentifier(e));
 	}
 	
 	public static String getText(Narrative text) {
@@ -575,6 +423,15 @@ public class FHIRUtils {
 	public static Reference getResourceReference(Element model){
 		return getResourceReference(new Reference(), model);
 	}
+	
+	public static void addResourceReference(CodeableConcept cc, Element el) {
+		Coding coding = cc.addCoding();
+		coding.setCode(el.getResourceIdentifier());
+		coding.setDisplay(el.getDisplayText());
+		coding.setSystem(SCHEMA_REFERENCE);
+	}
+
+	
 	
 	public static Reference getResourceReference(Reference r,Element model){
 		if(r == null)
@@ -674,20 +531,7 @@ public class FHIRUtils {
 	}
 	
 	
-	/**
-	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
-	 */
-	public static IClass getConceptClass(IOntology ont, IdentifiedAnnotation m){
-		// CancerSize doesn't have a CUI, but can be mapped
-		if(m instanceof CancerSize){
-			return ont.getClass(TUMOR_SIZE);
-		}
-		
-		String cui = getConceptCode(m);
-		return cui != null?ont.getClass(cui):null;
-	}
+	
 	
 	public static boolean isDiagnosis(IClass cls){
 		return (cls != null && cls.hasSuperClass(cls.getOntology().getClass(DIAGNOSIS)));
@@ -700,7 +544,7 @@ public class FHIRUtils {
 	 * get report elements
 	 * @return
 	 */
-	public static List getSubList(List entireList, Class cls) {
+	public static List getSubList(Collection entireList, Class cls) {
 		List list = new ArrayList();
 		for(Object e: entireList){
 			if(cls.isInstance(e))
@@ -798,115 +642,6 @@ public class FHIRUtils {
 	}
 	*/
 
-	/**
-	 * get a set of concept by type from the annotated document
-	 * @param doc
-	 * @param type
-	 * @return
-	 */
-	public static List<IdentifiedAnnotation> getAnnotationsByType(JCas cas, int type){
-		List<IdentifiedAnnotation> list = new ArrayList<IdentifiedAnnotation>();
-		Iterator<Annotation> it = cas.getAnnotationIndex(type).iterator();
-		while(it.hasNext()){
-			IdentifiedAnnotation ia = (IdentifiedAnnotation) it.next();
-			// don't add stuff that doesn't have a Class or ontology array
-			//if(getConceptClass(ia) != null) 
-			list.add(ia);
-		}
-		return filterAnnotations(list);
-	}
-	
-	/**
-	 * get a set of concept by type from the annotated document
-	 * @param doc
-	 * @param type
-	 * @return
-	 */
-	public static List<Relation> getRelationsByType(JCas cas, Type type){
-		List<Relation> list = new ArrayList<Relation>();
-		Iterator<FeatureStructure> it = cas.getFSIndexRepository().getAllIndexedFS(type);
-		while(it.hasNext()){
-			list.add((Relation)it.next());
-		}
-		return list;
-	}
-	
-	/**
-	 * get a set of concept by type from the annotated document
-	 * @param doc
-	 * @param type
-	 * @return
-	 */
-	public static List<Annotation> getRelatedAnnotationsByType(IdentifiedAnnotation an, Class classType){
-		JCas cas = null;
-		try {
-			cas = an.getCAS().getJCas();
-		} catch (CASException e1) {
-			e1.printStackTrace();
-		}
-		Type type = null;
-		try {
-			type = (Type) classType.getMethod("getType").invoke(classType.getDeclaredConstructor(JCas.class).newInstance(cas));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		List<Annotation> list = new ArrayList<Annotation>();
-		Iterator<FeatureStructure> it = cas.getFSIndexRepository().getAllIndexedFS(type);
-		while(it.hasNext()){
-			BinaryTextRelation br = (BinaryTextRelation)it.next();
-			if(br.getArg1().getArgument().getCoveredText().equals(an)){ 
-				list.add(br.getArg2().getArgument());
-			}else if (br.getArg2().getArgument().equals(an)){
-				list.add(br.getArg1().getArgument());
-			}
-		}
-		return list;
-	}
-	
-	/**
-	 * get anatomic location of an annotation
-	 * @param an
-	 * @return
-	 */
-	public static AnatomicalSiteMention getAnatimicLocation(IdentifiedAnnotation an){
-		JCas cas = null;
-		try {
-			cas = an.getCAS().getJCas();
-		} catch (CASException e) {
-			e.printStackTrace();
-		}
-		for(Relation r: FHIRUtils.getRelationsByType(cas,new LocationOfTextRelation(cas).getType())){
-			LocationOfTextRelation lr = (LocationOfTextRelation) r;
-			if(lr.getArg1().getArgument().equals(an) && lr.getArg2().getArgument() instanceof AnatomicalSiteMention){
-				return (AnatomicalSiteMention) lr.getArg2().getArgument();
-			}
-		}
-		return null;
-	}
-	
-	private static List<IdentifiedAnnotation> filterAnnotations(List<IdentifiedAnnotation> list) {
-		if(list.isEmpty() || list.size() == 1)
-			return list;
-		for(ListIterator<IdentifiedAnnotation> it = list.listIterator();it.hasNext();){
-			IdentifiedAnnotation m = it.next();
-			// keep annotation that might be part of relationship
-			if(!getRelatedAnnotationsByType(m, BinaryTextRelation.class).isEmpty())
-				continue;
-			
-			// filter out if something more specific exists
-			//if(hasMoreSpecific(m,list) || hasIdenticalSpan(m,list))
-			//	it.remove();
-		}
-		return list;
-	}
-	
-	private static boolean hasIdenticalSpan(IdentifiedAnnotation m, List<IdentifiedAnnotation> list) {
-		for(IdentifiedAnnotation mm: list){
-			if(!mm.equals(m) && mm.getCoveredText().equals(m.getCoveredText()))
-				return true;
-		}
-		return false;
-	}
 	
 	public static Extension createExtension(String url, String value) {
 		Extension e = new Extension();
@@ -981,6 +716,6 @@ public class FHIRUtils {
 		//System.out.println(getOntologyURL("http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl#ClinicalPhenotypicComponent"));
 	}
 
-	
+
 	
 }

@@ -7,10 +7,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
-import org.apache.ctakes.cancer.type.textsem.TnmClassification;
-import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
-import org.apache.ctakes.typesystem.type.textsem.TimeMention;
 import org.apache.uima.cas.FeatureStructure;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
@@ -18,10 +14,17 @@ import org.apache.uima.jcas.cas.StringArray;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.healthnlp.deepphe.fhir.AnatomicalSite;
 import org.healthnlp.deepphe.fhir.Disease;
+import org.healthnlp.deepphe.fhir.Element;
+import org.healthnlp.deepphe.fhir.Finding;
+import org.healthnlp.deepphe.fhir.Medication;
 import org.healthnlp.deepphe.fhir.Observation;
 import org.healthnlp.deepphe.fhir.Procedure;
 import org.healthnlp.deepphe.fhir.Report;
-import org.healthnlp.deepphe.fhir.Stage;
+import org.healthnlp.deepphe.fhir.summary.CancerSummary;
+import org.healthnlp.deepphe.fhir.summary.PatientSummary;
+import org.healthnlp.deepphe.fhir.summary.Summary;
+import org.healthnlp.deepphe.fhir.summary.TumorSummary;
+import org.healthnlp.deepphe.fhir.summary.TumorSummary.TumorPhenotype;
 import org.healthnlp.deepphe.uima.types.Attribute;
 import org.healthnlp.deepphe.uima.types.BodySite;
 import org.healthnlp.deepphe.uima.types.BodySiteSummary;
@@ -37,9 +40,7 @@ import org.healthnlp.deepphe.uima.types.Exposure;
 import org.healthnlp.deepphe.uima.types.GermlineSequenceVariant;
 import org.healthnlp.deepphe.uima.types.HistologicType;
 import org.healthnlp.deepphe.uima.types.ManifestionOfDisease;
-import org.healthnlp.deepphe.uima.types.MedicationStatement;
 import org.healthnlp.deepphe.uima.types.Modifier;
-import org.healthnlp.deepphe.uima.types.NumericModifier;
 import org.healthnlp.deepphe.uima.types.Outcome;
 import org.healthnlp.deepphe.uima.types.Patient;
 import org.healthnlp.deepphe.uima.types.PrimaryTumorClassification;
@@ -48,17 +49,7 @@ import org.healthnlp.deepphe.uima.types.Treatment;
 import org.healthnlp.deepphe.uima.types.Tumor;
 import org.healthnlp.deepphe.uima.types.TumorExtent;
 import org.healthnlp.deepphe.uima.types.TumorSequenceVariant;
-import org.healthnlp.deepphe.uima.types.Tumor_Type;
 import org.healthnlp.deepphe.util.FHIRUtils;
-import org.healthnlp.deepphe.fhir.Element;
-import org.healthnlp.deepphe.fhir.Finding;
-import org.healthnlp.deepphe.fhir.Medication;
-import org.healthnlp.deepphe.fhir.summary.CancerSummary;
-import org.healthnlp.deepphe.fhir.summary.PatientSummary;
-import org.healthnlp.deepphe.fhir.summary.Summary;
-import org.healthnlp.deepphe.fhir.summary.TumorSummary;
-import org.healthnlp.deepphe.fhir.summary.TumorSummary.TumorPhenotype;
-import org.hl7.fhir.instance.model.BackboneElement;
 import org.hl7.fhir.instance.model.BooleanType;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.DateTimeType;
@@ -117,8 +108,7 @@ public class PhenotypeResourceFactory {
 		
 		
 		// init individual components
-		int i = 0;
-		comp.setHasEvent(new FSArray(jcas,r.getReportElements().size()));
+		List<FeatureStructure> events = new ArrayList<FeatureStructure>();
 		for(Element e: r.getReportElements()){
 			// add to FSArray
 			org.healthnlp.deepphe.uima.types.Mention el = saveElement(e,jcas);
@@ -129,19 +119,20 @@ public class PhenotypeResourceFactory {
 							
 				CompositionEvent ev = new CompositionEvent(jcas);
 				ev.setHasEvent(getValue(jcas,el));
-				comp.setHasEvent(i++,ev);
+				events.add(ev);
 			}
 		}
+		comp.setHasEvent(getValues(jcas, events));
 		
 		// save summaries for this report
-		i = 0;
-		comp.setHasCompositionSummary(new FSArray(jcas,r.getCompositionSummary().size()));		
-		for(Summary ss: r.getCompositionSummary()){
+		List<FeatureStructure> summaries = new ArrayList<FeatureStructure>();
+		for(Summary ss: r.getCompositionSummaries()){
 			org.healthnlp.deepphe.uima.types.Summary el = saveSummary(ss,jcas);
 			if(el != null){
-				comp.setHasCompositionSummary(i++,el);
+				summaries.add(el);
 			}
 		}
+		comp.setHasCompositionSummary(getValues(jcas, summaries));	
 		comp.addToIndexes();
 		
 		return comp;
@@ -546,7 +537,7 @@ public class PhenotypeResourceFactory {
 	 * @return
 	 */
 	private static FSArray getValue(JCas jcas,FeatureStructure val){
-		return (val == null)?null:getValue(jcas,Collections.singleton(val));
+		return (val == null)?null:getValues(jcas,Collections.singleton(val));
 		
 	}
 	
@@ -556,7 +547,7 @@ public class PhenotypeResourceFactory {
 	 * @param val
 	 * @return
 	 */
-	private static FSArray getValue(JCas jcas,Collection<FeatureStructure> vals){
+	private static FSArray getValues(JCas jcas,Collection<FeatureStructure> vals){
 		if(vals == null)
 			return null;
 		FSArray fs = new FSArray(jcas,vals.size());
@@ -875,9 +866,12 @@ public class PhenotypeResourceFactory {
 		// get related items
 		for(int i=0;i<comp.getHasEvent().size();i++){
 			CompositionEvent ce = comp.getHasEvent(i);
-			for(int j=0;j<ce.getHasEvent().size();j++){
-				Element el = loadElement(ce.getHasEvent(j));
-				rr.addReportElement(el);
+			if(ce != null){
+				for(int j=0;j<ce.getHasEvent().size();j++){
+					Element el = loadElement(ce.getHasEvent(j));
+					if(el != null)
+						rr.addReportElement(el);
+				}
 			}
 		}
 		

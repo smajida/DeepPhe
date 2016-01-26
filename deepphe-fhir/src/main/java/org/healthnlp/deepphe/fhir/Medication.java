@@ -15,7 +15,7 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	}
 
 	public String getResourceIdentifier() {
-		return  getClass().getSimpleName().toUpperCase()+"_"+getDisplayText().replaceAll("\\W+","_");
+		return  FHIRUtils.createResourceIdentifier(this);
 	}
 
 	public String getSummaryText() {
@@ -59,4 +59,5 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	public String toString(){
 		return getDisplayText();
 	}
+		
 }

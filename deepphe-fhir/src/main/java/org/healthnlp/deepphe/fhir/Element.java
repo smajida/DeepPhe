@@ -7,8 +7,6 @@ import java.net.URI;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Resource;
 
-import edu.pitt.dbmi.nlp.noble.ontology.IClass;
-
 
 /**
  * DeepPhe model interface that 

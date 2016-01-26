@@ -15,6 +15,7 @@ import org.apache.uima.fit.pipeline.SimplePipeline;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.uima.ae.CompositionCancerSummaryAE;
 import org.healthnlp.deepphe.uima.ae.I2b2WriterAE;
+import org.healthnlp.deepphe.uima.ae.PhenotypeCancerSummaryAE;
 import org.healthnlp.deepphe.uima.ae.PhenotypeSummarizerAE;
 import org.healthnlp.deepphe.uima.cr.FHIRCollectionReader;
 import org.healthnlp.deepphe.uima.cr.PatientCollectionReader;
@@ -54,11 +55,12 @@ final public class PhenotypeSummarizerPipeline {
 			throws UIMAException, IOException {
 		final CollectionReader collectionReader = createCollectionReader(inputDirectory);
 		final AnalysisEngine compositionSummarizerAE =AnalysisEngineFactory.createEngine(CompositionCancerSummaryAE.class,CompositionCancerSummaryAE.PARAM_ONTOLOGY_PATH,ontologyPath);
+		final AnalysisEngine cancerSummarizerAE =AnalysisEngineFactory.createEngine(PhenotypeCancerSummaryAE.class,PhenotypeCancerSummaryAE.PARAM_ONTOLOGY_PATH,ontologyPath);
 		//final AnalysisEngine phenotypeSummarizerAE = createPhenotypeSummarizerAE(clipsDirectoryPath,ontologyPath);
 		//final AnalysisEngine i2B2OutputAE = createI2B2OutputAE();
 		final AnalysisEngine xmiWriter = AnalysisEngineFactory.createEngine( XMIWriter.class, XMIWriter.PARAM_OUTPUTDIR, outputDirectory);
 		//SimplePipeline.runPipeline(collectionReader, phenotypeSummarizerAE, i2B2OutputAE);
-		SimplePipeline.runPipeline(collectionReader,compositionSummarizerAE,xmiWriter);
+		SimplePipeline.runPipeline(collectionReader,compositionSummarizerAE,cancerSummarizerAE,xmiWriter);
 	}
 
 	private static CollectionReader createCollectionReader(String inputDirectory)

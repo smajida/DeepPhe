@@ -1,11 +1,14 @@
 package org.healthnlp.deepphe.fhir.summary;
 
+import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.hl7.fhir.instance.model.CodeableConcept;
+import org.hl7.fhir.instance.model.Resource;
 
 
 public class PatientSummary extends Summary {
@@ -45,5 +48,4 @@ public class PatientSummary extends Summary {
 	public URI getConceptURI() {
 		return FHIRConstants.PATIENT_SUMMARY_URI;
 	}
-	
 }

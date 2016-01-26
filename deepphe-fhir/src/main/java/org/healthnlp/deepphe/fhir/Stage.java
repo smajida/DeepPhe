@@ -1,6 +1,7 @@
 package org.healthnlp.deepphe.fhir;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,10 @@ import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.StringType;
 
 public class Stage extends ConditionStageComponent implements Serializable{
+	public static final String TNM_PRIMARY_TUMOR = FHIRUtils.STAGE_URL+"/PrimaryTumor";
+	public static final String TNM_DISTANT_METASTASIS = FHIRUtils.STAGE_URL+"/DistantMetastasis";
+	public static final String TNM_REGIONAL_LYMPH_NODES = FHIRUtils.STAGE_URL+"/RegionalLymphNodes";
+
 	
 	public void setStringExtension(String url, String value) {
 		Extension e = new Extension();
@@ -26,7 +31,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	 * @return
 	 */
 	public String getPrimaryTumorStage(){
-		Extension e = getExtension(FHIRUtils.CANCER_URL+"#"+FHIRUtils.T_STAGE);
+		Extension e = getExtension(TNM_PRIMARY_TUMOR); //FHIRUtils.CANCER_URL+"#"+FHIRUtils.T_STAGE
 		return e != null? ((StringType)e.getValue()).getValue():null;
 	}
 	
@@ -40,7 +45,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	 * @return
 	 */
 	public CodeableConcept getPrimaryTumorStageCode(){
-		return getStageValue(FHIRUtils.T_STAGE);
+		return getStageValue(TNM_PRIMARY_TUMOR);
 	}
 	
 	
@@ -49,7 +54,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	 * @return
 	 */
 	public CodeableConcept getDistantMetastasisStageCode(){
-		return getStageValue(FHIRUtils.M_STAGE);
+		return getStageValue(TNM_DISTANT_METASTASIS);
 	}
 	
 	/**
@@ -57,29 +62,16 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	 * @return
 	 */
 	public CodeableConcept getRegionalLymphNodeStageCode(){
-		return getStageValue(FHIRUtils.N_STAGE);
+		return getStageValue(TNM_REGIONAL_LYMPH_NODES);
 	}
 	
 	
 	private CodeableConcept getStageValue(String stage){
-		/*IOntology o = ResourceFactory.getInstance().getOntology();
-		IClass cls = o.getClass(stage);
-		if(cls == null)
-			return null;
-		Extension e = getExtension(""+cls.getURI());
+		Extension e = getExtension(stage);
 		if(e == null)
 			return null;
-		
 		String val = ((StringType)e.getValue()).getValue();
-		for(IClass c : cls.getSubClasses()){
-			for(String s: c.getConcept().getSynonyms()){
-				if(s.matches("\\b"+val+"\\b")){
-					return FHIRUtils.getCodeableConcept(c);
-				}
-			}
-		}
-		return null;*/
-		return null;
+		return (val != null)?FHIRUtils.getCodeableConcept(URI.create(val)):null;
 	}
 	
 	/**
@@ -87,7 +79,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	 * @return
 	 */
 	public String getDistantMetastasisStage(){
-		Extension e = getExtension(FHIRUtils.CANCER_URL+"#"+FHIRUtils.M_STAGE);
+		Extension e = getExtension(TNM_DISTANT_METASTASIS);
 		return e != null? ((StringType)e.getValue()).getValue():null;
 	}
 	
@@ -96,7 +88,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	 * @return
 	 */
 	public String getRegionalLymphNodeStage(){
-		Extension e = getExtension(FHIRUtils.CANCER_URL+"#"+FHIRUtils.N_STAGE);
+		Extension e = getExtension(TNM_REGIONAL_LYMPH_NODES); 
 		return e != null? ((StringType)e.getValue()).getValue():null;
 	}
 	

@@ -55,27 +55,26 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 
 		try {
 
-			for (DocumentID docID : JCasUtil.select(jcas, DocumentID.class)) {
-				Patient patient = DocumentResourceFactory.getPatient(jcas);
+			//for (DocumentID docID : JCasUtil.select(jcas, DocumentID.class)) {
+			Patient patient = DocumentResourceFactory.getPatient(jcas);
 
-				String namedID = patient != null?patient.getPatientName():"unknown";
-				Report report = DocumentResourceFactory.getReport(jcas);
-				report.setTitle(TextUtils.stripSuffix(docID.getDocumentID()));
-		
-				// save FHIR related data
-				File patientDir = new File(new File(outputDir, FHIR_TYPE), namedID);
-				if (!patientDir.exists()) {
-					patientDir.mkdirs();
-				}
-				report.save(patientDir);
-
-				// save XMI
-				patientDir = new File(new File(outputDir, XMI_TYPE), namedID);
-				if (!patientDir.exists()) {
-					patientDir.mkdirs();
-				}
-				XMIWriter.writeXmi(jcas.getCas(), new File(patientDir, report.getTitle().replace('/', '_') + ".xmi"));
+			String namedID = patient != null?patient.getPatientName():"unknown";
+			Report report = DocumentResourceFactory.getReport(jcas);
+			
+			// save FHIR related data
+			File patientDir = new File(new File(outputDir, FHIR_TYPE), namedID);
+			if (!patientDir.exists()) {
+				patientDir.mkdirs();
 			}
+			report.save(patientDir);
+
+			// save XMI
+			patientDir = new File(new File(outputDir, XMI_TYPE), namedID);
+			if (!patientDir.exists()) {
+				patientDir.mkdirs();
+			}
+			XMIWriter.writeXmi(jcas.getCas(), new File(patientDir, report.getTitle().replace('/', '_') + ".xmi"));
+			//}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
