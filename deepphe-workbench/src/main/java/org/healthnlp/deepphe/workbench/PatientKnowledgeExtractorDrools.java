@@ -47,13 +47,9 @@ public class PatientKnowledgeExtractorDrools implements
 	}
 
 	public void loadSinglePatient() {
-		try {
-			disassembleDagToKnowledge();
-			appendGoalEstablishPlan();
-			loadKnowledgeToDrools();
-		} catch (JessException e) {
-			e.printStackTrace();
-		}
+		disassembleDagToKnowledge();
+		appendGoalEstablishPlan();
+		loadKnowledgeToDrools();
 	}
 
 	private void assembleKnowledgeToDag() {
@@ -72,7 +68,7 @@ public class PatientKnowledgeExtractorDrools implements
 		assembler.execute();
 	}
 
-	private void loadKnowledgeToDrools() throws JessException {
+	private void loadKnowledgeToDrools() {
 		for (KbIdentified identified : knowledgeMap.values()) {
 			engine.getSession().insert(identified);
 		}

@@ -18,10 +18,11 @@ import org.apache.uima.resource.ResourceConfigurationException;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.Progress;
 import org.apache.uima.util.ProgressImpl;
-import org.healthnlp.deepphe.summarization.jess.kb.Encounter;
-import org.healthnlp.deepphe.summarization.jess.kb.Identified;
-import org.healthnlp.deepphe.summarization.jess.kb.Patient;
-import org.healthnlp.deepphe.summarization.jess.kb.Summary;
+import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbIdentified;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
+import org.healthnlp.deepphe.summarization.drools.kb.KbSummaryInterface;
 
 public class PatientCollectionReader extends CollectionReader_ImplBase {
 
@@ -31,7 +32,7 @@ public class PatientCollectionReader extends CollectionReader_ImplBase {
 
 	private File inputDirectory;
 
-	private Iterator<Patient> patientIterator;
+	private Iterator<KbPatient> patientIterator;
 
 	/**
 	 * Initialize shell patient objects. We don't populate patients completely
@@ -61,19 +62,18 @@ public class PatientCollectionReader extends CollectionReader_ImplBase {
 		patientIterator = patients.iterator();
 	}
 
-	List<Patient> patients = null;
+	List<KbPatient> patients = null;
 
 	private void createPatients(File inputDirectory) {
-		patients = new ArrayList<Patient>();
+		patients = new ArrayList<KbPatient>();
 
 		for (File f : inputDirectory.listFiles()) {
 			if (f.isDirectory()) {
-				Patient p = new Patient();
-				p.setPath(f.getAbsolutePath());
+				KbPatient p = new KbPatient();
+				((KbSummaryInterface) p).setPath(f.getAbsolutePath());
 				patients.add(p);
 			}
 		}
-
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class PatientCollectionReader extends CollectionReader_ImplBase {
 	@Override
 	public void getNext(CAS aCAS) throws IOException, CollectionException {
 		progressIndex++;
-		Patient p = patientIterator.next();
+		KbPatient p = patientIterator.next();
 
 		try {
 			loadPatient(inputDirectory, p);
@@ -109,15 +109,14 @@ public class PatientCollectionReader extends CollectionReader_ImplBase {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	private void loadPatient(File inputDirectory, Patient p)
+	private void loadPatient(File inputDirectory, KbPatient p)
 			throws IOException, ClassNotFoundException {
-		File patientDir = new File(p.getPath());
+		File patientDir = new File(inputDirectory, p.getUuid());
 		
 		for (File f : patientDir.listFiles()) {
 			if (!f.isDirectory()) {
-
-				FileInputStream inputFileStream = new FileInputStream(f);
-				Encounter encounter = (Encounter) SerializationUtils
+    			FileInputStream inputFileStream = new FileInputStream(f);
+				KbEncounter encounter = (KbEncounter) SerializationUtils
 						.deserialize(inputFileStream);
 				p.addEncounter(encounter);
 				inputFileStream.close();
@@ -128,21 +127,21 @@ public class PatientCollectionReader extends CollectionReader_ImplBase {
 
 	}
 
-	private void reIdentifyDAG(Patient p) {
-		p.setId(Identified.idGenerator++);
+	private void reIdentifyDAG(KbPatient p) {
+		p.setId(KbIdentified.idGenerator++);
 		p.setSequence(p.getId());
-		for (Encounter e : p.getEncounters()) {
-			e.setId(Identified.idGenerator++);
+		for (KbEncounter e : p.getEncounters()) {
+			e.setId(KbIdentified.idGenerator++);
 			e.setSequence(e.getId());
 			e.setPatientId(p.getId());
 		}
-		for (Summary s : p.getSummaries()) {
-			s.setId(Identified.idGenerator++);
+		for (KbSummary s : p.getSummaries()) {
+			s.setId(KbIdentified.idGenerator++);
 			s.setSummarizableId(p.getId());
 		}
-		for (Encounter e : p.getEncounters()) {
-			for (Summary s : e.getSummaries()) {
-				s.setId(Identified.idGenerator++);
+		for (KbEncounter e : p.getEncounters()) {
+			for (KbSummary s : e.getSummaries()) {
+				s.setId(KbIdentified.idGenerator++);
 				s.setSummarizableId(e.getId());
 			}
 		}

@@ -125,7 +125,7 @@ final public class ReceptorStatusUtil {
                                                                      final ReceptorStatus receptorStatus ) {
       final SignSymptomMention typeMention = createReceptorTypeMention( jcas, windowStartOffset, receptorStatus );
       final Modifier valueModifier = createValueModifier( jcas, windowStartOffset, receptorStatus );
-      createTypeValueDegree( jcas, typeMention, valueModifier );
+//      createTypeValueDegree( jcas, typeMention, valueModifier );
       return typeMention;
    }
 

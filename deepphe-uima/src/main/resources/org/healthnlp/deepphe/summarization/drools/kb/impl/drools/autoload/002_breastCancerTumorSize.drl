@@ -1,0 +1,101 @@
+package org.healthnlp.deepphe.summarization.drools.rules;
+
+//list any import classes here.
+import org.healthnlp.deepphe.summarization.drools.kb.*;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.*;
+
+// ============================================================
+//  
+// Tumor Size
+//
+// Set 1: Document Genre Rules for sourcing data
+//
+// ============================================================
+
+rule "002_breastCancerTumorSize Tumor Size From Largest Dimension"
+	salience 1500
+	when
+	    $g : KbGoal (name == "extract-tumor-size",
+                isActive > 0)
+        KbPatient($patientId : id)
+        KbEncounter ($encounterOneId : id)
+        $tumorOneSize : TumorSize ($ts1Id : id, summarizableId == $encounterOneId)
+        $d11 : Quantity ($q11Id : id, $v11 : value, $uom11 : unitOfMeasure, summarizableId == $encounterOneId)  
+        $d12 : Quantity ($q12Id : id, $v12 : value, $uom12 : unitOfMeasure, summarizableId == $encounterOneId)
+        $d13 : Quantity ($q13Id : id, $v13 : value, $uom13 : unitOfMeasure, summarizableId == $encounterOneId)                                           
+        Has1dimension (domainId == $ts1Id, rangeId == $q11Id)
+        Has2dimension (domainId == $ts1Id, rangeId == $q12Id)
+        Has3dimension (domainId == $ts1Id, rangeId == $q13Id)        
+        not
+        	TumorSize (summarizableId == $patientId)
+        not 
+        	(
+        	  KbEncounter ($encounterTwoId : id)
+              and TumorSize ($ts2Id : id, summarizableId == $encounterTwoId)
+              and Quantity ($q21Id : id, $v21 : value, $uom21 : unitOfMeasure, summarizableId == $encounterTwoId)
+              and Quantity ($q22Id : id, $v22 : value, $uom22 : unitOfMeasure, summarizableId == $encounterTwoId)
+              and Quantity ($q23Id : id, $v23 : value, $uom23 : unitOfMeasure, summarizableId == $encounterTwoId)                                      
+              and Has1dimension (domainId == $ts2Id, rangeId == $q21Id)
+              and Has2dimension (domainId == $ts2Id, rangeId == $q22Id)
+              and Has3dimension (domainId == $ts2Id, rangeId == $q23Id)     
+              and eval(isQuantityGreaterThan($v11, $v12, $v13, $v21, $v22, $v23))        	
+           )  
+    then
+        TumorSize patientTumorSize = beanCopyTumorSize($tumorOneSize);
+        patientTumorSize.setSummarizableId($patientId);
+ 	    insert(patientTumorSize);
+ 	    System.out.println("<DROOLS-ENGINE> Nominalized tumor size as " + patientTumorSize.getClass().getSimpleName());
+    end
+
+
+rule "002_breastCancerTumorSize Tumor Size From First Reliable Encounter"
+	salience 1000
+	when
+	    $g : KbGoal (name == "extract-tumor-size",
+                isActive > 0)
+        KbEncounter ($encounterOneId : id,
+                     $encounterOneSequence : sequence)
+        $tumorSize : TumorSize (summarizableId == $encounterOneId)
+        KbPatient( $patientId : id ) 
+        not
+        	TumorSize (summarizableId == $patientId)
+        not 
+        	(
+        	KbEncounter ($encounterTwoId : id,
+                     $encounterTwoSequence : sequence,
+                     $encounterTwoId != $encounterOneId,
+                     $encounterTwoSequence < $encounterOneSequence)             
+             and TumorSize ( summarizableId == $encounterTwoId )
+             )  
+    then
+        TumorSize patientTumorSize = beanCopyTumorSize($tumorSize);
+        patientTumorSize.setSummarizableId($patientId);
+ 	    insert(patientTumorSize);
+ 	    System.out.println("<DROOLS-ENGINE> Nominalized tumor size as " + patientTumorSize.getClass().getSimpleName());
+    end
+
+rule "002_breastCancerTumorSize Transition Goal State"
+	salience 500
+	when
+	    $g : KbGoal (name == "extract-tumor-size",
+                isActive > 0)
+    then
+
+    	retract($g);
+    	System.out.println("<DROOLS-ENGINE> Achieved goal " + $g.getName());
+    end
+    
+function boolean isQuantityGreaterThan(String s11, String s12, String s13,
+                                       String s21, String s22, String s23) {
+      long l11 = Long.valueOf(s11);
+      long l12 = Long.valueOf(s12);
+      long l13 = Long.valueOf(s13);
+      long l21 = Long.valueOf(s21);
+      long l22 = Long.valueOf(s22);
+      long l23 = Long.valueOf(s23);
+      return (l11 * l12 * l13) > (l21 * l22 * l23);
+      }
+    
+function TumorSize beanCopyTumorSize(TumorSize tumorSize) {
+        return (TumorSize) beanCopy(tumorSize);
+        }    

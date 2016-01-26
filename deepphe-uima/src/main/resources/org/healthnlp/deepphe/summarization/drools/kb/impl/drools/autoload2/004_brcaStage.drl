@@ -1,0 +1,1263 @@
+package org.healthnlp.deepphe.summarization.drools.rules;
+
+//list any import classes here.
+import org.healthnlp.deepphe.summarization.drools.kb.*;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.*;
+
+// ==========================================================
+// Stage0-1.1 	
+//
+// If Tis, N0, M0 then Stage 0 Breast Cancer 	
+//
+// Tis(?tis), N0(?n0), M0(?m0), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?tis),
+// hasNClassification(?caphen, ?n0),
+// hasMClassification(?caphen, ?m0),
+// swrlx:makeOWLThing(?stage0, ?tis, ?n0, ?m0) -> Stage0(?stage0)
+// 
+// ==========================================================
+rule "004_Stage0-1.1"
+	salience 2350
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )	    
+        Tis ($tis : id, summarizableId == $patientId)
+        N0 ($n0 : id, summarizableId == $patientId)
+        M0 ($m0 : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $tis, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n0, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m0, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)
+    then
+        System.out.println("<DROOLS-ENGINE> Stage0-1-1 Assigning Stage0 cancer for patient ");      
+        CancerStage cancerStage = new Stage0Impl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);
+    end
+    
+// ==========================================================
+// Stage0-1.2
+//
+// 	If Tis, pN0, M0 then Stage 0 Breast Cancer 	
+//
+//  Tis(?tis), pN0(?pn0), M0(?m0), CancerPhenotype(?caphen),
+//  hasTClassification(?caphen, ?tis),
+//  hasNClassification(?caphen, ?pn0),
+//  hasMClassification(?caphen, ?m0),
+//  swrlx:makeOWLThing(?stage0, ?tis, ?pn0, ?m0) -> Stage0(?stage0)
+// 
+// ==========================================================
+rule "004_Stage0-1.2"
+	salience 2400
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    Tis ($tis : id, summarizableId == $patientId)
+        Pn0 ($pn0 : id, summarizableId == $patientId)
+        M0 ($m0 : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $tis, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $pn0, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m0, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage0-1.2 fires ");
+        CancerStage cancerStage = new Stage0Impl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);      
+    end
+
+// ==========================================================
+// Stage1A-1.1
+//
+// 	If T1, N0, pM0, then Stage IA Breast Cancer
+//
+// T1(?t), N0(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m),
+// swrlx:makeOWLThing(?stage1a, ?t, ?n, ?m)
+// -> StageIA(?stage1a) 
+//
+// ==========================================================
+rule "004_Stage1A-1.1"
+	salience 2450
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T1 ($t : id, summarizableId == $patientId)
+        N0 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	    	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage1A-1.1 fires ");
+        CancerStage cancerStage = new StageiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);      
+    end
+
+// ==========================================================
+// Stage1A-1.2 	
+//
+// If T1, pN0, pM0, then Stage IA Breast Cancer
+//
+// T1(?t), pN0(?n), M0(?m),
+// CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m),
+// swrlx:makeOWLThing(?stage1a, ?t, ?n, ?m) ->
+// StageIA(?stage1a) 
+//  
+// ==========================================================
+rule "004_Stage1A-1.2"
+	salience 2500
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T1 ($t : id, summarizableId == $patientId)
+        Pn0 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	    		    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage1A-1.2 fires ");
+        CancerStage cancerStage = new StageiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);      
+    end
+    
+// ==========================================================
+// Stage1B-1
+//
+// 	If T0, pN1mi, M0, then Stage IB Breast Cancer
+//
+// 	T0(?t), pN1mi(?n), M0(?m), CancerPhenotype(?caphen),
+//  hasTClassification(?caphen, ?t), hasNClassification(?caphen, ?n), hasMClassification(?caphen, ?m)
+//  swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+//  -> StageIB(?stage)  
+//
+// ==========================================================
+rule "004_Stage1B-1"
+	salience 2550
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T0 ($t : id, summarizableId == $patientId)
+        Pn1mi ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage1B-1 fires ");
+        CancerStage cancerStage = new StageibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);          
+    end
+    
+// ==========================================================
+//
+// Stage1B-2 	
+//
+// If T1, pN1mi, M0, then Stage IB Breast Cancer
+//
+// T1(?t), pN1mi(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m) 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m) 
+// -> StageIB(?stage)
+//   
+// ==========================================================
+rule "004_Stage1B-2"
+	salience 2600
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T1 ($t : id, summarizableId == $patientId)
+        Pn1mi ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage1B-2 fires ");
+        CancerStage cancerStage = new StageibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);                
+    end
+
+// ==========================================================
+// Stage2A-1.1 	
+//
+// If T0, N1, M0, then Stage IIA Breast Cancer
+//
+// T0(?t), N1(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m)
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIA(?stage)
+//  
+// ==========================================================
+rule "004_Stage2A-1.1"
+	salience 2650
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T0 ($t : id, summarizableId == $patientId)
+        N1 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	  	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage2A-1.1 fires "); 
+        CancerStage cancerStage = new StageiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);          
+    end
+ 
+// ==========================================================
+// Stage2A-1.2
+//
+// 	If T0, pN1, M0, then Stage IIA Breast Cancer
+//
+// 	T0(?t), pN1(?n), M0(?m), CancerPhenotype(?caphen),
+//  hasTClassification(?caphen, ?t),
+//  hasNClassification(?caphen, ?n),
+//  hasMClassification(?caphen, ?m)
+//  swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+//  -> StageIIA(?stage)  
+//
+// ==========================================================
+rule "004_Stage2A-1.2"
+	salience 2700
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T0 ($t : id, summarizableId == $patientId)
+        Pn1 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	  	 	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage2A-1.2 fires "); 
+        CancerStage cancerStage = new StageiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);                 
+    end 
+    
+// ==========================================================
+//
+// Stage2A-2.1
+//
+// 	If T1, N1, M0, then Stage IIA Breast Cancer
+//
+// 	T1(?t), N1(?n), M0(?m), CancerPhenotype(?caphen),
+//  hasTClassification(?caphen, ?t),
+//  hasNClassification(?caphen, ?n),
+//  hasMClassification(?caphen, ?m)
+//  swrlx:makeOWLThing(?stage, ?t, ?n, ?m) 
+//  -> StageIIA(?stage)
+//
+// ==========================================================
+rule "004_Stage2A-2.1"
+	salience 2750
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T1 ($t : id, summarizableId == $patientId)
+        N1 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage2A-2.1 fires ");               
+        CancerStage cancerStage = new StageiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+//
+// Stage2A-2.2
+//
+// 	If T1, pN1, M0, then Stage IIA Breast Cancer
+//
+// 	T1(?t), pN1(?n), M0(?m), CancerPhenotype(?caphen),
+//  hasTClassification(?caphen, ?t), hasNClassification(?caphen, ?n), hasMClassification(?caphen, ?m)
+//  swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+//  -> StageIIA(?stage)
+// 
+// ==========================================================
+rule "004_Stage2A-2.2"
+	salience 2800
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T1 ($t : id, summarizableId == $patientId)
+        Pn1 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage2A-2.2 fires ");               
+        CancerStage cancerStage = new StageiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+//
+// Stage2A-3.1
+//
+// 	If T2, N0, M0, then Stage IIA Breast Cancer
+//
+// 	T2(?t), N0(?n), M0(?m),
+//  CancerPhenotype(?caphen), 
+//  hasTClassification(?caphen, ?t), 
+//  hasNClassification(?caphen, ?n), 
+//  hasMClassification(?caphen, ?m) 
+//  swrlx:makeOWLThing(?stage, ?t, ?n, ?m) 
+//  -> StageIIA(?stage)
+// 
+// ==========================================================
+rule "004_Stage2A-3.1"
+	salience 2850
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T2 ($t : id, summarizableId == $patientId)
+        N0 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage2A-3.1 fires ");               
+        CancerStage cancerStage = new StageiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+//
+// Stage2A-3.2 	
+//
+// If T2, pN0, M0, then Stage IIA Breast Cancer
+//
+// T1(?t), pN0(?n), M0(?m), CancerPhenotype(?caphen), 
+// hasTClassification(?caphen, ?t), hasNClassification(?caphen, ?n), hasMClassification(?caphen, ?m)
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIA(?stage)   (Note: should be T2(?t))
+//
+// ==========================================================
+rule "004_Stage2A-3.2"
+	salience 2900
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T2 ($t : id, summarizableId == $patientId)
+        Pn0 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage2A-3.2 fires ");               
+        CancerStage cancerStage = new StageiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage2B-1.1
+//
+// 	If T2, N1, M0, then Stage IIB Breast Cancer
+//
+// 	T2(?t), N1(?n), M0(?m), CancerPhenotype(?caphen),
+//  hasTClassification(?caphen, ?t), 
+//  hasNClassification(?caphen, ?n), 
+//  hasMClassification(?caphen, ?m) 
+//  swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+//  -> StageIIB(?stage) 
+// ==========================================================
+rule "004_Stage2B-1.1"
+	salience 2950
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T2 ($t : id, summarizableId == $patientId)
+        N1 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage2B-1.1 fires ");               
+        CancerStage cancerStage = new StageiibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage2B-1.2 	
+//
+// If T2, pN1, M0, then Stage IIB Breast Cancer
+//
+// T2(?t), pN1(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t), 
+// hasNClassification(?caphen, ?n), 
+// hasMClassification(?caphen, ?m) 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)-> StageIIB(?stage) 
+//
+// ==========================================================
+rule "004_Stage2B-1.2"
+	salience 3000
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T2 ($t : id, summarizableId == $patientId)
+        Pn1 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage2B-1.2 fires ");               
+        CancerStage cancerStage = new StageiibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+ 
+// ==========================================================
+// Stage2B-2.1 	
+//
+// If T3, N0, M0, then Stage IIB Breast Cancer 	
+//
+// T3(?t), N0(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m) 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIB(?stage) 
+// ==========================================================
+rule "004_Stage2B-2.1"
+	salience 3050
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T3 ($t : id, summarizableId == $patientId)
+        N0 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage2B-2.1 fires ");               
+        CancerStage cancerStage = new StageiibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage2B-2.2
+//
+// If T3, pN0, M0, then Stage IIB Breast Cancer
+//
+// T3(?t), pN0(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t), 
+// hasNClassification(?caphen, ?n), 
+// hasMClassification(?caphen, ?m) 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIB(?stage) 
+// ==========================================================
+rule "004_Stage2B-2.2"
+	salience 3100
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T3 ($t : id, summarizableId == $patientId)
+        Pn0 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage2B-2.2 fires ");               
+        CancerStage cancerStage = new StageiibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3A-1.1
+//
+// 	If T0, N2, M0, then Stage IIIA Breast Cancer
+//
+// 	T0(?t), N2(?n), M0(?m), CancerPhenotype(?caphen),
+//  hasTClassification(?caphen, ?t), 
+//  hasNClassification(?caphen, ?n), 
+//  hasMClassification(?caphen, ?m) 
+//  swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+//  -> StageIIIA(?stage) 
+// ==========================================================
+rule "004_Stage3A-1.1"
+	salience 3150
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T0 ($t : id, summarizableId == $patientId)
+        N2 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3A-1.1 fires ");               
+        CancerStage cancerStage = new StageiiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end 
+    
+// ==========================================================
+// Stage3A-1.2 	
+//
+// If T0, pN2, M0, then Stage IIIA Breast Cancer
+//
+// T0(?t), pN2(?n), M0(?m),
+// CancerPhenotype(?caphen), 
+// hasTClassification(?caphen, ?t), 
+// hasNClassification(?caphen, ?n), 
+// hasMClassification(?caphen, ?m), 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIA(?stage)
+// 
+// ==========================================================
+rule "004_Stage3A-1.2"
+	salience 3200
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T0 ($t : id, summarizableId == $patientId)
+        Pn2 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3A-1.2 fires ");               
+        CancerStage cancerStage = new StageiiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3A-2.1 	
+//
+// If T1, N2, M0, then Stage IIIA Breast Cancer
+//
+// T1(?t), N2(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t), 
+// hasNClassification(?caphen, ?n), 
+// hasMClassification(?caphen, ?m) 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIA(?stage)
+//
+// ==========================================================
+rule "004_Stage3A-2.1"
+	salience 3250
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T1 ($t : id, summarizableId == $patientId)
+        N2 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3A-2.1 fires ");               
+        CancerStage cancerStage = new StageiiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3A-2.2 	
+//
+// If T1, pN2, M0, then Stage IIIA Breast Cancer 	
+//
+// T1(?t), pN2(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m) 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIA(?stage) 
+// ==========================================================
+rule "004_Stage3A-2.2"
+	salience 3300
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+        KbPatient( $patientId : id )
+	    T1 ($t : id, summarizableId == $patientId)
+        Pn2 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3A-2.2 fires ");               
+        CancerStage cancerStage = new StageiiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end 
+    
+// ==========================================================
+// Stage3A-3.1 	
+//
+// If T2, N2, M0, then Stage IIIA Breast Cancer
+//
+// T2(?t), N2(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m)
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIA(?stage) 
+// ==========================================================
+rule "004_Stage3A-3.1"
+	salience 3350
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T2 ($t : id, summarizableId == $patientId)
+        N2 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3A-3.1 fires ");               
+        CancerStage cancerStage = new StageiiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3A-3.2 	
+//
+// If T2, pN2, M0, then Stage IIIA Breast Cancer
+//
+// T1(?t), pN2(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t), 
+// hasNClassification(?caphen, ?n), 
+// hasMClassification(?caphen, ?m) 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIA(?stage) 
+// ==========================================================
+rule "004_Stage3A-3.2"
+	salience 3400
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T2 ($t : id, summarizableId == $patientId)
+        Pn2 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3A-3.2 fires ");               
+        CancerStage cancerStage = new StageiiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3A-4.1 	
+//
+// If T3, N1, M0, then Stage IIIA Breast Cancer
+//
+// T3(?t), N1(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n), 
+// hasMClassification(?caphen, ?m) 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIA(?stage) 
+// ==========================================================
+rule "004_Stage3A-4.1"
+	salience 3450
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T3 ($t : id, summarizableId == $patientId)
+        N1 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3A-4.1 fires ");               
+        CancerStage cancerStage = new StageiiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3A-4.2 	
+//
+// If T3, pN1, M0, then Stage IIIA Breast Cancer 	
+//
+// T3(?t), pN1(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t), 
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m) 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIA(?stage) 
+// ==========================================================
+rule "004_Stage3A-4.2"
+	salience 3500
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T3 ($t : id, summarizableId == $patientId)
+        Pn1 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3A-4.2 fires ");               
+        CancerStage cancerStage = new StageiiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3A-5.1 	
+// 
+// If T3, N2, M0, then Stage IIIA Breast Cancer
+//
+// T3(?t), N2(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t), 
+// hasNClassification(?caphen, ?n), 
+// hasMClassification(?caphen, ?m) 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIA(?stage) 
+// ==========================================================
+rule "004_Stage3A-5.1"
+	salience 3550
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T3 ($t : id, summarizableId == $patientId)
+        N2 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3A-5.1 fires ");               
+        CancerStage cancerStage = new StageiiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3A-5.2 	
+// 
+// If T3, pN2, M0, then Stage IIIA Breast Cancer
+//
+// T3(?t), pN2(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t), 
+// hasNClassification(?caphen, ?n), 
+// hasMClassification(?caphen, ?m) 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIA(?stage) 
+// ==========================================================
+rule "004_Stage3A-5.2"
+	salience 3600
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T3 ($t : id, summarizableId == $patientId)
+        Pn2 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3A-5.2 fires ");               
+        CancerStage cancerStage = new StageiiiaImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3B-1.1 	
+//
+// If T4, N0, M0, then Stage IIIB Breast Cancer
+//
+// T4(?t), N0(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m)
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIB(?stage) 
+// ==========================================================
+rule "004_Stage3B-1.1"
+	salience 3650
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T4 ($t : id, summarizableId == $patientId)
+        N0 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3B-1.1 fires ");               
+        CancerStage cancerStage = new StageiiibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3B-1.2 	
+//
+// If T4, pN0, M0, then Stage IIIB Breast Cancer
+//
+// T4(?t), pN0(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m)
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIB(?stage) 
+// ==========================================================
+rule "004_Stage3B-1.2"
+	salience 3700
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T4 ($t : id, summarizableId == $patientId)
+        Pn0 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3B-1.2 fires ");               
+        CancerStage cancerStage = new StageiiibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3B-2.1 	
+//
+// If T4, N1, M0, then Stage IIIB Breast Cancer
+//
+// T4(?t), N1(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m)
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIB(?stage) 
+// ==========================================================
+rule "004_Stage3B-2.1"
+	salience 3750
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T4 ($t : id, summarizableId == $patientId)
+        N1 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3B-2.1 fires ");               
+        CancerStage cancerStage = new StageiiibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3B-2.2 	
+//
+// If T4, pN1, M0, then Stage IIIB Breast Cancer
+//
+// T4(?t), pN1(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m)
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIB(?stage) 
+// ==========================================================
+rule "004_Stage3B-2.2"
+	salience 3800
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T4 ($t : id, summarizableId == $patientId)
+        Pn1 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3B-2.2 fires ");               
+        CancerStage cancerStage = new StageiiibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+
+// ==========================================================
+// Stage3B-3.1 	
+//
+// If T4, N2, M0, then Stage IIIB Breast Cancer
+//
+// T4(?t), N2(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m)
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIB(?stage) 
+// ==========================================================
+rule "004_Stage3B-3.1"
+	salience 3850
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T4 ($t : id, summarizableId == $patientId)
+        N2 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3B-3.1 fires ");               
+        CancerStage cancerStage = new StageiiibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3B-3.2 	
+//
+// If T4, pN2, M0, then Stage IIIB Breast Cancer
+//
+// T4(?t), pN2(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t),
+// hasNClassification(?caphen, ?n),
+// hasMClassification(?caphen, ?m)
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m)
+// -> StageIIIB(?stage) 
+// ==========================================================
+rule "004_Stage3B-3.2"
+	salience 3900
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    T4 ($t : id, summarizableId == $patientId)
+        Pn2 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3B-3.2 fires ");               
+        CancerStage cancerStage = new StageiiibImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3C-1.1 	
+//
+// If any T value, N3, M0, then Stage IIIC Breast Cancer
+//
+// PrimaryTumorClassification(?t), N3(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t), 
+// hasNClassification(?caphen, ?n),  
+// hasMClassification(?caphen, ?m), 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m) 
+//-> StageIIIC(?stage) 
+// ==========================================================
+rule "004_Stage3C-1.1"
+	salience 3800
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    PrimaryTumorClassification ($t : id, summarizableId == $patientId)
+        N3 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3C-1.1 fires ");               
+        CancerStage cancerStage = new StageiiicImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage3C-1.2 	
+//
+// If any T value, pN3, M0, then Stage IIIC Breast Cancer
+//
+// PrimaryTumorClassification(?t), pN3(?n), M0(?m), CancerPhenotype(?caphen),
+// hasTClassification(?caphen, ?t), 
+// hasNClassification(?caphen, ?n),  
+// hasMClassification(?caphen, ?m), 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m) 
+//-> StageIIIC(?stage) 
+// ==========================================================
+rule "004_Stage3C-1.2"
+	salience 3950
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    PrimaryTumorClassification ($t : id, summarizableId == $patientId)
+        Pn3 ($n : id, summarizableId == $patientId)
+        M0 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage3C-1.2 fires ");               
+        CancerStage cancerStage = new StageiiicImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+// ==========================================================
+// Stage4-1 	
+//
+// If any T value, any N value, M1, then Stage IV Breast Cancer
+//
+// PrimaryTumorClassification(?t), 
+// RegionalLymphNodeClassification(?n), M1(?m),
+// CancerPhenotype(?caphen), 
+// hasTClassification(?caphen, ?t), 
+// hasNClassification(?caphen, ?n), 
+// hasMClassification(?caphen, ?m), 
+// swrlx:makeOWLThing(?stage, ?t, ?n, ?m) 
+// -> StageIV(?stage)
+// 
+// ==========================================================
+rule "004_Stage4-1"
+	salience 4000
+	when
+	    KbGoal (name == "extract-stage", isActive > 0)
+	    KbPatient( $patientId : id )
+	    PrimaryTumorClassification ($t : id, summarizableId == $patientId)
+        RegionalLymphNodeClassification ($n : id, summarizableId == $patientId)
+        M1 ($m : id, summarizableId == $patientId)
+        CancerPhenotype($caphen : id, summarizableId == $patientId)
+        Hastclassification(domainId == $caphen,
+                           rangeId == $t, summarizableId == $patientId)
+        Hasnclassification(domainId == $caphen,
+                           rangeId == $n, summarizableId == $patientId)
+        Hasmclassification(domainId == $caphen,
+                           rangeId == $m, summarizableId == $patientId)                   
+        not CancerStage (summarizableId == $patientId)	   	    
+    then
+        System.out.println("<DROOLS-ENGINE> 004_Stage4-1 fires ");               
+        CancerStage cancerStage = new StageivImpl();
+        cancerStage.setSummarizableId($patientId);
+        insert(cancerStage);               
+    end
+    
+
+                 
+rule "004_breastCancerStage Transition Goal State"
+	salience 500
+	when
+	    $g : KbGoal (name == "extract-stage",
+                isActive > 0)
+    then
+        System.out.println("<DROOLS-ENGINE> Achieved goal " + $g.getName());
+    	retract($g);
+    end
+    
+
+
+    

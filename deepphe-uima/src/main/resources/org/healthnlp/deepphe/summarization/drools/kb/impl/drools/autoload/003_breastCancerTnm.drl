@@ -1,0 +1,96 @@
+package org.healthnlp.deepphe.summarization.drools.rules;
+
+//list any import classes here.
+import org.healthnlp.deepphe.summarization.drools.kb.*;
+import org.healthnlp.deepphe.summarization.drools.kb.impl.*;
+
+// ============================================================
+//  
+//   If populating a TNM target template, and there exists a
+// latest TNM document level mention for the patient
+// and not in the past then use this as the TNM
+//
+// ============================================================
+
+rule "003_breastCancerTnm T Grade From Last Encounter"
+	salience 1000
+	when
+	    KbGoal (name == "extract-tnm", isActive > 0)
+	    KbPatient( $patientId : id )
+        KbEncounter($encounterOneId : id, 
+                    patientId == $patientId,
+                    $encounterOneSequence : sequence,                         
+                    ( kind == "Pathology Report" || kind == "Progress Note" ))
+         $encounterTumorGrade : PrimaryTumorClassification (summarizableId == $encounterOneId)
+         not PrimaryTumorClassification (summarizableId == $patientId)
+         not ( KbEncounter ($encounterTwoId : id,
+                            patientId == $patientId,
+                            sequence > $encounterOneSequence) and 
+               PrimaryTumorClassification (summarizableId == $encounterTwoId) )
+    then
+        System.out.println("<DROOLS-ENGINE> Extrcting T grade for patient ");
+    	PrimaryTumorClassification patientTumorGrade = beanCopyPrimaryTumorClassification($encounterTumorGrade);
+    	patientTumorGrade.setSummarizableId($patientId);
+        insert(patientTumorGrade);
+    end
+    
+rule "003_breastCancerTnm N Grade From Last Encounter"
+	salience 1000
+	when
+	    KbGoal (name == "extract-tnm", isActive > 0)
+	    KbPatient( $patientId : id )
+        KbEncounter($encounterOneId : id, 
+                    patientId == $patientId,
+                    $encounterOneSequence : sequence,                         
+                    ( kind == "Pathology Report" || kind == "Progress Note" ))
+        $encounterNodeGrade : ClinicalRegionalLymphNodeClassification (summarizableId == $encounterOneId)
+        not ClinicalRegionalLymphNodeClassification (summarizableId == $patientId)
+        not ( KbEncounter ($encounterTwoId : id, sequence > $encounterOneSequence) and 
+               ClinicalRegionalLymphNodeClassification (summarizableId == $encounterTwoId) )
+    then
+        System.out.println("<DROOLS-ENGINE> Extrcting N grade for patient ");
+    	ClinicalRegionalLymphNodeClassification patientNodeGrade = beanCopyClinicalRegionalLymphNodeClassification($encounterNodeGrade);
+    	patientNodeGrade.setSummarizableId($patientId);
+        insert(patientNodeGrade);
+    end
+ 
+ rule "003_breastCancerTnm M Grade From Last Encounter"
+	salience 1000
+	when
+        KbGoal (name == "extract-tnm", isActive > 0)
+	    KbPatient( $patientId : id )
+        KbEncounter($encounterOneId : id, 
+                    patientId == $patientId,
+                    $encounterOneSequence : sequence,                         
+                    ( kind == "Pathology Report" || kind == "Progress Note" ))
+        $encounterMetastaticGrade : DistantMetastasisClassification (summarizableId == $encounterOneId)
+        not DistantMetastasisClassification (summarizableId == $patientId)
+        not ( KbEncounter ($encounterTwoId : id, sequence > $encounterOneSequence) and 
+                DistantMetastasisClassification (summarizableId == $encounterTwoId) )
+    then
+        System.out.println("<DROOLS-ENGINE> Extrcting M grade for patient ");
+    	DistantMetastasisClassification patientMetastaticGrade = beanCopyDistantMetastasisClassification($encounterMetastaticGrade);
+    	patientMetastaticGrade.setSummarizableId($patientId);
+        insert(patientMetastaticGrade);
+    end   
+
+rule "003_breastCancerTnm Transition Goal State"
+	salience 500
+	when
+	    $g : KbGoal (name == "extract-tnm",
+                isActive > 0)
+    then
+        System.out.println("<DROOLS-ENGINE> Achieved goal " + $g.getName());
+    	retract($g);
+    end
+    
+function PrimaryTumorClassification beanCopyPrimaryTumorClassification(PrimaryTumorClassification primaryTumorClassification) {
+        return (PrimaryTumorClassification) beanCopy(primaryTumorClassification);
+}
+function ClinicalRegionalLymphNodeClassification beanCopyClinicalRegionalLymphNodeClassification(ClinicalRegionalLymphNodeClassification clinicalRegionalLymphNodeClassification) {
+        return (ClinicalRegionalLymphNodeClassification) beanCopy(clinicalRegionalLymphNodeClassification);
+}    
+function DistantMetastasisClassification beanCopyDistantMetastasisClassification(DistantMetastasisClassification distantMetastasisClassification) {
+        return (DistantMetastasisClassification) beanCopy(distantMetastasisClassification);
+}        
+

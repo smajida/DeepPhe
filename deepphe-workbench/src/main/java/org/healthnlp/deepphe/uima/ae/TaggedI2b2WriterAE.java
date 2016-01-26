@@ -33,12 +33,11 @@ public class TaggedI2b2WriterAE extends TaggedSummarizableAE {
 		for (KbSummary summary : patient.getSummaries()) {
 			System.out.println(summary);
 		}
-		
 	}
 
 	private void uploadPatientDAG()
 			throws CASException {
-		CtakesToDroolsConverter ctakesToJessConverter = new CtakesToDroolsConverter();
+		CtakesToDroolsConverter ctakesToJessConverter = CtakesToDroolsConverter.getInstance();
 		ctakesToJessConverter.setMultiJCas(multiJCas);
 		ctakesToJessConverter.setPatientJCas(patientJCas);
 		ctakesToJessConverter.setPatient(new KbPatient());

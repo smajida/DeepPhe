@@ -93,7 +93,7 @@ public class CasPreLoadedPatientAE extends JCasAnnotator_ImplBase {
 	}
 	
 	private void uploadPatientDAG() throws CASException {
-		CtakesToDroolsConverter ctakesToJessConverter = new CtakesToDroolsConverter();
+		CtakesToDroolsConverter ctakesToJessConverter = CtakesToDroolsConverter.getInstance();
 		ctakesToJessConverter.setMultiJCas(multiJCas);
 		ctakesToJessConverter.setPatientJCas(patientJCas);
 		ctakesToJessConverter.setPatient(new KbPatient());
