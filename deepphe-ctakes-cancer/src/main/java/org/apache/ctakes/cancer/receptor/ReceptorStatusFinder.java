@@ -31,12 +31,17 @@ final public class ReceptorStatusFinder {
    static private final Logger LOGGER = Logger.getLogger( "ReceptorStatusFinder" );
 
 
-   static private final String TYPE_REGEX = "(Estrogen|ER)|(Progesterone|PR)|(HER2( ?/ ?neu)?)";
-   static private final String VALUE_REGEX = "(\\+(pos)?|-(neg)?)|(\\s+(status\\s+)?(is\\s+)?"
-                                             + "(pos(itive)?|neg(ative)?"
-                                             + "|N/?A\\b|unknown|indeterminate|equivocal|(not assessed)))";
+   static private final String TYPE_REGEX
+         = "(Estrogen( and Progesterone)?)|(ER( ?(/|and) ?PR)?)|(Progesterone|PR)|(HER-?2( ?/ ?neu)?)";
+   static private final String INTERIM_EX = "(-?\\s*?Receptors?\\s*-?)?\\s*(status\\s*)?((is|are)\\s*)?\\s*:?";
+   static private final String LONG_VALUE = "(strongly |weakly )?(\\+?pos(itive)?)|(-?neg(ative)?)"
+                                            + "|N/?A\\b|unknown|indeterminate|equivocal|(not assessed)";
+   static private final String SHORT_VALUE = "\\+(pos)?|-(neg)?";
 
-   static private final String FULL_REGEX = "\\b(" + TYPE_REGEX + ") ?(" + VALUE_REGEX + ")";
+   // Order is very important
+   static private final String FULL_REGEX = "\\b(" + TYPE_REGEX + ")\\s*"
+                                            + "((" + INTERIM_EX + "\\s*(" + LONG_VALUE + "))"
+                                            + "|(" + SHORT_VALUE + "))";
    static private final Pattern FULL_PATTERN = Pattern.compile( FULL_REGEX, Pattern.CASE_INSENSITIVE );
 
 
@@ -61,32 +66,41 @@ final public class ReceptorStatusFinder {
       if ( lookupWindow.length() < 3 ) {
          return Collections.emptyList();
       }
+      System.out.println( lookupWindow );
       final List<ReceptorStatus> receptorStatuses = new ArrayList<>();
       final Matcher fullMatcher = FULL_PATTERN.matcher( lookupWindow );
       while ( fullMatcher.find() ) {
          final String matchWindow = lookupWindow.substring( fullMatcher.start(), fullMatcher.end() );
+         System.out.println( matchWindow );
          SpannedStatusType spannedType = null;
          SpannedStatusValue spannedValue = null;
          for ( StatusType type : StatusType.values() ) {
             final Matcher typeMatcher = type.getMatcher( matchWindow );
-            if ( typeMatcher.find() ) {
-               spannedType = new SpannedStatusType( type,
-                     fullMatcher.start() + typeMatcher.start(),
-                     fullMatcher.start() + typeMatcher.end() );
-               break;
+            while ( typeMatcher.find() ) {
+               final int typeStart = fullMatcher.start() + typeMatcher.start();
+               final int typeEnd = fullMatcher.start() + typeMatcher.end();
+               spannedType = new SpannedStatusType( type, typeStart, typeEnd );
+               final String valueLookupWindow = matchWindow.substring( typeMatcher.end() );
+               spannedValue = null;
+               System.out.println( lookupWindow.substring( spannedType.getStartOffset(), spannedType.getEndOffset() ) );
+               for ( StatusValue value : StatusValue.values() ) {
+                  final Matcher valueMatcher = value.getMatcher( valueLookupWindow );
+                  if ( valueMatcher.find() ) {
+                     spannedValue = new SpannedStatusValue( value,
+                           typeEnd + valueMatcher.start(),
+                           typeEnd + valueMatcher.end() );
+                     System.out.println( " ... " + lookupWindow
+                           .substring( spannedValue.getStartOffset(), spannedValue.getEndOffset() ) );
+                     break;
+                  }
+               }
+               if ( spannedValue != null ) {
+                  receptorStatuses.add( new ReceptorStatus( spannedType, spannedValue ) );
+                  System.out.println( lookupWindow.substring( spannedType.getStartOffset(), spannedType.getEndOffset() )
+                                      + " ... " + lookupWindow
+                                            .substring( spannedValue.getStartOffset(), spannedValue.getEndOffset() ) );
+               }
             }
-         }
-         for ( StatusValue value : StatusValue.values() ) {
-            final Matcher valueMatcher = value.getMatcher( matchWindow );
-            if ( valueMatcher.find() ) {
-               spannedValue = new SpannedStatusValue( value,
-                     fullMatcher.start() + valueMatcher.start(),
-                     fullMatcher.start() + valueMatcher.end() );
-               break;
-            }
-         }
-         if ( spannedType != null && spannedValue != null ) {
-            receptorStatuses.add( new ReceptorStatus( spannedType, spannedValue ) );
          }
       }
       Collections.sort( receptorStatuses, SpanOffsetComparator.getInstance() );

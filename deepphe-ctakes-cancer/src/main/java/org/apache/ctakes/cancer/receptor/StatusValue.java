@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
  * @since 8/19/2015
  */
 public enum StatusValue {
-   POSITIVE( "Positive", Boolean.TRUE, "Positive", "\\+(pos)?|pos(itive)?" ),
-   NEGATIVE( "Negative", Boolean.FALSE, "Negative", "-(neg)?|neg(ative)?" ),
+   POSITIVE( "Positive", Boolean.TRUE, "Positive", "\\+?pos(itive)?|\\+(pos)?" ),
+   NEGATIVE( "Negative", Boolean.FALSE, "Negative", "-?neg(ative)?|-(neg)?" ),
    UNKNOWN( "Unknown", null, "Unknown", "unknown|indeterminate|equivocal|(not assessed)|\\bN/?A\\b" );
    final private String _title;
    final private Boolean _booleanValue;
