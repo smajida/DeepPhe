@@ -113,10 +113,6 @@ final public class CancerPipelineFactory {
    static private void addPittHeaderEngines( final AggregateBuilder aggregateBuilder )
          throws ResourceInitializationException {
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( PittHeaderAnnotator.class ) );
-      // grab segments using known headers from default + what UPMC has given us.
-//      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( CDASegmentAnnotator.class,
-//            CDASegmentAnnotator.PARAM_SECTIONS_FILE, "ccda_sections.txt" ) );
-//	  aggregateBuilder.add(AnalysisEngineFactory.createEngineDescription(UpmcSimpleSegmenter.class));
    }
 
    static private void addCoreEngines( final AggregateBuilder aggregateBuilder )

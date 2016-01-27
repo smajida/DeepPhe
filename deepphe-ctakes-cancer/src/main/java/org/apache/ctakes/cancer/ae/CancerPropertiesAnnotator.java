@@ -62,16 +62,16 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
                = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, "Metastasis" );
          SizeFinder.addSizes( jcas, lookupWindow, breastNeoplasms, masses );
 //         if ( LOGGER.isDebugEnabled() ) {
-         printCancerFindings( jcas );
+//         printCancerFindings( jcas );
 //         }
       }
 
-      OwlOntologyConceptUtil.getUris( jcas ).stream().forEach( System.out::println );
-      OwlOntologyConceptUtil.getUris( jcas ).stream()
-            .map( uri -> OwlOntologyConceptUtil.getAnnotationsByUri( jcas, uri ) )
-            .flatMap( Collection::stream )
-            .map( Annotation::getCoveredText )
-            .forEach( System.out::println );
+//      OwlOntologyConceptUtil.getUris( jcas ).stream().forEach( System.out::println );
+//      OwlOntologyConceptUtil.getUris( jcas ).stream()
+//            .map( uri -> OwlOntologyConceptUtil.getAnnotationsByUri( jcas, uri ) )
+//            .flatMap( Collection::stream )
+//            .map( Annotation::getCoveredText )
+//            .forEach( System.out::println );
 
       LOGGER.info( "Finished processing" );
    }

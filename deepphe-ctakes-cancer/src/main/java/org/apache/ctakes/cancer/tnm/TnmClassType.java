@@ -18,15 +18,15 @@ enum TnmClassType {
    T( 0, "Size or direct extent of the primary tumor",
          "Generic_Primary_Tumor_TNM_Finding",
          "C1300486",
-         "T(x|is|a|[0-4][a-z]?)(\\((m|\\d+)?,?(is)?\\))?" ),
+         "T(x|is|a|([I]{1,3}V?)|([0-4][a-z]?))(\\((m|\\d+)?,?(is)?\\))?" ),
    N( 1, "Degree of spread to regional lymph nodes",
          "Generic_Regional_Lymph_Nodes_TNM_Finding",
          "C3250641",
-         "N(x|[0-3][a-z]?)" ),
+         "N(x|([I]{1,3})|([0-3][a-z]?))" ),
    M( 2, "Presence of distant metastasis",
          "Generic_Distant_Metastasis_TNM_Finding",
          "C1272456",
-         "M(x|[0-1][a-z]?)" );
+         "M(x|I|([0-1][a-z]?))" );
 
    static private final String TUI = "T033";
 
