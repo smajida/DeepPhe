@@ -16,16 +16,16 @@ public class TumorSummary extends Summary {
 	
 	
 	public static class TumorPhenotype extends BackboneElement{
-		private List<CodeableConcept> manifistation, histologicType, tumorExtent;
+		private List<CodeableConcept> manifestation, histologicType, tumorExtent;
 
-		public List<CodeableConcept> getManifistations() {
-			if(manifistation == null)
-				manifistation = new ArrayList<CodeableConcept>();
-			return manifistation;
+		public List<CodeableConcept> getManifestations() {
+			if(manifestation == null)
+				manifestation = new ArrayList<CodeableConcept>();
+			return manifestation;
 		}
 
-		public void addManifistation(CodeableConcept m) {
-			getManifistations().add(m);
+		public void addManifestation(CodeableConcept m) {
+			getManifestations().add(m);
 		}
 
 		public List<CodeableConcept> getHistologicTypes() {
