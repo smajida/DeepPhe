@@ -66,12 +66,10 @@ final public class ReceptorStatusFinder {
       if ( lookupWindow.length() < 3 ) {
          return Collections.emptyList();
       }
-      System.out.println( lookupWindow );
       final List<ReceptorStatus> receptorStatuses = new ArrayList<>();
       final Matcher fullMatcher = FULL_PATTERN.matcher( lookupWindow );
       while ( fullMatcher.find() ) {
          final String matchWindow = lookupWindow.substring( fullMatcher.start(), fullMatcher.end() );
-         System.out.println( matchWindow );
          SpannedStatusType spannedType = null;
          SpannedStatusValue spannedValue = null;
          for ( StatusType type : StatusType.values() ) {
@@ -82,23 +80,17 @@ final public class ReceptorStatusFinder {
                spannedType = new SpannedStatusType( type, typeStart, typeEnd );
                final String valueLookupWindow = matchWindow.substring( typeMatcher.end() );
                spannedValue = null;
-               System.out.println( lookupWindow.substring( spannedType.getStartOffset(), spannedType.getEndOffset() ) );
                for ( StatusValue value : StatusValue.values() ) {
                   final Matcher valueMatcher = value.getMatcher( valueLookupWindow );
                   if ( valueMatcher.find() ) {
                      spannedValue = new SpannedStatusValue( value,
                            typeEnd + valueMatcher.start(),
                            typeEnd + valueMatcher.end() );
-                     System.out.println( " ... " + lookupWindow
-                           .substring( spannedValue.getStartOffset(), spannedValue.getEndOffset() ) );
                      break;
                   }
                }
                if ( spannedValue != null ) {
                   receptorStatuses.add( new ReceptorStatus( spannedType, spannedValue ) );
-                  System.out.println( lookupWindow.substring( spannedType.getStartOffset(), spannedType.getEndOffset() )
-                                      + " ... " + lookupWindow
-                                            .substring( spannedValue.getStartOffset(), spannedValue.getEndOffset() ) );
                }
             }
          }
