@@ -4,16 +4,14 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.healthnlp.deepphe.fhir.summary.TumorSummary.TumorPhenotype;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.hl7.fhir.instance.model.BackboneElement;
 import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Resource;
 
 public class CancerSummary extends Summary {
 	public static class CancerPhenotype extends BackboneElement{
 		private CodeableConcept cancerStage,cancerType,tumorExtent,primaryTumorClassification, distantMetastasisClassification,regionalLymphNodeClassification;
-		private List<CodeableConcept> manifistation;
+		private List<CodeableConcept> manifestation;
 		public BackboneElement copy() {
 			// TODO Auto-generated method stub
 			return null;
@@ -54,13 +52,13 @@ public class CancerSummary extends Summary {
 		public void setRegionalLymphNodeClassification(CodeableConcept regionalLymphNodeClassification) {
 			this.regionalLymphNodeClassification = regionalLymphNodeClassification;
 		}
-		public List<CodeableConcept> getManifistations() {
-			if(manifistation == null)
-				manifistation = new ArrayList<CodeableConcept>();
-			return manifistation;
+		public List<CodeableConcept> getManifestations() {
+			if(manifestation == null)
+				manifestation = new ArrayList<CodeableConcept>();
+			return manifestation;
 		}
-		public void addManifistation(CodeableConcept manifistation) {
-			getManifistations().add(manifistation);
+		public void addManifestation(CodeableConcept manifestation) {
+			getManifestations().add(manifestation);
 		}
 		public String getDisplayText() {
 			return getClass().getSimpleName();
