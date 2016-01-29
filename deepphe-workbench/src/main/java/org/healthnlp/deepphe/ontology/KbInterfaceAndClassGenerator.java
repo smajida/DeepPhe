@@ -393,7 +393,8 @@ public class KbInterfaceAndClassGenerator {
 	}
 	
 	private String getCamelCasedObjectPropertyName(OWLObjectProperty cls) {
-		return camelCaseConverter.toCamelCase(getObjectPropertyName(cls));
+//		return camelCaseConverter.toCamelCase(getObjectPropertyName(cls));
+		return getObjectPropertyName(cls);
 	}
 
 	private String getObjectPropertyName(OWLObjectProperty cls) {
@@ -402,7 +403,8 @@ public class KbInterfaceAndClassGenerator {
 		String clsIriString = (clsIri != null) ? clsIri.toString() : null;
 		result = (clsIriString != null) ? StringUtils.substringAfterLast(
 				clsIriString, "#") : null;
-		result = (result != null) ? "Relation_" + result : null;
+//		result = (result != null) ? "Relation_" + result : null;
+		result = (result != null) ? StringUtils.capitalise(result) : null;
 		return result;
 	}
 
