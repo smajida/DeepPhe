@@ -26,6 +26,7 @@ import org.healthnlp.deepphe.summarization.drools.kb.Left;
 import org.healthnlp.deepphe.summarization.drools.kb.LocalRecurrence;
 import org.healthnlp.deepphe.summarization.drools.kb.PrimaryTumor;
 import org.healthnlp.deepphe.summarization.drools.kb.Right;
+import org.healthnlp.deepphe.summarization.drools.kb.SurgicalScar;
 import org.healthnlp.deepphe.summarization.drools.kb.Tumor;
 import org.healthnlp.deepphe.summarization.drools.kb.TumorType;
 import org.junit.After;
@@ -299,6 +300,75 @@ public class TesterBrcaMetastasis {
 		numberOfFactsInSession = session.getFactCount();
 		assertEquals(numberOfFactsInSession, 1);
 	}
+	
+	@Test
+	public void testLocalRecurrenceTwo() {
+
+		int idCounter = 0;
+
+		System.out.println("\nRunning test localRecurrence2\n");
+		
+		final List<FactHandle> factHandles = new ArrayList<FactHandle>();
+
+		KbGoal goal = new KbGoal();
+		goal.setId(idCounter++);
+		goal.setName("extract-metastasis");
+		goal.setIsActive(1);
+		factHandles.add(session.insert(goal));
+	
+		KbPatient patient = new KbPatient();
+		patient.setId(idCounter++);
+		factHandles.add(session.insert(patient));
+		
+		Tumor tumor = new TumorImpl();
+		tumor.setId(idCounter++);
+		tumor.setSummarizableId(patient.getId());
+		factHandles.add(session.insert(tumor));
+		
+		SurgicalScar surgicalScar = new SurgicalScarImpl();
+		surgicalScar.setId(idCounter++);
+		surgicalScar.setSummarizableId(patient.getId());
+		factHandles.add(session.insert(surgicalScar));
+		
+		BodySite bodySite = new BodySiteImpl();
+		bodySite.setId(idCounter++);
+		bodySite.setSummarizableId(patient.getId());
+		factHandles.add(session.insert(bodySite));
+		
+		HasBodySite hasBodySiteForTumor = new HasBodySiteImpl();
+		hasBodySiteForTumor.setId(idCounter++);
+		hasBodySiteForTumor.setSummarizableId(patient.getId());
+		hasBodySiteForTumor.setDomainId(tumor.getId());
+		hasBodySiteForTumor.setRangeId(bodySite.getId());
+		factHandles.add(session.insert(hasBodySiteForTumor));
+		
+		HasBodySite hasBodySiteForScar = new HasBodySiteImpl();
+		hasBodySiteForScar.setId(idCounter++);
+		hasBodySiteForScar.setSummarizableId(patient.getId());
+		hasBodySiteForScar.setDomainId(surgicalScar.getId());
+		hasBodySiteForScar.setRangeId(bodySite.getId());
+		factHandles.add(session.insert(hasBodySiteForScar));
+
+		long numberOfFactsInSession = session.getFactCount();
+		assertEquals(numberOfFactsInSession, factHandles.size());
+
+		final String[] rulesToTest = { "006_localRecurrence2" };
+		CustomAgendaFilter customAgendaFilter = new CustomAgendaFilter(
+				rulesToTest);
+		int numRulesFired = session.fireAllRules(customAgendaFilter);
+		assertEquals(1, numRulesFired);
+
+		numberOfFactsInSession = session.getFactCount();
+		assertEquals(numberOfFactsInSession, factHandles.size() + 2);
+
+		for (FactHandle factHandle : factHandles) {
+			session.retract(factHandle);
+		}
+		
+		numberOfFactsInSession = session.getFactCount();
+		assertEquals(numberOfFactsInSession, 2);
+	}
+	
 	
 	@Test
 	public void testSecondPrimaryOneDashOne() {
