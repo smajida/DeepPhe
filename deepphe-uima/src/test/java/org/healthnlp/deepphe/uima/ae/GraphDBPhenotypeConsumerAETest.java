@@ -9,16 +9,15 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.uima.analysis_engine.AnalysisEngine;
-import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
-import org.apache.uima.fit.factory.AnalysisEngineFactory;
-import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.uima.fhir.FHIRObjectMocker;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,7 +31,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.helpers.collection.IteratorUtil;
 
 
-public class GraphDBDocumentConsumerAETest {
+public class GraphDBPhenotypeConsumerAETest {
 	
    
 
@@ -50,7 +49,7 @@ public class GraphDBDocumentConsumerAETest {
    public void initializationTest(){
 	   try { 
 		   String dbPath = TEST_DB + File.separator;
-		   GraphDBDocumentConsumerAE ae = new GraphDBDocumentConsumerAE();
+		   GraphDBPhenotypeConsumerAE ae = new GraphDBPhenotypeConsumerAE();
 		   ae.initializeGraphDatabase(dbPath);
 		   ae.destroy();
    
@@ -68,14 +67,14 @@ public class GraphDBDocumentConsumerAETest {
 	   assertTrue("Database connection failed",db.isAvailable(500));
 
 	   
-	   GraphDBDocumentConsumerAE ae = new GraphDBDocumentConsumerAE();
+	   GraphDBPhenotypeConsumerAE ae = new GraphDBPhenotypeConsumerAE();
 	   
 	   FHIRObjectMocker mocker = new FHIRObjectMocker();
 	   
 	   Patient patient = mocker.getPatient();
 	   Report report = mocker.getReport();
 	   
-	   ae.processReport(db, patient, report);
+	   ae.processPatient(db, patient, Arrays.asList(new Report[]{report}));
 	   
 	   try ( Transaction ignored = db.beginTx();
 			 Result reportResult = db.execute( "match (n {name: '" + report.getTitle() + "'}) return n" ))
@@ -95,6 +94,11 @@ public class GraphDBDocumentConsumerAETest {
 		       Node findingNode = null;
 		       Node diagNode = null;
 		       Node procNode = null;
+		       
+		       Node csNode = null;
+		       Node psNode = null;
+		       Node tsNode = null;
+		       
 		       
 		       for(Relationship r:reportNode.getRelationships(Direction.OUTGOING)){
 		    	   Node n = r.getEndNode();
@@ -139,13 +143,40 @@ public class GraphDBDocumentConsumerAETest {
 		    		   assertEquals("medication name property is incorrect",report.getMedications().get(0).getDisplayText(),value);
 		    	   }
 		    	   
+		    	   if(n.hasLabel(GraphDBConstants.Nodes.CancerSummary)){
+		    		   assertTrue("Relationship type is incorrect for document - cancersummary",r.isType(GraphDBConstants.Relationships.hasCancerSummary));
+		    		   csNode = n;
+		    		   Object value = n.getProperty("name");
+		    		   assertEquals("CancerSummary name property is incorrect",((List<Summary>)report.getCompositionSummaries()).get(0).getDisplayText(),value);
+		    	   }
+		    	   
+		    	   if(n.hasLabel(GraphDBConstants.Nodes.TumorSummary)){
+		    		   assertTrue("Relationship type is incorrect for document - tumorsummary",r.isType(GraphDBConstants.Relationships.hasTumorSummary));
+		    		   tsNode = n;
+		    		   Object value = n.getProperty("name");
+		    		   assertEquals("TumorSummary name property is incorrect",((List<Summary>)report.getCompositionSummaries()).get(1).getDisplayText(),value);
+		    	   }		    	   
+		    	   
+		    	   if(n.hasLabel(GraphDBConstants.Nodes.PatientSummary)){
+		    		   assertTrue("Relationship type is incorrect for document - patientsummary",r.isType(GraphDBConstants.Relationships.hasPatientSummary));
+		    		   psNode = n;
+		    		   Object value = n.getProperty("name");
+		    		   assertEquals("PatientSummary name property is incorrect",((List<Summary>)report.getCompositionSummaries()).get(2).getDisplayText(),value);
+		    	   }
+		    	   
+		    	   
 		       }
+		       
 		       assertNotNull("Patient not linked to Document",patientNode);
 		       assertNotNull("Disease not linked to Document",diagNode);
 		       assertNotNull("Procedure not linked to Document",procNode);
 		       assertNotNull("Finding not linked to Document",findingNode);
 		       assertNotNull("Observation not linked to Document",obsNode);
 		       assertNotNull("Medication not linked to Document",medicationNode);
+		       
+		       assertNotNull("CancerSummary not linked to Document",csNode);
+		       assertNotNull("PatientSummary not linked to Document",psNode);
+		       assertNotNull("TumorSummary not linked to Document",tsNode);
 
 		   }
 		}

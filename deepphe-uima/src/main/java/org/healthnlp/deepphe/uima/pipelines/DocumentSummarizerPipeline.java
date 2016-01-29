@@ -53,12 +53,8 @@ final public class DocumentSummarizerPipeline {
             = AnalysisEngineFactory
             .createEngine( IClassExtractor.class, DocumentSummarizerAE.PARAM_ONTOLOGY_PATH, ontologyPath );
       
-      final AnalysisEngine graphDBConsumerAE
-      = AnalysisEngineFactory
-      .createEngine( GraphDBDocumentConsumerAE.class, GraphDBDocumentConsumerAE.PARAM_DBPATH,outputDirectory + File.separator + "neo4jdb" );
-      
       final AnalysisEngine docSummarizer = createDocSummarizerAE( outputDirectory, ontologyPath );
-      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, iClassExtractor, docSummarizer, graphDBConsumerAE );
+      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, iClassExtractor, docSummarizer);
    }
 
 
