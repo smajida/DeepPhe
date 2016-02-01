@@ -503,6 +503,15 @@ public class FHIRUtils {
 		return null;
 	}
 	
+	public static String getResourceIdentifer(CodeableConcept c){
+		for(Coding coding : c.getCoding()){
+			if(coding.getCode() != null && SCHEMA_REFERENCE.equals(coding.getSystem())){
+				return coding.getCode();
+			}
+		}
+		return null;
+	}
+	
 	
 	/**
 	 * get concept class from a default ontology based on Concept

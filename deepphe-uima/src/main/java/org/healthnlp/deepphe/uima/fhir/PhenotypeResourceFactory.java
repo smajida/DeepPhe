@@ -20,6 +20,7 @@ import org.healthnlp.deepphe.fhir.Medication;
 import org.healthnlp.deepphe.fhir.Observation;
 import org.healthnlp.deepphe.fhir.Procedure;
 import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.Stage;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
@@ -40,22 +41,27 @@ import org.healthnlp.deepphe.uima.types.Exposure;
 import org.healthnlp.deepphe.uima.types.GermlineSequenceVariant;
 import org.healthnlp.deepphe.uima.types.HistologicType;
 import org.healthnlp.deepphe.uima.types.ManifestionOfDisease;
+import org.healthnlp.deepphe.uima.types.Mention;
 import org.healthnlp.deepphe.uima.types.Modifier;
 import org.healthnlp.deepphe.uima.types.Outcome;
 import org.healthnlp.deepphe.uima.types.Patient;
 import org.healthnlp.deepphe.uima.types.PrimaryTumorClassification;
 import org.healthnlp.deepphe.uima.types.RegionalLymphNodeClassification;
+import org.healthnlp.deepphe.uima.types.TNMValue;
 import org.healthnlp.deepphe.uima.types.Treatment;
 import org.healthnlp.deepphe.uima.types.Tumor;
 import org.healthnlp.deepphe.uima.types.TumorExtent;
 import org.healthnlp.deepphe.uima.types.TumorSequenceVariant;
+import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.BooleanType;
 import org.hl7.fhir.instance.model.CodeableConcept;
+import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DateTimeType;
 import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Quantity;
+import org.hl7.fhir.instance.model.Resource;
 
 public class PhenotypeResourceFactory {
 	
@@ -66,6 +72,9 @@ public class PhenotypeResourceFactory {
 	 * @return
 	 */
 	private static Annotation getAnnotationByIdentifer(JCas jcas, String id){
+		if(id == null)
+			return null;
+		
 		for(Annotation a: getAnnotations(jcas,Annotation.type)){
 			String a_id = null;
 			if(a instanceof org.healthnlp.deepphe.uima.types.Annotation){
@@ -122,7 +131,8 @@ public class PhenotypeResourceFactory {
 				events.add(ev);
 			}
 		}
-		comp.setHasEvent(getValues(jcas, events));
+		if(!events.isEmpty())
+			comp.setHasEvent(getValues(jcas, events));
 		
 		// save summaries for this report
 		List<FeatureStructure> summaries = new ArrayList<FeatureStructure>();
@@ -132,7 +142,8 @@ public class PhenotypeResourceFactory {
 				summaries.add(el);
 			}
 		}
-		comp.setHasCompositionSummary(getValues(jcas, summaries));	
+		if(!summaries.isEmpty())
+			comp.setHasCompositionSummary(getValues(jcas, summaries));	
 		comp.addToIndexes();
 		
 		return comp;
@@ -483,6 +494,8 @@ public class PhenotypeResourceFactory {
 			el = saveMedication((Medication)e,jcas);
 		}else if(e instanceof org.healthnlp.deepphe.fhir.Patient){
 			el = savePatient((org.healthnlp.deepphe.fhir.Patient)e,jcas);
+		}else if(e instanceof org.healthnlp.deepphe.fhir.AnatomicalSite){
+			el = saveAnatomicalSite((AnatomicalSite)e,jcas);
 		}
 		
 		// do common things
@@ -507,6 +520,9 @@ public class PhenotypeResourceFactory {
 		return el;
 	}
 	
+
+
+
 	/**
 	 * get set of annotations from cas of a given type
 	 * @param cas
@@ -562,6 +578,9 @@ public class PhenotypeResourceFactory {
 	
 	
 	private static org.healthnlp.deepphe.uima.types.Patient savePatient(org.healthnlp.deepphe.fhir.Patient e, JCas jcas) {
+		if(e == null)
+			return null;
+		
 		org.healthnlp.deepphe.uima.types.Patient p  = (org.healthnlp.deepphe.uima.types.Patient) getAnnotationByIdentifer(jcas,e.getResourceIdentifier());
 		//org.healthnlp.deepphe.uima.types.Patient p = getPatient(jcas);
 		// init the patient
@@ -620,15 +639,33 @@ public class PhenotypeResourceFactory {
 		return t;
 	}
 
+	private static BodySite saveAnatomicalSite(AnatomicalSite e, JCas jcas) {
+		Annotation a = getAnnotationByIdentifer(jcas,e.getResourceIdentifier());
+		BodySite t = (a == null)? new  BodySite(jcas):(BodySite)a;
+		return t;
+	}
+	
 	private static org.healthnlp.deepphe.uima.types.Procedure saveProcedure(Procedure e, JCas jcas) {
 		Annotation a = getAnnotationByIdentifer(jcas,e.getResourceIdentifier());
 		org.healthnlp.deepphe.uima.types.Procedure t = (a == null)?new  org.healthnlp.deepphe.uima.types.Procedure(jcas):(org.healthnlp.deepphe.uima.types.Procedure)a;
+		
+		// add body location
+		List<FeatureStructure> sites = getBodySites(jcas,e.getBodySite());
+		if(!sites.isEmpty())
+			t.setHasBodySite(getValues(jcas,sites));
+		
 		return t;
 	}
 
 	private static org.healthnlp.deepphe.uima.types.Finding saveFinding(Finding e, JCas jcas) {
 		Annotation a = getAnnotationByIdentifer(jcas,e.getResourceIdentifier());
 		org.healthnlp.deepphe.uima.types.Finding t = (a == null)? new  org.healthnlp.deepphe.uima.types.Finding(jcas):(org.healthnlp.deepphe.uima.types.Finding) a;
+		
+		// add body location
+		List<FeatureStructure> sites = getBodySites(jcas,e.getBodySite());
+		if(!sites.isEmpty())
+			t.setHasBodySite(getValues(jcas,sites));
+		
 		return t;
 	}
 
@@ -653,7 +690,12 @@ public class PhenotypeResourceFactory {
 			ob.setHasNumValue(getValue(jcas,nm));
 		}
 		//ob.setHasNumValue(e.getObservationValue());
-		//TODO: add interpretation
+		
+		// add body location
+		List<FeatureStructure> sites = getBodySites(jcas,Collections.singleton(e.getBodySite()));
+		if(!sites.isEmpty())
+			ob.setHasBodySite(getValues(jcas,sites));
+		
 		return ob;
 	}
 	
@@ -674,9 +716,43 @@ public class PhenotypeResourceFactory {
 			
 			// add patient 
 			dd.setHasPatient(getValue(jcas,getPatient(jcas)));
-			// add body location
-			//TODO:
 			
+			// add body location
+			List<FeatureStructure> sites = getBodySites(jcas, e.getBodySite());
+			if(!sites.isEmpty())
+				dd.setHasBodySite(getValues(jcas,sites));
+			
+			
+			// save stage
+			Stage stage = e.getStage();
+			if(stage != null){
+				org.healthnlp.deepphe.uima.types.Stage st =  new  org.healthnlp.deepphe.uima.types.Stage(jcas);
+				URI uri = FHIRUtils.getConceptURI(stage.getSummary());
+				if(uri != null)
+					st.setHasStageSummary(uri.toString());
+				List<FeatureStructure> tnm = new ArrayList<FeatureStructure>();
+				for(Resource r : stage.getAssessmentTarget()){
+					Finding finding = (Finding) r;
+					String id = finding.getResourceIdentifier();
+					
+					TNMValue t = new TNMValue(jcas);
+					t.setHasIdentifier(id);
+					t.setHasPreferredName(finding.getDisplayText());
+					t.setHasURI(""+finding.getConceptURI());
+					
+					org.healthnlp.deepphe.uima.types.Finding f = (org.healthnlp.deepphe.uima.types.Finding) getAnnotationByIdentifer(jcas,id);
+					if(f != null){
+						t.setBegin(f.getBegin());
+						t.setEnd(f.getEnd());
+					}
+					t.addToIndexes();
+					tnm.add(t);
+				}
+				if(!tnm.isEmpty())
+					st.setHasAssessment(getValues(jcas, tnm));
+				st.addToIndexes();
+			}
+					
 		//dd.setHasStage(v);
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -685,6 +761,35 @@ public class PhenotypeResourceFactory {
 		return dd;
 	}
 
+	
+	/**
+	 * get a list of BodySites from 
+	 * @param jcas
+	 * @param bodySites
+	 * @return
+	 */
+	private static List<FeatureStructure> getBodySites(JCas jcas, Collection<CodeableConcept> bodySites){
+		List<FeatureStructure> sites = new ArrayList<FeatureStructure>();
+		for(CodeableConcept bs: bodySites){
+			String id = FHIRUtils.getResourceIdentifer(bs);
+			BodySite bodySite = (BodySite) getAnnotationByIdentifer(jcas,id);
+			if(bodySite == null && id != null){
+				bodySite =  new  BodySite(jcas);
+				bodySite.setHasURI(""+FHIRUtils.getConceptURI(bs));
+				bodySite.setHasIdentifier(id);
+				bodySite.setHasPreferredName(bs.getText());
+				bodySite.addToIndexes();
+			}
+			if(bodySite != null)
+				sites.add(bodySite);
+			
+		}
+		return sites;
+	}
+	
+	
+	
+	
 	/**
 	 * load typesystem element into corresponding FHIR object
 	 * @param el
@@ -740,6 +845,14 @@ public class PhenotypeResourceFactory {
 		FHIRUtils.createIdentifier(ob.addIdentifier(),e.getHasIdentifier());
 		return ob;
 	}
+	
+	private static Finding loadFinding(org.healthnlp.deepphe.uima.types.TNMValue e) {
+		Finding ob = new Finding();
+		ob.setCode(getCodeableConcept(e));
+		ob.addExtension(FHIRUtils.createMentionExtension(e.getCoveredText(),e.getBegin(),e.getEnd()));
+		FHIRUtils.createIdentifier(ob.addIdentifier(),e.getHasIdentifier());
+		return ob;
+	}
 
 	private static Observation loadObservation(org.healthnlp.deepphe.uima.types.Observation e) {
 		Observation ob = new Observation();
@@ -771,6 +884,7 @@ public class PhenotypeResourceFactory {
 	}
 
 	
+	
 	private static Disease loadDiagnosis(DiseaseDisorder e) {
 		Disease dx = new Disease();
 		dx.setCode(getCodeableConcept(e));
@@ -783,11 +897,24 @@ public class PhenotypeResourceFactory {
 			}
 		}
 		// now lets get the location relationships
-		/*if(e.getHasStage() != null){
-			Stage st = new Stage();
-			st.
+		if(e.getHasStage() != null){
+			// get stage
+			org.healthnlp.deepphe.uima.types.Stage st = e.getHasStage(0);
 			
-		}*/
+			// init 
+			Stage stage = new Stage();
+			String cs =  st.getHasStageSummary();
+			if(cs != null){
+				stage.setSummary(FHIRUtils.getCodeableConcept(URI.create(cs)));
+			}
+			if(st.getHasAssessment() != null){
+				for(int i=0;i<st.getHasAssessment().size();i++){
+					TNMValue tn = st.getHasAssessment(i);
+					stage.addAssessment(loadFinding(tn));
+				}
+			}
+			
+		}
 		
 		// add mention text
 		addMention(dx,e);
@@ -799,7 +926,21 @@ public class PhenotypeResourceFactory {
 
 	
 	private static CodeableConcept getCodeableConcept(org.healthnlp.deepphe.uima.types.Mention e){
-		return FHIRUtils.getCodeableConcept(e.getCoveredText(),e.getHasURI(),FHIRUtils.getOntologyURL(e.getHasURI()));
+		CodeableConcept cc =  FHIRUtils.getCodeableConcept(e.getCoveredText(),e.getHasURI(),FHIRUtils.SCHEMA_OWL);
+		Coding c = cc.addCoding();
+		c.setSystem(FHIRUtils.SCHEMA_REFERENCE);
+		c.setCode(e.getHasIdentifier());
+		c.setDisplay(e.getHasPreferredName());
+		return cc;
+	}
+	
+	private static CodeableConcept getCodeableConcept(org.healthnlp.deepphe.uima.types.Modifier e){
+		CodeableConcept cc =  FHIRUtils.getCodeableConcept(e.getCoveredText(),e.getHasURI(),FHIRUtils.SCHEMA_OWL);
+		Coding c = cc.addCoding();
+		c.setSystem(FHIRUtils.SCHEMA_REFERENCE);
+		c.setCode(e.getHasIdentifier());
+		c.setDisplay(e.getHasPreferredName());
+		return cc;
 	}
 	
 	private static org.healthnlp.deepphe.fhir.Patient loadPatient(Patient pt) {
@@ -860,8 +1001,10 @@ public class PhenotypeResourceFactory {
 		rr.setOffset(comp.getBegin());
 		
 		// handle patient (there can be only one :)
-		org.healthnlp.deepphe.fhir.Patient p = loadPatient(comp.getHasPatient(0));
-		rr.setPatient(p);
+		if(comp.getHasPatient() != null){
+			org.healthnlp.deepphe.fhir.Patient p = loadPatient(comp.getHasPatient(0));
+			rr.setPatient(p);
+		}
 		
 		// get related items
 		for(int i=0;i<comp.getHasEvent().size();i++){

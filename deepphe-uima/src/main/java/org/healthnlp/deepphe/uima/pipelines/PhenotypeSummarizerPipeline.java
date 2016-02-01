@@ -1,6 +1,5 @@
 package org.healthnlp.deepphe.uima.pipelines;
 
-import java.io.File;
 import java.io.IOException;
 
 import javax.annotation.concurrent.Immutable;
@@ -18,7 +17,6 @@ import org.healthnlp.deepphe.uima.ae.I2b2WriterAE;
 import org.healthnlp.deepphe.uima.ae.PhenotypeCancerSummaryAE;
 import org.healthnlp.deepphe.uima.ae.PhenotypeSummarizerAE;
 import org.healthnlp.deepphe.uima.cr.FHIRCollectionReader;
-import org.healthnlp.deepphe.uima.cr.PatientCollectionReader;
 
 import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
@@ -60,7 +58,7 @@ final public class PhenotypeSummarizerPipeline {
 		//final AnalysisEngine i2B2OutputAE = createI2B2OutputAE();
 		final AnalysisEngine xmiWriter = AnalysisEngineFactory.createEngine( XMIWriter.class, XMIWriter.PARAM_OUTPUTDIR, outputDirectory);
 		//SimplePipeline.runPipeline(collectionReader, phenotypeSummarizerAE, i2B2OutputAE);
-		SimplePipeline.runPipeline(collectionReader,compositionSummarizerAE,cancerSummarizerAE,xmiWriter);
+		SimplePipeline.runPipeline(collectionReader,compositionSummarizerAE,cancerSummarizerAE,xmiWriter); 
 	}
 
 	private static CollectionReader createCollectionReader(String inputDirectory)

@@ -12,6 +12,7 @@ import org.healthnlp.deepphe.fhir.*;
 import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRUtils;
+import org.hl7.fhir.instance.model.CodeableConcept;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
@@ -106,7 +107,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		
 		// create tumor summary if we talke about cancer in trigger document
 		if(cancer != null && documentTypeTriggers.contains(report.getType())){
-			tumor = createTumorSummary(report);
+			tumor = createTumorSummary(null);
 			cancer.addTumor(tumor);
 		}
 		
@@ -115,7 +116,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			for(Element e: report.getReportElements()){
 				// if we have a tumor trigger
 				if(e instanceof Condition && hasTrigger(tumorTriggers, (Condition)e)){
-					tumor = createTumorSummary(report);
+					tumor = createTumorSummary((Condition) e);
 					if(cancer != null){
 						cancer.addTumor(tumor);
 					}else{
@@ -129,18 +130,59 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		return list;
 	}
 
-	private CancerSummary createCancerSummary(Disease c){
+	private CancerSummary createCancerSummary(Disease diagnosis){
 		CancerSummary cancer = new CancerSummary();
-		CancerSummary.CancerPhenotype pheontype = new CancerSummary.CancerPhenotype();
-		cancer.addPhenotype(pheontype);
-		//TODO:
+		CancerSummary.CancerPhenotype phenotype = new CancerSummary.CancerPhenotype();
+		cancer.addPhenotype(phenotype);
+		
+		// add body location
+		for(CodeableConcept cc: diagnosis.getBodySite()){
+			cancer.addBodySite(cc);
+		}
+		
+		
+		// add TNM stage infromation
+		Stage stage = diagnosis.getStage();
+		if(stage != null){
+			phenotype.setCancerStage(stage.getSummary());
+			phenotype.setPrimaryTumorClassification(stage.getPrimaryTumorStageCode());
+			phenotype.setRegionalLymphNodeClassification(stage.getPrimaryTumorStageCode());
+			phenotype.setDistantMetastasisClassification(stage.getDistantMetastasisStageCode());
+		}
+		
+		//TODO: infor type and extend
+		//phenotype.setCancerType(null);   // adnecarcionma vs sarcoma
+		//phenotype.setTumorExtent(null);  // insitu vs invasive 
+	
+		
+		//cancer.addOutcome(outcome); 	   // death
+		//cancer.addTreatment(treatment);  //chemo
+		
 		return cancer;
 	}
 	
-	private TumorSummary createTumorSummary(Report r){
+	private TumorSummary createTumorSummary(Condition diagnosis){
 		TumorSummary tumor = new TumorSummary();
 		TumorSummary.TumorPhenotype phenotype = new TumorSummary.TumorPhenotype();
 		tumor.setPhenotype(phenotype);
+		
+		// add body location
+		for(CodeableConcept cc: diagnosis.getBodySite()){
+			tumor.addBodySite(cc);
+		}
+		
+		// manifistation: 
+		//phenotype.addHistologicType(null); // ductal, lobular infered from DX
+		//phenotype.addManifistation(null);  // Receptor Status, Tumor size 
+		//phenotype.addTumorExtent(null);    // insitu vs invasive
+		
+		
+		//tumor.addOutcome(null); // tumor is gone
+		//tumor.addTreatment(null); // chemo
+		//tumor.addTumorSequenceVarient(null); // don't have one
+		//tumor.setTumorType(null);  // primary vs local recurance, distance recurance  infered from rules
+		
+		
 		//TODO:
 		return tumor;
 	}
