@@ -65,6 +65,50 @@ public class TesterBrcaTnm {
 			session.dispose();
 		}
 	}
+	
+	@Test
+	public void testMoneDashOne() {
+
+		int idCounter = 0;
+
+		System.out.println("\nRunning test M1-1\n");
+
+		final List<FactHandle> factHandles = new ArrayList<FactHandle>();
+
+		KbGoal goal = new KbGoal();
+		goal.setId(idCounter++);
+		goal.setName("extract-tnm");
+		goal.setIsActive(1);
+		factHandles.add(session.insert(goal));
+
+		KbPatient patient = new KbPatient();
+		patient.setId(idCounter++);
+		factHandles.add(session.insert(patient));
+
+		M1 m1 = new M1Impl();
+		m1.setId(idCounter++);
+		m1.setSummarizableId(patient.getId());
+		factHandles.add(session.insert(m1));
+
+		long numberOfFactsInSession = session.getFactCount();
+		assertEquals(numberOfFactsInSession, factHandles.size());
+
+		final String[] rulesToTest = { "003_M1-1" };
+		CustomAgendaFilter customAgendaFilter = new CustomAgendaFilter(
+				rulesToTest);
+		int numRulesFired = session.fireAllRules(customAgendaFilter);
+		assertEquals(1, numRulesFired);
+
+		numberOfFactsInSession = session.getFactCount();
+		assertEquals(numberOfFactsInSession, factHandles.size() + 3);
+
+		for (FactHandle factHandle : factHandles) {
+			session.retract(factHandle);
+		}
+
+		numberOfFactsInSession = session.getFactCount();
+		assertEquals(numberOfFactsInSession, 3);
+	}
 
 	@Test
 	public void testTisDashOne() {
@@ -198,48 +242,6 @@ public class TesterBrcaTnm {
 		assertEquals(numberOfFactsInSession, 9);
 	}
 
-	@Test
-	public void testMoneDashOne() {
-
-		int idCounter = 0;
-
-		System.out.println("\nRunning test M1-1\n");
-
-		final List<FactHandle> factHandles = new ArrayList<FactHandle>();
-
-		KbGoal goal = new KbGoal();
-		goal.setId(idCounter++);
-		goal.setName("extract-tnm");
-		goal.setIsActive(1);
-		factHandles.add(session.insert(goal));
-
-		KbPatient patient = new KbPatient();
-		patient.setId(idCounter++);
-		factHandles.add(session.insert(patient));
-
-		M1 m1 = new M1Impl();
-		m1.setId(idCounter++);
-		m1.setSummarizableId(patient.getId());
-		factHandles.add(session.insert(m1));
-
-		long numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, factHandles.size());
-
-		final String[] rulesToTest = { "003_M1-1" };
-		CustomAgendaFilter customAgendaFilter = new CustomAgendaFilter(
-				rulesToTest);
-		int numRulesFired = session.fireAllRules(customAgendaFilter);
-		assertEquals(1, numRulesFired);
-
-		numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, factHandles.size() + 3);
-
-		for (FactHandle factHandle : factHandles) {
-			session.retract(factHandle);
-		}
-
-		numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 3);
-	}
+	
 
 }

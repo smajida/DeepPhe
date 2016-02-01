@@ -92,6 +92,41 @@ rule "006_localRecurrence1-2"
         insert(hasTumorType);
     end
 
+//    
+// localRecurrence2 
+//	
+// Breast Cancer in Surgical Scar is a local recurrence 
+//	
+// Tumor(?tumor), SurgicalScar(?scar), BodySite(?site), 
+// hasBodySite(?tumor, ?site), hasBodySite(?scar, ?site), 
+// LocalRecurrence(?local) -> hasTumorType(?tumor, ?local) 
+//
+rule "006_localRecurrence2"
+	salience 1000
+	when
+         KbGoal (name == "extract-metastasis",
+                isActive > 0)
+         KbPatient($patientId : id)
+         Tumor($tumorId : id, summarizableId == $patientId)
+     	 SurgicalScar($surgicalScarId : id, summarizableId == $patientId)
+     	 BodySite($bodySiteId : id, summarizableId == $patientId)
+     	 HasBodySite(summarizableId == $patientId, domainId == $tumorId, rangeId == $bodySiteId)
+     	 HasBodySite(summarizableId == $patientId, domainId == $surgicalScarId, rangeId == $bodySiteId)
+         not (
+            Recurrence($recurrencId : id, summarizableId == $patientId) and
+            HasTumorType(summarizableId == $patientId, domainId == $tumorId, rangeId == $recurrencId)
+         ) 
+    then
+        LocalRecurrence localRecurrence = new LocalRecurrenceImpl();
+        localRecurrence.setSummarizableId($patientId);
+        HasTumorType hasTumorType = new HasTumorTypeImpl();
+        hasTumorType.setSummarizableId($patientId);
+		hasTumorType.setDomainId($tumorId);
+		hasTumorType.setRangeId(localRecurrence.getId());
+		insert(localRecurrence);
+        insert(hasTumorType);
+        System.out.println("<DROOLS-ENGINE> 006_localRecurrence2 Fires... ");
+    end
 //
 // secondPrimary1-1
 // 	

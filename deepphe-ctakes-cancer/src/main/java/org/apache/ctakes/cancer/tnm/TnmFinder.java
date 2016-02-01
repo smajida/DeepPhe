@@ -40,6 +40,8 @@ final public class TnmFinder {
 
 
    static List<TnmClass> getTnmClasses( final String lookupWindow ) {
+      final Collection<Integer> starts = new HashSet<>();
+      final Collection<Integer> ends = new HashSet<>();
       final List<TnmClass> tnmClasses = new ArrayList<>();
       for ( TnmClassType classType : TnmClassType.values() ) {
          final Matcher matcher = classType.getMatcher( lookupWindow );
@@ -51,12 +53,45 @@ final public class TnmFinder {
             }
             tnmClasses.add( new TnmClass( prefix, classType, startOffset, matcher.end(),
                   lookupWindow.substring( matcher.start() + 1, matcher.end() ) ) );
+            starts.add( startOffset );
+            ends.add( matcher.end() );
          }
       }
+      final Collection<TnmClass> removalClasses = new HashSet<>();
+      for ( TnmClass tnmClass : tnmClasses ) {
+         final char before = tnmClass.getStartOffset() == 0
+                             ? ' '
+                             : lookupWindow.charAt( tnmClass.getStartOffset() - 1 );
+         final char after = tnmClass.getEndOffset() == lookupWindow.length()
+                            ? ' '
+                            : lookupWindow.charAt( tnmClass.getEndOffset() );
+         if ( !isBoundCharOk( before ) && !ends.contains( tnmClass.getStartOffset() ) ) {
+            removalClasses.add( tnmClass );
+         } else if ( !isBoundCharOk( after ) && !starts.contains( tnmClass.getEndOffset() ) ) {
+            removalClasses.add( tnmClass );
+         }
+      }
+      tnmClasses.removeAll( removalClasses );
       Collections.sort( tnmClasses, SpanOffsetComparator.getInstance() );
       return tnmClasses;
    }
 
+   static private final char[] OK_CHARS = { '!', '\"', '&', '\'', '(', ')', ',', '.', '/', ':', '?', '[', ']' };
+
+   static private boolean isBoundCharOk( final char c ) {
+      if ( Character.isWhitespace( c ) ) {
+         return true;
+      }
+      if ( Character.isLetterOrDigit( c ) ) {
+         return false;
+      }
+      for ( char ok : OK_CHARS ) {
+         if ( c == ok ) {
+            return true;
+         }
+      }
+      return false;
+   }
 
    static private Collection<TnmClassOption> getTnmClassOptions( final CharSequence lookupWindow,
                                                                  final int classEndIndex ) {

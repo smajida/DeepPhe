@@ -15,9 +15,10 @@ import org.apache.uima.jcas.tcas.Annotation;
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.function.BinaryOperator;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 
 /**
  * @author SPF , chip-nlp
@@ -34,7 +35,7 @@ final public class OwlOntologyConceptUtil {
    static public final String CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#";
    static public final String BREAST_CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#";
 
-   static private final Function<String, String> asSelf = self -> self;
+//   static private final Function<String, String> asSelf = self -> self;
 
    static private final BinaryOperator<Collection<IdentifiedAnnotation>> mergeSets
          = ( set1, set2 ) -> {
@@ -193,7 +194,9 @@ final public class OwlOntologyConceptUtil {
    static public Map<String, Collection<IdentifiedAnnotation>> getUriAnnotationsByUriBranch( final JCas jcas,
                                                                                              final String rootUri ) {
       return getUriBranchStream( rootUri )
-            .collect( Collectors.toMap( asSelf, uri -> getAnnotationsByUri( jcas, uri ), mergeSets ) );
+//            .collect( Collectors.toMap( asSelf, uri -> getAnnotationsByUri( jcas, uri ), mergeSets ) );
+            .collect( Collectors
+                  .toMap( UnaryOperator.identity(), uri -> getAnnotationsByUri( jcas, uri ), mergeSets ) );
    }
 
    /**

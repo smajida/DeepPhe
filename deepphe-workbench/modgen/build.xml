@@ -1,0 +1,39 @@
+<?xml version="1.0" ?> 
+<project name="DeeppheKnowledgebaseBuilder" default="jar" basedir=".">
+
+	<target name="init">
+		<echo>Initializing the DeeppheKnowledgebaseBuilder</echo>
+		<tstamp/>
+		<mkdir dir="bin"/>
+	</target>
+	
+	<path id="src.path">
+	  <pathelement location="srcBase" />
+	  <pathelement location="srcGen/cls000" />
+	  <pathelement location="srcGen/rel000" />
+	</path>
+	
+	 <target name="compile"  depends="init"
+	        description="compile the source">
+	    <!-- Compile the java code from ${src} into ${build} -->
+	 	 <javac includeantruntime="true" destdir="bin" source="1.8">
+	 	        <src refid="src.path" />
+	 	 </javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar jarfile="modgen-${DSTAMP}.jar" basedir="bin"/>
+	</target>
+	
+	<target name="deploy" depends="jar">
+		<copy file="modgen-${DSTAMP}.jar" toFile="../../deepphe-uima/lib/modgen.jar"/>
+	</target>
+	
+	<target name="clean">
+		<delete dir="bin" />
+		<!-- 
+		    <delete file="modgen-20151007.jar"/>
+		    -->
+	</target>
+	
+</project>

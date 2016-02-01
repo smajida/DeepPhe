@@ -20,6 +20,20 @@ public class TnmTester {
          = "Patient is a 54 year old female with history of T2N0M0 left breast cancer ER-neg, PR-neg, HER2+,"
            + " now undergoing neoadjuvant chemo with taxotere, carboplatin, Herceptin, and pertuzumab.";
 
+   static private final String[] NO_TNM_SENTENCES = {
+         "Patient has Taken aspirin for her headache.", "The patient drives a lamborghini LXM1 and boy is it fast." };
+
+   static private final String[] PUNCTUATION_SENTENCES = {
+         "Patient's Cancer diagnosed as pT1 N1.",
+         "Test confirmed Primary T0, Metastasis M1.",
+         "Father had T1, son is worse (T3)"
+   };
+
+   static private final String[] ROMAN_SENTENCES = {
+         "Patient's Cancer diagnosed as pTI NI.",
+         "Test confirmed Primary T0, Metastasis MI.",
+         "Father had TIII, son is worse (TIV)"
+   };
 
    @Test
    public void testTnmClasses() {
@@ -30,6 +44,29 @@ public class TnmTester {
       testTnmClass( tnmClasses.get( 2 ), TnmClassPrefixType.UNSPECIFIED, TnmClassType.M, "0" );
    }
 
+   @Test
+   public void testNoTnm() {
+      for ( String sentence : NO_TNM_SENTENCES ) {
+         final List<TnmClass> tnmClasses = TnmFinder.getTnmClasses( sentence );
+         assertEquals( "Expect no TNM in " + sentence, 0, tnmClasses.size() );
+      }
+   }
+
+   @Test
+   public void testPunctuation() {
+      for ( String sentence : PUNCTUATION_SENTENCES ) {
+         final List<TnmClass> tnmClasses = TnmFinder.getTnmClasses( sentence );
+         assertEquals( "Expect 2 TNM Classes from " + sentence, 2, tnmClasses.size() );
+      }
+   }
+
+   @Test
+   public void testRoman() {
+      for ( String sentence : ROMAN_SENTENCES ) {
+         final List<TnmClass> tnmClasses = TnmFinder.getTnmClasses( sentence );
+         assertEquals( "Expect 2 TNM Classes from " + sentence, 2, tnmClasses.size() );
+      }
+   }
 
    static private void testTnmClass( final TnmClass tnmClass,
                                      final TnmClassPrefixType expectedPrefix,

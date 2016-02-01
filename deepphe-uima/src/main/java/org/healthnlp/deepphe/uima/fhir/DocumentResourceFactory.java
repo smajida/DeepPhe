@@ -94,7 +94,13 @@ public class DocumentResourceFactory {
 		Report r = getReport(cTAKESUtils.getDocumentText(cas));
 		
 		// oh, well no document title available
-		String title = DocumentIDAnnotationUtil.getDocumentIdForFile(cas);
+		String title;
+		try {
+			title = DocumentIDAnnotationUtil.getDocumentIdForFile(cas);
+		} catch (Exception e) {
+			e.printStackTrace();
+			title = "Untitled";
+		}
 		if(title != null){
 			r.setTitle(TextUtils.stripSuffix(title));
 		}

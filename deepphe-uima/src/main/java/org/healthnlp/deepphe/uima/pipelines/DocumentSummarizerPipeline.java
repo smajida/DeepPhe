@@ -1,5 +1,6 @@
 package org.healthnlp.deepphe.uima.pipelines;
 
+import java.io.File;
 import java.io.IOException;
 
 import javax.annotation.concurrent.Immutable;
@@ -13,6 +14,7 @@ import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.fit.pipeline.SimplePipeline;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.uima.ae.DocumentSummarizerAE;
+import org.healthnlp.deepphe.uima.ae.GraphDBDocumentConsumerAE;
 
 import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
@@ -50,8 +52,9 @@ final public class DocumentSummarizerPipeline {
       final AnalysisEngine iClassExtractor
             = AnalysisEngineFactory
             .createEngine( IClassExtractor.class, DocumentSummarizerAE.PARAM_ONTOLOGY_PATH, ontologyPath );
+      
       final AnalysisEngine docSummarizer = createDocSummarizerAE( outputDirectory, ontologyPath );
-      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, iClassExtractor, docSummarizer );
+      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, iClassExtractor, docSummarizer);
    }
 
 

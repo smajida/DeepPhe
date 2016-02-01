@@ -1,18 +1,15 @@
 package org.healthnlp.deepphe.fhir.summary;
 
-import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Resource;
 
 
 public class PatientSummary extends Summary {
-	private List<CodeableConcept> exposure, outcome, germlineSequenceVarient;
+	private List<CodeableConcept> exposure, outcome, germlineSequenceVariant;
 
 	public List<CodeableConcept> getExposure() {
 		if(exposure == null)
@@ -20,16 +17,16 @@ public class PatientSummary extends Summary {
 		return exposure;
 	}
 
-	public List<CodeableConcept> getOutcome() {
+	public List<CodeableConcept> getOutcomes() {
 		if(outcome == null)
 			outcome = new ArrayList<CodeableConcept>();
 		return outcome;
 	}
 
-	public List<CodeableConcept> getGermlineSequenceVarient() {
-		if(germlineSequenceVarient == null)
-			germlineSequenceVarient = new ArrayList<CodeableConcept>();
-		return germlineSequenceVarient;
+	public List<CodeableConcept> getGermlineSequenceVariant() {
+		if(germlineSequenceVariant == null)
+			germlineSequenceVariant = new ArrayList<CodeableConcept>();
+		return germlineSequenceVariant;
 	}
 
 	public String getDisplayText() {

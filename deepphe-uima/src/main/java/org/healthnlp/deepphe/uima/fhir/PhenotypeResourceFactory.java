@@ -266,10 +266,10 @@ public class PhenotypeResourceFactory {
 		}
 		
 		// add manifistation
-		if(!phenotype.getManifistations().isEmpty()){
+		if(!phenotype.getManifestations().isEmpty()){
 			int i = 0;
-			summaryAnnotation.setHasManifestation(new FSArray(jcas,phenotype.getManifistations().size()));
-			for(CodeableConcept cc : phenotype.getManifistations()){
+			summaryAnnotation.setHasManifestation(new FSArray(jcas,phenotype.getManifestations().size()));
+			for(CodeableConcept cc : phenotype.getManifestations()){
 				ManifestionOfDisease ex = new ManifestionOfDisease(jcas);
 				addCodeableConcept(ex, cc);
 				summaryAnnotation.setHasManifestation(i++,ex);
@@ -406,10 +406,10 @@ public class PhenotypeResourceFactory {
 		}
 		
 		// add manifistation
-		if(!phenotype.getManifistations().isEmpty()){
+		if(!phenotype.getManifestations().isEmpty()){
 			int i = 0;
-			summaryAnnotation.setHasManifestation(new FSArray(jcas,phenotype.getManifistations().size()));
-			for(CodeableConcept cc : phenotype.getManifistations()){
+			summaryAnnotation.setHasManifestation(new FSArray(jcas,phenotype.getManifestations().size()));
+			for(CodeableConcept cc : phenotype.getManifestations()){
 				ManifestionOfDisease ex = new ManifestionOfDisease(jcas);
 				addCodeableConcept(ex, cc);
 				summaryAnnotation.setHasManifestation(i++,ex);
@@ -439,10 +439,10 @@ public class PhenotypeResourceFactory {
 		}
 		
 		// add sequnece varients
-		if(!summaryFHIR.getGermlineSequenceVarient().isEmpty()){
+		if(!summaryFHIR.getGermlineSequenceVariant().isEmpty()){
 			int i = 0;
-			summaryAnnotation.setHasSequenceVariant(new FSArray(jcas,summaryFHIR.getGermlineSequenceVarient().size()));
-			for(CodeableConcept cc : summaryFHIR.getGermlineSequenceVarient()){
+			summaryAnnotation.setHasSequenceVariant(new FSArray(jcas,summaryFHIR.getGermlineSequenceVariant().size()));
+			for(CodeableConcept cc : summaryFHIR.getGermlineSequenceVariant()){
 				GermlineSequenceVariant ex = new GermlineSequenceVariant(jcas);
 				addCodeableConcept(ex, cc);
 				summaryAnnotation.setHasSequenceVariant(i++,ex);
@@ -450,10 +450,10 @@ public class PhenotypeResourceFactory {
 		}
 		
 		// add outcomes
-		if(!summaryFHIR.getOutcome().isEmpty()){
+		if(!summaryFHIR.getOutcomes().isEmpty()){
 			int i = 0;
-			summaryAnnotation.setHasOutcome(new FSArray(jcas,summaryFHIR.getOutcome().size()));
-			for(CodeableConcept cc : summaryFHIR.getOutcome()){
+			summaryAnnotation.setHasOutcome(new FSArray(jcas,summaryFHIR.getOutcomes().size()));
+			for(CodeableConcept cc : summaryFHIR.getOutcomes()){
 				CauseOfDeath ex = new CauseOfDeath(jcas);
 				addCodeableConcept(ex, cc);
 				summaryAnnotation.setHasOutcome(i++,ex);

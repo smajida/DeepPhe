@@ -18,9 +18,14 @@ final public class ReceptorStatusFinderTester {
 
    static private final Logger LOGGER = Logger.getLogger( "ReceptorStatusTester" );
 
-   static private final String MULTIPLE_MENTION_SENTENCE
-         = "Patient is a 54 year old female with history of T2N0M0 left breast cancer ER-, PR-, HER2+,"
-           + " now undergoing neoadjuvant chemo with taxotere, carboplatin, Herceptin, and pertuzumab.";
+   static private final String[] MULTIPLE_MENTION_SENTENCES = {
+         "Patient is a 54 year old female with history of T2N0M0 left breast cancer ER-, PR-, HER2+,"
+         + " now undergoing neoadjuvant chemo with taxotere, carboplatin, Herceptin, and pertuzumab.",
+         "Patient is reported to be ER/PR Negative, Her2/neu status: positive.",
+         "Patient is Estrogen and Progesterone negative, Her-2 is positive.",
+         "The estrogen and progesterone receptors are negative and her2 strongly positive.",
+         "ER and PR are negative, HER2/neu pos."
+   };
 
    static private final String[] NO_RECEPTOR_SENTENCES = {
          "Patient stated her position.", "Patient sex is neuter.", "Patient is positive her pulse is rapid.",
@@ -37,7 +42,10 @@ final public class ReceptorStatusFinderTester {
          "Patient tested ER status pos last week.", "Patient tested ER status positive last week.",
          "Patient ER status pos.", "Patient ER status is positive.",
          "ER      POS", "ER Status           POSITIVE",
-         "Estrogen      POS", "Estrogen           POSITIVE" };
+         "ER: POS", "Estrogen Receptors: Positive",
+         "Estrogen      POS", "Estrogen           POSITIVE",
+         "Estrogen Receptor POS", "Estrogen-Receptor POSITIVE", "Estrogen Receptor-positive",
+         "Estrogen Receptor status POS", "Estrogen-Receptor status is positive" };
 
    static private final String[] ER_NEG_SENTENCES = {
          "Patient tested ER- last week.", "Patient tested ER - last week.",
@@ -46,7 +54,10 @@ final public class ReceptorStatusFinderTester {
          "Patient tested ER status neg last week.", "Patient tested ER status negative last week.",
          "Patient ER status neg.", "Patient ER status is negative.",
          "ER      NEG", "ER Status           NEGATIVE",
-         "Estrogen      NEG", "Estrogen           NEGATIVE" };
+         "ER: NEG", "Estrogen Receptors : Negative",
+         "Estrogen      NEG", "Estrogen           NEGATIVE",
+         "Estrogen Receptor NEG", "Estrogen-Receptor NEGATIVE", "Estrogen Receptor-negative",
+         "Estrogen Receptor status NEG", "Estrogen-Receptor status is negative" };
 
    static private final String[] ER_NA_SENTENCES = {
          "Patient ER status unknown.", "Patient ER status is unknown.",
@@ -72,7 +83,10 @@ final public class ReceptorStatusFinderTester {
          "Patient tested PR status pos last week.", "Patient tested PR status positive last week.",
          "Patient PR status pos.", "Patient PR status is positive.",
          "PR      POS", "PR Status           POSITIVE",
-         "Progesterone      POS", "Progesterone           POSITIVE" };
+         "PR: POS", "Progesterone Receptors : Positive",
+         "Progesterone      POS", "Progesterone           POSITIVE",
+         "Progesterone Receptor POS", "Progesterone-Receptor POSITIVE", "Progesterone Receptor-positive",
+         "Progesterone Receptor status POS", "Progesterone-Receptor status is positive" };
 
    static private final String[] PR_NEG_SENTENCES = {
          "Patient tested PR- last week.", "Patient tested PR - last week.",
@@ -81,7 +95,10 @@ final public class ReceptorStatusFinderTester {
          "Patient tested PR status neg last week.", "Patient tested PR status negative last week.",
          "Patient PR status neg.", "Patient PR status is negative.",
          "PR      NEG", "PR Status           NEGATIVE",
-         "Progesterone      NEG", "Progesterone           NEGATIVE" };
+         "PR: NEG", "Progesterone Receptors : Negative",
+         "Progesterone      NEG", "Progesterone           NEGATIVE",
+         "Progesterone Receptor NEG", "Progesterone-Receptor NEGATIVE", "Progesterone Receptor-negative",
+         "Progesterone Receptor status NEG", "Progesterone-Receptor status is negative" };
 
    static private final String[] PR_NA_SENTENCES = {
          "Patient PR status unknown.", "Patient PR status is unknown.",
@@ -106,13 +123,16 @@ final public class ReceptorStatusFinderTester {
          "Patient tested HER2 pos last week.", "Patient tested HER2 positive last week.",
          "Patient tested HER2 status pos last week.", "Patient tested HER2 status positive last week.",
          "Patient HER2 status pos.", "Patient HER2 status is positive.",
-         "HER2      POS", "HER2 Status           POSITIVE",
+         "HER-2      POS", "HER2 Status           POSITIVE",
          "Patient tested HER2/neu+ last week.", "Patient tested HER2/neu + last week.",
          "Patient tested HER2/neu+pos last week.", "Patient tested HER2/neu+positive last week.",
          "Patient tested HER2/neu pos last week.", "Patient tested HER2/neu positive last week.",
          "Patient tested HER2/neu status pos last week.", "Patient tested HER2/neu status positive last week.",
          "Patient HER2/neu status pos.", "Patient HER2/neu status is positive.",
-         "HER2/neu      POS", "HER2/neu Status           POSITIVE" };
+         "HER-2/neu      POS", "HER2/neu Status           POSITIVE",
+         "HER2: POS", "HER2/neu Receptors : Positive",
+         "HER2/neu Receptor POS", "HER2/neu-Receptor POSITIVE",
+         "HER2/neu Receptor status POS", "HER2/neu-Receptor status is positive" };
 
    static private final String[] HER2_NEG_SENTENCES = {
          "Patient tested HER2- last week.", "Patient tested HER2 - last week.",
@@ -120,13 +140,16 @@ final public class ReceptorStatusFinderTester {
          "Patient tested HER2 neg last week.", "Patient tested HER2 negative last week.",
          "Patient tested HER2 status neg last week.", "Patient tested HER2 status negative last week.",
          "Patient HER2 status neg.", "Patient HER2 status is negative.",
-         "HER2      NEG", "HER2 Status           NEGATIVE",
+         "HER-2      NEG", "HER2 Status           NEGATIVE",
          "Patient tested HER2/neu- last week.", "Patient tested HER2/neu - last week.",
          "Patient tested HER2/neu-neg last week.", "Patient tested HER2/neu-negative last week.",
          "Patient tested HER2/neu neg last week.", "Patient tested HER2/neu negative last week.",
          "Patient tested HER2/neu status neg last week.", "Patient tested HER2/neu status negative last week.",
          "Patient HER2/neu status neg.", "Patient HER2/neu status is negative.",
-         "HER2/neu      NEG", "HER2/neu Status           NEGATIVE" };
+         "HER2: NEG", "HER2/neu Receptors : Negative",
+         "HER-2/neu      NEG", "HER2/neu Status           NEGATIVE",
+         "HER2/neu Receptor NEG", "HER2/neu-Receptor NEGATIVE",
+         "HER2/neu Receptor status NEG", "HER2/neu-Receptor status is negative" };
 
    static private final String[] HER2_NA_SENTENCES = {
          "Patient HER2 status unknown.", "Patient HER2 status is unknown.",
@@ -139,7 +162,7 @@ final public class ReceptorStatusFinderTester {
          "HER2      equivocal", "HER2 Status           equivocal",
          "HER2      not assessed", "HER2 Status           not assessed",
          "HER2      NA", "HER2 Status           NA",
-         "HER2      N/A", "HER2 Status           N/A",
+         "HER-2      N/A", "HER2 Status           N/A",
          "Patient HER2/neu status unknown.", "Patient HER2/neu status is unknown.",
          "Patient HER2/neu status indeterminate.", "Patient HER2/neu status is indeterminate.",
          "Patient HER2/neu status equivocal.", "Patient HER2/neu status is equivocal.",
@@ -149,26 +172,32 @@ final public class ReceptorStatusFinderTester {
          "HER2/neu      indeterminate", "HER2/neu Status           indeterminate",
          "HER2/neu      equivocal", "HER2/neu Status           equivocal",
          "HER2/neu      not assessed", "HER2/neu Status           not assessed",
-         "HER2/neu      NA", "HER2/neu Status           NA",
+         "HER-2/neu      NA", "HER2/neu Status           NA",
          "HER2/neu      N/A", "HER2/neu Status           N/A" };
 
 
    @Test
    public void testMultipleMention() {
+      for ( String sentence : MULTIPLE_MENTION_SENTENCES ) {
+         testMultiples( sentence );
+      }
+   }
+
+   static private void testMultiples( final String sentence ) {
       final List<ReceptorStatus> receptorStatuses
-            = ReceptorStatusFinder.getReceptorStatuses( MULTIPLE_MENTION_SENTENCE );
-      assertEquals( "Expect three Hormone Receptors in " + MULTIPLE_MENTION_SENTENCE, 3, receptorStatuses.size() );
-      assertTrue( "First receptor is Estrogen in " + MULTIPLE_MENTION_SENTENCE,
+            = ReceptorStatusFinder.getReceptorStatuses( sentence );
+      assertEquals( "Expect three Hormone Receptors in " + sentence, 3, receptorStatuses.size() );
+      assertTrue( "First receptor is Estrogen in " + sentence,
             receptorStatuses.get( 0 ).getStatusType().getStatusType() == StatusType.ER );
-      assertTrue( "Second receptor is Progesterone in " + MULTIPLE_MENTION_SENTENCE,
+      assertTrue( "Second receptor is Progesterone in " + sentence,
             receptorStatuses.get( 1 ).getStatusType().getStatusType() == StatusType.PR );
-      assertTrue( "Third receptor is HER2/neu in " + MULTIPLE_MENTION_SENTENCE,
+      assertTrue( "Third receptor is HER2/neu in " + sentence,
             receptorStatuses.get( 2 ).getStatusType().getStatusType() == StatusType.HER2 );
-      assertTrue( "First receptor is Negative in " + MULTIPLE_MENTION_SENTENCE,
+      assertTrue( "First receptor is Negative in " + sentence,
             receptorStatuses.get( 0 ).getStatusValue().getStatusValue() == StatusValue.NEGATIVE );
-      assertTrue( "Second receptor is Negative in " + MULTIPLE_MENTION_SENTENCE,
+      assertTrue( "Second receptor is Negative in " + sentence,
             receptorStatuses.get( 1 ).getStatusValue().getStatusValue() == StatusValue.NEGATIVE );
-      assertTrue( "Third receptor is Positive in " + MULTIPLE_MENTION_SENTENCE,
+      assertTrue( "Third receptor is Positive in " + sentence,
             receptorStatuses.get( 2 ).getStatusValue().getStatusValue() == StatusValue.POSITIVE );
    }
 

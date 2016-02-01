@@ -47,14 +47,22 @@ public class GraphDBDocumentConsumerAE extends JCasAnnotator_ImplBase {
 
 	@Override
 	public void initialize(UimaContext aContext) throws ResourceInitializationException {
-		String dbPath = (String) aContext.getConfigParameterValue(PARAM_DBPATH);
+		initializeGraphDatabase((String)aContext.getConfigParameterValue(PARAM_DBPATH));
+	}
+	
+	
+
+	public void initializeGraphDatabase(String dbPath) throws ResourceInitializationException {
+	
 		graph = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
 
 		if (!graph.isAvailable(500))
 			throw new ResourceInitializationException(new Exception("Could not initialize neo4j connection for:"
 					+ dbPath));
-
+		
 	}
+
+
 
 	@Override
 	public void destroy() {
@@ -67,21 +75,12 @@ public class GraphDBDocumentConsumerAE extends JCasAnnotator_ImplBase {
 
 	@Override
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
-
-		try {
-
-			for (DocumentID docID : JCasUtil.select(jcas, DocumentID.class)) {
-				Patient patient = DocumentResourceFactory.getPatient(jcas);
-
-				Report report = DocumentResourceFactory.getReport(jcas);
-				report.setTitle(TextUtils.stripSuffix(docID.getDocumentID()));
-
-				processReport(graph, patient, report);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		Patient patient = DocumentResourceFactory.getPatient(jcas);
+		Report report = DocumentResourceFactory.getReport(jcas);
+		if(patient==null || report==null){
+			throw new AnalysisEngineProcessException(new Exception("Patient or Report not found in CAS"));
 		}
-
+		processReport(graph, patient, report);
 	}
 
 	public void processReport(GraphDatabaseService graphDb, Patient patient, Report report) {
@@ -113,11 +112,14 @@ public class GraphDBDocumentConsumerAE extends JCasAnnotator_ImplBase {
 				for (CodeableConcept c : cc) {
 					ccnames.add(c.getText());
 				}
-				n.setProperty("bodySites", ccnames.toArray().toString());
+				if(ccnames.size()>0)
+					n.setProperty("bodySites", ccnames.toString());
 
 				Stage s = dx.getStage();
-				String stage = s.getSummary().getText();
-				n.setProperty("stage", stage);
+				if(s!=null){
+					String stage = s.getSummary().getText();
+					n.setProperty("stage", stage);
+				}
 
 				documentN.createRelationshipTo(n, GraphDBConstants.Relationships.hasDiagnosis);
 			}
@@ -130,7 +132,7 @@ public class GraphDBDocumentConsumerAE extends JCasAnnotator_ImplBase {
 				for (CodeableConcept c : cc) {
 					ccnames.add(c.getText());
 				}
-				n.setProperty("bodySites", ccnames.toArray().toString());
+				n.setProperty("bodySites", ccnames.toString());
 
 				documentN.createRelationshipTo(n, GraphDBConstants.Relationships.hasProcedure);
 			}
@@ -187,6 +189,12 @@ public class GraphDBDocumentConsumerAE extends JCasAnnotator_ImplBase {
 
 	private void deleteDocument(Node documentN) {
 		for (Relationship r : documentN.getRelationships()) {
+			if(r.getType() == GraphDBConstants.Relationships.hasSubject)
+				; //dont delete patient
+			else{
+				Node n = r.getOtherNode(documentN);
+				n.delete();
+			}
 			r.delete();
 		}
 		documentN.delete();

@@ -3,7 +3,7 @@ machine:
     version: oraclejdk8
 dependencies:
   override:
-    - mvn -e clean compile
+    - mvn -q -e clean compile
 test:
   override:
     - mvn -e clean test

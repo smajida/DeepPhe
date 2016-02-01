@@ -23,10 +23,11 @@ public enum StatusType {
          "C1514471", "C1514471", "C1514471" ),
    HER2( "Human epidermal growth factor receptor 2",
          "HER2_Neu_Status",
-         "HER2( ?/ ?neu)?",
+         "HER-?2( ?/ ?neu)?",
          "C1512413", "C1512413", "C1512413" );
 
    static public final String PARENT_URI = OwlOntologyConceptUtil.BREAST_CANCER_OWL + "Receptor_Status";
+   static private final String RECEPTOR_EX = "(\\s*-?\\s*?Receptors?\\s*-?)?";
 
    static private final String TUI = "T034";
 
@@ -41,7 +42,7 @@ public enum StatusType {
                final String positiveCui, final String negativeCui, final String unknownCui ) {
       _title = title;
       _uri = uri;
-      _pattern = Pattern.compile( "\\b" + regex, Pattern.CASE_INSENSITIVE );
+      _pattern = Pattern.compile( "\\b" + regex + RECEPTOR_EX, Pattern.CASE_INSENSITIVE );
       _positiveCui = positiveCui;
       _negativeCui = negativeCui;
       _unknownCui = unknownCui;
