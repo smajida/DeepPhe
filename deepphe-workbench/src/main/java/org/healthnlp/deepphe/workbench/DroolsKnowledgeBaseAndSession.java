@@ -48,8 +48,13 @@ public class DroolsKnowledgeBaseAndSession implements WorkingMemoryEventListener
 		try {
 			KnowledgeBuilder builder = KnowledgeBuilderFactory
 					.newKnowledgeBuilder();
+			StringBuilder sb = new StringBuilder();
+			sb.append("../deepphe-uima/src/main/");
+			sb.append("resources/org/healthnlp/deepphe/summarization/drools/kb/");
+			sb.append("impl/drools/autoload");
 			File autoloadDirectory = new File(
-					"src\\main\\resources\\drools\\autoload");
+					sb.toString());
+			System.out.println(autoloadDirectory.getAbsolutePath());
 			if (autoloadDirectory.exists() && autoloadDirectory.isDirectory()) {
 				File[] autoloadFiles = autoloadDirectory.listFiles();
 				for (File autoloadFile : autoloadFiles) {

@@ -1,6 +1,7 @@
 package org.healthnlp.deepphe.workbench.treeview.drools;
 
 import java.awt.Component;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -11,6 +12,8 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import org.drools.KnowledgeBase;
+import org.drools.definition.KnowledgePackage;
 import org.drools.definition.rule.Rule;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 import org.healthnlp.deepphe.workbench.DroolsKnowledgeBaseAndSession;
@@ -37,8 +40,10 @@ public class DroolsTree {
 		DefaultMutableTreeNode droolsRulesFolder = new DefaultMutableTreeNode(
 				new DroolsRulesUserObj());
 		root.add(droolsRulesFolder);
-		Iterator<Rule> ruleIterator = engine.getKnowledgeBase()
-				.getKnowledgePackage(CONST_DRLS_PKG_PATH).getRules().iterator();
+		KnowledgeBase kb = engine.getKnowledgeBase();
+		KnowledgePackage kbPackage = kb.getKnowledgePackage(CONST_DRLS_PKG_PATH);
+		Collection<Rule> rules = kbPackage.getRules();
+		Iterator<Rule> ruleIterator = rules.iterator();
 		while (ruleIterator.hasNext()) {
 			Rule rule = ruleIterator.next();
 			DroolsRuleUserObj userObj = new DroolsRuleUserObj();
