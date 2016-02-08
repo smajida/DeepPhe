@@ -2,6 +2,9 @@ package org.healthnlp.deepphe.ontology;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -68,7 +71,7 @@ public class I2b2OntologyBuilder {
 		final TreeSet<PartialPath> partialPaths = new TreeSet<PartialPath>();
 
 		OWLOntologyManager m = OWLManager.createOWLOntologyManager();
-		OWLOntology o = loadDeepPheOntology(m);
+		OWLOntology o = loadDeepPheOntologyFromUrl(m);
 		OWLReasonerFactory reasonerFactory;
 		reasonerFactory = new StructuralReasonerFactory();
 		OWLReasoner reasoner = reasonerFactory.createReasoner(o);
@@ -103,13 +106,27 @@ public class I2b2OntologyBuilder {
 		return partialPaths;
 	}
 
-	private OWLOntology loadDeepPheOntology(OWLOntologyManager manager)
+	private OWLOntology loadDeepPheOntologyFromFile(OWLOntologyManager manager)
 			throws IOException, OWLOntologyCreationException {
 		File f = new File(ontologyPath);
 		String fText = FileUtils.readFileToString(f, "UTF-8");
 		OWLOntology o = manager
 				.loadOntologyFromOntologyDocument(new StringDocumentSource(
 						fText));
+		return o;
+	}
+	
+	private OWLOntology loadDeepPheOntologyFromUrl(OWLOntologyManager manager) {
+		IRI ontologyIRI;
+		OWLOntology o = null;
+		try {
+			ontologyIRI = IRI.create(new URL(ontologyPath) );
+			o = manager.loadOntology(ontologyIRI);
+		} catch (MalformedURLException | URISyntaxException e) {
+			e.printStackTrace();
+		} catch (OWLOntologyCreationException e) {
+			e.printStackTrace();
+		}
 		return o;
 	}
 

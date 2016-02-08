@@ -356,7 +356,7 @@ public class TesterBreastCancerReceptorStatus {
 		assertEquals(1, numRulesFired);
 		
 		numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 12);
+		assertEquals(numberOfFactsInSession, 14);
 
 		session.retract(handleGoal);
 		session.retract(handlePatient);
@@ -376,7 +376,7 @@ public class TesterBreastCancerReceptorStatus {
 		session.retract(handleHer2neuHasInterpretation);
 		
 		numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 1);
+		assertEquals(numberOfFactsInSession, 3);
 		
 	}
 	
@@ -464,7 +464,7 @@ public class TesterBreastCancerReceptorStatus {
 		assertEquals(1, numRulesFired);
 		
 		numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 12);
+		assertEquals(numberOfFactsInSession, 14);
 
 		session.retract(handleGoal);
 		session.retract(handlePatient);
@@ -484,7 +484,7 @@ public class TesterBreastCancerReceptorStatus {
 		session.retract(handleHer2neuHasInterpretation);
 		
 		numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 1);
+		assertEquals(numberOfFactsInSession, 3);
 		
 	}
 	
@@ -591,7 +591,7 @@ public class TesterBreastCancerReceptorStatus {
 		assertEquals(5, numRulesFired);
 		
 		numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 21);
+		assertEquals(numberOfFactsInSession, 23);
 		
 	}
 }

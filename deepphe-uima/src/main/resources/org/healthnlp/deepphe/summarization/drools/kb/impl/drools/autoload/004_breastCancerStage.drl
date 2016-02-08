@@ -88,12 +88,12 @@ rule "004_breastCancerStage Stage0-3-1"
 	    KbPatient( $patientId : id )
         Tumor ($tumorId : id, summarizableId == $patientId)
         Lobular($histologyId : id, summarizableId == $patientId)
-        HasHistologicType(domainId == $tumorId, rangeId == $histologyId)
         InSitu ($inSituId : id, summarizableId == $patientId)
+        HasHistologicType(domainId == $tumorId, rangeId == $histologyId)
         HasTumorExtent(domainId == $tumorId, rangeId == $inSituId)
         not (Tumor ($invasiveTumorId : id, summarizableId == $patientId)
-         and HasTumorExtent(domainId == $invasiveTumorId, $extentId : rangeId)
-         and Invasive (id == $extentId, summarizableId == $patientId))
+          and HasTumorExtent(domainId == $invasiveTumorId, $extentId : rangeId)
+          and Invasive (id == $extentId, summarizableId == $patientId))
         not CancerStage (summarizableId == $patientId)
     then
         System.out.println("<DROOLS-ENGINE> Stage0-3-1 Assigning Stage0 cancer for patient ");      

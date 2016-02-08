@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
@@ -13,8 +15,10 @@ import org.drools.builder.ResourceType;
 import org.drools.io.Resource;
 import org.drools.io.ResourceFactory;
 import org.drools.runtime.StatefulKnowledgeSession;
+import org.drools.runtime.rule.FactHandle;
 import org.healthnlp.deepphe.summarization.drools.kb.Breast;
 import org.healthnlp.deepphe.summarization.drools.kb.CancerStage;
+import org.healthnlp.deepphe.summarization.drools.kb.ClinicalRegionalLymphNodeClassification;
 import org.healthnlp.deepphe.summarization.drools.kb.Ductal;
 import org.healthnlp.deepphe.summarization.drools.kb.HasBodySite;
 import org.healthnlp.deepphe.summarization.drools.kb.HasHistologicType;
@@ -28,12 +32,9 @@ import org.healthnlp.deepphe.summarization.drools.kb.InSitu;
 import org.healthnlp.deepphe.summarization.drools.kb.Invasive;
 import org.healthnlp.deepphe.summarization.drools.kb.KbGoal;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.summarization.drools.kb.Lobular;
 import org.healthnlp.deepphe.summarization.drools.kb.M0;
 import org.healthnlp.deepphe.summarization.drools.kb.M1;
-import org.healthnlp.deepphe.summarization.drools.kb.N0;
-import org.healthnlp.deepphe.summarization.drools.kb.N1;
-import org.healthnlp.deepphe.summarization.drools.kb.N2;
-import org.healthnlp.deepphe.summarization.drools.kb.N3;
 import org.healthnlp.deepphe.summarization.drools.kb.PagetsDisease;
 import org.healthnlp.deepphe.summarization.drools.kb.Pn0;
 import org.healthnlp.deepphe.summarization.drools.kb.Pn1;
@@ -41,6 +42,7 @@ import org.healthnlp.deepphe.summarization.drools.kb.Pn1mi;
 import org.healthnlp.deepphe.summarization.drools.kb.Pn2;
 import org.healthnlp.deepphe.summarization.drools.kb.Pn3;
 import org.healthnlp.deepphe.summarization.drools.kb.PrimaryTumor;
+import org.healthnlp.deepphe.summarization.drools.kb.PrimaryTumorClassification;
 import org.healthnlp.deepphe.summarization.drools.kb.Stageia;
 import org.healthnlp.deepphe.summarization.drools.kb.T0;
 import org.healthnlp.deepphe.summarization.drools.kb.T1;
@@ -141,6 +143,8 @@ public class TesterBreastCancerStage {
 	public void testStage0_2_1() {
 
 		idCounter = 0;
+		
+		final List<FactHandle> factHandles = new ArrayList<FactHandle>();
 
 		System.out.println("\nRunning testStage0_2_1\n");
 
@@ -157,8 +161,8 @@ public class TesterBreastCancerStage {
 		//
 		// DCIS
 		//
-		Tumor tumor = populateSessionWithInSituPrimaryBreastTumor(patient);
-		populateSessionWithDcis(patient, tumor);
+		Tumor tumor = populateSessionWithInSituPrimaryBreastTumor(patient, factHandles);
+		populateSessionWithDcis(patient, tumor, factHandles);
 		
 		long numberOfFactsInSession = session.getFactCount();
 		assertEquals(numberOfFactsInSession, 11);
@@ -177,21 +181,25 @@ public class TesterBreastCancerStage {
 		System.out.println("\nRunning testStage0_2_2\n");
 		
 		idCounter = 0;
+		
+		final List<FactHandle> factHandles = new ArrayList<FactHandle>();
+
 
 		KbGoal goal = new KbGoal();
 		goal.setId(idCounter++);
 		goal.setIsActive(1);
 		goal.setName("extract-stage");
-		session.insert(goal);
+		factHandles.add(session.insert(goal));
 
 		KbPatient patient = new KbPatient();
 		patient.setId(idCounter++);
+		factHandles.add(session.insert(patient));
 		
 		//
 		// DCIS
 		//
-		Tumor tumor = populateSessionWithInSituPrimaryBreastTumor(patient);
-		populateSessionWithDcis(patient, tumor);
+		Tumor tumor = populateSessionWithInSituPrimaryBreastTumor(patient, factHandles);
+		populateSessionWithDcis(patient, tumor, factHandles);
 		
 		//
 		// Paget's Disease
@@ -203,20 +211,22 @@ public class TesterBreastCancerStage {
 		session.insert(pagets);
 	
 		long numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 4);
+		assertEquals(numberOfFactsInSession, 12);
 		final String[] rulesToTest = { "004_breastCancerStage Stage0-2-2" };
 		CustomAgendaFilter customAgendaFilter = new CustomAgendaFilter(
 				rulesToTest);
 		int numRulesFired = session.fireAllRules(customAgendaFilter);
 		assertEquals(1, numRulesFired);
 		numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 5);
+		assertEquals(numberOfFactsInSession, 13);
 	}
 	
 	@Test
 	public void testStage0_3_1() {
 
 		idCounter = 0;
+		
+		final List<FactHandle> factHandles = new ArrayList<FactHandle>();
 
 		System.out.println("\nRunning testStage0_3_1\n");
 
@@ -224,33 +234,36 @@ public class TesterBreastCancerStage {
 		goal.setId(idCounter++);
 		goal.setIsActive(1);
 		goal.setName("extract-stage");
-		session.insert(goal);
+		factHandles.add(session.insert(goal));
 
 		KbPatient patient = new KbPatient();
 		patient.setId(idCounter++);
-		session.insert(patient);
+		factHandles.add(session.insert(patient));
 		
 		//
 		// LCIS
 		//
-		Tumor tumor = populateSessionWithInSituPrimaryBreastTumor(patient);
-		populateSessionWithLcis(patient, tumor);
+		Tumor tumor = populateSessionWithInSituPrimaryBreastTumor(patient, factHandles);
+		populateSessionWithLcis(patient, tumor, factHandles);
 		
 		long numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 3);
+		assertEquals(numberOfFactsInSession, 11);
 		final String[] rulesToTest = { "004_breastCancerStage Stage0-3-1" };
 		CustomAgendaFilter customAgendaFilter = new CustomAgendaFilter(
 				rulesToTest);
 		int numRulesFired = session.fireAllRules(customAgendaFilter);
 		assertEquals(1, numRulesFired);
+
 		numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 4);
+		assertEquals(numberOfFactsInSession, 12);
 	}
 	
 	@Test
 	public void testStage0_3_2() {
 
 		idCounter = 0;
+		
+		final List<FactHandle> factHandles = new ArrayList<FactHandle>();
 
 		System.out.println("\nRunning testStage0_2_2\n");
 
@@ -267,8 +280,8 @@ public class TesterBreastCancerStage {
 		//
 		// LCIS
 		//
-		Tumor tumor = populateSessionWithInSituPrimaryBreastTumor(patient);
-		populateSessionWithLcis(patient, tumor);
+		Tumor tumor = populateSessionWithInSituPrimaryBreastTumor(patient, factHandles);
+		populateSessionWithLcis(patient, tumor, factHandles);
      
 		PagetsDisease pagets = new PagetsDiseaseImpl();
 		pagets.setId(idCounter++);
@@ -276,20 +289,22 @@ public class TesterBreastCancerStage {
 		session.insert(pagets);
 	
 		long numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 4);
+		assertEquals(numberOfFactsInSession, 12);
 		final String[] rulesToTest = { "004_breastCancerStage Stage0-3-2" };
 		CustomAgendaFilter customAgendaFilter = new CustomAgendaFilter(
 				rulesToTest);
 		int numRulesFired = session.fireAllRules(customAgendaFilter);
 		assertEquals(1, numRulesFired);
 		numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 5);
+		assertEquals(numberOfFactsInSession, 13);
 	}
 	
 	@Test
 	public void testStage0_4_1() {
 
 		idCounter = 0;
+		
+		final List<FactHandle> factHandles = new ArrayList<FactHandle>();
 
 		System.out.println("\nRunning testStage0_4_1\n");
 
@@ -306,25 +321,27 @@ public class TesterBreastCancerStage {
 		//
 		// DCIS and LCIS
 		//
-		Tumor tumor = populateSessionWithInSituPrimaryBreastTumor(patient);
-		populateSessionWithDcis(patient, tumor);
-		populateSessionWithLcis(patient, tumor);
+		Tumor tumor = populateSessionWithInSituPrimaryBreastTumor(patient, factHandles);
+		populateSessionWithDcis(patient, tumor, factHandles);
+		populateSessionWithLcis(patient, tumor, factHandles);
 	
 		long numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 4);
+		assertEquals(numberOfFactsInSession, 13);
 		final String[] rulesToTest = { "004_breastCancerStage Stage0-4-1" };
 		CustomAgendaFilter customAgendaFilter = new CustomAgendaFilter(
 				rulesToTest);
 		int numRulesFired = session.fireAllRules(customAgendaFilter);
 		assertEquals(1, numRulesFired);
 		numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 5);
+		assertEquals(numberOfFactsInSession, 14);
 	}
 	
 	@Test
 	public void testStage0_4_2() {
 
 		idCounter = 0;
+		
+		final List<FactHandle> factHandles = new ArrayList<FactHandle>();
 
 		System.out.println("\nRunning testStage0_4_2\n");
 
@@ -341,9 +358,9 @@ public class TesterBreastCancerStage {
 		//
 		// DCIS and LCIS
 		//
-		Tumor tumor = populateSessionWithInSituPrimaryBreastTumor(patient);
-		populateSessionWithDcis(patient, tumor);
-		populateSessionWithLcis(patient, tumor);
+		Tumor tumor = populateSessionWithInSituPrimaryBreastTumor(patient, factHandles);
+		populateSessionWithDcis(patient, tumor, factHandles);
+		populateSessionWithLcis(patient, tumor, factHandles);
 		
 		PagetsDisease pagets = new PagetsDiseaseImpl();
 		pagets.setId(idCounter++);
@@ -351,14 +368,14 @@ public class TesterBreastCancerStage {
 		session.insert(pagets);
 	
 		long numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 5);
+		assertEquals(numberOfFactsInSession, 14);
 		final String[] rulesToTest = { "004_breastCancerStage Stage0-4-2" };
 		CustomAgendaFilter customAgendaFilter = new CustomAgendaFilter(
 				rulesToTest);
 		int numRulesFired = session.fireAllRules(customAgendaFilter);
 		assertEquals(1, numRulesFired);
 		numberOfFactsInSession = session.getFactCount();
-		assertEquals(numberOfFactsInSession, 6);
+		assertEquals(numberOfFactsInSession, 15);
 	}
 
 	@Test
@@ -1158,11 +1175,11 @@ public class TesterBreastCancerStage {
 		KbPatient patient = new KbPatient();
 		patient.setId(idCounter++);
 		
-		T0 tStage = new T0Impl();
+		PrimaryTumorClassification tStage = new T0Impl();
 		tStage.setId(idCounter++);
 		tStage.setSummarizableId(patient.getId());
      
-		Pn0 nStage = new Pn0Impl();
+		ClinicalRegionalLymphNodeClassification nStage = new N0Impl();
 		nStage.setId(idCounter++);
 		nStage.setSummarizableId(patient.getId());
 		
@@ -1187,14 +1204,14 @@ public class TesterBreastCancerStage {
 		assertEquals(numberOfFactsInSession, 6);
 	}
 	
-	private Tumor populateSessionWithInSituPrimaryBreastTumor(KbPatient kbPatient) {
+	private Tumor populateSessionWithInSituPrimaryBreastTumor(KbPatient kbPatient, List<FactHandle> factHandles) {
 		//
 		// Tumor
 		//
 		Tumor tumor = new TumorImpl();
 		tumor.setId(idCounter++);
 		tumor.setSummarizableId(kbPatient.getId());		
-		session.insert(tumor);
+		factHandles.add(session.insert(tumor));
 		
 		//
 		// LCIS
@@ -1211,9 +1228,11 @@ public class TesterBreastCancerStage {
 		breast.setSummarizableId(kbPatient.getId());
 		hasBodySite.setDomainId(tumor.getId());
 		hasBodySite.setRangeId(breast.getId());
-		session.insert(hasBodySite);
-		session.insert(breast);
 		
+		factHandles.add(session.insert(tumor));
+		factHandles.add(session.insert(breast));
+		factHandles.add(session.insert(hasBodySite));
+	
 		//
 		// tumor hasTumorType primaryTumor
 		// 
@@ -1227,8 +1246,10 @@ public class TesterBreastCancerStage {
 		hasTumorType.setRangeId(primaryTumor.getId());
 		hasTumorType.setDomainId(tumor.getId());
 		hasTumorType.setRangeId(primaryTumor.getId());
-		session.insert(hasTumorType);
-		session.insert(primaryTumor);
+	
+		
+		factHandles.add(session.insert(hasTumorType));
+		factHandles.add(session.insert(primaryTumor));
 		
 		//
 		// tumor hasAttribute inSitu
@@ -1241,13 +1262,15 @@ public class TesterBreastCancerStage {
 		inSitu.setSummarizableId(kbPatient.getId());
 		hasTumorExtent.setDomainId(tumor.getId());
 		hasTumorExtent.setRangeId(inSitu.getId());
-		session.insert(hasTumorExtent);
-		session.insert(inSitu);
+		factHandles.add(session.insert(hasTumorExtent));
+		factHandles.add(session.insert(inSitu));
+		
+		System.out.println("there are " + factHandles.size() + " facts");
 		
 		return tumor;
 	}
 	
-	private void populateSessionWithDcis(KbPatient kbPatient, Tumor tumor) {
+	private void populateSessionWithDcis(KbPatient kbPatient, Tumor tumor, List<FactHandle> factHandles) {
 		//
 		// DCIS
 		//
@@ -1263,12 +1286,12 @@ public class TesterBreastCancerStage {
 		ductal.setSummarizableId(kbPatient.getId());
 		hasHistologicType.setDomainId(tumor.getId());
 		hasHistologicType.setRangeId(ductal.getId());
-		session.insert(hasHistologicType);
-		session.insert(ductal);
+		factHandles.add(session.insert(hasHistologicType));
+		factHandles.add(session.insert(ductal));
 		
 	}
 	
-	private void populateSessionWithLcis(KbPatient patient, Tumor tumor) {
+	private void populateSessionWithLcis(KbPatient patient, Tumor tumor, List<FactHandle> factHandles) {
 		//
 		// LCIS
 		//
@@ -1279,13 +1302,13 @@ public class TesterBreastCancerStage {
 		HasHistologicType hasHistologicType = new HasHistologicTypeImpl();
 		hasHistologicType.setId(idCounter++);
 		hasHistologicType.setSummarizableId(patient.getId());	
-		Ductal lobular = new DuctalImpl();
+		Lobular lobular = new LobularImpl();
 		lobular.setId(idCounter++);
 		lobular.setSummarizableId(patient.getId());
 		hasHistologicType.setDomainId(tumor.getId());
 		hasHistologicType.setRangeId(lobular.getId());
-		session.insert(hasHistologicType);
-		session.insert(lobular);
+		factHandles.add(session.insert(hasHistologicType));
+		factHandles.add(session.insert(lobular));
 		
 	}
 	

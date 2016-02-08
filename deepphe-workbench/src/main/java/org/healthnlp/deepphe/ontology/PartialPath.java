@@ -5,6 +5,7 @@ import static org.semanticweb.owlapi.search.Searcher.annotations;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.reasoner.Node;
@@ -106,7 +107,9 @@ public class PartialPath implements Comparable<PartialPath> {
     @Override
     public String toString() {
         String clsString = (cls == null) ? "topLevel" : cls.getIRI().toString();
-        return "Level: " + getLevel() + "\n Path: " + path + "\n IRI: " + clsString ;
+        String result = StringUtils.substringAfterLast(clsString, "#");
+//        return "Level: " + getLevel() + "\n Path: " + path + "\n IRI: " + clsString ;
+        return result;
     }
 
     @Override

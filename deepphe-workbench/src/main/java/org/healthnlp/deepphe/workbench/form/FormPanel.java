@@ -67,7 +67,7 @@ public class FormPanel extends JPanel {
 	private JButton metastaticSiteTwoSearchButton = new JButton();
 	private JButton metastaticSiteThreeSearchButton = new JButton();
 	private JComboBox<PartialPath> sizeBox;
-	private JComboBox<PartialPath> tnmModifierBox;
+//	private JComboBox<PartialPath> tnmModifierBox;
 	private JComboBox<PartialPath> tnmTumorBox;
 	private JComboBox<PartialPath> tnmNodeBox;
 	private JComboBox<PartialPath> tnmMetastasisBox;
@@ -211,34 +211,31 @@ public class FormPanel extends JPanel {
 
 			clearAll();
 			sizeBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_BREAST_CANCER
-					+ "Tumor_Size");
+					+ "TumorSize");
 			clearAll();
-			tnmModifierBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_CANCER
-					+ "TNM_Modifier");
+//			tnmModifierBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_CANCER
+//					+ "#TNM_Modifier");
+//			clearAll();
+			tnmTumorBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_BREAST_CANCER
+					+ "BreastCancerPrimaryTumorClassification");
 			clearAll();
-			tnmTumorBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_CANCER
-					+ "Generic_Primary_Tumor_TNM_Finding");
+			tnmNodeBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_BREAST_CANCER
+					+ "ClinicalRegionalLymphNodeClassification");
 			clearAll();
-			tnmNodeBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_CANCER
-					+ "Generic_Regional_Lymph_Nodes_TNM_Finding");
-			clearAll();
-			tnmMetastasisBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_CANCER
-					+ "Generic_Distant_Metastasis_TNM_Finding");
-			clearAll();
-			tnmMetastasisBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_CANCER
-					+ "Generic_Distant_Metastasis_TNM_Finding");
+			tnmMetastasisBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_BREAST_CANCER
+					+ "BreastCancerDistantMetastasisClassification");
 			clearAll();
 			stageBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_BREAST_CANCER
-					+ "Breast_Carcinoma_by_AJCC_v7_Stage");
+					+ "BreastCancerStage");
 			clearAll();
-			erStatusBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_UTAH_BLULAB
-					+ "OrdinalInterpretation");
+			erStatusBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_CANCER
+					+ "#Interpretation");
 			clearAll();
-			prStatusBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_UTAH_BLULAB
-					+ "OrdinalInterpretation");
+			prStatusBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_CANCER
+					+ "#Interpretation");
 			clearAll();
-			her2NeuStatusBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_UTAH_BLULAB
-					+ "OrdinalInterpretation");
+			her2NeuStatusBox = buildComboBoxFromSubclasses(CONST_NAMESPACE_CANCER
+					+ "#Interpretation");
 
 			clearButton.setActionCommand("Form:Clear");
 			clearButton.setEnabled(true);
@@ -360,9 +357,9 @@ public class FormPanel extends JPanel {
 		yCoor += 2;
 		add(createSeparator("TNM"), cc.xyw(1, yCoor, 5));
 
-		yCoor += 2;
-		add(new JLabel("Modifier"), cc.xyw(1, yCoor, 1));
-		add(tnmModifierBox, cc.xyw(3, yCoor, 1));
+//		yCoor += 2;
+//		add(new JLabel("Modifier"), cc.xyw(1, yCoor, 1));
+//		add(tnmModifierBox, cc.xyw(3, yCoor, 1));
 		yCoor += 2;
 		add(new JLabel("Primary Tumor"), cc.xyw(1, yCoor, 1));
 		add(tnmTumorBox, cc.xyw(3, yCoor, 1));
@@ -513,7 +510,7 @@ public class FormPanel extends JPanel {
 			fillTextFieldWithString(metastaticSiteTwoTextField, formDataBean.getMetastaticSiteTwo());
 			fillTextFieldWithString(metastaticSiteThreeTextField, formDataBean.getMetastaticSiteThree());
 			fillComboBoxWithString(sizeBox, formDataBean.getSize());
-			fillComboBoxWithString(tnmModifierBox, formDataBean.getTnmModifier());
+//			fillComboBoxWithString(tnmModifierBox, formDataBean.getTnmModifier());
 			fillComboBoxWithString(tnmTumorBox, formDataBean.getTnmTumor());
 			fillComboBoxWithString(tnmNodeBox, formDataBean.getTnmNode());
 			fillComboBoxWithString(tnmMetastasisBox, formDataBean.getTnmMetastasis());
@@ -530,7 +527,7 @@ public class FormPanel extends JPanel {
 		formDataBean.setMetastaticSiteTwo(metastaticSiteTwoTextField.getText());
 		formDataBean.setMetastaticSiteThree(metastaticSiteThreeTextField.getText());
 		formDataBean.setSize(sizeBox.getSelectedItem().toString());	
-		formDataBean.setTnmModifier(tnmModifierBox.getSelectedItem().toString());
+//		formDataBean.setTnmModifier(tnmModifierBox.getSelectedItem().toString());
 		formDataBean.setTnmTumor(tnmTumorBox.getSelectedItem().toString());
 		formDataBean.setTnmNode(tnmNodeBox.getSelectedItem().toString());
 		formDataBean.setTnmMetastasis(tnmMetastasisBox.getSelectedItem().toString());
