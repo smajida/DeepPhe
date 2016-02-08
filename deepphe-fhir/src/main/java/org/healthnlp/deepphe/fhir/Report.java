@@ -10,7 +10,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.healthnlp.deepphe.fhir.summary.CancerSummary;
+import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
+import org.healthnlp.deepphe.fhir.summary.TumorSummary;
 import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.TextUtils;
 import org.healthnlp.deepphe.util.FHIRUtils;
@@ -332,6 +335,33 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		for(Summary ss: s){
 			addCompositionSummary(ss);
 		}
+	}
+	
+	
+	public List<CancerSummary> getCancerSummaries(){
+		List<CancerSummary> list = new ArrayList<CancerSummary>();
+		for(Summary s: getCompositionSummaries()){
+			if(s instanceof CancerSummary)
+				list.add((CancerSummary) s);
+		}
+		return list;
+	}
+	
+	public List<TumorSummary> getTumorSummaries(){
+		List<TumorSummary> list = new ArrayList<TumorSummary>();
+		for(Summary s: getCompositionSummaries()){
+			if(s instanceof TumorSummary)
+				list.add((TumorSummary) s);
+		}
+		return list;
+	}
+	
+	public PatientSummary getPatientSummary(){
+		for(Summary s: getCompositionSummaries()){
+			if(s instanceof PatientSummary)
+				return (PatientSummary) s;
+		}
+		return null;
 	}
 	
 	/*private void writeObject(ObjectOutputStream stream) throws IOException {

@@ -11,6 +11,7 @@ import java.util.ListIterator;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
+import org.apache.ctakes.cancer.type.textsem.CancerStage;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.cancer.type.textsem.TnmClassification;
 import org.apache.ctakes.typesystem.type.refsem.*;
@@ -391,6 +392,15 @@ public class cTAKESUtils {
 		for(Annotation  a: cTAKESUtils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
 			if(a instanceof TnmClassification){
 				return (TnmClassification) a;
+			}
+		}
+		return null;
+	}
+	
+	public static CancerStage getCancerStage(IdentifiedAnnotation dm){
+		for(Annotation  a: cTAKESUtils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
+			if(a instanceof CancerStage){
+				return (CancerStage) a;
 			}
 		}
 		return null;

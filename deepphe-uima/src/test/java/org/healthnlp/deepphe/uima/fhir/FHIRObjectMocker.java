@@ -188,7 +188,7 @@ public class FHIRObjectMocker {
 				allowing(cancerSummary).getConceptURI();
 				will(returnValue(FHIRConstants.CANCER_SUMMARY_URI));
 				
-				allowing(cancerSummary).getBodySite();
+				allowing(cancerSummary).getBodySites();
 				will(returnValue(Collections.singletonList(bodySiteCC)));
 
 				allowing(cancerSummary).getOutcomes();
@@ -252,7 +252,7 @@ public class FHIRObjectMocker {
 				allowing(tumorSummary).getConceptURI();
 				will(returnValue(FHIRConstants.TUMOR_SUMMARY_URI));
 								
-				allowing(tumorSummary).getBodySite();
+				allowing(tumorSummary).getBodySites();
 				will(returnValue(Collections.singletonList(bodySiteCC)));
 
 				allowing(tumorSummary).getOutcomes();

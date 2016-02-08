@@ -4,11 +4,14 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Condition.ConditionStageComponent;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Reference;
+import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.StringType;
 
 public class Stage extends ConditionStageComponent implements Serializable{
@@ -125,6 +128,19 @@ public class Stage extends ConditionStageComponent implements Serializable{
 		}
 	
 		return dst;
+	}
+	
+	public List<Resource> getAssessmentTarget() {
+		// if list of targets is empty, check the references
+		if(super.getAssessmentTarget().isEmpty() && !getAssessment().isEmpty()){
+			for(Reference r: getAssessment()){
+				Element e = FHIRRegistry.getInstance().getResource(r.getReference());
+				if(e != null){
+					super.getAssessmentTarget().add((Resource)e);
+				}
+			}
+		}
+		return super.getAssessmentTarget();
 	}
 	
 

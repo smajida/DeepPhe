@@ -29,6 +29,7 @@ import org.healthnlp.deepphe.fhir.summary.TumorSummary.TumorPhenotype;
 import org.healthnlp.deepphe.uima.types.Attribute;
 import org.healthnlp.deepphe.uima.types.BodySite;
 import org.healthnlp.deepphe.uima.types.BodySiteSummary;
+import org.healthnlp.deepphe.uima.types.Cancer;
 import org.healthnlp.deepphe.uima.types.CancerPhenotype;
 import org.healthnlp.deepphe.uima.types.CancerStage;
 import org.healthnlp.deepphe.uima.types.CancerType;
@@ -47,6 +48,7 @@ import org.healthnlp.deepphe.uima.types.Outcome;
 import org.healthnlp.deepphe.uima.types.Patient;
 import org.healthnlp.deepphe.uima.types.PrimaryTumorClassification;
 import org.healthnlp.deepphe.uima.types.RegionalLymphNodeClassification;
+import org.healthnlp.deepphe.uima.types.SummaryAttribute;
 import org.healthnlp.deepphe.uima.types.TNMValue;
 import org.healthnlp.deepphe.uima.types.Treatment;
 import org.healthnlp.deepphe.uima.types.Tumor;
@@ -81,7 +83,8 @@ public class PhenotypeResourceFactory {
 				a_id = ((org.healthnlp.deepphe.uima.types.Annotation) a).getHasIdentifier();
 			}else if(a instanceof Attribute){
 				a_id = ((Attribute) a).getHasIdentifier();
-			}else if(a instanceof Modifier){
+				//TODO: I don't like the TNMValue shit, need to think of a better way
+			}else if(a instanceof Modifier && !(a instanceof TNMValue)){
 				a_id = ((Modifier) a).getHasIdentifier();
 			}
 			
@@ -178,10 +181,10 @@ public class PhenotypeResourceFactory {
 		summaryAnnotation.setHasPhenotype(getValue(jcas,phenotypeAnnotation));
 		
 		// add body site
-		if(!summaryFHIR.getBodySite().isEmpty()){
+		if(!summaryFHIR.getBodySites().isEmpty()){
 			int i = 0;
-			summaryAnnotation.setHasBodySite(new FSArray(jcas,summaryFHIR.getBodySite().size()));
-			for(CodeableConcept cc : summaryFHIR.getBodySite()){
+			summaryAnnotation.setHasBodySite(new FSArray(jcas,summaryFHIR.getBodySites().size()));
+			for(CodeableConcept cc : summaryFHIR.getBodySites()){
 				BodySiteSummary ex = new BodySiteSummary(jcas);
 				addCodeableConcept(ex, cc);
 				summaryAnnotation.setHasBodySite(i++,ex);
@@ -314,10 +317,10 @@ public class PhenotypeResourceFactory {
 		}
 		
 		// add body site
-		if(!summaryFHIR.getBodySite().isEmpty()){
+		if(!summaryFHIR.getBodySites().isEmpty()){
 			int i = 0;
-			summaryAnnotation.setHasBodySite(new FSArray(jcas,summaryFHIR.getBodySite().size()));
-			for(CodeableConcept cc : summaryFHIR.getBodySite()){
+			summaryAnnotation.setHasBodySite(new FSArray(jcas,summaryFHIR.getBodySites().size()));
+			for(CodeableConcept cc : summaryFHIR.getBodySites()){
 				BodySiteSummary ex = new BodySiteSummary(jcas);
 				addCodeableConcept(ex, cc);
 				summaryAnnotation.setHasBodySite(i++,ex);
@@ -381,28 +384,28 @@ public class PhenotypeResourceFactory {
 		if(phenotype.getTumorExtent() != null){
 			TumorExtent te = new TumorExtent(jcas);
 			addCodeableConcept(te,phenotype.getTumorExtent());
-			summaryAnnotation.setHasCancerType(getValue(jcas,te));
+			summaryAnnotation.setHasTumorExtent(getValue(jcas,te));
 		}
 		
 		// add primary tumor stage
 		if(phenotype.getPrimaryTumorClassification() != null){
 			PrimaryTumorClassification pstage = new PrimaryTumorClassification(jcas);
 			addCodeableConcept(pstage,phenotype.getPrimaryTumorClassification());
-			summaryAnnotation.setHasCancerType(getValue(jcas,pstage));
+			summaryAnnotation.setHasTClassification(getValue(jcas,pstage));
 		}
 		
 		// add regional lymph node
 		if(phenotype.getRegionalLymphNodeClassification() != null){
 			RegionalLymphNodeClassification nstage = new RegionalLymphNodeClassification(jcas);
 			addCodeableConcept(nstage,phenotype.getRegionalLymphNodeClassification());
-			summaryAnnotation.setHasCancerType(getValue(jcas,nstage));
+			summaryAnnotation.setHasNClassification(getValue(jcas,nstage));
 		}
 		
 		// add primary tumor stage
 		if(phenotype.getDistantMetastasisClassification() != null){
 			DistantMetastasisClassification mstage = new DistantMetastasisClassification(jcas);
 			addCodeableConcept(mstage,phenotype.getDistantMetastasisClassification());
-			summaryAnnotation.setHasCancerType(getValue(jcas,mstage));
+			summaryAnnotation.setHasMClassification(getValue(jcas,mstage));
 		}
 		
 		// add manifistation
@@ -751,6 +754,9 @@ public class PhenotypeResourceFactory {
 				if(!tnm.isEmpty())
 					st.setHasAssessment(getValues(jcas, tnm));
 				st.addToIndexes();
+				
+				// add stage
+				dd.setHasStage(getValue(jcas, st));
 			}
 					
 		//dd.setHasStage(v);
@@ -913,7 +919,7 @@ public class PhenotypeResourceFactory {
 					stage.addAssessment(loadFinding(tn));
 				}
 			}
-			
+			dx.setStage(stage);
 		}
 		
 		// add mention text
@@ -925,8 +931,8 @@ public class PhenotypeResourceFactory {
 	}
 
 	
-	private static CodeableConcept getCodeableConcept(org.healthnlp.deepphe.uima.types.Mention e){
-		CodeableConcept cc =  FHIRUtils.getCodeableConcept(e.getCoveredText(),e.getHasURI(),FHIRUtils.SCHEMA_OWL);
+	private static CodeableConcept getCodeableConcept(org.healthnlp.deepphe.uima.types.Annotation e){
+		CodeableConcept cc =  FHIRUtils.getCodeableConcept(e.getHasPreferredName(),e.getHasURI(),FHIRUtils.SCHEMA_OWL);
 		Coding c = cc.addCoding();
 		c.setSystem(FHIRUtils.SCHEMA_REFERENCE);
 		c.setCode(e.getHasIdentifier());
@@ -935,7 +941,16 @@ public class PhenotypeResourceFactory {
 	}
 	
 	private static CodeableConcept getCodeableConcept(org.healthnlp.deepphe.uima.types.Modifier e){
-		CodeableConcept cc =  FHIRUtils.getCodeableConcept(e.getCoveredText(),e.getHasURI(),FHIRUtils.SCHEMA_OWL);
+		CodeableConcept cc =  FHIRUtils.getCodeableConcept(e.getHasPreferredName(),e.getHasURI(),FHIRUtils.SCHEMA_OWL);
+		Coding c = cc.addCoding();
+		c.setSystem(FHIRUtils.SCHEMA_REFERENCE);
+		c.setCode(e.getHasIdentifier());
+		c.setDisplay(e.getHasPreferredName());
+		return cc;
+	}
+	
+	private static CodeableConcept getCodeableConcept(org.healthnlp.deepphe.uima.types.Attribute e){
+		CodeableConcept cc =  FHIRUtils.getCodeableConcept(e.getHasPreferredName(),e.getHasURI(),FHIRUtils.SCHEMA_OWL);
 		Coding c = cc.addCoding();
 		c.setSystem(FHIRUtils.SCHEMA_REFERENCE);
 		c.setCode(e.getHasIdentifier());
@@ -1007,7 +1022,7 @@ public class PhenotypeResourceFactory {
 		}
 		
 		// get related items
-		for(int i=0;i<comp.getHasEvent().size();i++){
+		for(int i=0;i<getSize(comp.getHasEvent());i++){
 			CompositionEvent ce = comp.getHasEvent(i);
 			if(ce != null){
 				for(int j=0;j<ce.getHasEvent().size();j++){
@@ -1018,9 +1033,133 @@ public class PhenotypeResourceFactory {
 			}
 		}
 		
+		// load summaries
+		for(int i=0;i<getSize(comp.getHasCompositionSummary());i++){
+			Summary summary = loadSummary( comp.getHasCompositionSummary(i));
+			rr.addCompositionSummary(summary);
+		}
 		
 		return rr;
 	}
+	
+	public static Summary loadSummary(org.healthnlp.deepphe.uima.types.Summary summaryAnnotation) {
+		Summary summary = null;
+		if(summaryAnnotation instanceof org.healthnlp.deepphe.uima.types.PatientSummary){
+			summary = loadPatientSummary((org.healthnlp.deepphe.uima.types.PatientSummary) summaryAnnotation);
+		}else if(summaryAnnotation instanceof Cancer){
+			summary = loadCancerSummary((Cancer) summaryAnnotation);
+		}else if(summaryAnnotation instanceof Tumor){
+			summary = loadTumorSummary((Tumor) summaryAnnotation);
+		}
+		
+		return summary;
+	}
+	
+	
+	private static PatientSummary loadPatientSummary(org.healthnlp.deepphe.uima.types.PatientSummary summaryAnnotation) {
+		PatientSummary patientSummary = new PatientSummary();
+		//TODO: don't care about patient summary for now, will do later
+		FHIRUtils.createIdentifier(patientSummary.addIdentifier(),summaryAnnotation.getHasIdentifier());
+		return patientSummary;
+	}
+
+	private static int getSize(FSArray arr){
+		return arr == null?0:arr.size();
+	}
+
+	private static CancerSummary loadCancerSummary(Cancer summaryAnnotation) {
+		CancerSummary cancerSummary = new CancerSummary();
+		
+		// add values
+		for(int i=0;i<getSize(summaryAnnotation.getHasBodySite());i++){
+			cancerSummary.addBodySite(getCodeableConcept(summaryAnnotation.getHasBodySite(i)));	
+		}
+		for(int i=0;i<getSize(summaryAnnotation.getHasOutcome());i++){
+			cancerSummary.addOutcome(getCodeableConcept(summaryAnnotation.getHasOutcome(i)));	
+		}
+		for(int i=0;i<getSize(summaryAnnotation.getHasTreatment());i++){
+			cancerSummary.addTreatment(getCodeableConcept(summaryAnnotation.getHasTreatment(i)));	
+		}
+		
+		// add phenotypes
+		for(int i=0;i<getSize(summaryAnnotation.getHasPhenotype());i++){
+			CancerPhenotype pheneAnnotation = summaryAnnotation.getHasPhenotype(i);
+			CancerSummary.CancerPhenotype phenotype = new CancerSummary.CancerPhenotype();
+			
+			for(int j=0;j<getSize(pheneAnnotation.getHasCancerStage());j++){
+				phenotype.setCancerStage(getCodeableConcept(pheneAnnotation.getHasCancerStage(j)));
+			}
+			for(int j=0;j<getSize(pheneAnnotation.getHasCancerType());j++){
+				phenotype.setCancerType(getCodeableConcept(pheneAnnotation.getHasCancerType(j)));
+			}
+			for(int j=0;j<getSize(pheneAnnotation.getHasTumorExtent());j++){
+				phenotype.setTumorExtent(getCodeableConcept(pheneAnnotation.getHasTumorExtent(j)));
+			}
+			for(int j=0;j<getSize(pheneAnnotation.getHasTClassification());j++){
+				phenotype.setPrimaryTumorClassification(getCodeableConcept(pheneAnnotation.getHasTClassification(j)));
+			}
+			for(int j=0;j<getSize(pheneAnnotation.getHasMClassification());j++){
+				phenotype.setDistantMetastasisClassification(getCodeableConcept(pheneAnnotation.getHasMClassification(j)));
+			}
+			for(int j=0;j<getSize(pheneAnnotation.getHasNClassification());j++){
+				phenotype.setRegionalLymphNodeClassification(getCodeableConcept(pheneAnnotation.getHasNClassification(j)));
+			}
+			for(int j=0;j<getSize(pheneAnnotation.getHasManifestation());j++){
+				phenotype.addManifestation(getCodeableConcept(pheneAnnotation.getHasManifestation(j)));
+			}
+			cancerSummary.addPhenotype(phenotype);
+		}
+		
+		// add tumors
+		for(int i=0;i<getSize(summaryAnnotation.getRealizes());i++){
+			cancerSummary.addTumor(loadTumorSummary(summaryAnnotation.getRealizes(i)));
+		}
+		
+		FHIRUtils.createIdentifier(cancerSummary.addIdentifier(),summaryAnnotation.getHasIdentifier());
+		return cancerSummary;
+	}
+
+
+	private static TumorSummary loadTumorSummary(Tumor summaryAnnotation) {
+		TumorSummary tumorSummary = new TumorSummary();
+		// add values
+		for(int i=0;i<getSize(summaryAnnotation.getHasBodySite());i++){
+			tumorSummary.addBodySite(getCodeableConcept(summaryAnnotation.getHasBodySite(i)));	
+		}
+		for(int i=0;i<getSize(summaryAnnotation.getHasOutcome());i++){
+			tumorSummary.addOutcome(getCodeableConcept(summaryAnnotation.getHasOutcome(i)));	
+		}
+		for(int i=0;i<getSize(summaryAnnotation.getHasTreatment());i++){
+			tumorSummary.addTreatment(getCodeableConcept(summaryAnnotation.getHasTreatment(i)));	
+		}
+		for(int i=0;i<getSize(summaryAnnotation.getHasSequenceVariant());i++){
+			tumorSummary.addTreatment(getCodeableConcept(summaryAnnotation.getHasSequenceVariant(i)));	
+		}
+		if(summaryAnnotation.getHasTumorType() != null)
+			tumorSummary.setTumorType(FHIRUtils.getCodeableConcept(URI.create(summaryAnnotation.getHasTumorType())));
+		
+		// add phenotypes
+		for(int i=0;i<getSize(summaryAnnotation.getHasPhenotype());i++){
+			org.healthnlp.deepphe.uima.types.TumorPhenotype pheneAnnotation = summaryAnnotation.getHasPhenotype(i);
+			TumorSummary.TumorPhenotype phenotype = new TumorSummary.TumorPhenotype();
+			for(int j=0;j<getSize(pheneAnnotation.getHasHistologicType());j++){
+				phenotype.addHistologicType(getCodeableConcept(pheneAnnotation.getHasHistologicType(j)));
+			}
+			for(int j=0;j<getSize(pheneAnnotation.getHasTumorExtent());j++){
+				phenotype.addTumorExtent(getCodeableConcept(pheneAnnotation.getHasTumorExtent(j)));
+			}
+			for(int j=0;j<getSize(pheneAnnotation.getHasManifestation());j++){
+				phenotype.addManifestation(getCodeableConcept(pheneAnnotation.getHasManifestation(j)));
+			}
+			tumorSummary.setPhenotype(phenotype);
+			
+		}
+		
+		FHIRUtils.createIdentifier(tumorSummary.addIdentifier(),summaryAnnotation.getHasIdentifier());
+		return tumorSummary;
+	}
+
+
 	/**
 	 * load a single patient mention froma a cas (there can only be one)
 	 * @param cas

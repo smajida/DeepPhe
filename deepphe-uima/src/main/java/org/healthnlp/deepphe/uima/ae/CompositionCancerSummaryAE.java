@@ -1,16 +1,29 @@
 package org.healthnlp.deepphe.uima.ae;
 
-import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.healthnlp.deepphe.fhir.*;
-import org.healthnlp.deepphe.fhir.summary.*;
+import org.healthnlp.deepphe.fhir.Condition;
+import org.healthnlp.deepphe.fhir.Disease;
+import org.healthnlp.deepphe.fhir.Element;
+import org.healthnlp.deepphe.fhir.Patient;
+import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.Stage;
+import org.healthnlp.deepphe.fhir.summary.CancerSummary;
+import org.healthnlp.deepphe.fhir.summary.PatientSummary;
+import org.healthnlp.deepphe.fhir.summary.Summary;
+import org.healthnlp.deepphe.fhir.summary.TumorSummary;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
+import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 
@@ -18,6 +31,7 @@ import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
+import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 
 
 /**
@@ -97,9 +111,11 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		
 		// explicit mentions mentions of cancer, carcinoma, any disease under 'malignant breast neoplasm' class "metastatic neoplasm"
 		// If in pathology report, then generate tumor instance as well.
+		Disease cancerDx = null;
 		for(Disease c: report.getDiagnoses()){
 			if(hasTrigger(cancerTriggers,c)){
-				cancer = createCancerSummary(c);
+				cancer = createCancerSummary(report,c);
+				cancerDx = c;
 				list.add(cancer);
 				break;
 			}
@@ -107,7 +123,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		
 		// create tumor summary if we talke about cancer in trigger document
 		if(cancer != null && documentTypeTriggers.contains(report.getType())){
-			tumor = createTumorSummary(null);
+			tumor = createTumorSummary(report,cancerDx);
 			cancer.addTumor(tumor);
 		}
 		
@@ -116,7 +132,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			for(Element e: report.getReportElements()){
 				// if we have a tumor trigger
 				if(e instanceof Condition && hasTrigger(tumorTriggers, (Condition)e)){
-					tumor = createTumorSummary((Condition) e);
+					tumor = createTumorSummary(report,(Condition) e);
 					if(cancer != null){
 						cancer.addTumor(tumor);
 					}else{
@@ -130,7 +146,14 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		return list;
 	}
 
-	private CancerSummary createCancerSummary(Disease diagnosis){
+	
+	/**
+	 * create cancer summary
+	 * @param report
+	 * @param diagnosis
+	 * @return
+	 */
+	private CancerSummary createCancerSummary(Report report, Disease diagnosis){
 		CancerSummary cancer = new CancerSummary();
 		CancerSummary.CancerPhenotype phenotype = new CancerSummary.CancerPhenotype();
 		cancer.addPhenotype(phenotype);
@@ -139,7 +162,6 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		for(CodeableConcept cc: diagnosis.getBodySite()){
 			cancer.addBodySite(cc);
 		}
-		
 		
 		// add TNM stage infromation
 		Stage stage = diagnosis.getStage();
@@ -150,40 +172,171 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			phenotype.setDistantMetastasisClassification(stage.getDistantMetastasisStageCode());
 		}
 		
-		//TODO: infor type and extend
-		//phenotype.setCancerType(null);   // adnecarcionma vs sarcoma
-		//phenotype.setTumorExtent(null);  // insitu vs invasive 
+		// adnecarcionma vs sarcoma
+		CodeableConcept ct = getCancerType(diagnosis);
+		if(ct != null)
+			phenotype.setCancerType(ct);
+		
+		// insitu vs invasive 
+		CodeableConcept te = getTumorExtent(diagnosis);
+		if(te != null)
+			phenotype.setTumorExtent(te);  
 	
-		
-		//cancer.addOutcome(outcome); 	   // death
-		//cancer.addTreatment(treatment);  //chemo
-		
-		return cancer;
-	}
-	
-	private TumorSummary createTumorSummary(Condition diagnosis){
-		TumorSummary tumor = new TumorSummary();
-		TumorSummary.TumorPhenotype phenotype = new TumorSummary.TumorPhenotype();
-		tumor.setPhenotype(phenotype);
-		
-		// add body location
-		for(CodeableConcept cc: diagnosis.getBodySite()){
-			tumor.addBodySite(cc);
+		//add treatment cancer.addTreatment(treatment);  //chemo
+		IClass treatmentCls = ontology.getClass(""+FHIRConstants.TREATMENT_URI);
+		for(Element treatment: report.getReportElements()){
+			if(isValueSet(treatment.getCode(), treatmentCls)){
+				cancer.addTreatment(treatment.getCode()); 
+			}
 		}
 		
-		// manifistation: 
-		//phenotype.addHistologicType(null); // ductal, lobular infered from DX
-		//phenotype.addManifistation(null);  // Receptor Status, Tumor size 
-		//phenotype.addTumorExtent(null);    // insitu vs invasive
+		//cancer.addOutcome(outcome); 	   // death
+			
+		return cancer;
+	}
+
+
+	private TumorSummary createTumorSummary(Report report, Condition diagnosis){
+		TumorSummary tumor = new TumorSummary();
+		TumorSummary.TumorPhenotype phenotype = tumor.getPhenotype();
 		
-		
-		//tumor.addOutcome(null); // tumor is gone
-		//tumor.addTreatment(null); // chemo
-		//tumor.addTumorSequenceVarient(null); // don't have one
-		//tumor.setTumorType(null);  // primary vs local recurance, distance recurance  infered from rules
-		
-		
-		//TODO:
+		if(diagnosis != null){
+			// add body location
+			for(CodeableConcept cc: diagnosis.getBodySite()){
+				tumor.addBodySite(cc);
+			}
+			
+			// manifistation: 
+			//phenotype.addManifistation(null);  // Receptor Status, Tumor size 
+			//List<IClass> manifestationClasses = getManifestationForTumor();
+			IClass manifistationCls = ontology.getClass(""+FHIRConstants.MANIFISTATION_URI);
+			for(Element element: report.getReportElements()){
+				if(isValueSet(element.getCode(),manifistationCls)){
+					phenotype.addManifestation(element.getCode()); 
+				}
+			}
+			
+			//phenotype.addHistologicType(null); // ductal, lobular infered from DX
+			CodeableConcept ht = getHistologicType(diagnosis);
+			if(ht != null)
+				phenotype.addHistologicType(ht);
+			
+			// insitu vs invasive 
+			//phenotype.addTumorExtent(null);    // insitu vs invasive
+			CodeableConcept te = getTumorExtent(diagnosis);
+			if(te != null)
+				phenotype.addTumorExtent(te);  
+			
+			
+			
+			// add treatment (// chemo)
+			IClass treatmentCls = ontology.getClass(""+FHIRConstants.TREATMENT_URI);
+			for(Element treatment: report.getReportElements()){
+				if(isValueSet(treatment.getCode(), treatmentCls)){
+					tumor.addTreatment(treatment.getCode()); 
+				}
+			}
+			
+			
+			
+			//tumor.addOutcome(null); // tumor is gone
+			//tumor.addTumorSequenceVarient(null); // don't have one
+			//tumor.setTumorType(null);  // primary vs local recurance, distance recurance  infered from rules
+		}
+
 		return tumor;
+	}
+	
+	// ductal, lobular infered from DX
+	private CodeableConcept getHistologicType(Condition diagnosis) {
+		return getLexicalPartValue(diagnosis,""+FHIRConstants.HISTOLOGIC_TYPE_URI);
+	}
+	
+	// adnecarcionma vs sarcoma
+	private CodeableConcept getCancerType(Condition dx){
+		return getLexicalPartValue(dx,""+FHIRConstants.CANCER_TYPE_URI);
+	}
+	
+	// insitu vs invasive 
+	private CodeableConcept getTumorExtent(Condition diagnosis) {
+		return getLexicalPartValue(diagnosis, ""+FHIRConstants.TUMOR_EXTENT_URI);
+	}
+	
+	/**
+	 * get lexical part value
+	 * @param diagnosis
+	 * @param value
+	 * @return
+	 */
+	private CodeableConcept getLexicalPartValue(Condition diagnosis, String value) {
+		// get values from histologictype and search all synonyms up the tree 
+		IClass dx = ontology.getClass(""+FHIRUtils.getConceptURI(diagnosis.getCode()));
+		if(dx != null){
+			for(IClass cls : ontology.getClass(value).getSubClasses()){
+				if(isLexicalPartOf(cls,dx)){
+					return FHIRUtils.getCodeableConcept(cls.getURI());
+				}
+			}
+		}
+		return null;
+	}
+	
+
+	/**
+	 * is class a lexical part of a given diagnosis
+	 * @param cls
+	 * @param dx
+	 * @return
+	 */
+	private boolean isLexicalPartOf(IClass cls, IClass dx) {
+		// create a list of words for each 
+		List<List<String>> partWordList = new ArrayList<List<String>>();
+		for(String t: cls.getConcept().getSynonyms()){
+			partWordList.add(TextTools.getWords(t.toLowerCase()));
+		}
+		
+		// create list of terms of diagnosis and its parent
+		Set<String> terms = new LinkedHashSet<String>();
+		Collections.addAll(terms,dx.getConcept().getSynonyms());
+		for(IClass parent: dx.getSuperClasses()){
+			Collections.addAll(terms,parent.getConcept().getSynonyms());
+		}
+		
+		// now see if one is part of the other
+		for(String term: terms){
+			List<String> words = TextTools.getWords(term.toLowerCase());
+			for(List<String> w: partWordList){
+				if(words.containsAll(w)){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * is somethin in a value set
+	 * @param c
+	 * @param classes
+	 * @return
+	 */
+	private boolean isValueSet(CodeableConcept c, List<IClass> classes){
+		IClass cls = ontology.getClass(""+FHIRUtils.getConceptURI(c));
+		if(cls == null)
+			return false;
+		for(IClass parent: classes){
+			if(cls.hasSuperClass(parent))
+				return true;
+		}
+		return false;
+	}
+	/**
+	 * is somethin in a value set
+	 * @param c
+	 * @param classes
+	 * @return
+	 */
+	private boolean isValueSet(CodeableConcept c, IClass parent){
+		return isValueSet(c,Collections.singletonList(parent));
 	}
 }

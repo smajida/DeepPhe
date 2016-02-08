@@ -2,6 +2,7 @@ package org.healthnlp.deepphe.uima.fhir;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,6 +14,7 @@ import java.util.regex.Pattern;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
+import org.apache.ctakes.cancer.type.textsem.CancerStage;
 import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.cancer.type.textsem.TnmClassification;
@@ -271,6 +273,9 @@ public class DocumentResourceFactory {
 				list.add(createFinding(tnm.getNodeSpread()));
 			}
 		}
+		for(Annotation  a: cTAKESUtils.getAnnotationsByType(cas, CancerStage.type)){
+			list.add(createFinding((CancerStage) a));
+		}
 		
 		return list;
 	}
@@ -518,9 +523,10 @@ public class DocumentResourceFactory {
 		}
 	
 		// now lets get the location relationships
+		CancerStage st = cTAKESUtils.getCancerStage(dm);
 		TnmClassification tnm = cTAKESUtils.getTnmClassification(dm);
-		if(tnm != null){
-			dx.setStage(createStage(tnm));
+		if(tnm != null || st != null){
+			dx.setStage(createStage(st,tnm));
 		}
 		
 		// add mention text
@@ -634,8 +640,8 @@ public class DocumentResourceFactory {
 	
 	
 	
-	public static Stage createStage(TnmClassification st) {
-		return load(new Stage(),st);
+	public static Stage createStage(CancerStage st, TnmClassification tnm) {
+		return load(new Stage(),st,tnm);
 	}
 	
 
@@ -654,38 +660,56 @@ public class DocumentResourceFactory {
 	 * load stage object
 	 */
 	
-	public static Stage load(Stage stage, TnmClassification st) {
+	public static Stage load(Stage stage, CancerStage st, TnmClassification tnm) {
 	
-		CodeableConcept c = cTAKESUtils.getCodeableConcept(st);
-		c.setText(st.getCoveredText());
-		stage.setSummary(c);
+		// set cancer stage, if available
+		if(st != null){
+			CodeableConcept c = cTAKESUtils.getCodeableConcept(st);
+			c.setText(st.getCoveredText());
+			stage.setSummary(c);
+			
+			// add id to cancer stage
+			Finding f = (Finding) FHIRRegistry.getInstance().getResource(st);
+			if(f != null)
+				FHIRUtils.addResourceReference(c,f);
+			
+			// add extension
+			stage.addExtension(FHIRUtils.createMentionExtension(st.getCoveredText(),st.getBegin(),st.getEnd()));
+		}else{
+			
+			// for now just add a generic TNM
+			CodeableConcept c = cTAKESUtils.getCodeableConcept(tnm);
+			c.setText(tnm.getCoveredText());
+			stage.setSummary(c);
+		}
 		
+				
 		// extract individual Stage levels if values are conflated
-		if(st.getSize() != null){
-			Finding f = (Finding) FHIRRegistry.getInstance().getResource(st.getSize());
-			if(f == null)
-				f = createFinding(st.getSize());
-			stage.addAssessment(f);
-			//stage.setStringExtension(Stage.TNM_PRIMARY_TUMOR,cTAKESUtils.getConceptURI(st.getSize()));
-		}
-		if(st.getNodeSpread() != null){
-			Finding f = (Finding) FHIRRegistry.getInstance().getResource(st.getNodeSpread());
-			if(f == null)
-				f = createFinding(st.getNodeSpread());
-			stage.addAssessment(f);
-			//stage.setStringExtension(Stage.TNM_REGIONAL_LYMPH_NODES,cTAKESUtils.getConceptURI(st.getNodeSpread()));
-		}
-		if(st.getMetastasis() != null){
-			Finding f = (Finding) FHIRRegistry.getInstance().getResource(st.getMetastasis());
-			if(f == null)
-				f = createFinding(st.getMetastasis());
-			stage.addAssessment(f);
-			//stage.setStringExtension(Stage.TNM_DISTANT_METASTASIS,cTAKESUtils.getConceptURI(st.getMetastasis()));
+		if(tnm != null){
+			if(tnm.getSize() != null){
+				Finding f = (Finding) FHIRRegistry.getInstance().getResource(tnm.getSize());
+				if(f == null)
+					f = createFinding(tnm.getSize());
+				stage.addAssessment(f);
+				//stage.setStringExtension(Stage.TNM_PRIMARY_TUMOR,cTAKESUtils.getConceptURI(st.getSize()));
+			}
+			if(tnm.getNodeSpread() != null){
+				Finding f = (Finding) FHIRRegistry.getInstance().getResource(tnm.getNodeSpread());
+				if(f == null)
+					f = createFinding(tnm.getNodeSpread());
+				stage.addAssessment(f);
+				//stage.setStringExtension(Stage.TNM_REGIONAL_LYMPH_NODES,cTAKESUtils.getConceptURI(st.getNodeSpread()));
+			}
+			if(tnm.getMetastasis() != null){
+				Finding f = (Finding) FHIRRegistry.getInstance().getResource(tnm.getMetastasis());
+				if(f == null)
+					f = createFinding(tnm.getMetastasis());
+				stage.addAssessment(f);
+				//stage.setStringExtension(Stage.TNM_DISTANT_METASTASIS,cTAKESUtils.getConceptURI(st.getMetastasis()));
+			}
+			stage.addExtension(FHIRUtils.createMentionExtension(tnm.getCoveredText(),tnm.getBegin(),tnm.getEnd()));
 		}
 		
-
-		// add mention text
-		stage.addExtension(FHIRUtils.createMentionExtension(st.getCoveredText(),st.getBegin(),st.getEnd()));
 		
 		// register
 		//FHIRRegistry.getInstance().addResource(stage,st);
