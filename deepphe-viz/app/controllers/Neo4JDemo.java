@@ -60,7 +60,7 @@ public class Neo4JDemo extends Controller {
 	   
 	    String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
 	   	String username = "neo4j";
-	   	String password = "neo4jpass";
+	   	String password = "neo4jdemo";
 	   
 	   	try {
 			DatamodelUtility caller = new DatamodelUtility(SERVER_ROOT_URI, username, password);
