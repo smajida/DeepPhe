@@ -7,6 +7,7 @@ import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.BodySite;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Extension;
+import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Resource;
 
 
@@ -56,6 +57,9 @@ public class AnatomicalSite extends BodySite implements Element{
 		}
 		for(Extension ex: bs.getExtension()){
 			addExtension(ex);
+		}
+		for(Identifier id: bs.getIdentifier()){
+			addIdentifier(id);
 		}
 		
 	}

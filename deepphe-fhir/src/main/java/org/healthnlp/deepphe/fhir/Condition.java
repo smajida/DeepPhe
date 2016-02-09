@@ -75,7 +75,7 @@ public class Condition extends org.hl7.fhir.instance.model.Condition {
 
 	public String getSummaryText() {
 		StringBuffer st = new StringBuffer();
-		st.append("Disease:\t"+getDisplayText());
+		st.append(getClass().getSimpleName()+":\t"+getDisplayText());
 		for(CodeableConcept l: getBodySite()){
 			st.append(" | location: "+l.getText());
 		}

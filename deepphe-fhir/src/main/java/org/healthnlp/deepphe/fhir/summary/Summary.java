@@ -34,4 +34,19 @@ public abstract class Summary extends List_  implements Element {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	/**
+	 * is this summary appendable?
+	 * @param s
+	 * @return
+	 */
+	public abstract boolean isAppendable(Summary s);
+	
+	/**
+	 * append summary appendable?
+	 * @param s
+	 * @return
+	 */
+	public abstract void append(Summary s);
+	
 }

@@ -167,6 +167,12 @@
                <description/>
                <rangeTypeName>uima.cas.String</rangeTypeName>
             </featureDescription>
+            <featureDescription>
+               <name>hasStage</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Stage</elementType>
+            </featureDescription>
          </features>
       </typeDescription>
       <typeDescription>
@@ -180,6 +186,24 @@
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Modifier</supertypeName>
          <features/>
+      </typeDescription>
+      <typeDescription>
+         <name>org.healthnlp.deepphe.uima.types.Stage</name>
+         <description/>
+         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
+         <features>
+            <featureDescription>
+               <name>hasAssessment</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.TNMValue</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasStageSummary</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
+            </featureDescription>
+         </features>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Finding</name>
@@ -222,6 +246,16 @@
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
                <elementType>org.healthnlp.deepphe.uima.types.CauseOfDeath</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasBirthDate</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
+               <name>hasFullName</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
             </featureDescription>
          </features>
       </typeDescription>
@@ -324,14 +358,14 @@
          <supertypeName>org.healthnlp.deepphe.uima.types.NumericModifier</supertypeName>
          <features>
             <featureDescription>
+               <name>hasQuantityValue</name>
+               <description/>
+               <rangeTypeName>uima.cas.Double</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
                <name>hasUnit</name>
                <description/>
                <rangeTypeName>uima.cas.String</rangeTypeName>
-            </featureDescription>
-            <featureDescription>
-               <name>hasQuantityValue</name>
-               <description/>
-               <rangeTypeName>uima.cas.Float</rangeTypeName>
             </featureDescription>
          </features>
       </typeDescription>
@@ -657,7 +691,7 @@
             <featureDescription>
                <name>hasNumericValue</name>
                <description/>
-               <rangeTypeName>uima.cas.String</rangeTypeName>
+               <rangeTypeName>uima.cas.Float</rangeTypeName>
             </featureDescription>
             <featureDescription>
                <name>hasUnit</name>

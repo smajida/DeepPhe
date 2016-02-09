@@ -37,6 +37,8 @@ public class FHIRConstants {
 	public static final String GENOMIC_FACTOR = "GenomicFactor";
 	public static final String TREATMENT_FACTOR = "TreatmentFactor";
 	public static final String RELATED_FACTOR = "RelatedFactor";
+	public static final String TREATMENT = "Treatment";
+	public static final String MANIFISTATION = "ManifestationOfDisease";
 	
 	
 	public static final String T_STAGE = "Generic_Primary_Tumor_TNM_Finding";
@@ -59,8 +61,12 @@ public class FHIRConstants {
 	public static final URI MEDICATION_URI = URI.create(SCHEMA_URL+"#"+MEDICATION);
 	public static final URI BODY_SITE_URI = URI.create(SCHEMA_URL+"#"+BODY_SITE);
 	public static final URI PATIENT_URI = URI.create(SCHEMA_URL+"#"+PATIENT);
+	public static final URI TREATMENT_URI = URI.create(MODEL_CANCER_URL+"#"+TREATMENT);
+	public static final URI MANIFISTATION_URI = URI.create(MODEL_CANCER_URL+"#"+MANIFISTATION);
 	
-	
+	public static final URI HISTOLOGIC_TYPE_URI = URI.create(MODEL_CANCER_URL+"#HistologicType");
+	public static final URI TUMOR_EXTENT_URI = URI.create(MODEL_CANCER_URL+"#TumorExtent");
+	public static final URI CANCER_TYPE_URI = URI.create(MODEL_CANCER_URL+"#CancerType");
 	
 	//public static final URI TUMOR_SIZE_URI = URI.create(MODEL_CANCER_URL+"/"+TUMOR_PHENOTYPE);
 	

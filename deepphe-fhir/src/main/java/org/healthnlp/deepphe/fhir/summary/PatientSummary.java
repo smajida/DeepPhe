@@ -45,4 +45,14 @@ public class PatientSummary extends Summary {
 	public URI getConceptURI() {
 		return FHIRConstants.PATIENT_SUMMARY_URI;
 	}
+
+	public boolean isAppendable(Summary s) {
+		//TODO: nothing to do here for now
+		return s instanceof PatientSummary;
+	}
+
+	public void append(Summary s) {
+		// TODO: nothing to do here for now
+		
+	}
 }

@@ -12,6 +12,7 @@ import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
+import org.healthnlp.deepphe.fhir.summary.TumorSummary;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
@@ -40,17 +41,44 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 	}
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
 		
-		PatientSummary patientSummary = null;
-		CancerSummary cancerSummary =  null;
+		// for now, lets assume there is only one cancer summary
+		PatientSummary patientSummary = new PatientSummary();
+		CancerSummary cancerSummary =  new CancerSummary();
 		
 		for(Report report: PhenotypeResourceFactory.loadReports(jcas)){
-			Collection<Summary> summaries = report.getCompositionSummaries(); 
+			// append patient summary
+			PatientSummary p = report.getPatientSummary();
+			if(p != null && patientSummary.isAppendable(p)){
+				patientSummary.append(p);
+			}
+			
+			//append cancer summary
+			for(CancerSummary cs: report.getCancerSummaries()){
+				if(cancerSummary.isAppendable(cs)){
+					cancerSummary.append(cs);
+				}else{
+					//TODO: well we have another cancer summary, will ignore it for now
+				}
+			}
+			
+			//append tumor summaries that are by themselves
+			for(TumorSummary ts: report.getTumorSummaries()){
+				cancerSummary.append(ts);
+			}
 			
 			//TODO: this is where you can start with RULES
-			
+			// this is a temporary merge of all summaries together without
+			// much thought until we have something better
 		}
 
-		//TODO: this is where you save your work back to CAS
+		// lets print out cancer summary
+		System.out.println("\n\n\n---| Medical Record Cancer Summary |---");
+		System.out.println(cancerSummary.getSummaryText());
+		
+		//this is where you save your work back to CAS
+		PhenotypeResourceFactory.saveSummary(patientSummary, jcas);
+		PhenotypeResourceFactory.saveSummary(cancerSummary, jcas);
+		
 	}
 
 }

@@ -1,0 +1,5 @@
+Patient Name..................Jane Doe
+Record Type...................SP
+================================================
+Tumor is ER negative, PR negative, Her2 negative.
+Patient has triple negative breast cancer.

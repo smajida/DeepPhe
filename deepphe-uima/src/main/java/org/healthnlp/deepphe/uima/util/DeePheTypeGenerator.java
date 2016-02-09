@@ -326,7 +326,7 @@ public class DeePheTypeGenerator {
 		File file = new File(args[0]);
 		if(!file.getParentFile().exists())
 			file.getParentFile().mkdirs();
-		IOntology ont = OOntology.loadOntology("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl");
+		IOntology ont = OOntology.loadOntology("/home/tseytlin/Work/DeepPhe/data/ontology/nlpCancer.owl"); //"http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl"
 		//"http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl" ///home/tseytlin/Work/DeepPhe/data/ontology/cancer.owl
 		System.out.println("input: "+ont.getURI());
 		DeePheTypeGenerator dtg = new DeePheTypeGenerator(ont);

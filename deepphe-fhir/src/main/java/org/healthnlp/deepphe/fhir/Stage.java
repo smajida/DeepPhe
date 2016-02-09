@@ -5,11 +5,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Condition.ConditionStageComponent;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Reference;
+import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.StringType;
 
 public class Stage extends ConditionStageComponent implements Serializable{
@@ -17,6 +19,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	public static final String TNM_DISTANT_METASTASIS = FHIRUtils.STAGE_URL+"/DistantMetastasis";
 	public static final String TNM_REGIONAL_LYMPH_NODES = FHIRUtils.STAGE_URL+"/RegionalLymphNodes";
 
+	private static final String TNM_SUFFIX  = "Stage Finding";
 	
 	public void setStringExtension(String url, String value) {
 		Extension e = new Extension();
@@ -75,6 +78,28 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	}
 	
 	/**
+	 * add assessment to
+	 * @param f
+	 */
+	public void addAssessment(Finding f){
+		addAssessment(FHIRUtils.getResourceReference(f));
+		getAssessmentTarget().add(f);
+		
+		//infer TNM
+		CodeableConcept c = f.getCode();
+		if(c.getText() != null && c.getText().endsWith(TNM_SUFFIX)){
+			if(c.getText().startsWith("T")){
+				setStringExtension(Stage.TNM_PRIMARY_TUMOR,""+FHIRUtils.getConceptURI(c));
+			}else if(c.getText().startsWith("N")){
+				setStringExtension(Stage.TNM_REGIONAL_LYMPH_NODES,""+FHIRUtils.getConceptURI(c));
+			}else if(c.getText().startsWith("M")){
+				setStringExtension(Stage.TNM_DISTANT_METASTASIS,""+FHIRUtils.getConceptURI(c));
+			}
+		}
+		
+	}
+	
+	/**
 	 * get primary tumor stage
 	 * @return
 	 */
@@ -105,9 +130,25 @@ public class Stage extends ConditionStageComponent implements Serializable{
 		return dst;
 	}
 	
+	public List<Resource> getAssessmentTarget() {
+		// if list of targets is empty, check the references
+		if(super.getAssessmentTarget().isEmpty() && !getAssessment().isEmpty()){
+			for(Reference r: getAssessment()){
+				Element e = FHIRRegistry.getInstance().getResource(r.getReference());
+				if(e != null){
+					super.getAssessmentTarget().add((Resource)e);
+				}
+			}
+		}
+		return super.getAssessmentTarget();
+	}
+	
 
 	public void copy(ConditionStageComponent st) {
 		setSummary(st.getSummary());
+		for(Reference r: st.getAssessment()){
+			addAssessment(r);
+		}
 		for(Extension e: st.getExtension()){
 			setStringExtension(e.getUrl(),((StringType) e.getValue()).asStringValue());
 		}

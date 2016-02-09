@@ -132,9 +132,7 @@ public class FHIRUtils {
 	}
 	
 	public static CodeableConcept getCodeableConcept(URI uri){
-		String url = uri.toString();
-		//return getCodeableConcept(uri.getFragment(),url,url.substring(0,url.length()-uri.getFragment().length()-1));
-		return getCodeableConcept(uri.getFragment(),url,SCHEMA_OWL);
+		return getCodeableConcept(getConceptName(uri),uri.toString(),SCHEMA_OWL);
 	}
 	
 
@@ -503,6 +501,15 @@ public class FHIRUtils {
 		return null;
 	}
 	
+	public static String getResourceIdentifer(CodeableConcept c){
+		for(Coding coding : c.getCoding()){
+			if(coding.getCode() != null && SCHEMA_REFERENCE.equals(coding.getSystem())){
+				return coding.getCode();
+			}
+		}
+		return null;
+	}
+	
 	
 	/**
 	 * get concept class from a default ontology based on Concept
@@ -710,6 +717,19 @@ public class FHIRUtils {
 			return uri.substring(0,x);
 		return uri;
 	}
+	
+	public static boolean contains(List<CodeableConcept> list, CodeableConcept cc){
+		URI uu = getConceptURI(cc);
+		if(uu != null){
+			for(CodeableConcept c: list){
+				URI u = getConceptURI(c);
+				if(u != null && uu.equals(u))
+					return true;
+			}
+		}
+		return false;
+	}
+	
 	
 	public static void main(String [] args) throws Exception{
 		//System.out.println(getHeaderValues(TextTools.getText(new FileInputStream(new File("/home/tseytlin/Work/DeepPhe/data/sample/docs/doc1.txt")))));

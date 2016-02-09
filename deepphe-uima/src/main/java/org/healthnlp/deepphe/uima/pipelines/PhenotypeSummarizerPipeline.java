@@ -58,14 +58,14 @@ final public class PhenotypeSummarizerPipeline {
 		final AnalysisEngine cancerSummarizerAE =AnalysisEngineFactory.createEngine(PhenotypeCancerSummaryAE.class,PhenotypeCancerSummaryAE.PARAM_ONTOLOGY_PATH,ontologyPath);
 		//final AnalysisEngine phenotypeSummarizerAE = createPhenotypeSummarizerAE(clipsDirectoryPath,ontologyPath);
 		//final AnalysisEngine i2B2OutputAE = createI2B2OutputAE();
-		final AnalysisEngine xmiWriter = AnalysisEngineFactory.createEngine( XMIWriter.class, XMIWriter.PARAM_OUTPUTDIR, outputDirectory);
+		final AnalysisEngine xmiWriter = AnalysisEngineFactory.createEngine( XMIWriter.class, XMIWriter.PARAM_OUTPUTDIR, outputDirectory+File.separator+"TYPE");
 		//SimplePipeline.runPipeline(collectionReader, phenotypeSummarizerAE, i2B2OutputAE);
-		
-	      final AnalysisEngine graphDBConsumerAE
+
+      final AnalysisEngine graphDBConsumerAE
 	      = AnalysisEngineFactory
 	      .createEngine( GraphDBPhenotypeConsumerAE.class, GraphDBPhenotypeConsumerAE.PARAM_DBPATH,outputDirectory + File.separator + "neo4jdb" );
 
-	      
+	     // 
 		SimplePipeline.runPipeline(collectionReader,compositionSummarizerAE,cancerSummarizerAE,xmiWriter,graphDBConsumerAE);
 	}
 

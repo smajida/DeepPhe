@@ -200,7 +200,7 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 		csn.setProperty("summaryText", cs.getSummaryText());
 		csn.setProperty("conceptURI", cs.getConceptURI().toString());
 		
-		saveCodeableConcepts(csn, "bodySites", cs.getBodySite());
+		saveCodeableConcepts(csn, "bodySites", cs.getBodySites());
 		saveCodeableConcepts(csn, "outcomes", cs.getOutcomes());
 		saveCodeableConcepts(csn, "treatments", cs.getTreatments());
 		
@@ -252,7 +252,7 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 		tsn.setProperty("conceptURI", ts.getConceptURI().toString());
 		
 		
-		saveCodeableConcepts(tsn, "bodySites", ts.getBodySite());
+		saveCodeableConcepts(tsn, "bodySites", ts.getBodySites());
 		saveCodeableConcepts(tsn, "outcomes", ts.getOutcomes());
 		saveCodeableConcepts(tsn, "treatments", ts.getTreatments());
 		saveCodeableConcepts(tsn, "tumorSequenceVariants", ts.getTumorSequenceVarients());
