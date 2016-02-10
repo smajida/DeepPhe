@@ -1,6 +1,7 @@
 package org.apache.ctakes.cancer.ae;
 
 import org.apache.ctakes.typesystem.type.textsem.*;
+import org.apache.log4j.Logger;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.component.JCasAnnotator_ImplBase;
 import org.apache.uima.fit.util.JCasUtil;
@@ -16,6 +17,7 @@ import java.util.regex.Pattern;
  * Cleans EventMentions out of Pitt Header area
  */
 final public class PittHeaderCleaner extends JCasAnnotator_ImplBase {
+   static private final Logger LOGGER = Logger.getLogger( "PittHeaderCleaner" );
 
    static private final Pattern DIVIDER_PATTERN
          = Pattern.compile( "===================================================================" );
@@ -29,6 +31,7 @@ final public class PittHeaderCleaner extends JCasAnnotator_ImplBase {
     */
    @Override
    public void process( final JCas jcas ) throws AnalysisEngineProcessException {
+      LOGGER.info( "Starting processing" );
       final String docText = jcas.getDocumentText();
       if ( docText.length() <= 80 ) {
          return;
@@ -45,6 +48,7 @@ final public class PittHeaderCleaner extends JCasAnnotator_ImplBase {
       for ( IdentifiedAnnotation unwantedAnnotation : unwantedAnnotations ) {
          unwantedAnnotation.removeFromIndexes();
       }
+      LOGGER.info( "Finished processing" );
    }
 
 

@@ -46,8 +46,16 @@ final public class CancerPipelineFactory {
 //         "AnnotationVersion", 2,
 //         "AnnotationVersionPropKey", "ANNOTATION_VERSION" ) );
 
-
    static private final String CTAKES_DIR_PREFIX = "/org/apache/ctakes/";
+
+   // Default dictionary lookup exclusion pos tags except for IN
+   static private final String LOOKUP_EXCLUSION_TAGS
+         = "VB,VBD,VBG,VBN,VBP,VBZ,CC,CD,DT,EX,LS,MD,PDT,POS,PP,PP$,PRP,PRP$,RP,TO,WDT,WP,WPS,WRB";
+   static private final String LOOKUP_CONFIG_DESC
+         = "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml";
+//   = "C:/Spiffy/prj_darth_phenome/dev/github3/DeepPhe/resources/org/apache/ctakes/dictionary/lookup/fast/nci_proc.xml";
+
+
 
    private CancerPipelineFactory() {
    }
@@ -82,12 +90,13 @@ final public class CancerPipelineFactory {
       addAttributeEngines( aggregateBuilder );
       // Cancer deep phe tnm, stage, hormone receptor status annotator.  Do before temporal (but after polarity?)
       aggregateBuilder.add( CancerPropertiesAnnotator.createAnnotatorDescription() );
-      addTemporalEngines( aggregateBuilder );
+      // Temporal is horribly slow on these notes.  Do not use it until necessary
+//      addTemporalEngines( aggregateBuilder );
       // Kludge to clean out unwanted annotations from the pittsburgh header
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( PittHeaderCleaner.class ) );
       addUmlsRelationEngines( aggregateBuilder );
       // coreference
-      addCorefEngines( aggregateBuilder );
+//      addCorefEngines( aggregateBuilder );
 
       return aggregateBuilder;
    }
@@ -134,9 +143,9 @@ final public class CancerPipelineFactory {
             AnalysisEngineFactory.createEngineDescription( RemoveEnclosedLookupWindows.class ) );
       aggregateBuilder.add(
             AnalysisEngineFactory.createEngineDescription( DefaultJCasTermAnnotator.class,
-                  JCasTermAnnotator.DICTIONARY_DESCRIPTOR_KEY,
-                  "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml",
-                  JCasTermAnnotator.PARAM_MIN_SPAN_KEY, 2 ) );
+                  JCasTermAnnotator.DICTIONARY_DESCRIPTOR_KEY, LOOKUP_CONFIG_DESC,
+                  JCasTermAnnotator.PARAM_EXC_TAGS_KEY, LOOKUP_EXCLUSION_TAGS,
+                  JCasTermAnnotator.PARAM_MIN_SPAN_KEY, 3 ) );
    }
 
    static private void addAttributeEngines( final AggregateBuilder aggregateBuilder )
@@ -144,8 +153,8 @@ final public class CancerPipelineFactory {
       aggregateBuilder.add( ClearNLPDependencyParserAE.createAnnotatorDescription() );
       aggregateBuilder.add( PolarityCleartkAnalysisEngine.createAnnotatorDescription() );
       aggregateBuilder.add( UncertaintyCleartkAnalysisEngine.createAnnotatorDescription() );
-      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ClearNLPSemanticRoleLabelerAE.class ) );
-      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ConstituencyParser.class ) );
+//      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ClearNLPSemanticRoleLabelerAE.class ) );
+//      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ConstituencyParser.class ) );
    }
 
    static private void addTemporalEngines( final AggregateBuilder aggregateBuilder )
