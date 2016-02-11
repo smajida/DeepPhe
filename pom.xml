@@ -107,7 +107,8 @@
 							<include>**/*Test.java</include>
 							<include>**/*Tests.java</include>
 							<include>**/*TestCase.java</include>
-						</includes>
+                     <include>**/*Tester.java</include>
+                  </includes>
 						<argLine>-Xmx3g</argLine>
 						<forkedProcessTimeoutInSeconds>900</forkedProcessTimeoutInSeconds>
 					</configuration>
