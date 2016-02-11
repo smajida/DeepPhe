@@ -13,6 +13,19 @@
    <!--<rangeTypeName>uima.cas.String</rangeTypeName>-->
    <types>
       <typeDescription>
+         <name>org.apache.ctakes.typesystem.type.structured.DocumentIdPrefix</name>
+         <description>Can specify a prefix to a document ID. Useful for directory tree retention.</description>
+         <supertypeName>uima.cas.TOP</supertypeName>
+         <features>
+            <featureDescription>
+               <name>documentIdPrefix</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
+            </featureDescription>
+         </features>
+      </typeDescription>
+
+      <typeDescription>
          <name>org.apache.ctakes.cancer.type.textsem.CodedDescribedFinding</name>
          <description>A Sign/Symptom (super)type that has a String code and a String description</description>
          <supertypeName>org.apache.ctakes.typesystem.type.textsem.SignSymptomMention</supertypeName>
