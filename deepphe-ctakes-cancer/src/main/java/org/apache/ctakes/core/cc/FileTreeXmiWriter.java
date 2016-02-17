@@ -70,26 +70,8 @@ public class FileTreeXmiWriter extends CasConsumer_ImplBase {
          throw new AnalysisEngineProcessException( casE );
       }
       final String fileName = DocumentIDAnnotationUtil.getDocumentIdForFile( jcas ) + ".xmi";
-
-      String subDirectory = "";
-      JFSIndexRepository indexes = jcas.getJFSIndexRepository();
-      FSIterator idPrefixIterator = indexes.getAllIndexedFS( DocumentIdPrefix.type );
-      if ( idPrefixIterator != null && idPrefixIterator.hasNext() ) {
-         final DocumentIdPrefix idPrefix = (DocumentIdPrefix)idPrefixIterator.next();
-         if ( idPrefix != null ) {
-            try {
-               subDirectory = idPrefix.getDocumentIdPrefix();
-            } catch ( CASRuntimeException var5 ) {
-               LOGGER.debug( "No subdirectory information for " + fileName );
-               subDirectory = "";
-            }
-         }
-      }
-      if ( !subDirectory.isEmpty() ) {
-         new File( _outputRootDir + "/" + subDirectory ).mkdirs();
-         subDirectory = "/" + subDirectory;
-      }
-      final File xmiFile = new File( _outputRootDir + subDirectory, fileName );
+      final String outputDir = getOutputDirectory( jcas, _outputRootDir.getPath(), fileName );
+      final File xmiFile = new File( outputDir, fileName );
       try {
          writeXmi( jcas.getCas(), xmiFile );
       } catch ( IOException | SAXException multE ) {
@@ -130,5 +112,35 @@ public class FileTreeXmiWriter extends CasConsumer_ImplBase {
    public static URL getDescriptorURL() {
       return FileTreeXmiWriter.class.getResource( "FileTreeXmiWriter.xml" );
    }
+
+   /**
+    * @param jcas     -
+    * @param rootPath the root path for all output subdirectories and files
+    * @param fileName the name of the output file
+    * @return the full output path up to but not including the fileName
+    */
+   static private String getOutputDirectory( final JCas jcas, final String rootPath, final String fileName ) {
+      String subDirectory = "";
+      JFSIndexRepository indexes = jcas.getJFSIndexRepository();
+      FSIterator idPrefixIterator = indexes.getAllIndexedFS( DocumentIdPrefix.type );
+      if ( idPrefixIterator != null && idPrefixIterator.hasNext() ) {
+         final DocumentIdPrefix idPrefix = (DocumentIdPrefix)idPrefixIterator.next();
+         if ( idPrefix != null ) {
+            try {
+               subDirectory = idPrefix.getDocumentIdPrefix();
+            } catch ( CASRuntimeException var5 ) {
+               LOGGER.debug( "No subdirectory information for " + fileName );
+               subDirectory = "";
+            }
+         }
+      }
+      if ( subDirectory == null || subDirectory.isEmpty() ) {
+         return rootPath;
+      }
+      final File outputDir = new File( rootPath + "/" + subDirectory );
+      outputDir.mkdirs();
+      return outputDir.getPath();
+   }
+
 
 }
