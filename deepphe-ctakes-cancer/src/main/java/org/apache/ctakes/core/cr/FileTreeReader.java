@@ -73,7 +73,7 @@ final public class FileTreeReader extends CollectionReader_ImplBase {
       final String[] explicitExtensions = (String[])getConfigParameterValue( PARAM_EXTENSIONS );
       _validExtensions = createValidExtensions( explicitExtensions );
 
-      _currentIndex = -1;
+      _currentIndex = 0;
       _files = getDescendentFiles( _rootDir, _validExtensions );
    }
 
@@ -211,14 +211,15 @@ final public class FileTreeReader extends CollectionReader_ImplBase {
     */
    @Override
    public void getNext( final CAS cas ) throws IOException, CollectionException {
-      _currentIndex++;
       JCas jcas;
       try {
          jcas = cas.getJCas();
       } catch ( CASException casE ) {
+         _currentIndex++;
          throw new IOException( casE );
       }
       final File file = _files.get( _currentIndex );
+      _currentIndex++;
       // Use 8KB as the default buffer size
       byte[] buffer = new byte[ 8192 ];
       final StringBuilder sb = new StringBuilder();
@@ -231,7 +232,7 @@ final public class FileTreeReader extends CollectionReader_ImplBase {
             if ( _encoding != null ) {
                sb.append( new String( buffer, 0, length, _encoding ) );
             } else {
-               sb.append( new String( buffer ) );
+               sb.append( new String( buffer, 0, length ) );
             }
          }
       } catch ( FileNotFoundException fnfE ) {

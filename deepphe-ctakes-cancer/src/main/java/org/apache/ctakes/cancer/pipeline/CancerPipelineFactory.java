@@ -8,17 +8,17 @@ import org.apache.ctakes.chunker.ae.Chunker;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.CopyNPChunksToLookupWindowAnnotations;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.RemoveEnclosedLookupWindows;
-import org.apache.ctakes.constituency.parser.ae.ConstituencyParser;
 import org.apache.ctakes.contexttokenizer.ae.ContextDependentTokenizerAnnotator;
 import org.apache.ctakes.core.ae.SentenceDetectorAnnotator;
 import org.apache.ctakes.core.ae.TokenizerAnnotatorPTB;
+import org.apache.ctakes.core.cc.FileTreeXmiWriter;
+import org.apache.ctakes.core.cr.FileTreeReader;
 import org.apache.ctakes.core.cr.FilesInDirectoryCollectionReader;
 import org.apache.ctakes.coreference.ae.DeterministicMarkableAnnotator;
 import org.apache.ctakes.coreference.ae.MarkableSalienceAnnotator;
 import org.apache.ctakes.coreference.ae.MentionClusterCoreferenceAnnotator;
 import org.apache.ctakes.coreference.eval.EvaluationOfEventCoreference.RemovePersonMarkables;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
-import org.apache.ctakes.dependency.parser.ae.ClearNLPSemanticRoleLabelerAE;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.JCasTermAnnotator;
 import org.apache.ctakes.postagger.POSTagger;
@@ -102,19 +102,25 @@ final public class CancerPipelineFactory {
    }
 
 
-   public static CollectionReader createFilesInDirectoryReader( final String inputDirectory )
+   public static CollectionReader createFilesReader( final String inputDirectory )
          throws ResourceInitializationException {
-      return CollectionReaderFactory.createReader( FilesInDirectoryCollectionReader.class,
+//      return CollectionReaderFactory.createReader( FilesInDirectoryCollectionReader.class,
+//            FilesInDirectoryCollectionReader.PARAM_INPUTDIR,
+//            inputDirectory,
+//            FilesInDirectoryCollectionReader.PARAM_RECURSE,
+//            true );
+      return CollectionReaderFactory.createReader( FileTreeReader.class,
             FilesInDirectoryCollectionReader.PARAM_INPUTDIR,
-            inputDirectory,
-            FilesInDirectoryCollectionReader.PARAM_RECURSE,
-            true );
+            inputDirectory );
    }
 
    public static AnalysisEngine createXMIWriter( final String outputDirectory )
          throws ResourceInitializationException {
-      return AnalysisEngineFactory.createEngine( XMIWriter.class,
-            XMIWriter.PARAM_OUTPUTDIR,
+//      return AnalysisEngineFactory.createEngine( XMIWriter.class,
+//            XMIWriter.PARAM_OUTPUTDIR,
+//            outputDirectory );
+      return AnalysisEngineFactory.createEngine( FileTreeXmiWriter.class,
+            FileTreeXmiWriter.PARAM_OUTPUTDIR,
             outputDirectory );
    }
 
