@@ -22,6 +22,7 @@ public class DeePheTypeGenerator {
 	public static final String CLASS_ATTRIBUTE = "Attribute";
 	public static final String CLASS_ANNOTATION = "Annotation";
 	public static final String CLASS_MODIFIER = "Modifier";
+	public static final String CLASS_SUMMARY = "Summary";
 	public static final String CLASS_SUMMARY_MODEL = "SummaryModel";
 	private IOntology ontology;
 	private Map<String,String> nameMap;
@@ -54,8 +55,9 @@ public class DeePheTypeGenerator {
 	
 	private String getSuperType(IClass cls){
 		String superType = "uima.tcas.Annotation"; //uima.cas.TOP
-		for(IClass s: cls.getDirectSuperClasses()){
-			if(!s.equals(ontology.getRoot()) && !s.getName().equals(CLASS_SUMMARY_MODEL)){
+		IClass [] parents =  cls.getDirectSuperClasses();
+		for(IClass s: parents){
+			if(!s.equals(ontology.getRoot()) && !(s.getName().equals(CLASS_SUMMARY_MODEL) && parents.length > 1)){
 				superType = TYPE_PREFIX+getName(s);
 				break;
 			}
@@ -108,15 +110,15 @@ public class DeePheTypeGenerator {
 		for(Object obj: cls.getEquivalentRestrictions()){
 			if(obj instanceof IRestriction){
 				IRestriction r = (IRestriction) obj;
-				if(isOKRestriction(cls,r))
-					list.add(createFeatureDesciption(doc,r));
+				//if(isOKRestriction(cls,r))
+				list.add(createFeatureDesciption(doc,r,!isOKRestriction(cls, r)));
 			}
 		}
 		for(Object obj: cls.getDirectNecessaryRestrictions()){
 			if(obj instanceof IRestriction){
 				IRestriction r = (IRestriction) obj;
-				if(isOKRestriction(cls,r))
-					list.add(createFeatureDesciption(doc,r));
+				//if(isOKRestriction(cls,r))
+				list.add(createFeatureDesciption(doc,r,!isOKRestriction(cls, r)));
 			}
 		}
 		
@@ -171,21 +173,11 @@ public class DeePheTypeGenerator {
 	}
 	
 	
-	private Element createFeatureDesciption(Document doc, IRestriction r) {
+	private Element createFeatureDesciption(Document doc, IRestriction r, boolean rename) {
 		Element element = doc.createElement("featureDescription");
-		
-		Element e = doc.createElement("name");
-		e.setTextContent(r.getProperty().getName());
-		element.appendChild(e);
-	
-		e = doc.createElement("description");
-		for(String str: r.getProperty().getComments()){
-			e.setTextContent(str); break;
-		}
-		element.appendChild(e);
-		
-		
+			
 		// for now just handle single slot
+		String propertyName = r.getProperty().getName();
 		String range = "uima.cas.String";
 		String elementType = null;
 		
@@ -196,6 +188,9 @@ public class DeePheTypeGenerator {
 		if(value instanceof IClass && isTypeWorthy((IClass)value)){
 			range = "uima.cas.FSArray"; 
 			elementType = TYPE_PREFIX+getName((IClass)value); 
+			if(rename){
+				propertyName = propertyName+getName((IClass)value); 
+			}
 		}else if( value instanceof Float){
 			range = "uima.cas.Float"; 
 		}else if( value instanceof Double){
@@ -210,6 +205,18 @@ public class DeePheTypeGenerator {
 		/*}else{
 			System.err.println(r);
 		}*/
+		
+		
+		
+		Element e = doc.createElement("name");
+		e.setTextContent(propertyName);
+		element.appendChild(e);
+	
+		e = doc.createElement("description");
+		for(String str: r.getProperty().getComments()){
+			e.setTextContent(str); break;
+		}
+		element.appendChild(e);
 		e = doc.createElement("rangeTypeName");
 		e.setTextContent(range); 
 		element.appendChild(e);
@@ -245,20 +252,34 @@ public class DeePheTypeGenerator {
 		IClass attribute = ontology.getClass(CLASS_ATTRIBUTE);  //"Attribute"
 		IClass modifier = ontology.getClass(CLASS_MODIFIER);
 		
+		IClass model = ontology.getClass(CLASS_SUMMARY_MODEL);
+		IClass summary = ontology.getClass(CLASS_SUMMARY);
+		IClass outcome = ontology.getClass("Outcome");
+		
 		
 		if(cls.equals(annotation) || cls.hasSuperClass(annotation))
+			return true;
+		if(cls.equals(summary) || cls.hasSuperClass(summary))
 			return true;
 		if(cls.equals(attribute) || cls.hasDirectSuperClass(attribute))
 			return true;
 		if(cls.equals(modifier) || cls.hasDirectSuperClass(modifier))
 			return true;
-		if(cls.hasSuperClass(attribute) || cls.hasSuperClass(modifier)){
+		if(cls.equals(model) || cls.hasDirectSuperClass(model))
+			return true;
+		if(cls.hasSuperClass(attribute) || cls.hasSuperClass(modifier) || cls.hasSuperClass(model)){
 			// don't create type for attributes that don't have any useful "slots"
-			if(!cls.getDirectNecessaryRestrictions().isEmpty() || !cls.getEquivalentRestrictions().isEmpty()){
+			/*if(!cls.getDirectNecessaryRestrictions().isEmpty() || !cls.getEquivalentRestrictions().isEmpty()){
 				return true;
-			}
-			// don't include classes that happen to be concepts that are simply widely used
-			//return cls.getPropertyValue(ontology.getProperty("code")) == null;
+			}*/
+			// don't include classes that happen to be just concepts that are simply widely used s.a. Outcome
+			if(cls.hasSuperClass(outcome))
+				return false;
+			/*for(Object st: cls.getPropertyValues(ontology.getProperty("semanticType"))){
+				if(Arrays.asList("Finding","Quantitative Concept").contains(st))
+					return false;
+			}*/
+			return true;
 		}
 		return false;
 	}

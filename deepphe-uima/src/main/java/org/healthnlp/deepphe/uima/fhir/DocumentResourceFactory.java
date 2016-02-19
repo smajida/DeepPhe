@@ -273,8 +273,10 @@ public class DocumentResourceFactory {
 				list.add(createFinding(tnm.getNodeSpread()));
 			}
 		}
-		for(Annotation  a: cTAKESUtils.getAnnotationsByType(cas, CancerStage.type)){
-			list.add(createFinding((CancerStage) a));
+		for(Annotation  a: cTAKESUtils.getAnnotationsByType(cas,DiseaseDisorderMention.type)){
+			CancerStage st = cTAKESUtils.getCancerStage((IdentifiedAnnotation)a);
+			if(st != null)
+				list.add(createFinding(st));
 		}
 		
 		return list;

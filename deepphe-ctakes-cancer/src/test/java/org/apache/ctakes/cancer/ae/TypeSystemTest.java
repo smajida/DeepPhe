@@ -13,16 +13,16 @@ import org.xml.sax.SAXException;
 
 public class TypeSystemTest {
 
-	@Test
-	public void test() throws Exception {
-		testTypeSystem();
-	}
-	
-	public static void testTypeSystem() throws Exception {
-		TypeSystemDescription typesystem = TypeSystemDescriptionFactory
-				.createTypeSystemDescription();
-		typesystem.toXML(System.out);
-		//typesystem.toXML(new FileWriter("SuperDuperTypeSystem.xml"));
-	}
+//	@Test
+//	public void test() throws Exception {
+//		testTypeSystem();
+//	}
+//
+//	public static void testTypeSystem() throws Exception {
+//		TypeSystemDescription typesystem = TypeSystemDescriptionFactory
+//				.createTypeSystemDescription();
+//		typesystem.toXML(System.out);
+//		//typesystem.toXML(new FileWriter("SuperDuperTypeSystem.xml"));
+//	}
 
 }

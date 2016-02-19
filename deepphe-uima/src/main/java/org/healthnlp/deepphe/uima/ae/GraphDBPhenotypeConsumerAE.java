@@ -224,8 +224,6 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 			saveCodeableConcept(cpn, "primaryTumorClassification", cp.getPrimaryTumorClassification());
 			saveCodeableConcept(cpn, "regionalLympNodeClassification", cp.getRegionalLymphNodeClassification());
 			saveCodeableConcept(cpn, "tumorExtent", cp.getTumorExtent());
-
-			
 		}
 		
 		for(TumorSummary ts:cs.getTumors()){

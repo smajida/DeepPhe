@@ -2,8 +2,10 @@ package org.healthnlp.deepphe.fhir.summary;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.healthnlp.deepphe.fhir.summary.TumorSummary.TumorPhenotype;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.BackboneElement;
@@ -119,9 +121,13 @@ public class CancerSummary extends Summary {
 			}
 		}
 	}
-	private List<CancerPhenotype> phenotype;
+	private CancerPhenotype phenotype;
 	private List<CodeableConcept> bodySite, treatment, outcome;
 	private List<TumorSummary> tumors;
+	
+	public CancerSummary(){
+		phenotype = new CancerPhenotype();
+	}
 	
 	public List<CodeableConcept> getBodySites() {
 		if(bodySite == null)
@@ -132,17 +138,25 @@ public class CancerSummary extends Summary {
 		getBodySites().add(bodySite);
 	}
 	public List<CancerPhenotype> getPhenotypes() {
-		if(phenotype == null)
-			phenotype = new ArrayList<CancerSummary.CancerPhenotype>();
-		return phenotype;
+		//if(phenotype == null)
+		//	phenotype = new ArrayList<CancerSummary.CancerPhenotype>();
+		return Arrays.asList(getPhenotype());
 	}
+	/*
 	public void addPhenotype(CancerPhenotype phenotype) {
 		getPhenotypes().add(phenotype);
-	}
+	}*/
+	
 	public List<CodeableConcept> getTreatments() {
 		if(treatment == null)
 			treatment = new ArrayList<CodeableConcept>();
 		return treatment;
+	}
+	public CancerPhenotype getPhenotype() {
+		return phenotype;
+	}
+	public void setPhenotype(CancerPhenotype phenotype) {
+		this.phenotype = phenotype;
 	}
 	public void addTreatment(CodeableConcept treatment) {
 		getTreatments().add(treatment);
@@ -161,6 +175,7 @@ public class CancerSummary extends Summary {
 		return tumors;
 	}
 	public void addTumor(TumorSummary tumor) {
+		tumor.setAnnotationType(getAnnotationType());
 		getTumors().add(tumor);
 	}
 	public String getDisplayText() {
@@ -188,9 +203,9 @@ public class CancerSummary extends Summary {
 			st.append("\t\t"+c.getText()+"\n");
 		}
 		// look at phenotypes
-		for(CancerPhenotype ph: getPhenotypes()){
-			st.append(ph.getSummaryText()+"\n");
-		}
+		//for(CancerPhenotype ph: getPhenotypes()){
+		st.append(getPhenotype().getSummaryText()+"\n");
+		//}
 		// look at tumors
 		for(TumorSummary ts: getTumors()){
 			st.append(ts.getSummaryText()+"\n");
@@ -228,18 +243,18 @@ public class CancerSummary extends Summary {
 		
 		// add phenotypes (worry about 1 for now)
 		//TODO: need to make some simple assumptions for now
-		CancerPhenotype phenotype = null;
-		for(CancerPhenotype ph: getPhenotypes()){
+		CancerPhenotype phenotype = getPhenotype();
+		/*for(CancerPhenotype ph: getPhenotypes()){
 			phenotype = ph; 
 		}
 		if(phenotype == null){
 			phenotype = new CancerPhenotype();
 			addPhenotype(phenotype);
-		}
+		}*/
 		// now simply merge in the data
-		for(CancerPhenotype ph: summary.getPhenotypes()){
-			phenotype.append(ph);
-		}
+		//for(CancerPhenotype ph: summary.getPhenotypes()){
+		phenotype.append(summary.getPhenotype());
+		//}
 		
 		// add tumors if none exist
 		for(TumorSummary t: summary.getTumors()){

@@ -7,10 +7,15 @@ import java.net.URI;
  * @author tseytlin
  */
 public class FHIRConstants {
-	public static final String MODEL_CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/modelCancer.owl";
+	
 	public static final String NLP_CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl";
 	public static final String SCHEMA_URL = "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl";
+	public static final String MODEL_CANCER_URL = NLP_CANCER_URL;
+	//public static final String MODEL_CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/modelCancer.owl";
 	
+	public static final String ANNOTATION_TYPE_MENTION = "mention";
+	public static final String ANNOTATION_TYPE_DOCUMENT = "document";
+	public static final String ANNOTATION_TYPE_RECORD = "record";
 	
 	public static final String INTERPRETATION_POSITIVE = "Positive";
 	public static final String INTERPRETATION_NEGATIVE = "Negative";
@@ -68,6 +73,9 @@ public class FHIRConstants {
 	public static final URI TUMOR_EXTENT_URI = URI.create(MODEL_CANCER_URL+"#TumorExtent");
 	public static final URI CANCER_TYPE_URI = URI.create(MODEL_CANCER_URL+"#CancerType");
 	
+	
+	public static final URI PRIMARY_TUMOR_URI = URI.create(MODEL_CANCER_URL+"#PrimaryTumor");
+	public static final URI RECURRENT_TUMOR_URI = URI.create(MODEL_CANCER_URL+"#Recurrent_Tumor");
 	//public static final URI TUMOR_SIZE_URI = URI.create(MODEL_CANCER_URL+"/"+TUMOR_PHENOTYPE);
 	
 }

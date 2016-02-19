@@ -8,6 +8,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.Address;
 import org.hl7.fhir.instance.model.Attachment;
@@ -21,6 +22,7 @@ import org.hl7.fhir.instance.model.Resource;
 
 
 public class Patient extends org.hl7.fhir.instance.model.Patient implements Element{
+	private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
 	private int yearsOld;
 	
 	public Patient(){
@@ -200,6 +202,14 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 
 	public CodeableConcept getCode() {
 		return FHIRUtils.getCodeableConcept(getConceptURI());
+	}
+
+	public String getAnnotationType() {
+		return annotationType;
+	}
+
+	public void setAnnotationType(String annotationType) {
+		this.annotationType = annotationType;
 	}
 
 }

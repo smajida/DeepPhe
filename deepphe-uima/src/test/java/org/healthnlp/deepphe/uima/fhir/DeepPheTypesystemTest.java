@@ -21,7 +21,7 @@ import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.uima.cr.FHIRCollectionReader;
 import org.healthnlp.deepphe.uima.types.Composition;
 import org.healthnlp.deepphe.uima.types.DiseaseDisorder;
-import org.healthnlp.deepphe.uima.types.Medication;
+import org.healthnlp.deepphe.uima.types.MedicationStatement;
 import org.healthnlp.deepphe.uima.types.Observation;
 import org.junit.Test;
 
@@ -75,7 +75,7 @@ public class DeepPheTypesystemTest {
 			assertEquals("number of diseases error",3,cc.size());
 						
 			// check medications
-			cc = getAnnotations(jcas,Medication.type);
+			cc = getAnnotations(jcas,MedicationStatement.type);
 			assertEquals("number of medication error",4,cc.size());
 			
 			// check medications

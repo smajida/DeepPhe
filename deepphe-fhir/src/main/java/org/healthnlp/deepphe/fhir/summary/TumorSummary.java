@@ -234,6 +234,9 @@ public class TumorSummary extends Summary {
 			if(!FHIRUtils.contains(getTreatments(),c))
 				addTreatment(c);
 		}
+		// add tumor type
+		if(getTumorType() == null && summary.getTumorType() != null)
+			setTumorType(summary.getTumorType());
 		
 		// add sequence
 		for(CodeableConcept c: summary.getTumorSequenceVarients()){

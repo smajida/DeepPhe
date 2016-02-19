@@ -4,12 +4,14 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 
+import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Resource;
 
 
 public class Medication extends org.hl7.fhir.instance.model.Medication implements Element {
+	private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
 	public String getDisplayText() {
 		return getCode().getText();
 	}
@@ -58,6 +60,14 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	}
 	public String toString(){
 		return getDisplayText();
+	}
+
+	public String getAnnotationType() {
+		return annotationType;
+	}
+
+	public void setAnnotationType(String annotationType) {
+		this.annotationType = annotationType;
 	}
 		
 }
