@@ -44,7 +44,7 @@ final public class DocumentSummarizerPipeline {
    public static void runDocumentSummarizerPipeline( final String inputDirectory,
                                                      final String outputDirectory,
                                                      final String ontologyPath ) throws UIMAException, IOException {
-      final CollectionReader collectionReader = CancerPipelineFactory.createFilesInDirectoryReader( inputDirectory );
+      final CollectionReader collectionReader = CancerPipelineFactory.createFilesReader(inputDirectory );
       final AnalysisEngine ctakesCancerEngine = CancerPipelineFactory.createPipelineEngine();
       final AnalysisEngine iClassExtractor
             = AnalysisEngineFactory
