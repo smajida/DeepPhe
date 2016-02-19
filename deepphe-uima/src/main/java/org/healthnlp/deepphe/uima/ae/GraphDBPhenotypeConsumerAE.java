@@ -169,8 +169,12 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 					documentN.createRelationshipTo(n, GraphDBConstants.Relationships.hasFinding);
 				}
 				for (Observation p : report.getObservations()) {
+					if(p.getObservationValue()==null)
+						continue;
+					
 					Node n = graphDb.createNode(GraphDBConstants.Nodes.Observation);
 					n.setProperty("name", p.getDisplayText());
+					
 					n.setProperty("value", p.getObservationValue());
 					CodeableConcept cc = p.getBodySite();
 					n.setProperty("bodySites", new String[] { cc.getText() }.toString());
