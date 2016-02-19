@@ -114,7 +114,7 @@ public class OwlDictionary implements RareWordDictionary {
       try {
          final IOntology ontology = OwlConnectionFactory.getInstance().getOntology( owlFilePath );
          final Collection<CuiTerm> cuiTerms = new ArrayList<>();
-         final IClass root = ontology.getClass( "Element" );
+         final IClass root = ontology.getClass( "Annotation" );
          for ( IClass childClass : root.getSubClasses() ) {
             cuiTerms.addAll( createCuiTerms( childClass ) );
          }

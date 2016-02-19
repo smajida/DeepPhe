@@ -83,7 +83,7 @@ public class OwlConceptFactory implements ConceptFactory {
       try {
          final IOntology ontology = OwlConnectionFactory.getInstance().getOntology( owlFilePath );
          final Map<Long, Concept> conceptMap = new HashMap<>();
-         final IClass root = ontology.getClass( "Element" );
+         final IClass root = ontology.getClass( "Annotation" );
          for ( IClass childClass : root.getSubClasses() ) {
             conceptMap.putAll( createOwlConcepts( childClass ) );
          }

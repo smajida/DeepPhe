@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <group id="Folder Repository, directory=, recursive=true, Auto-Update=true, version=2" prefer="public" xml:base="">
+        <uri id="Automatically generated entry, Timestamp=1455290304695" name="http://blulab.chpc.utah.edu/ontologies/TermMapping.owl" uri="TermMapping.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1455290304695" name="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl" uri="ConText.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1455290304695" name="http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl" uri="Schema.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1455290304695" name="http://ontologies.dbmi.pitt.edu/deepphe/modelBreastCancer.owl" uri="modelBreastCancer.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1455290304695" name="http://ontologies.dbmi.pitt.edu/deepphe/modelCancer.owl" uri="modelCancer.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1455290304695" name="http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl" uri="nlpBreastCancer.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1455290304695" name="http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl" uri="nlpCancer.owl"/>
+    </group>
+</catalog>

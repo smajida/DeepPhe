@@ -1,0 +1,132 @@
+Filename	Category Code	Column Number	Data Label	Data Label Source	Controlled Vocab Code	Ignored Column
+tcga-breast-BH.txt	Other Columns	1	STUDY ID			
+tcga-breast-BH.txt	OMIT	2	OMIT			bcr_patient_uuid
+tcga-breast-BH.txt	Other Columns	3	SUBJ_ID			bcr_patient_barcode
+tcga-breast-BH.txt	OMIT	4	OMIT			form_completion_date
+tcga-breast-BH.txt	OMIT	5	OMIT			prospective_collection
+tcga-breast-BH.txt	OMIT	6	OMIT			retrospective_collection
+tcga-breast-BH.txt	OMIT	7	OMIT			birth_days_to
+tcga-breast-BH.txt	Patient	8	GENDER			gender
+tcga-breast-BH.txt	Patient	9	Menopause Status			menopause_status
+tcga-breast-BH.txt	Patient	10	RACE			race
+tcga-breast-BH.txt	Patient	11	Ethnicity			ethnicity
+tcga-breast-BH.txt	Patient	12	History of Other Malignancy			history_other_malignancy
+tcga-breast-BH.txt	Treatment+TherapeuticProcedure+Chemotherapy+AdjuvantChemotherapy	13	Neoadjuvant Treatment			history_neoadjuvant_treatment
+tcga-breast-BH.txt	Outcome	14	Tumor Status			tumor_status
+tcga-breast-BH.txt	Outcome	15	Vital Status			vital_status
+tcga-breast-BH.txt	Episode+Follow Up Episode	16	Days to Last Followup			last_contact_days_to
+tcga-breast-BH.txt	Outcome	17	Days to Death			death_days_to
+tcga-breast-BH.txt	Treatment+TherapeuticProcedure+Radiotherapy	18	Radiation Adjuvant Tx			radiation_treatment_adjuvant
+tcga-breast-BH.txt	Treatment+TherapeuticProcedure+Chemotherapy	19	Pharmaceutical Adjuvant Tx			pharmaceutical_tx_adjuvant
+tcga-breast-BH.txt	Cancer+History	20	Histologic Diagnosis Other			histologic_diagnosis_other
+tcga-breast-BH.txt	Episode+Diagnostic Episode	21	Initial Pathologic DX (year)			initial_pathologic_dx_year
+tcga-breast-BH.txt	Episode+Diagnostic Episode	22	Age at Diagnosis			age_at_diagnosis
+tcga-breast-BH.txt	Episode+Diagnostic Episode	23	Initial Pathologic DX Method			method_initial_path_dx
+tcga-breast-BH.txt	Episode+Diagnostic Episode	24	Initial Pathologic DX Method Other			method_initial_path_dx_other
+tcga-breast-BH.txt	Treatment+TherapeuticProcedure	25	Primary Surgical Procedure			surgical_procedure_first
+tcga-breast-BH.txt	Treatment+TherapeuticProcedure	26	Primary Surgical Procedure Other			first_surgical_procedure_other
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	27	Margin Status			margin_status
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	28	Surgery for Positive Margins			surgery_for_positive_margins
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	29	Surgery for Positive Margins Other			surgery_for_positive_margins_other
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	30	Margin Status Reexcision			margin_status_reexcision
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	31	Axillary Staging Method			axillary_staging_method
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	32	Axillary Staging Method Other			axillary_staging_method_other
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	33	Micromet Detection by IHC			micromet_detection_by_ihc
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	34	Lymph Nodes Examined Count			lymph_nodes_examined_count
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	35	Lymph Nodes Examined			lymph_nodes_examined
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	36	Lymph Nodes Examined by HE			lymph_nodes_examined_he_count
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	37	Lymph Nodes Examined IHC			lymph_nodes_examined_ihc_count
+tcga-breast-BH.txt	Manifestation of Disease+Clinical Manifestation of Disease+Breast Cancer Stage	38	AJCC Staging Edition			ajcc_staging_edition
+tcga-breast-BH.txt	Manifestation of Disease+Clinical Manifestation of Disease+Breast Cancer TNM Classification	39	T			ajcc_tumor_pathologic_pt
+tcga-breast-BH.txt	Manifestation of Disease+Clinical Manifestation of Disease+Breast Cancer TNM Classification	40	N 			ajcc_nodes_pathologic_pn
+tcga-breast-BH.txt	Manifestation of Disease+Clinical Manifestation of Disease+Breast Cancer TNM Classification	41	M			ajcc_metastasis_pathologic_pm
+tcga-breast-BH.txt	Manifestation of Disease+Clinical Manifestation of Disease+Breast Cancer Stage	42	Stage			ajcc_pathologic_tumor_stage
+tcga-breast-BH.txt	Outcome+Metastases	43	Metastasis site			metastasis_site
+tcga-breast-BH.txt	Outcome+Metastases	44	Metastasis site other			metastasis_site_other
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+Estrogen Receptor Status	45	ER status by IHC			er_status_by_ihc
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+Estrogen Receptor Status	46	ER status IHC Percent Positive			er_status_ihc_Percent_Positive
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+Estrogen Receptor Status	47	ER Positivity Scale Used			er_positivity_scale_used
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+Estrogen Receptor Status	48	ER Score (IHC)			er_ihc_score
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+Estrogen Receptor Status	49	ER Positivity Scale Other			er_positivity_scale_other
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+Estrogen Receptor Status	50	ER Positivity Method			er_positivity_method
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+Progesterone Receptor Status	51	PR Status (IHC)			pr_status_by_ihc
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+Progesterone Receptor Status	52	PR Status Ihc Percent Positive			pr_status_ihc_percent_positive
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+Progesterone Receptor Status	53	PR Positivity Scale Used			pr_positivity_scale_used
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+Progesterone Receptor Status	54	PR Positivity Intensity Score (IHC)			pr_positivity_ihc_intensity_score
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+Progesterone Receptor Status	55	PR Positivity Scale Other			pr_positivity_scale_other
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+Progesterone Receptor Status	56	PR Positivity Define Method			pr_positivity_define_method
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+HER2-Neu Receptor Status	57	HER2 Status By Ihc			her2_status_by_ihc
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+HER2-Neu Receptor Status	58	HER2 Ihc Percent Positive			her2_ihc_percent_positive
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+HER2-Neu Receptor Status	59	HER2 Ihc Score			her2_ihc_score
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+HER2-Neu Receptor Status	60	HER2 Positivity Scale Other			her2_positivity_scale_other
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+HER2-Neu Receptor Status	61	HER2 Positivity Method Text			her2_positivity_method_text
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+HER2-Neu Receptor Status	62	HER2 Fish Status			her2_fish_status
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+HER2-Neu Receptor Status	63	HER2 Copy Number			her2_copy_number
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+HER2-Neu Receptor Status	64	Cent17 Copy Number			cent17_copy_number
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+HER2-Neu Receptor Status	65	Her2 And Cent17 Cells Count			her2_and_cent17_cells_count
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+HER2-Neu Receptor Status	66	Her2 Cent17 Ratio			her2_cent17_ratio
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+HER2-Neu Receptor Status	67	Her2 And Cent17 Scale Other			her2_and_cent17_scale_other
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status+HER2-Neu Receptor Status	68	Her2 Fish Method			her2_fish_method
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	69	New Tumor Event Dx Indicator			new_tumor_event_dx_indicator
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	70	Nte Er Status			nte_er_status
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	71	Nte Er Status Ihc  Positive			nte_er_status_ihc__positive
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	72	Nte Er Ihc Intensity Score			nte_er_ihc_intensity_score
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	73	Nte Er Positivity Other Scale			nte_er_positivity_other_scale
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	74	Nte Er Positivity Define Method			nte_er_positivity_define_method
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	75	Nte Pr Status By Ihc			nte_pr_status_by_ihc
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	76	Nte Pr Status Ihc  Positive			nte_pr_status_ihc__positive
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	77	Nte Pr Ihc Intensity Score			nte_pr_ihc_intensity_score
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	78	Nte Pr Positivity Other Scale			nte_pr_positivity_other_scale
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	79	Nte Pr Positivity Define Method			nte_pr_positivity_define_method
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	80	Nte Her2 Status			nte_her2_status
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	81	Nte Her2 Status Ihc  Positive			nte_her2_status_ihc__positive
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	82	Nte Her2 Positivity Ihc Score			nte_her2_positivity_ihc_score
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	83	Nte Her2 Positivity Other Scale			nte_her2_positivity_other_scale
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	84	Nte Her2 Positivity Method			nte_her2_positivity_method
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	85	Nte Her2 Fish Status			nte_her2_fish_status
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	86	Nte Her2 Signal Number			nte_her2_signal_number
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	87	Nte Cent 17 Signal Number			nte_cent_17_signal_number
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	88	Her2 Cent17 Counted Cells Count			her2_cent17_counted_cells_count
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	89	Nte Cent 17 Her2 Ratio			nte_cent_17_her2_ratio
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	90	Nte Cent17 Her2 Other Scale			nte_cent17_her2_other_scale
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	91	Nte Her2 Fish Define Method			nte_her2_fish_define_method
+tcga-breast-BH.txt	Disease Phenotype+Cancer Phenotype+Breast Cancer Phenotype	92	Laterality			anatomic_neoplasm_subdivision
+tcga-breast-BH.txt	OMIT	93	OMIT			clinical_M
+tcga-breast-BH.txt	OMIT	94	OMIT			clinical_N
+tcga-breast-BH.txt	OMIT	95	OMIT			clinical_T
+tcga-breast-BH.txt	OMIT	96	OMIT			clinical_stage
+tcga-breast-BH.txt	Outcome	97	Days To First Complete Response			days_to_first_complete_response
+tcga-breast-BH.txt	Outcome	98	Days To First Partial Response			days_to_first_partial_response
+tcga-breast-BH.txt	Outcome	99	Days To First Response			days_to_first_response
+tcga-breast-BH.txt	Episode+Diagnostic Episode	100	Days To Initial Pathologic Diagnosis			days_to_initial_pathologic_diagnosis
+tcga-breast-BH.txt	Outcome	101	Days To Patient Progression Free			days_to_patient_progression_free
+tcga-breast-BH.txt	Outcome	102	Days To Tumor Progression			days_to_tumor_progression
+tcga-breast-BH.txt	OMIT	103	OMIT			disease_code
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	104	Er Disease Extent Prior Er Treatment			er_disease_extent_prior_er_treatment
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	105	Er Estimated Duration Response			er_estimated_duration_response
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	106	Er Response Type			er_response_type
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	107	Er Solid Tumor Response Documented Type			er_solid_tumor_response_documented_type
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	108	Er Solid Tumor Response Documented Type Other			er_solid_tumor_response_documented_type_other
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	109	Extranodal Involvement			extranodal_involvement
+tcga-breast-BH.txt	OMIT	110	OMIT			field
+tcga-breast-BH.txt	Manifestation of Disease+Clinical Manifestation of Disease	111	Histological Type			histological_type
+tcga-breast-BH.txt	Cancer+History	112	History Of Radiation Metastatic Site			history_of_radiation_metastatic_site
+tcga-breast-BH.txt	Cancer+History	113	History Of Radiation Primary Site			history_of_radiation_primary_site
+tcga-breast-BH.txt	Cancer+History	114	History Prior Surgery Indicator			history_prior_surgery_indicator
+tcga-breast-BH.txt	Cancer+History	115	History Prior Surgery Type			history_prior_surgery_type
+tcga-breast-BH.txt	Cancer+History	116	History Prior Surgery Type Other			history_prior_surgery_type_other
+tcga-breast-BH.txt	OMIT	117	OMIT			icd_10
+tcga-breast-BH.txt	OMIT	118	OMIT			icd_o_3_histology
+tcga-breast-BH.txt	OMIT	119	OMIT			icd_o_3_site
+tcga-breast-BH.txt	OMIT	120	OMIT			informed_consent_verified
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	121	Metastatic Tumor Indicator			metastatic_tumor_indicator
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status	122	Molecular Abnormality Results			molecular_abnormality_results
+tcga-breast-BH.txt	Manifestation of Disease+Molecular Manifestation of Disease+Receptor Status	123	Molecular Abnormality Results Other			molecular_abnormality_results_other
+tcga-breast-BH.txt	OMIT	124	OMIT			patient_id
+tcga-breast-BH.txt	Outcome	125	Progression Status			patient_progression_status
+tcga-breast-BH.txt	OMIT	126	OMIT			project_code
+tcga-breast-BH.txt	Disease Phenotype+Tumor Phenotype	127	Site Of Primary Tumor Other			site_of_primary_tumor_other
+tcga-breast-BH.txt	Manifestation of Disease+Clinical Manifestation of Disease+Breast Cancer Stage	128	Stage Other			stage_other
+tcga-breast-BH.txt	Other Columns	129	OMIT			tissue_source_site
+tcga-breast-BH.txt	Other Columns	130	OMIT			tumor_tissue_site
+tcga-breast-BH.txt	Patient	131	AGE			AGE key label for patient table

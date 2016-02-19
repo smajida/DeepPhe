@@ -1,5 +1,6 @@
 package org.healthnlp.deepphe.uima.ae;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,7 +73,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			PhenotypeResourceFactory.saveReport(report,jcas);
 			
 			// print out
-			System.out.println(report.getSummaryText());
+			//System.out.println(report.getSummaryText());
 		}
 	}
 
@@ -123,7 +124,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		
 		// create tumor summary if we talke about cancer in trigger document
 		if(cancer != null && documentTypeTriggers.contains(report.getType())){
-			tumor = createTumorSummary(report,cancerDx);
+			tumor = createTumorSummary(report,cancerDx,cancer);
 			cancer.addTumor(tumor);
 		}
 		
@@ -132,7 +133,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			for(Element e: report.getReportElements()){
 				// if we have a tumor trigger
 				if(e instanceof Condition && hasTrigger(tumorTriggers, (Condition)e)){
-					tumor = createTumorSummary(report,(Condition) e);
+					tumor = createTumorSummary(report,(Condition) e,cancer);
 					if(cancer != null){
 						cancer.addTumor(tumor);
 					}else{
@@ -155,8 +156,8 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	 */
 	private CancerSummary createCancerSummary(Report report, Disease diagnosis){
 		CancerSummary cancer = new CancerSummary();
-		CancerSummary.CancerPhenotype phenotype = new CancerSummary.CancerPhenotype();
-		cancer.addPhenotype(phenotype);
+		CancerSummary.CancerPhenotype phenotype = cancer.getPhenotype();
+		//cancer.addPhenotype(phenotype);
 		
 		// add body location
 		for(CodeableConcept cc: diagnosis.getBodySite()){
@@ -196,7 +197,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	}
 
 
-	private TumorSummary createTumorSummary(Report report, Condition diagnosis){
+	private TumorSummary createTumorSummary(Report report, Condition diagnosis, CancerSummary cancer){
 		TumorSummary tumor = new TumorSummary();
 		TumorSummary.TumorPhenotype phenotype = tumor.getPhenotype();
 		
@@ -237,11 +238,27 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 				}
 			}
 			
+			// document type RULE
+			// if cancer location is the same as tumor location, then tumor is 'primary'
+			// else tumor type is 'recurent' if they are not the same
+			// cancer has to be more specific then a tumor, then infer
+			// else can't infer a type
+			//tumor.setTumorType(null);  // primary vs local recurance, distance recurance  infered from rules
+			if(cancer != null){
+				URI tumorType = null;
+				if(hasCommonBodySite(cancer.getBodySites(),tumor.getBodySites())){
+					tumorType = FHIRConstants.PRIMARY_TUMOR_URI;
+				}else{
+					tumorType = FHIRConstants.RECURRENT_TUMOR_URI;
+				}
+				if(tumorType != null)
+					tumor.setTumorType(FHIRUtils.getCodeableConcept(tumorType));
+			}
 			
 			
 			//tumor.addOutcome(null); // tumor is gone
 			//tumor.addTumorSequenceVarient(null); // don't have one
-			//tumor.setTumorType(null);  // primary vs local recurance, distance recurance  infered from rules
+			
 		}
 
 		return tumor;
@@ -282,6 +299,21 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	}
 	
 
+	private boolean hasCommonBodySite(List<CodeableConcept> aa, List<CodeableConcept> bb){
+		for(CodeableConcept ca: aa){
+			URI ua = FHIRUtils.getConceptURI(ca);
+			for(CodeableConcept cb: bb){
+				URI ub = FHIRUtils.getConceptURI(cb);
+				// if equal, or first argument is more specific theen the second
+				if(ua.equals(ub) || ontology.getClass(ua.toString()).hasSuperClass(ontology.getClass(ub.toString()))){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	
 	/**
 	 * is class a lexical part of a given diagnosis
 	 * @param cls

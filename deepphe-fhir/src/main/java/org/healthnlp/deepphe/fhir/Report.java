@@ -14,6 +14,7 @@ import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.fhir.summary.TumorSummary;
+import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.TextUtils;
 import org.healthnlp.deepphe.util.FHIRUtils;
@@ -208,7 +209,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	
 	public String getSummaryText() {
 		StringBuffer st = new StringBuffer();
-		st.append("Report:\n"+getDisplayText()+"\n---\n");
+		
 		if(getPatient() != null)
 			st.append(getPatient().getSummaryText()+"\n");
 		for(Disease dx: getDiagnoses()){
@@ -233,6 +234,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 			}
 			st.append("---");
 		}
+		st.append("\n"+getDisplayText()+"\n---\n");
 		
 		return st.toString();
 	}
@@ -362,6 +364,12 @@ public class Report extends Composition implements Element, Comparable<Report>{
 				return (PatientSummary) s;
 		}
 		return null;
+	}
+
+
+
+	public String getAnnotationType() {
+		return FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
 	}
 	
 	/*private void writeObject(ObjectOutputStream stream) throws IOException {

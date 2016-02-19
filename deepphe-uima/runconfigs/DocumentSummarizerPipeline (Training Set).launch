@@ -20,8 +20,7 @@
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.healthnlp.deepphe.uima.pipelines.DocumentSummarizerPipeline"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-i ${git_work_tree}/data/training_set/patient03&#13;&#10;-o ${git_work_tree}/data/training_set/output&#13;&#10;-m ${git_work_tree}/data/ontology/breastCancer-3.owl"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-i ${git_work_tree}/data/training_set/patient92&#13;&#10;-o ${git_work_tree}/data/training_set/output&#13;&#10;-m ${git_work_tree}/data/ontology/nlpBreastCancer.owl"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="deepphe-uima"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
 </launchConfiguration>
-

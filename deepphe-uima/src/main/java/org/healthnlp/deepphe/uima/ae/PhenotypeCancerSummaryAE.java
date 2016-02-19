@@ -14,6 +14,9 @@ import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.fhir.summary.TumorSummary;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
+import org.healthnlp.deepphe.util.FHIRConstants;
+import org.healthnlp.deepphe.util.FHIRRegistry;
+import org.healthnlp.deepphe.util.FHIRUtils;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
@@ -43,7 +46,10 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		
 		// for now, lets assume there is only one cancer summary
 		PatientSummary patientSummary = new PatientSummary();
+		patientSummary.setAnnotationType(FHIRConstants.ANNOTATION_TYPE_RECORD);
+		
 		CancerSummary cancerSummary =  new CancerSummary();
+		cancerSummary.setAnnotationType(FHIRConstants.ANNOTATION_TYPE_RECORD);
 		
 		for(Report report: PhenotypeResourceFactory.loadReports(jcas)){
 			// append patient summary
@@ -65,6 +71,8 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			for(TumorSummary ts: report.getTumorSummaries()){
 				cancerSummary.append(ts);
 			}
+		
+			
 			
 			//TODO: this is where you can start with RULES
 			// this is a temporary merge of all summaries together without
@@ -76,8 +84,8 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		System.out.println(cancerSummary.getSummaryText());
 		
 		//this is where you save your work back to CAS
-		PhenotypeResourceFactory.saveSummary(patientSummary, jcas);
-		PhenotypeResourceFactory.saveSummary(cancerSummary, jcas);
+		PhenotypeResourceFactory.saveMedicalRecordPatientSummary(patientSummary, jcas);
+		PhenotypeResourceFactory.saveMedicalRecordCancerSummary(cancerSummary, jcas);
 		
 	}
 

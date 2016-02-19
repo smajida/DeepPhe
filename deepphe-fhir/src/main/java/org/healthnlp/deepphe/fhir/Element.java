@@ -23,4 +23,5 @@ public interface Element extends Serializable {
 	public void setReport(Report r);
 	public void save(File e) throws Exception;
 	public void copy(Resource r);
+	public String getAnnotationType();
 }

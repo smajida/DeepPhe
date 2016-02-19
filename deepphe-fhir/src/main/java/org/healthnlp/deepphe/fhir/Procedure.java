@@ -8,6 +8,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.DateType;
@@ -18,7 +19,7 @@ import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
 
 public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements Element{
-
+	private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
 
 	public String getDisplayText() {
 		return getCode().getText();
@@ -105,6 +106,14 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
 		stream.defaultReadObject();
+	}
+
+	public String getAnnotationType() {
+		return annotationType;
+	}
+
+	public void setAnnotationType(String annotationType) {
+		this.annotationType = annotationType;
 	}
 	
 }

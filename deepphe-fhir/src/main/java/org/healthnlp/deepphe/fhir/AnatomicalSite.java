@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.fhir;
 import java.io.File;
 import java.net.URI;
 
+import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.BodySite;
 import org.hl7.fhir.instance.model.CodeableConcept;
@@ -12,7 +13,7 @@ import org.hl7.fhir.instance.model.Resource;
 
 
 public class AnatomicalSite extends BodySite implements Element{
-
+	private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
 	public String getDisplayText() {
 		return getCode().getText();
 	}
@@ -64,4 +65,12 @@ public class AnatomicalSite extends BodySite implements Element{
 		
 	}
 
+	public String getAnnotationType() {
+		return annotationType;
+	}
+
+	public void setAnnotationType(String annotationType) {
+		this.annotationType = annotationType;
+	}
+	
 }

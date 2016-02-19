@@ -7,6 +7,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.Extension;
@@ -21,6 +22,7 @@ import org.hl7.fhir.instance.model.Type;
  * @author tseytlin
  */
 public class Observation extends org.hl7.fhir.instance.model.Observation implements Element{
+	private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
 	public Observation(){
 		setStatus(ObservationStatus.FINAL);
 		//setLanguage(FHIRUtils.DEFAULT_LANGUAGE); // we only care about English
@@ -127,4 +129,13 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	public URI getConceptURI(){
 		return FHIRUtils.getConceptURI(getCode());
 	}
+
+	public String getAnnotationType() {
+		return annotationType;
+	}
+
+	public void setAnnotationType(String annotationType) {
+		this.annotationType = annotationType;
+	}
+	
 }
