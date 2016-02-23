@@ -55,7 +55,7 @@ public enum StatusType implements Type {
    }
 
    public String getUri() {
-      return OwlOntologyConceptUtil.BREAST_CANCER_OWL + _uri;
+      return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + _uri;
    }
 
    public String getCui( final Value statusValue ) {
