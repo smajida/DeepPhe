@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
  * @version %I%
  * @since 8/20/2015
  */ // http://en.wikipedia.org/wiki/TNM_staging_system
+@Deprecated
 enum TnmClassOptionType {
    G( "Grade of cancer cells", "G[1-4](C[1-5])?" ),
    S( "Elevation of serum tumor markers", "S[0-3](C[1-5])?" ),

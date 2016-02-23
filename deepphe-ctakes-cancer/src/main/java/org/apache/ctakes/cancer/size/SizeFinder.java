@@ -122,7 +122,7 @@ final public class SizeFinder {
     *
     * @param jCas       - JCas object, needed to create new UIMA types
     * @param cancerSize - First argument to relation
-    * @param neoplasm - Second argument to relation
+    * @param neoplasm   - Second argument to relation
     */
    static private void addCancerSizeRelationToCas( final JCas jCas,
                                                    final CancerSize cancerSize,

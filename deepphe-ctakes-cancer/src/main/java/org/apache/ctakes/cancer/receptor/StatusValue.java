@@ -1,8 +1,8 @@
 package org.apache.ctakes.cancer.receptor;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.property.Value;
 
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  * @version %I%
  * @since 8/19/2015
  */
-public enum StatusValue {
+public enum StatusValue implements Value {
    POSITIVE( "Positive", Boolean.TRUE, "Positive", "\\+?pos(itive)?|\\+(pos)?" ),
    NEGATIVE( "Negative", Boolean.FALSE, "Negative", "-?neg(ative)?|-(neg)?" ),
    UNKNOWN( "Unknown", null, "Unknown", "unknown|indeterminate|equivocal|(not assessed)|\\bN/?A\\b" );
@@ -32,7 +32,11 @@ public enum StatusValue {
    }
 
    public String getUri() {
-      return OwlOntologyConceptUtil.BREAST_CANCER_OWL + _uri;
+      return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + _uri;
+   }
+
+   public String getCui() {
+      return "";
    }
 
    public Matcher getMatcher( final CharSequence lookupWindow ) {
@@ -43,12 +47,11 @@ public enum StatusValue {
       return _booleanValue;
    }
 
-
    /**
     * @param uri full uri
     * @return StatusValue with the given uri or UNKNOWN if not found
     */
-   static public StatusValue getUriStatusValue( final String uri ) {
+   static public StatusValue getUriValue( final String uri ) {
       for ( StatusValue statusValue : StatusValue.values() ) {
          if ( statusValue.getUri().equals( uri ) ) {
             return statusValue;

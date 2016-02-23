@@ -8,8 +8,8 @@ import org.apache.uima.jcas.JCas;
 
 
 /**
-*
-*/
+ *
+ */
 final public class PropertyToEventCopier extends JCasAnnotator_ImplBase {
 
    /**

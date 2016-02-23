@@ -2,9 +2,7 @@ package org.apache.ctakes.cancer.relation;
 
 
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
-import org.apache.ctakes.cancer.type.textsem.CancerStage;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
-import org.apache.ctakes.typesystem.type.textsem.EventMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.jcas.JCas;

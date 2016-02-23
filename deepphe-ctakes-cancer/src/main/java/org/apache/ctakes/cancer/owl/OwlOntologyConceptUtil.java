@@ -13,7 +13,10 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -32,8 +35,8 @@ final public class OwlOntologyConceptUtil {
    private OwlOntologyConceptUtil() {
    }
 
-   static public final String CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#";
-   static public final String BREAST_CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#";
+   static public final String CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl";
+   static public final String BREAST_CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl";
 
 //   static private final Function<String, String> asSelf = self -> self;
 
@@ -55,10 +58,9 @@ final public class OwlOntologyConceptUtil {
    }
 
    /**
-    *
-    * @param jcas -
+    * @param jcas         -
     * @param lookupWindow -
-    * @param <T> type for lookup window
+    * @param <T>          type for lookup window
     * @return all owl URIs that exist for the given window
     */
    static public <T extends Annotation> Collection<String> getUris( final JCas jcas, final T lookupWindow ) {
@@ -115,9 +117,9 @@ final public class OwlOntologyConceptUtil {
    }
 
    /**
-    * @param jcas -
+    * @param jcas         -
     * @param lookupWindow -
-    * @param <T> type for lookup window
+    * @param <T>          type for lookup window
     * @return all iClasses within the lookup window
     */
    static public <T extends Annotation> Collection<IClass> getIClasses( final JCas jcas, final T lookupWindow ) {
@@ -133,10 +135,10 @@ final public class OwlOntologyConceptUtil {
    }
 
    /**
-    * @param jcas -
+    * @param jcas         -
     * @param lookupWindow -
-    * @param uri  uri of interest
-    * @param <T> type for lookup window
+    * @param uri          uri of interest
+    * @param <T>          type for lookup window
     * @return all IdentifiedAnnotations within the given window that have the given uri
     */
    static public <T extends Annotation> Collection<IdentifiedAnnotation> getAnnotationsByUri( final JCas jcas,
@@ -174,8 +176,8 @@ final public class OwlOntologyConceptUtil {
    }
 
    /**
-    * @param jcas -
-    * @param rootUri  uri of interest
+    * @param jcas    -
+    * @param rootUri uri of interest
     * @return all IdentifiedAnnotations for the given uri and its children
     */
    static public Collection<IdentifiedAnnotation> getAnnotationsByUriBranch( final JCas jcas,

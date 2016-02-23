@@ -5,6 +5,7 @@ package org.apache.ctakes.cancer.tnm;
  * @version %I%
  * @since 8/20/2015
  */
+@Deprecated
 enum TnmClassPrefixType {
    C( "Classification given by clinical examination", 'c' ),
    P( "Classification given by pathologic examination", 'p' ),

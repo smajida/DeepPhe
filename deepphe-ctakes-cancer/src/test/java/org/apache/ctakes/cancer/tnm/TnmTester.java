@@ -37,46 +37,105 @@ public class TnmTester {
 
    @Test
    public void testTnmClasses() {
-      final List<TnmClass> tnmClasses = TnmFinder.getTnmClasses( FULL_SENTENCE );
-      assertEquals( "Expect 3 TNM Classes from " + FULL_SENTENCE, 3, tnmClasses.size() );
-      testTnmClass( tnmClasses.get( 0 ), TnmClassPrefixType.UNSPECIFIED, TnmClassType.T, "2" );
-      testTnmClass( tnmClasses.get( 1 ), TnmClassPrefixType.UNSPECIFIED, TnmClassType.N, "0" );
-      testTnmClass( tnmClasses.get( 2 ), TnmClassPrefixType.UNSPECIFIED, TnmClassType.M, "0" );
+      final List<Tnm> tnms = TnmFinder.getTnms( FULL_SENTENCE );
+      assertEquals( "Expect 3 TNM Classes from " + FULL_SENTENCE, 3, tnms.size() );
+      testTnmTypeValue( tnms.get( 0 ), TnmType.T, "2" );
+      testTnmTypeValue( tnms.get( 1 ), TnmType.N, "0" );
+      testTnmTypeValue( tnms.get( 2 ), TnmType.M, "0" );
    }
 
    @Test
    public void testNoTnm() {
       for ( String sentence : NO_TNM_SENTENCES ) {
-         final List<TnmClass> tnmClasses = TnmFinder.getTnmClasses( sentence );
-         assertEquals( "Expect no TNM in " + sentence, 0, tnmClasses.size() );
+         final List<Tnm> tnms = TnmFinder.getTnms( sentence );
+         assertEquals( "Expect no TNM in " + sentence, 0, tnms.size() );
       }
    }
 
    @Test
    public void testPunctuation() {
       for ( String sentence : PUNCTUATION_SENTENCES ) {
-         final List<TnmClass> tnmClasses = TnmFinder.getTnmClasses( sentence );
-         assertEquals( "Expect 2 TNM Classes from " + sentence, 2, tnmClasses.size() );
+         final List<Tnm> tnms = TnmFinder.getTnms( sentence );
+         assertEquals( "Expect 2 TNM Classes from " + sentence, 2, tnms.size() );
       }
+   }
+
+   @Test
+   public void testPunctuation1() {
+      final List<Tnm> tnms = TnmFinder.getTnms( PUNCTUATION_SENTENCES[ 0 ] );
+      assertEquals( "Expect 2 TNM Classes from " + PUNCTUATION_SENTENCES[ 0 ], 2, tnms.size() );
+      testTnmTypeValue( tnms.get( 0 ), TnmType.T, "1" );
+      testTnmTypeValue( tnms.get( 1 ), TnmType.N, "1" );
+   }
+
+   @Test
+   public void testPunctuation2() {
+      final List<Tnm> tnms = TnmFinder.getTnms( PUNCTUATION_SENTENCES[ 1 ] );
+      assertEquals( "Expect 2 TNM Classes from " + PUNCTUATION_SENTENCES[ 1 ], 2, tnms.size() );
+      testTnmTypeValue( tnms.get( 0 ), TnmType.T, "0" );
+      testTnmTypeValue( tnms.get( 1 ), TnmType.M, "1" );
+   }
+
+   @Test
+   public void testPunctuation3() {
+      final List<Tnm> tnms = TnmFinder.getTnms( PUNCTUATION_SENTENCES[ 2 ] );
+      assertEquals( "Expect 2 TNM Classes from " + PUNCTUATION_SENTENCES[ 2 ], 2, tnms.size() );
+      testTnmTypeValue( tnms.get( 0 ), TnmType.T, "1" );
+      testTnmTypeValue( tnms.get( 1 ), TnmType.T, "3" );
    }
 
    @Test
    public void testRoman() {
       for ( String sentence : ROMAN_SENTENCES ) {
-         final List<TnmClass> tnmClasses = TnmFinder.getTnmClasses( sentence );
-         assertEquals( "Expect 2 TNM Classes from " + sentence, 2, tnmClasses.size() );
+         final List<Tnm> tnms = TnmFinder.getTnms( sentence );
+         assertEquals( "Expect 2 TNM Classes from " + sentence, 2, tnms.size() );
       }
    }
 
-   static private void testTnmClass( final TnmClass tnmClass,
-                                     final TnmClassPrefixType expectedPrefix,
-                                     final TnmClassType expectedClassType,
-                                     final String expectedValue ) {
-      assertEquals( "Expecting prefix " + expectedPrefix.getCharacterCode() + " : " + expectedPrefix.getTitle(),
-            expectedPrefix, tnmClass.getPrefix() );
-      assertEquals( "Expected class type " + expectedClassType.name() + " : " + expectedClassType.getTitle(),
-            expectedClassType, tnmClass.getClassType() );
-      assertEquals( "Expected value " + expectedValue, expectedValue, tnmClass.getValue() );
+   @Test
+   public void testRoman1() {
+      final List<Tnm> tnms = TnmFinder.getTnms( ROMAN_SENTENCES[ 0 ] );
+      assertEquals( "Expect 2 TNM Classes from " + ROMAN_SENTENCES[ 0 ], 2, tnms.size() );
+      testTnmTypeValue( tnms.get( 0 ), TnmType.T, "1" );
+      testTnmTypeValue( tnms.get( 1 ), TnmType.N, "1" );
    }
+
+   @Test
+   public void testRoman2() {
+      final List<Tnm> tnms = TnmFinder.getTnms( ROMAN_SENTENCES[ 1 ] );
+      assertEquals( "Expect 2 TNM Classes from " + ROMAN_SENTENCES[ 1 ], 2, tnms.size() );
+      testTnmTypeValue( tnms.get( 0 ), TnmType.T, "0" );
+      testTnmTypeValue( tnms.get( 1 ), TnmType.M, "1" );
+   }
+
+   @Test
+   public void testRoman3() {
+      final List<Tnm> tnms = TnmFinder.getTnms( ROMAN_SENTENCES[ 2 ] );
+      assertEquals( "Expect 2 TNM Classes from " + ROMAN_SENTENCES[ 2 ], 2, tnms.size() );
+      testTnmTypeValue( tnms.get( 0 ), TnmType.T, "3" );
+      testTnmTypeValue( tnms.get( 1 ), TnmType.T, "4" );
+   }
+
+
+//   static private void testTnmClass( final TnmClass tnmClass,
+//                                     final TnmClassPrefixType expectedPrefix,
+//                                     final TnmType expectedClassType,
+//                                     final String expectedValue ) {
+//      assertEquals( "Expecting prefix " + expectedPrefix.getCharacterCode() + " : " + expectedPrefix.getTitle(),
+//            expectedPrefix, tnmClass.getPrefix() );
+//      assertEquals( "Expected class type " + expectedClassType.name() + " : " + expectedClassType.getTitle(),
+//            expectedClassType, tnmClass.getClassType() );
+//      assertEquals( "Expected value " + expectedValue, expectedValue, tnmClass.getValue() );
+//   }
+
+   static private void testTnmTypeValue( final Tnm tnm,
+                                         final TnmType expectedType,
+                                         final String expectedValueTitle ) {
+      assertEquals( "Expected TNM type " + expectedType.name() + " : " + expectedType.getTitle(),
+            expectedType, tnm.getSpannedType().getType() );
+      assertEquals( "Expected TNM value " + expectedValueTitle, expectedValueTitle, tnm.getSpannedValue().getValue()
+            .getTitle() );
+   }
+
 
 }

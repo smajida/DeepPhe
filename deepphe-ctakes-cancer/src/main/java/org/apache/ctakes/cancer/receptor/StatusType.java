@@ -1,6 +1,8 @@
 package org.apache.ctakes.cancer.receptor;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.property.Type;
+import org.apache.ctakes.cancer.property.Value;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,7 +14,7 @@ import java.util.regex.Pattern;
  */
 // http://www.breastcancer.org/symptoms/diagnosis/hormone_status
 // http://www.breastcancer.org/symptoms/diagnosis/hormone_status/read_results
-public enum StatusType {
+public enum StatusType implements Type {
    ER( "Estrogen receptor",
          "Estrogen_Receptor_Status",
          "(Estrogen|ER)",
@@ -26,7 +28,7 @@ public enum StatusType {
          "HER-?2( ?/ ?neu)?",
          "C1512413", "C1512413", "C1512413" );
 
-   static public final String PARENT_URI = OwlOntologyConceptUtil.BREAST_CANCER_OWL + "Receptor_Status";
+   static public final String PARENT_URI = OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Receptor_Status";
    static private final String RECEPTOR_EX = "(\\s*-?\\s*?Receptors?\\s*-?)?";
 
    static private final String TUI = "T034";
@@ -56,7 +58,7 @@ public enum StatusType {
       return OwlOntologyConceptUtil.BREAST_CANCER_OWL + _uri;
    }
 
-   public String getCui( final StatusValue statusValue ) {
+   public String getCui( final Value statusValue ) {
       if ( statusValue == StatusValue.POSITIVE ) {
          return _positiveCui;
       } else if ( statusValue == StatusValue.NEGATIVE ) {
