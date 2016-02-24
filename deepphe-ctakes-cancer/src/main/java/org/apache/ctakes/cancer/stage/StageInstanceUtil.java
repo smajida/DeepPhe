@@ -2,6 +2,8 @@ package org.apache.ctakes.cancer.stage;
 
 import org.apache.ctakes.cancer.instance.AbstractInstanceUtil;
 import org.apache.ctakes.cancer.property.SpannedProperty;
+import org.apache.ctakes.cancer.property.SpannedTest;
+import org.apache.ctakes.cancer.property.Test;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.Modifier;
@@ -31,11 +33,13 @@ final public class StageInstanceUtil extends AbstractInstanceUtil<StageType, Sta
    public DiseaseDisorderMention createInstance( final JCas jcas,
                                                  final int windowStartOffset,
                                                  final SpannedProperty<StageType, StageValue> stage,
-                                                 final Iterable<IdentifiedAnnotation> neoplasms ) {
+                                                 final Iterable<IdentifiedAnnotation> neoplasms,
+                                                 final SpannedTest<? extends Test> spannedTest ) {
       final DiseaseDisorderMention eventMention = createEventMention( jcas, windowStartOffset, stage );
       final Modifier valueModifier = createValueModifier( jcas, windowStartOffset, stage );
       createEventMentionDegree( jcas, eventMention, valueModifier );
       createEventMentionNeoplasm( jcas, windowStartOffset, stage, eventMention, neoplasms );
+      createEventMentionIndicator( jcas, windowStartOffset, eventMention, spannedTest );
       return eventMention;
    }
 

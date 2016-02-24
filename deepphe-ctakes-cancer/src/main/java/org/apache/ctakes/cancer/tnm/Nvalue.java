@@ -17,15 +17,15 @@ class Nvalue implements TnmValue {
 
    static {
       final Collection<Nvalue> values = new ArrayList<>();
-      values.add( new Nvalue( "X", "NX_Stage_Finding", "", "X" ) );
-      values.add( new Nvalue( "0", "N0_Stage_Finding", "", "0" ) );
+      values.add( new Nvalue( "X", "NX_Stage_Finding", "X" ) );
+      values.add( new Nvalue( "0", "N0_Stage_Finding", "0" ) );
       for ( int i = 1; i < 4; i++ ) {
-         values.add( new Nvalue( "" + i, "N" + i + "_Stage_Finding", "", "[I]{" + i + "}|" + i ) );
+         values.add( new Nvalue( "" + i, "N" + i + "_Stage_Finding", "[I]{" + i + "}|" + i ) );
       }
       for ( int i = 1; i < 4; i++ ) {
          for ( char c = 'a'; c <= 'z'; c++ ) {
             values.add( new Nvalue(
-                  "" + i + c, "N" + i + c + "_Stage_Finding", "", "([I]{" + i + "}|" + i + ")" + c ) );
+                  "" + i + c, "N" + i + c + "_Stage_Finding", "([I]{" + i + "}|" + i + ")" + c ) );
          }
       }
       VALUES = values.toArray( new Nvalue[ values.size() ] );
@@ -39,14 +39,12 @@ class Nvalue implements TnmValue {
 
    final private String _title;
    final private String _uri;
-   final private String _cui;
    final private Pattern _pattern;
 
 
-   Nvalue( final String title, final String uri, final String cui, final String regex ) {
+   Nvalue( final String title, final String uri, final String regex ) {
       _title = title;
       _uri = uri;
-      _cui = cui;
       _pattern = Pattern.compile( regex, Pattern.CASE_INSENSITIVE );
    }
 
@@ -64,14 +62,6 @@ class Nvalue implements TnmValue {
    @Override
    public String getUri() {
       return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + _uri;
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public String getCui() {
-      return _cui;
    }
 
    /**

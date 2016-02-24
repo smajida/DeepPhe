@@ -3,6 +3,8 @@ package org.apache.ctakes.cancer.receptor;
 
 import org.apache.ctakes.cancer.instance.AbstractInstanceUtil;
 import org.apache.ctakes.cancer.property.SpannedProperty;
+import org.apache.ctakes.cancer.property.SpannedTest;
+import org.apache.ctakes.cancer.property.Test;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.Modifier;
 import org.apache.ctakes.typesystem.type.textsem.SignSymptomMention;
@@ -31,11 +33,13 @@ final public class StatusInstanceUtil extends AbstractInstanceUtil<StatusType, S
    public SignSymptomMention createInstance( final JCas jcas,
                                              final int windowStartOffset,
                                              final SpannedProperty<StatusType, StatusValue> status,
-                                             final Iterable<IdentifiedAnnotation> neoplasms ) {
+                                             final Iterable<IdentifiedAnnotation> neoplasms,
+                                             final SpannedTest<? extends Test> spannedTest ) {
       final SignSymptomMention eventMention = createEventMention( jcas, windowStartOffset, status );
       final Modifier valueModifier = createValueModifier( jcas, windowStartOffset, status );
       createEventMentionDegree( jcas, eventMention, valueModifier );
       createEventMentionNeoplasm( jcas, windowStartOffset, status, eventMention, neoplasms );
+      createEventMentionIndicator( jcas, windowStartOffset, eventMention, spannedTest );
       return eventMention;
    }
 

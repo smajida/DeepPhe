@@ -15,8 +15,6 @@ import java.util.regex.Pattern;
 public enum StageType implements Type {
    DEFAULT( "Stage", "Cancer_Stage", "Stage\\s*" );
 
-   static private final String TUI = "T191";
-
    final private String _title;
    final private String _uri;
    final private Pattern _pattern;
@@ -49,14 +47,6 @@ public enum StageType implements Type {
    @Override
    public String getCui( final Value stageValue ) {
       return stageValue.getCui();
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public String getTui() {
-      return TUI;
    }
 
    /**

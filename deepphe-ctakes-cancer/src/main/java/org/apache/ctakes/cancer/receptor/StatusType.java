@@ -28,10 +28,13 @@ public enum StatusType implements Type {
          "HER-?2( ?/ ?neu)?",
          "C1512413", "C1512413", "C1512413" );
 
+   // TODO
+//   http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#Triple_Negative
+//   http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#Triple_Positive
+
+
    static public final String PARENT_URI = OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Receptor_Status";
    static private final String RECEPTOR_EX = "(\\s*-?\\s*?Receptors?\\s*-?)?";
-
-   static private final String TUI = "T034";
 
    final private String _title;
    final private String _uri;
@@ -50,14 +53,26 @@ public enum StatusType implements Type {
       _unknownCui = unknownCui;
    }
 
+   /**
+    * {@inheritDoc}
+    */
+   @Override
    public String getTitle() {
       return _title;
    }
 
+   /**
+    * {@inheritDoc}
+    */
+   @Override
    public String getUri() {
       return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + _uri;
    }
 
+   /**
+    * {@inheritDoc}
+    */
+   @Override
    public String getCui( final Value statusValue ) {
       if ( statusValue == StatusValue.POSITIVE ) {
          return _positiveCui;
@@ -67,10 +82,10 @@ public enum StatusType implements Type {
       return _unknownCui;
    }
 
-   public String getTui() {
-      return TUI;
-   }
-
+   /**
+    * {@inheritDoc}
+    */
+   @Override
    public Matcher getMatcher( final CharSequence lookupWindow ) {
       return _pattern.matcher( lookupWindow );
    }

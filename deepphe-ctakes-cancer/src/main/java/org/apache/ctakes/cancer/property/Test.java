@@ -12,14 +12,14 @@ import java.util.regex.Matcher;
  * @version %I%
  * @since 2/8/2016
  */
-public interface Type {
+public interface Test {
 
    String getTitle();
    // Can use the ontology:  iClass.getConcept().getPreferredTerm()
 
    String getUri();
 
-   default <T extends Value> String getCui( final T value ) {
+   default String getCui() {
       final IClass iClass = OwlOntologyConceptUtil.getIClass( getUri() );
       if ( iClass == null ) {
          return null;

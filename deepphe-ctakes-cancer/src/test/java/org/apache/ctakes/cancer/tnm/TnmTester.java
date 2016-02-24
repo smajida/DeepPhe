@@ -35,6 +35,7 @@ public class TnmTester {
          "Father had TIII, son is worse (TIV)"
    };
 
+
    @Test
    public void testTnmClasses() {
       final List<Tnm> tnms = TnmFinder.getTnms( FULL_SENTENCE );
@@ -66,6 +67,8 @@ public class TnmTester {
       assertEquals( "Expect 2 TNM Classes from " + PUNCTUATION_SENTENCES[ 0 ], 2, tnms.size() );
       testTnmTypeValue( tnms.get( 0 ), TnmType.T, "1" );
       testTnmTypeValue( tnms.get( 1 ), TnmType.N, "1" );
+      final SpannedTnmPrefix prefix = TnmFinder.getTnmPrefix( tnms.get( 0 ), PUNCTUATION_SENTENCES[ 0 ] );
+      assertEquals( "Expect prefix p for pT1 in " + PUNCTUATION_SENTENCES[ 0 ], TnmPrefix.P, prefix.getTest() );
    }
 
    @Test
@@ -98,6 +101,8 @@ public class TnmTester {
       assertEquals( "Expect 2 TNM Classes from " + ROMAN_SENTENCES[ 0 ], 2, tnms.size() );
       testTnmTypeValue( tnms.get( 0 ), TnmType.T, "1" );
       testTnmTypeValue( tnms.get( 1 ), TnmType.N, "1" );
+      final SpannedTnmPrefix prefix = TnmFinder.getTnmPrefix( tnms.get( 0 ), ROMAN_SENTENCES[ 0 ] );
+      assertEquals( "Expect prefix p for pTI in " + ROMAN_SENTENCES[ 0 ], TnmPrefix.P, prefix.getTest() );
    }
 
    @Test

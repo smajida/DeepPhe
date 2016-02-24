@@ -4,13 +4,14 @@ import org.apache.ctakes.cancer.property.*;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
-import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.relation.DegreeOfTextRelation;
+import org.apache.ctakes.typesystem.type.relation.IndicatesTextRelation;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
 import org.apache.ctakes.typesystem.type.textsem.EventMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.Modifier;
+import org.apache.ctakes.typesystem.type.textsem.ProcedureMention;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 
@@ -18,6 +19,7 @@ import java.util.Collections;
 import java.util.logging.Logger;
 
 import static org.apache.ctakes.typesystem.type.constants.CONST.MODIFIER_TYPE_ID_SEVERITY_CLASS;
+import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_PROCEDURE;
 
 /**
  * @author SPF , chip-nlp
@@ -25,6 +27,8 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.MODIFIER_TYPE_ID
  * @since 2/17/2016
  */
 abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E extends EventMention> {
+
+   // TODO add <..., P extends Test, ...>
 
    static private final Logger LOGGER = Logger.getLogger( "AbstractInstanceUtil" );
 
@@ -51,9 +55,9 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
     * @param spannedProperty   -
     * @return the property as a event mention
     */
-   public E createInstance( final JCas jcas,
-                            final int windowStartOffset,
-                            final SpannedProperty<T, V> spannedProperty ) {
+   final public E createInstance( final JCas jcas,
+                                  final int windowStartOffset,
+                                  final SpannedProperty<T, V> spannedProperty ) {
       return createInstance( jcas, windowStartOffset, spannedProperty, Collections.emptyList() );
    }
 
@@ -69,10 +73,31 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
     * @param neoplasms         nearby neoplasms
     * @return the property as a event mention
     */
+   final public E createInstance( final JCas jcas,
+                                  final int windowStartOffset,
+                                  final SpannedProperty<T, V> spannedProperty,
+                                  final Iterable<IdentifiedAnnotation> neoplasms ) {
+      return createInstance( jcas, windowStartOffset, spannedProperty, neoplasms, null );
+   }
+
+   /**
+    * Create the type as an event mention and add it to the cas,
+    * create the value as a modifier and add it to the cas,
+    * create the type to value tie as a DegreeOfTextRelation
+    * Tie the type as an event mention to the closest neoplasm
+    *
+    * @param jcas              -
+    * @param windowStartOffset character offset of window containing the receptor status
+    * @param spannedProperty   -
+    * @param neoplasms         nearby neoplasms
+    * @param spannedTest       an associated test for the property.  Null if none
+    * @return the property as a event mention
+    */
    abstract public E createInstance( final JCas jcas,
                                      final int windowStartOffset,
                                      final SpannedProperty<T, V> spannedProperty,
-                                     final Iterable<IdentifiedAnnotation> neoplasms );
+                                     final Iterable<IdentifiedAnnotation> neoplasms,
+                                     final SpannedTest<? extends Test> spannedTest );
 
    /**
     * Create a sign/symptom and add it to the cas
@@ -93,12 +118,15 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
       final V value = spannedValue.getValue();
       final T type = spannedType.getType();
       // Main Umls Concept
-      final UmlsConcept umlsConcept = new UmlsConcept( jcas );
-      umlsConcept.setCui( type.getCui( value ) );
-      umlsConcept.setTui( type.getTui() );
+      final String cui = value.getCui();
+      final String tui = value.getTui();
+      final String title = value.getTitle();
+      UmlsConcept umlsConcept = new UmlsConcept( jcas );
+      umlsConcept.setCui( cui == null ? "" : cui );
+      umlsConcept.setTui( tui == null ? "" : tui );
+      umlsConcept.setPreferredText( title == null ? "" : title );
       umlsConcept.setCodingScheme( OwlConcept.URI_CODING_SCHEME );
       umlsConcept.setCode( type.getUri() );
-      umlsConcept.setPreferredText( type.getTitle() );
       final FSArray ontologyConcepts = new FSArray( jcas, 1 );
       ontologyConcepts.set( 0, umlsConcept );
       typeMention.setOntologyConceptArr( ontologyConcepts );
@@ -132,11 +160,17 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
       valueModifier.setTypeID( MODIFIER_TYPE_ID_SEVERITY_CLASS );
       final V value = spannedValue.getValue();
       // Value uri concept
-      final OntologyConcept valueConcept = new OntologyConcept( jcas );
-      valueConcept.setCodingScheme( OwlConcept.URI_CODING_SCHEME );
-      valueConcept.setCode( value.getUri() );
+      final String cui = value.getCui();
+      final String tui = value.getTui();
+      final String title = value.getTitle();
+      UmlsConcept umlsConcept = new UmlsConcept( jcas );
+      umlsConcept.setCui( cui == null ? "" : cui );
+      umlsConcept.setTui( tui == null ? "" : tui );
+      umlsConcept.setPreferredText( title == null ? "" : title );
+      umlsConcept.setCodingScheme( OwlConcept.URI_CODING_SCHEME );
+      umlsConcept.setCode( value.getUri() );
       final FSArray ontologyConcepts = new FSArray( jcas, 1 );
-      ontologyConcepts.set( 0, valueConcept );
+      ontologyConcepts.set( 0, umlsConcept );
       valueModifier.setOntologyConceptArr( ontologyConcepts );
       valueModifier.addToIndexes();
       return valueModifier;
@@ -144,6 +178,8 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
 
    /**
     * Create the degree of relation and add is to the cas
+    * http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Severity
+    * http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Degree
     *
     * @param jCas         -
     * @param eventMention -
@@ -225,6 +261,97 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
       neoplasmRelation.setArg2( neoplasmArgument );
       neoplasmRelation.setCategory( relationName );
       neoplasmRelation.addToIndexes();
+   }
+
+
+   /**
+    * Create a "test_indicates_property" relation
+    *
+    * @param jCas              -
+    * @param windowStartOffset character offset of window containing the receptor status
+    * @param eventMention      property as an event mention
+    * @param spannedTest       associated test
+    */
+   final protected void createEventMentionIndicator( final JCas jCas,
+                                                     final int windowStartOffset,
+                                                     final E eventMention,
+                                                     final SpannedTest<? extends Test> spannedTest ) {
+      if ( spannedTest == null ) {
+         return;
+      }
+      final ProcedureMention procedure = createTestProcedure( jCas, windowStartOffset, spannedTest );
+      final String relationName = spannedTest.getTest().getTitle().replace( ' ', '_' ) + "_for";
+      createEventMentionIndicator( jCas, eventMention, procedure, relationName );
+   }
+
+   /**
+    * Create a modifier and add it to the cas
+    *
+    * @param jcas              -
+    * @param windowStartOffset character offset of window containing the property
+    * @param spannedTest       -
+    * @return the procedure mention representing the test for a property
+    */
+   final protected ProcedureMention createTestProcedure( final JCas jcas,
+                                                         final int windowStartOffset,
+                                                         final SpannedTest<? extends Test> spannedTest ) {
+      final ProcedureMention procedure = new ProcedureMention( jcas,
+            windowStartOffset + spannedTest.getStartOffset(),
+            windowStartOffset + spannedTest.getEndOffset() );
+      procedure.setTypeID( NE_TYPE_ID_PROCEDURE );
+      // Test uri concept
+      final Test test = spannedTest.getTest();
+      final String cui = test.getCui();
+      final String tui = test.getTui();
+      final String title = test.getTitle();
+      UmlsConcept umlsConcept = new UmlsConcept( jcas );
+      umlsConcept.setCui( cui == null ? "" : cui );
+      umlsConcept.setTui( tui == null ? "" : tui );
+      umlsConcept.setPreferredText( title == null ? "" : title );
+      umlsConcept.setCodingScheme( OwlConcept.URI_CODING_SCHEME );
+      umlsConcept.setCode( test.getUri() );
+      final FSArray ontologyConcepts = new FSArray( jcas, 1 );
+      ontologyConcepts.set( 0, umlsConcept );
+      procedure.setOntologyConceptArr( ontologyConcepts );
+      procedure.addToIndexes();
+      return procedure;
+   }
+
+   /**
+    * Create a "property_type_of" relation to a neoplasm.
+    *
+    * @param jCas         -
+    * @param eventMention property as an event mention
+    * @param procedure    the associated neoplasm
+    * @param relationName e.g. tnm_of
+    */
+   final protected void createEventMentionIndicator( final JCas jCas,
+                                                     final E eventMention,
+                                                     final IdentifiedAnnotation procedure,
+                                                     final String relationName ) {
+      if ( eventMention == null ) {
+         LOGGER.info( "No argument for " + relationName
+                      + ((procedure != null) ? " of " + procedure.getCoveredText() : "") );
+         return;
+      }
+      if ( procedure == null ) {
+         LOGGER.info( "No Test for " + relationName + " " + eventMention.getCoveredText() );
+         return;
+      }
+      // add the relation to the CAS
+      final RelationArgument eventArgument = new RelationArgument( jCas );
+      eventArgument.setArgument( eventMention );
+      eventArgument.setRole( "Argument" );
+      eventArgument.addToIndexes();
+      final RelationArgument procedureArgument = new RelationArgument( jCas );
+      procedureArgument.setArgument( procedure );
+      procedureArgument.setRole( "Related_to" );
+      procedureArgument.addToIndexes();
+      final IndicatesTextRelation indicatesRelation = new IndicatesTextRelation( jCas );
+      indicatesRelation.setArg1( eventArgument );
+      indicatesRelation.setArg2( procedureArgument );
+      indicatesRelation.setCategory( relationName );
+      indicatesRelation.addToIndexes();
    }
 
 

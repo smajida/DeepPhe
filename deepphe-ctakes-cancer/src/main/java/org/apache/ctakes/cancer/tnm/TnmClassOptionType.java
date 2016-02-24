@@ -16,6 +16,9 @@ enum TnmClassOptionType {
    L( "Invasion into lymphatic vessels", "L[0-1](C[1-5])?" ),
    V( "Invasion into vein", "V[0-2](C[1-5])?" );
 
+   // TODO -- not sure where to put this at the moment ...
+//   http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#TNM_Modifier   ??
+
    final private String _title;
    final private Pattern _pattern;
 

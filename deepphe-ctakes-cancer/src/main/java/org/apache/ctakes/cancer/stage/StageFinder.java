@@ -3,10 +3,7 @@ package org.apache.ctakes.cancer.stage;
 
 import org.apache.ctakes.cancer.property.SpannedType;
 import org.apache.ctakes.cancer.property.SpannedValue;
-import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
-import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
-import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;

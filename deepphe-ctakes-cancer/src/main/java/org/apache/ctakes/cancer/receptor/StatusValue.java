@@ -12,17 +12,19 @@ import java.util.regex.Pattern;
  * @since 8/19/2015
  */
 public enum StatusValue implements Value {
-   POSITIVE( "Positive", Boolean.TRUE, "Positive", "\\+?pos(itive)?|\\+(pos)?" ),
-   NEGATIVE( "Negative", Boolean.FALSE, "Negative", "-?neg(ative)?|-(neg)?" ),
-   UNKNOWN( "Unknown", null, "Unknown", "unknown|indeterminate|equivocal|(not assessed)|\\bN/?A\\b" );
+   POSITIVE( "Positive", "Positive", "\\+?pos(itive)?|\\+(pos)?" ),
+   NEGATIVE( "Negative", "Negative", "-?neg(ative)?|-(neg)?" ),
+   UNKNOWN( "Unknown", "Unknown", "unknown|indeterminate|equivocal|(not assessed)|\\bN/?A\\b" );
+   //   http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#Equivocal
    final private String _title;
-   final private Boolean _booleanValue;
    final private String _uri;
    final private Pattern _pattern;
 
-   StatusValue( final String title, final Boolean booleanValue, final String uri, final String regex ) {
+
+   static private final String VALUE_TYPE_URI = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#TNMValue";
+
+   StatusValue( final String title, final String uri, final String regex ) {
       _title = title;
-      _booleanValue = booleanValue;
       _uri = uri;
       _pattern = Pattern.compile( regex, Pattern.CASE_INSENSITIVE );
    }
@@ -35,16 +37,8 @@ public enum StatusValue implements Value {
       return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + _uri;
    }
 
-   public String getCui() {
-      return "";
-   }
-
    public Matcher getMatcher( final CharSequence lookupWindow ) {
       return _pattern.matcher( lookupWindow );
-   }
-
-   public Boolean getBooleanValue() {
-      return _booleanValue;
    }
 
    /**

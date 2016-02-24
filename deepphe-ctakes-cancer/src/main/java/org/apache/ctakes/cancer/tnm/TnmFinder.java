@@ -1,19 +1,15 @@
 package org.apache.ctakes.cancer.tnm;
 
-import org.apache.ctakes.cancer.property.SpannedValue;
-import org.apache.ctakes.cancer.property.Value;
-import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
-import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
-import org.apache.ctakes.dictionary.lookup2.textspan.TextSpan;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
-import org.apache.ctakes.typesystem.type.textsem.SignSymptomMention;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.jcas.JCas;
 
-import java.util.*;
-import java.util.function.BiFunction;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,12 +60,13 @@ final public class TnmFinder {
       }
       final int windowStartOffset = lookupWindow.getBegin();
       for ( Tnm tnm : tnms ) {
-         TNM_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, tnm, neoplasms );
+         final SpannedTnmPrefix tnmPrefix = getTnmPrefix( tnm, lookupWindow.getCoveredText() );
+         TNM_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, tnm, neoplasms, tnmPrefix );
       }
    }
 
    static List<Tnm> getTnms( final String lookupWindow ) {
-      if ( lookupWindow.length() < 3 ) {
+      if ( lookupWindow.length() < 2 ) {
          return Collections.emptyList();
       }
       final List<SpannedTnmType> types = new ArrayList<>();
@@ -149,6 +146,21 @@ final public class TnmFinder {
          }
       }
       return bestValue;
+   }
+
+   static SpannedTnmPrefix getTnmPrefix( final Tnm tnm, final String lookupWindow ) {
+      if ( tnm.getStartOffset() == 0 || lookupWindow.length() < 3 ||
+           lookupWindow.charAt( tnm.getStartOffset() - 1 ) == ' ' ) {
+         return null;
+      }
+      final String matchWindow = lookupWindow.substring( tnm.getStartOffset() - 1, tnm.getStartOffset() );
+      for ( TnmPrefix prefix : TnmPrefix.values() ) {
+         final Matcher prefixMatcher = prefix.getMatcher( matchWindow );
+         if ( prefixMatcher.find() ) {
+            return new SpannedTnmPrefix( prefix, tnm.getStartOffset() - 1, tnm.getStartOffset() );
+         }
+      }
+      return null;
    }
 
 
