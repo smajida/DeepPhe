@@ -1,0 +1,49 @@
+//created on: Feb 18, 2016
+package org.healthnlp.deepphe.uima.drools;
+
+import org.healthnlp.deepphe.fhir.summary.CancerSummary;
+import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.FHIRConstants;
+
+import java.net.URI;
+
+
+//declare any global variables here
+
+
+//tCls: http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#T2_Stage_Finding  
+//FHIRUtils.getConceptURI(cancerSummary.getPhenotype().getPrimaryTumorClassification());
+
+//nCls: http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#T2_Stage_Finding 
+//FHIRUtils.getConceptURI(cancerSummary.getPhenotype().getRegionalLymphNodeClassification());  
+
+//mCls: http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#M0_Stage_Finding 
+//FHIRUtils.getConceptURI(cancerSummary.getPhenotype().getDistantMetastasisClassification());
+   
+//URI stage = URI.create(FHIRConstants.MODEL_CANCER_URL+"#StageIIA");
+//cancerSummary.getPhenotype().setCancerStage(FHIRUtils.getCodeableConcept(stage));
+
+/**
+Tclass = T2 and Mclass= MX and Nclass=NS THEN Stage = IIA
+*/
+rule "addStage"
+
+    when
+        CancerSummary ($phenotype : phenotype )
+        //eval(FHIRUtils.getConceptName($phenotype.getPrimaryTumorClassification()).equals("T2 Stage Finding"))
+        eval(
+        FHIRUtils.getConceptURI($phenotype.getPrimaryTumorClassification()).toString().equals("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#T2_Stage_Finding") 
+        && 
+        FHIRUtils.getConceptURI($phenotype.getRegionalLymphNodeClassification()).toString().equals("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#T2_Stage_Finding") 
+        && 
+        FHIRUtils.getConceptURI($phenotype.getDistantMetastasisClassification()).toString().equals("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#M0_Stage_Finding") 
+        )
+    then
+         URI stage = URI.create(FHIRConstants.MODEL_CANCER_URL+"#StageIIA");
+         $phenotype.setCancerStage(FHIRUtils.getCodeableConcept(stage));
+        System.out.println(" \n*************** DROOLS addStage fired *************** ");
+        System.out.println("DROOLS about to set stage: "+stage);
+         
+end
+      
+
