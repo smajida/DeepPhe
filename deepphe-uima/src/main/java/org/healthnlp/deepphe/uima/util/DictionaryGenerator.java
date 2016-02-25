@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
@@ -21,6 +22,7 @@ import edu.pitt.dbmi.nlp.noble.terminology.Source;
 import edu.pitt.dbmi.nlp.noble.terminology.Terminology;
 import edu.pitt.dbmi.nlp.noble.terminology.TerminologyException;
 import edu.pitt.dbmi.nlp.noble.terminology.impl.NobleCoderTerminology;
+import edu.pitt.dbmi.nlp.noble.util.PathHelper;
 
 /**
  * create a custom dictionary that will map a dictionary of intest to our existing ontology
@@ -30,16 +32,17 @@ import edu.pitt.dbmi.nlp.noble.terminology.impl.NobleCoderTerminology;
  */
 public class DictionaryGenerator {
 	private static final String I = "|";
-	private Terminology terminology,metathesaurus;
+	private NobleCoderTerminology terminology,metathesaurus,ancestryTerminology;
 	private Terminology ontologyTerminology;
 	private List<SemanticType> semanticTypeFilter;
-	private List<Concept> rootFilter;
 	private List<Source> sourceFilter;
 	private URI defaultNOS;
 	private Set<String> visited;
+	private boolean pullSynonymsFromMetathesaurus;
+	private PathHelper pathHelper;
 	
 	
-	public DictionaryGenerator(Terminology terminology, IOntology ontology) throws IOException, TerminologyException, IOntologyException{
+	public DictionaryGenerator(NobleCoderTerminology terminology, IOntology ontology) throws IOException, TerminologyException, IOntologyException{
 		this.terminology = terminology;
 		this.ontologyTerminology = new NobleCoderTerminology(ontology);
 	}
@@ -57,15 +60,39 @@ public class DictionaryGenerator {
 	}
 
 
-	public List<Concept> getRootFilter() {
-		if(rootFilter == null)
-			rootFilter = new ArrayList<Concept>();
-		return rootFilter;
+
+	public PathHelper getPathHelper() {
+		if(pathHelper == null){
+			if(ancestryTerminology != null){
+				pathHelper = new PathHelper(ancestryTerminology);
+			}else{
+				pathHelper = new PathHelper(terminology);
+			}
+		}
+		return pathHelper;
 	}
 
 
-	public void setRootFilter(List<Concept> rootFilter) {
-		this.rootFilter = rootFilter;
+	public NobleCoderTerminology getAncestryTerminology() {
+		if(ancestryTerminology == null){
+			ancestryTerminology = terminology;
+		}
+		return ancestryTerminology;
+	}
+
+
+	public void setAncestryTerminology(NobleCoderTerminology ancestryTerminology) {
+		this.ancestryTerminology = ancestryTerminology;
+	}
+
+
+	public boolean isPullSynonymsFromMetathesaurus() {
+		return pullSynonymsFromMetathesaurus;
+	}
+
+
+	public void setPullSynonymsFromMetathesaurus(boolean pullSynonymsFromMetathesaurus) {
+		this.pullSynonymsFromMetathesaurus = pullSynonymsFromMetathesaurus;
 	}
 
 
@@ -109,26 +136,82 @@ public class DictionaryGenerator {
 	 * @return
 	 */
 	private boolean isFilteredOut(Concept c){
-		if(getSemanticTypeFilter().isEmpty())
-			return false;
-		for(SemanticType st: c.getSemanticTypes()){
-			if(getSemanticTypeFilter().contains(st))
-				return false;
+		boolean filteredOut = true;
+		
+		if(!getSemanticTypeFilter().isEmpty()){
+			for(SemanticType st: c.getSemanticTypes()){
+				if(getSemanticTypeFilter().contains(st)){
+					filteredOut = false;
+					break;
+				}
+			}
 		}
-		return true;
+		// optional source filter
+		if(!filteredOut && !getSourceFilter().isEmpty()){
+			filteredOut = true;
+			for(Source st: c.getSources()){
+				if(getSourceFilter().contains(st)){
+					filteredOut = false;
+					break;
+				}
+			}
+		}
+		
+		return filteredOut;
 	}
 	
+	/**
+	 * generate dictionary by recursively pulling synonym
+	 * @throws Exception
+	 */
 	
 	
-	public void generate() throws Exception{
+	public void generateByHierarchy(List<Concept> roots) throws Exception{
 		visited = new HashSet<String>();
-		List<Concept> roots = (getRootFilter().isEmpty())?Arrays.asList(terminology.getRootConcepts()):getRootFilter();
 		for(Concept c: roots){
 			exportConcept(c,defaultNOS);
 		}
 	}
 	
+	/**
+	 * only use 
+	 * @throws Exception
+	 */
+	public void generateBySemanticTypes() throws Exception {
+		for(String code: terminology.getAllConcepts()){
+			exportConcept(terminology.lookupConcept(code));
+		}
+	}
 	
+	/**
+	 * export concept information without going through hierarchy
+	 * @param c
+	 * @throws TerminologyException 
+	 */
+	private void exportConcept(Concept c) throws TerminologyException {
+		// first make sure that it fits the filter
+		if(c == null || isFilteredOut(c)){
+			return;
+		}
+		
+		// find mapped URL
+		URI url = getMatchingURL(c);
+		if(url == null)
+			url = defaultNOS;
+		
+		// print concept information
+		for(String s: getTerms(c)){
+			StringBuffer tui= new StringBuffer();
+			String sep = "";
+			for(SemanticType st: c.getSemanticTypes()){
+				tui.append(sep+st.getCode());
+				sep = ",";
+			}
+			System.out.println(c.getCode()+I+s+I+tui+I+url);
+		}
+	}
+
+
 	/**
 	 * export single concept as class
 	 * @param c
@@ -172,17 +255,18 @@ public class DictionaryGenerator {
 		terms.add(c.getName());
 		Collections.addAll(terms,c.getSynonyms());
 		// lookup in UMLS
-		Concept cc = getMetathesaurus().lookupConcept(c.getCode());
-		if(cc != null){
-			Collections.addAll(terms,cc.getSynonyms());
+		if(pullSynonymsFromMetathesaurus){
+			Concept cc = getMetathesaurus().lookupConcept(c.getCode());
+			if(cc != null){
+				Collections.addAll(terms,cc.getSynonyms());
+			}
 		}
 		return terms;
 		
 	}
 	
 	
-	
-	private URI getMatchingURL(Concept c) throws TerminologyException {
+	private Concept getMatchingOntologyConcept(Concept c) throws TerminologyException {
 		Concept cc = ontologyTerminology.lookupConcept(c.getCode());
 		// if not found try to match by other codes
 		if(cc == null){
@@ -203,7 +287,23 @@ public class DictionaryGenerator {
 				
 			}
 		}
-		
+		return cc;
+	}
+	
+	
+	private URI getMatchingURL(Concept c) throws TerminologyException {
+		Concept cc = getMatchingOntologyConcept(c);
+		// try ancestors
+		if(cc == null){
+			Concept ccc = getAncestryTerminology().lookupConcept(c.getCode());
+			if(ccc != null){
+				for(Concept ac: getPathHelper().getAncestors(ccc).keySet()){
+					cc = getMatchingOntologyConcept(ac);
+					if(cc != null)
+						break;
+				}
+			}
+		}
 		
 		if(cc != null){
 			String uri = cc.getCode();
@@ -234,14 +334,68 @@ public class DictionaryGenerator {
 		*/
 		
 		
-		Terminology term = new NobleCoderTerminology("NCI_Thesaurus");
-		IOntology ont = OOntology.loadOntology("/home/tseytlin/Work/DeepPhe/data/ontology/nlpBreastCancer.owl");
 		//generate dictionary
-		DictionaryGenerator dg = new DictionaryGenerator(term,ont);
+		/*	DictionaryGenerator dg = new DictionaryGenerator(term,ont);
 		dg.setDefaultNOS(URI.create("http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl#BodySite_NOS"));
 		dg.setSemanticTypeFilter(Arrays.asList(SemanticType.getSemanticTypes(new String [] {"Body Part, Organ, or Organ Component"})));
-		dg.setRootFilter(Arrays.asList(term.lookupConcept("C13018")));
-		dg.generate();
+		dg.generateByHierarchy(Arrays.asList(term.lookupConcept("C13018")));*/
+		
+		NobleCoderTerminology term = new NobleCoderTerminology("NCI_Metathesaurus");
+		NobleCoderTerminology aterm = new NobleCoderTerminology("NCI_Thesaurus");
+		IOntology ont = OOntology.loadOntology("/home/tseytlin/Work/DeepPhe/data/ontology/nlpBreastCancer.owl");
+		
+		DictionaryGenerator dg = new DictionaryGenerator(term,ont);
+		// Anatomical Sites 
+	/*	dg.setAncestryTerminology(aterm);
+		dg.setDefaultNOS(URI.create("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#OtherBodySite"));
+		dg.setSemanticTypeFilter(Arrays.asList(SemanticType.getSemanticTypes(new String [] {"T021","T022","T023","T024","T025","T026","T029","T030"})));
+		dg.setSourceFilter(Arrays.asList(Source.getSources(new String [] {"SNOMEDCT_US"})));
+		dg.generateBySemanticTypes();*/
+		
+		
+		// Procedures (diagnostic)
+		/*dg.setAncestryTerminology(aterm);
+		dg.setDefaultNOS(URI.create("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#OtherDiagnositcProcedure"));
+		dg.setSemanticTypeFilter(Arrays.asList(SemanticType.getSemanticTypes(new String [] {"T060"}))); 
+		dg.setSourceFilter(Arrays.asList(Source.getSources(new String [] {"SNOMEDCT_US"})));
+		dg.generateBySemanticTypes();*/
+		
+		// Procedures (theraputic)
+		/*dg.setAncestryTerminology(aterm);
+		dg.setDefaultNOS(URI.create("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#OtherTherapeuticProcedure"));
+		dg.setSemanticTypeFilter(Arrays.asList(SemanticType.getSemanticTypes(new String [] {"T061"}))); 
+		dg.setSourceFilter(Arrays.asList(Source.getSources(new String [] {"SNOMEDCT_US"})));
+		dg.generateBySemanticTypes();*/
+		
+		
+		// Drugs
+		dg.setAncestryTerminology(aterm);
+		dg.setDefaultNOS(URI.create("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#OtherMedication"));
+		dg.setSemanticTypeFilter(Arrays.asList(SemanticType.getSemanticTypes(new String [] {"T109", 
+				"T110", 
+				"T114", 
+				"T115", 
+				"T116", 
+				"T118", 
+				"T119", 
+				"T121", 
+				"T122", 
+				"T123", 
+				"T124", 
+				"T125", 
+				"T126", 
+				"T127", 
+				"T129", 
+				"T130", 
+				"T131", 
+				"T195", 
+				"T196", 
+				"T197", 
+				"T200", 
+				"T203"}))); 
+		dg.setSourceFilter(Arrays.asList(Source.getSources(new String [] {"RXNORM"})));
+		dg.generateBySemanticTypes();
+		
 	}
 
 }
