@@ -493,6 +493,8 @@ public class FHIRUtils {
 	}
 	
 	public static URI getConceptURI(CodeableConcept c){
+		if(c == null)
+			return null;
 		for(Coding coding : c.getCoding()){
 			if(coding.getCode() != null && coding.getCode().startsWith("http://")){
 				return URI.create(coding.getCode());
