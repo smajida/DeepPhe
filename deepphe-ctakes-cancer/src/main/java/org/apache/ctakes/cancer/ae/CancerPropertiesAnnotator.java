@@ -1,7 +1,7 @@
 package org.apache.ctakes.cancer.ae;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
-import org.apache.ctakes.cancer.receptor.ReceptorStatusFinder;
+import org.apache.ctakes.cancer.receptor.StatusFinder;
 import org.apache.ctakes.cancer.size.SizeFinder;
 import org.apache.ctakes.cancer.stage.StageFinder;
 import org.apache.ctakes.cancer.tnm.TnmFinder;
@@ -53,9 +53,12 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
                = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, "Breast_Neoplasm" );
 
          if ( !breastNeoplasms.isEmpty() ) {
-            TnmFinder.addTnmTumorClasses( jcas, lookupWindow, breastNeoplasms );
-            ReceptorStatusFinder.addReceptorStatuses( jcas, lookupWindow, breastNeoplasms );
+            TnmFinder.addTnms( jcas, lookupWindow, breastNeoplasms );
             StageFinder.addStages( jcas, lookupWindow, breastNeoplasms );
+
+            final Collection<IdentifiedAnnotation> diagnosticProcedures
+                  = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, "DiagnosticProcedure" );
+            StatusFinder.addReceptorStatuses( jcas, lookupWindow, breastNeoplasms, diagnosticProcedures );
          }
 
          final Collection<IdentifiedAnnotation> masses

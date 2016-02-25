@@ -14,6 +14,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class StageTester {
 
+   // TODO add some decent tests
+
    static private final Logger LOGGER = Logger.getLogger( "StageTester" );
 
    static private final String MULTIPLE_MENTION_SENTENCE = "Patient has stage 1a liver cancer and StageIV breast cancer.";
@@ -23,10 +25,10 @@ public class StageTester {
    public void testMultipleMention() {
       final List<Stage> stages = StageFinder.getStages( MULTIPLE_MENTION_SENTENCE );
       assertEquals( "Expect two Cancer Stages in " + MULTIPLE_MENTION_SENTENCE, 2, stages.size() );
-      StageValue value = stages.get( 0 ).getValue();
+      StageValue value = stages.get( 0 ).getSpannedValue().getValue();
       assertEquals( "Expected " + StageValue.I_A.getTitle() + " in " + MULTIPLE_MENTION_SENTENCE,
             StageValue.I_A.getTitle(), value.getTitle() );
-      value = stages.get( 1 ).getValue();
+      value = stages.get( 1 ).getSpannedValue().getValue();
       assertEquals( "Expected " + StageValue.IV.getTitle() + " in " + MULTIPLE_MENTION_SENTENCE,
             StageValue.IV.getTitle(), value.getTitle() );
    }

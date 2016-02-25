@@ -3,7 +3,10 @@ package org.apache.ctakes.cancer.pipeline;
 
 import org.apache.ctakes.assertion.medfacts.cleartk.PolarityCleartkAnalysisEngine;
 import org.apache.ctakes.assertion.medfacts.cleartk.UncertaintyCleartkAnalysisEngine;
-import org.apache.ctakes.cancer.ae.*;
+import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
+import org.apache.ctakes.cancer.ae.PittHeaderAnnotator;
+import org.apache.ctakes.cancer.ae.PittHeaderCleaner;
+import org.apache.ctakes.cancer.ae.PropertyToEventCopier;
 import org.apache.ctakes.chunker.ae.Chunker;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.CopyNPChunksToLookupWindowAnnotations;
@@ -22,7 +25,6 @@ import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.JCasTermAnnotator;
 import org.apache.ctakes.postagger.POSTagger;
-import org.apache.ctakes.relationextractor.ae.DegreeOfRelationExtractorAnnotator;
 import org.apache.ctakes.relationextractor.ae.LocationOfRelationExtractorAnnotator;
 import org.apache.ctakes.relationextractor.ae.ModifierExtractorAnnotator;
 import org.apache.ctakes.temporal.ae.*;
@@ -54,7 +56,6 @@ final public class CancerPipelineFactory {
    static private final String LOOKUP_CONFIG_DESC
          = "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml";
 //   = "C:/Spiffy/prj_darth_phenome/dev/github3/DeepPhe/resources/org/apache/ctakes/dictionary/lookup/fast/nci_proc.xml";
-
 
 
    private CancerPipelineFactory() {
@@ -184,11 +185,11 @@ final public class CancerPipelineFactory {
                   ModifierExtractorAnnotator.class,
                   GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
                   getModelPath( "relationextractor/models/modifier_extractor" ) ) );
-      aggregateBuilder.add(
-            AnalysisEngineFactory.createEngineDescription(
-                  DegreeOfRelationExtractorAnnotator.class,
-                  GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
-                  getModelPath( "relationextractor/models/degree_of" ) ) );
+//      aggregateBuilder.add(
+//            AnalysisEngineFactory.createEngineDescription(
+//                  DegreeOfRelationExtractorAnnotator.class,
+//                  GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
+//                  getModelPath( "relationextractor/models/degree_of" ) ) );
       aggregateBuilder.add(
             AnalysisEngineFactory.createEngineDescription(
                   LocationOfRelationExtractorAnnotator.class,

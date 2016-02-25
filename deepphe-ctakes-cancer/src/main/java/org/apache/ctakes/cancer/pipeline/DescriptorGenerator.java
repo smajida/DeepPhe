@@ -20,7 +20,7 @@ final public class DescriptorGenerator {
       @Option(
             shortName = "x",
             description = "File to write xml descriptor to",
-            defaultToNull = true)
+            defaultToNull = true )
       public String getXmlOutput();
 
    }

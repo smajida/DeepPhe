@@ -4,8 +4,6 @@ package org.apache.ctakes.dictionary.lookup2.ontology;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 import edu.pitt.dbmi.nlp.noble.terminology.SemanticType;
-import org.apache.ctakes.dictionary.lookup2.util.CuiCodeUtil;
-import org.apache.ctakes.dictionary.lookup2.util.TuiCodeUtil;
 import org.apache.log4j.Logger;
 
 import java.net.URI;

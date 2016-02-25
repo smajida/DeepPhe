@@ -12,3 +12,5 @@
 /deepphe-uima/deepphe-uima.iml
 /deepphe-workbench/deepphe-workbench.iml
 /resources/
+/deepphe-uima/testdb
+./deepphe-viz/project/.sbtserver

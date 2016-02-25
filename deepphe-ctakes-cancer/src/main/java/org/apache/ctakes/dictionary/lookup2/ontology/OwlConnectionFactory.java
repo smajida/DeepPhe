@@ -3,7 +3,6 @@ package org.apache.ctakes.dictionary.lookup2.ontology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
-
 import org.apache.ctakes.core.resource.FileLocator;
 import org.apache.log4j.Logger;
 
@@ -23,9 +22,11 @@ public enum OwlConnectionFactory {
       return INSTANCE;
    }
 
-   static final private Logger LOGGER = Logger.getLogger( "OwlConnectionFactory" );
-   static final private Logger DOT_LOGGER = Logger.getLogger( "ProgressAppender" );
-   static final private Logger EOL_LOGGER = Logger.getLogger( "ProgressDone" );
+   static public final String ROOT_ELEMENT_NAME = "Annotation";
+
+   static private final Logger LOGGER = Logger.getLogger( "OwlConnectionFactory" );
+   static private final Logger DOT_LOGGER = Logger.getLogger( "ProgressAppender" );
+   static private final Logger EOL_LOGGER = Logger.getLogger( "ProgressDone" );
 
 
    private final Map<String, IOntology> ONTOLOGIES = Collections.synchronizedMap( new HashMap<>() );

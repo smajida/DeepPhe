@@ -1,28 +1,25 @@
 package org.apache.ctakes.cancer.tnm;
 
-import edu.pitt.dbmi.nlp.noble.ontology.IClass;
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
-import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
-import org.apache.ctakes.cancer.type.textsem.TnmClassification;
-import org.apache.ctakes.cancer.type.textsem.TnmFeature;
-import org.apache.ctakes.cancer.type.textsem.TnmOption;
-import org.apache.ctakes.cancer.type.textsem.TnmPrefix;
-import org.apache.ctakes.cancer.util.FinderUtil;
+import org.apache.ctakes.cancer.property.SpannedTest;
+import org.apache.ctakes.cancer.property.Test;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
 import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
-import org.apache.ctakes.dictionary.lookup2.ontology.OwlParserUtil;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
+import org.apache.ctakes.typesystem.type.textsem.ProcedureMention;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDING;
+import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_PROCEDURE;
 
 /**
  * @author SPF , chip-nlp
@@ -36,263 +33,182 @@ final public class TnmFinder {
 
    static private final Logger LOGGER = Logger.getLogger( "TnmFinder" );
 
+   static private final TnmInstanceUtil TNM_INSTANCE_UTIL = new TnmInstanceUtil();
+
    static private final Pattern WHITESPACE_PATTERN = Pattern.compile( "\\s+" );
 
+   static private final String PREFIX_REGEX = "(c|p|y|r|a|u)?";
+   static private final String T_REGEX = "T(x|is|a|([I]{1,3}V?)|([0-4][a-z]?))(\\((m|\\d+)?,?(is)?\\))?";
+   static private final String N_REGEX = "N(x|([I]{1,3})|([0-3][a-z]?))";
+   static private final String M_REGEX = "M(x|I|([0-1][a-z]?))";
 
-   static List<TnmClass> getTnmClasses( final String lookupWindow ) {
-      final Collection<Integer> starts = new HashSet<>();
-      final Collection<Integer> ends = new HashSet<>();
-      final List<TnmClass> tnmClasses = new ArrayList<>();
-      for ( TnmClassType classType : TnmClassType.values() ) {
-         final Matcher matcher = classType.getMatcher( lookupWindow );
-         while ( matcher.find() ) {
-            int startOffset = matcher.start();
-            final TnmClassPrefixType prefix = TnmClassPrefixType.getPrefix( lookupWindow, startOffset );
-            if ( prefix != TnmClassPrefixType.UNSPECIFIED ) {
-               startOffset -= 1;
-            }
-            tnmClasses.add( new TnmClass( prefix, classType, startOffset, matcher.end(),
-                  lookupWindow.substring( matcher.start() + 1, matcher.end() ) ) );
-            starts.add( startOffset );
-            ends.add( matcher.end() );
-         }
-      }
-      final Collection<TnmClass> removalClasses = new HashSet<>();
-      for ( TnmClass tnmClass : tnmClasses ) {
-         final char before = tnmClass.getStartOffset() == 0
-                             ? ' '
-                             : lookupWindow.charAt( tnmClass.getStartOffset() - 1 );
-         final char after = tnmClass.getEndOffset() == lookupWindow.length()
-                            ? ' '
-                            : lookupWindow.charAt( tnmClass.getEndOffset() );
-         if ( !isBoundCharOk( before ) && !ends.contains( tnmClass.getStartOffset() ) ) {
-            removalClasses.add( tnmClass );
-         } else if ( !isBoundCharOk( after ) && !starts.contains( tnmClass.getEndOffset() ) ) {
-            removalClasses.add( tnmClass );
-         }
-      }
-      tnmClasses.removeAll( removalClasses );
-      Collections.sort( tnmClasses, SpanOffsetComparator.getInstance() );
-      return tnmClasses;
-   }
+   static private final String FULL_T_REGEX = "\\b(" + PREFIX_REGEX + T_REGEX + ")"
+                                              + "(" + PREFIX_REGEX + N_REGEX + ")?"
+                                              + "(" + PREFIX_REGEX + M_REGEX + ")?\\b";
 
-   static private final char[] OK_CHARS = { '!', '\"', '&', '\'', '(', ')', ',', '.', '/', ':', '?', '[', ']' };
+   static private final String FULL_N_REGEX = "\\b(" + PREFIX_REGEX + T_REGEX + ")?"
+                                              + "(" + PREFIX_REGEX + N_REGEX + ")"
+                                              + "(" + PREFIX_REGEX + M_REGEX + ")?\\b";
 
-   static private boolean isBoundCharOk( final char c ) {
-      if ( Character.isWhitespace( c ) ) {
-         return true;
-      }
-      if ( Character.isLetterOrDigit( c ) ) {
-         return false;
-      }
-      for ( char ok : OK_CHARS ) {
-         if ( c == ok ) {
-            return true;
-         }
-      }
-      return false;
-   }
+   static private final String FULL_M_REGEX = "\\b"
+                                              + "(" + PREFIX_REGEX + T_REGEX + ")?"
+                                              + "(" + PREFIX_REGEX + N_REGEX + ")?"
+                                              + "(" + PREFIX_REGEX + M_REGEX + ")\\b";
 
-   static private Collection<TnmClassOption> getTnmClassOptions( final CharSequence lookupWindow,
-                                                                 final int classEndIndex ) {
-      if ( classEndIndex >= lookupWindow.length() ) {
-         return Collections.emptyList();
-      }
-      final char firstChar = lookupWindow.charAt( classEndIndex );
-      if ( (firstChar == ' ') || firstChar == '\t' || firstChar == '\r' || firstChar == '\n' ) {
-         return Collections.emptyList();
-      }
-      final String[] splits
-            = WHITESPACE_PATTERN.split( lookupWindow.subSequence( classEndIndex, lookupWindow.length() ) );
-      if ( splits.length < 1 ) {
-         return Collections.emptyList();
-      }
-      final Collection<TnmClassOption> options = new ArrayList<>();
-      for ( TnmClassOptionType parameter : TnmClassOptionType.values() ) {
-         final Matcher matcher = parameter.getMatcher( splits[ 0 ] );
-         while ( matcher.find() ) {
-            options.add( new TnmClassOption( parameter,
-                  classEndIndex + matcher.start(), classEndIndex + matcher.end(),
-                  getIntValue( splits[ 0 ], matcher.start(), matcher.end() ),
-                  getOptionCertainty( splits[ 0 ], matcher.start(), matcher.end() ) ) );
-         }
-      }
-      return options;
-   }
+   static private final String FULL_REGEX = "(" + FULL_T_REGEX + ")|(" + FULL_N_REGEX + ")|(" + FULL_M_REGEX + ")";
 
-   static private int getOptionCertainty( final String text, final int startOffset, final int endOffset ) {
-      if ( endOffset - startOffset != 4 ) {
-         return -1;
-      }
-      return getIntValue( text, endOffset - 2, endOffset );
-   }
+   static private final Pattern FULL_PATTERN = Pattern.compile( FULL_REGEX, Pattern.CASE_INSENSITIVE );
 
 
-   static Collection<TnmTumorClassification> getTnmTumorClassifications( final String lookupWindow ) {
-      if ( lookupWindow.length() < 2 ) {
-         return Collections.emptyList();
-      }
-      final List<TnmClass> tnmClasses = getTnmClasses( lookupWindow );
-      if ( tnmClasses.isEmpty() ) {
-         return Collections.emptyList();
-      }
-      Collections.sort( tnmClasses, SpanOffsetComparator.getInstance() );
-      final Collection<TnmTumorClassification> classifications = new ArrayList<>();
-      final EnumMap<TnmClassType, TnmClass> malignantClassMap = new EnumMap<>( TnmClassType.class );
-      int currentOrder = -1;
-      int currentStart = -1;
-      int currentEnd = -1;
-      for ( TnmClass tnmClass : tnmClasses ) {
-         if ( currentStart < 0 ) {
-            currentOrder = tnmClass.getClassType().getOrder();
-            currentStart = tnmClass.getStartOffset();
-         } else if ( tnmClass.getClassType().getOrder() <= currentOrder ||
-                     tnmClass.getStartOffset() > currentEnd + 1 ) {
-            // Ordering of TNM is set, so if things occur out of order start a new one
-            // Or if the next start is more than one space away then start a new one
-            classifications.add( new TnmTumorClassification( malignantClassMap,
-                  getTnmClassOptions( lookupWindow, currentEnd ) ) );
-            malignantClassMap.clear();
-            currentStart = tnmClass.getStartOffset();
-         }
-         malignantClassMap.put( tnmClass.getClassType(), tnmClass );
-         currentEnd = tnmClass.getEndOffset();
-      }
-      classifications.add( new TnmTumorClassification( malignantClassMap,
-            getTnmClassOptions( lookupWindow, currentEnd ) ) );
-      return classifications;
-   }
-
-   static private int getIntValue( final String text, final int startOffset, final int endOffset ) {
-      return getIntValue( text.substring( startOffset, endOffset ) );
-   }
-
-   static private int getIntValue( final String tnmItem ) {
-      final String tnmNum = tnmItem.substring( 1, 2 );
-      try {
-         return Integer.parseInt( tnmNum );
-      } catch ( NumberFormatException nfE ) {
-         LOGGER.error( "Could not parse value for " + tnmItem );
-      }
-      return -1;
-   }
-
-   static public void addTnmTumorClasses( final JCas jcas, final AnnotationFS lookupWindow,
-                                          final Iterable<IdentifiedAnnotation> lookupWindowT191s ) {
-      final Collection<TnmTumorClassification> tnmTumorClassifications
-            = getTnmTumorClassifications( lookupWindow.getCoveredText() );
-      if ( tnmTumorClassifications.isEmpty() ) {
+   static public void addTnms( final JCas jcas, final AnnotationFS lookupWindow,
+                               final Iterable<IdentifiedAnnotation> neoplasms ) {
+      final Collection<Tnm> tnms = getTnms( lookupWindow.getCoveredText() );
+      if ( tnms.isEmpty() ) {
          return;
       }
       final int windowStartOffset = lookupWindow.getBegin();
-      for ( TnmTumorClassification classification : tnmTumorClassifications ) {
-         final IdentifiedAnnotation closestDiseaseMention
-               = FinderUtil.getClosestAnnotation( windowStartOffset + classification.getStartOffset(),
-               windowStartOffset + classification.getEndOffset(), lookupWindowT191s );
-         final TnmClassification tnmAnnotation = createTnmAnnotation( jcas, lookupWindow, classification );
-         addTnmRelationToCas( jcas, tnmAnnotation, closestDiseaseMention );
-      }
-   }
-
-   static private TnmClassification createTnmAnnotation( final JCas jcas,
-                                                         final AnnotationFS lookupWindow,
-                                                         final TnmTumorClassification classification ) {
-      final TnmClassification tnmClassificationType = new TnmClassification( jcas,
-            lookupWindow.getBegin() + classification.getStartOffset(),
-            lookupWindow.getBegin() + classification.getEndOffset() );
-      final Map<TnmClassType, TnmClass> malignantClassMap = classification.getTnmClassMap();
-      final TnmClass extentClass = malignantClassMap.get( TnmClassType.T );
-      if ( extentClass != null ) {
-         tnmClassificationType.setSize( createTnmFeature( jcas, extentClass ) );
-      }
-      final TnmClass nodeSpreadClass = malignantClassMap.get( TnmClassType.N );
-      if ( nodeSpreadClass != null ) {
-         tnmClassificationType.setNodeSpread( createTnmFeature( jcas, nodeSpreadClass ) );
-      }
-      final TnmClass metastasisClass = malignantClassMap.get( TnmClassType.M );
-      if ( metastasisClass != null ) {
-         tnmClassificationType.setMetastasis( createTnmFeature( jcas, metastasisClass ) );
-      }
-      final Collection<TnmClassOption> classificationOptions = classification.getTnmClassOptions();
-      if ( !classificationOptions.isEmpty() ) {
-         final FSArray optionFeatures = new FSArray( jcas, classificationOptions.size() );
-         int optionIndex = 0;
-         for ( TnmClassOption option : classificationOptions ) {
-            final TnmOption tnmOptionFeature = new TnmOption( jcas );
-            tnmOptionFeature.setCode( option.getOptionType().name() );
-            tnmOptionFeature.setDescription( option.getOptionType().getTitle() );
-            tnmOptionFeature.setValue( option.getValue() );
-            tnmOptionFeature.setCertainty( option.getCertainty() );
-            optionFeatures.set( optionIndex, tnmOptionFeature );
-            optionIndex++;
+      for ( Tnm tnm : tnms ) {
+         final SpannedTnmPrefix tnmPrefix = getTnmPrefix( tnm, lookupWindow.getCoveredText() );
+         if ( tnmPrefix != null ) {
+            final IdentifiedAnnotation diagnosticTest = createTestProcedure( jcas, windowStartOffset, tnmPrefix );
+            TNM_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, tnm, neoplasms, Collections
+                  .singletonList( diagnosticTest ) );
+         } else {
+            TNM_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, tnm, neoplasms );
          }
-         tnmClassificationType.setOptions( optionFeatures );
       }
-      // Sets the tnm annotation to match the umls concept.  I'm not sure that we want/need this
-      tnmClassificationType.setTypeID( NE_TYPE_ID_FINDING );
-      final UmlsConcept umlsConcept = new UmlsConcept( jcas );
-      umlsConcept.setCui( "C1300492" );
-      umlsConcept.setTui( "T034" );
-//      umlsConcept.setCodingScheme( "SNOMED" );
-//      umlsConcept.setCode( "385379008" );
-      umlsConcept.setPreferredText( "TNM tumor staging finding" );
-      final FSArray ontologyConcepts = new FSArray( jcas, 1 );
-      ontologyConcepts.set( 0, umlsConcept );
-      tnmClassificationType.setOntologyConceptArr( ontologyConcepts );
-      tnmClassificationType.addToIndexes();
-      return tnmClassificationType;
    }
 
-   static private TnmPrefix createTnmPrefix( final JCas jcas, final TnmClass tnmClass ) {
-      final TnmClassPrefixType prefixType = tnmClass.getPrefix();
-      final TnmPrefix tnmPrefix = new TnmPrefix( jcas );
-      tnmPrefix.setCode( prefixType.getCharacterCode() + "" );
-      tnmPrefix.setDescription( prefixType.getTitle() );
-      return tnmPrefix;
-   }
-
-   static private TnmFeature createTnmFeature( final JCas jcas, final TnmClass tnmClass ) {
-      final TnmFeature tnmFeatureFeature = new TnmFeature( jcas );
-      final TnmClassType classType = tnmClass.getClassType();
-      tnmFeatureFeature.setPrefix( createTnmPrefix( jcas, tnmClass ) );
-      tnmFeatureFeature.setCode( classType.name() );
-      tnmFeatureFeature.setDescription( classType.getTitle() );
-      tnmFeatureFeature.setValue( tnmClass.getValue() );
-
-      tnmFeatureFeature.setTypeID( NE_TYPE_ID_FINDING );
-      final UmlsConcept umlsConcept = new UmlsConcept( jcas );
-      umlsConcept.setCui( classType.getCui() );
-      umlsConcept.setTui( classType.getTui() );
-      umlsConcept.setCodingScheme( OwlConcept.URI_CODING_SCHEME );
-      // Attempt to use a URI specific to value
-      final String valueUri = classType.name() + tnmClass.getValue() + "_Stage_Finding";
-      final IClass iClass = OwlOntologyConceptUtil.getIClass( valueUri );
-      if ( iClass != null ) {
-         umlsConcept.setCode( OwlParserUtil.getUriString( iClass ) );
-      } else {
-         umlsConcept.setCode( classType.getUri() );
+   static List<Tnm> getTnms( final String lookupWindow ) {
+      if ( lookupWindow.length() < 2 ) {
+         return Collections.emptyList();
       }
-      umlsConcept.setPreferredText( classType.getTitle() );
-      final FSArray ontologyConcepts = new FSArray( jcas, 1 );
-      ontologyConcepts.set( 0, umlsConcept );
-      tnmFeatureFeature.setOntologyConceptArr( ontologyConcepts );
-      tnmFeatureFeature.addToIndexes();
-      return tnmFeatureFeature;
+      final List<SpannedTnmType> types = new ArrayList<>();
+      final List<Tnm> tnms = new ArrayList<>();
+      final Matcher fullMatcher = FULL_PATTERN.matcher( lookupWindow );
+      while ( fullMatcher.find() ) {
+         final String matchWindow = lookupWindow.substring( fullMatcher.start(), fullMatcher.end() );
+         if ( matchWindow.trim().isEmpty() ) {
+            continue;
+         }
+         for ( TnmType type : TnmType.values() ) {
+            final Matcher typeMatcher = type.getMatcher( matchWindow );
+            while ( typeMatcher.find() ) {
+               final int typeStart = fullMatcher.start() + typeMatcher.start();
+               final int typeEnd = fullMatcher.start() + typeMatcher.end();
+               types.add( new SpannedTnmType( type, typeStart, typeEnd ) );
+            }
+         }
+         if ( types.isEmpty() ) {
+            continue;
+         }
+         SpannedTnmType currentType = types.get( 0 );
+         for ( int i = 1; i < types.size(); i++ ) {
+            SpannedTnmType nextType = types.get( i );
+            final SpannedTnmValue spannedValue = getSpannedValue( currentType.getType(),
+                  lookupWindow, currentType.getEndOffset(), nextType.getStartOffset() );
+            if ( spannedValue != null ) {
+               tnms.add( new Tnm( currentType, spannedValue ) );
+            }
+            currentType = nextType;
+         }
+         final SpannedTnmValue spannedValue = getSpannedValue( currentType.getType(),
+               lookupWindow, currentType.getEndOffset(), fullMatcher.end() );
+         if ( spannedValue != null ) {
+            tnms.add( new Tnm( currentType, spannedValue ) );
+         }
+         types.clear();
+      }
+      Collections.sort( tnms, SpanOffsetComparator.getInstance() );
+      return tnms;
    }
+
+   static private SpannedTnmValue getSpannedValue( final TnmType tnmType,
+                                                   final String matchWindow,
+                                                   final int startOffset,
+                                                   final int endOffset ) {
+      switch ( tnmType ) {
+         case T:
+            return getSpannedValue( Tvalue.values(), matchWindow, startOffset, endOffset );
+         case N:
+            return getSpannedValue( Nvalue.values(), matchWindow, startOffset, endOffset );
+         case M:
+            return getSpannedValue( Mvalue.values(), matchWindow, startOffset, endOffset );
+      }
+      return null;
+   }
+
+   static private SpannedTnmValue getSpannedValue( final TnmValue[] tnmValues,
+                                                   final String matchWindow,
+                                                   final int startOffset,
+                                                   final int endOffset ) {
+      final String valueLookupWindow = matchWindow.substring( startOffset, endOffset );
+      if ( valueLookupWindow.isEmpty() ) {
+         return null;
+      }
+      SpannedTnmValue bestValue = null;
+      for ( TnmValue value : tnmValues ) {
+         final Matcher valueMatcher = value.getMatcher( valueLookupWindow );
+         if ( valueMatcher.find() ) {
+            if ( bestValue == null
+                 || (valueMatcher.end() - valueMatcher.start() > bestValue.getEndOffset() - bestValue.getStartOffset())
+                 || (startOffset + valueMatcher.start() < bestValue.getStartOffset()) ) {
+               bestValue = new SpannedTnmValue( value,
+                     startOffset + valueMatcher.start(),
+                     startOffset + valueMatcher.end() );
+            }
+         }
+      }
+      return bestValue;
+   }
+
+   static SpannedTnmPrefix getTnmPrefix( final Tnm tnm, final String lookupWindow ) {
+      if ( tnm.getStartOffset() == 0 || lookupWindow.length() < 3 ||
+           lookupWindow.charAt( tnm.getStartOffset() - 1 ) == ' ' ) {
+         return null;
+      }
+      final String matchWindow = lookupWindow.substring( tnm.getStartOffset() - 1, tnm.getStartOffset() );
+      for ( TnmPrefix prefix : TnmPrefix.values() ) {
+         final Matcher prefixMatcher = prefix.getMatcher( matchWindow );
+         if ( prefixMatcher.find() ) {
+            return new SpannedTnmPrefix( prefix, tnm.getStartOffset() - 1, tnm.getStartOffset() );
+         }
+      }
+      return null;
+   }
+
 
    /**
-    * Create a UIMA relation type based on arguments and the relation label. This
-    * allows subclasses to create/define their own types: e.g. coreference can
-    * create CoreferenceRelation instead of BinaryTextRelation
+    * Create a modifier and add it to the cas
     *
-    * @param jCas              - JCas object, needed to create new UIMA types
-    * @param tnmClassification - First argument to relation
-    * @param neoplasm   - Second argument to relation
+    * @param jcas              -
+    * @param windowStartOffset character offset of window containing the property
+    * @param spannedTest       -
+    * @return the procedure mention representing the test for a property
     */
-   static private void addTnmRelationToCas( final JCas jCas,
-                                            final TnmClassification tnmClassification,
-                                            final IdentifiedAnnotation neoplasm ) {
-      NeoplasmRelationFactory.createNeoplasmRelation( jCas, tnmClassification, neoplasm, "TNM_of" );
+   static private ProcedureMention createTestProcedure( final JCas jcas,
+                                                        final int windowStartOffset,
+                                                        final SpannedTest<? extends Test> spannedTest ) {
+      final ProcedureMention procedure = new ProcedureMention( jcas,
+            windowStartOffset + spannedTest.getStartOffset(),
+            windowStartOffset + spannedTest.getEndOffset() );
+      procedure.setTypeID( NE_TYPE_ID_PROCEDURE );
+      // Test uri concept
+      final Test test = spannedTest.getTest();
+      final String cui = test.getCui();
+      final String tui = test.getTui();
+      final String title = test.getTitle();
+      UmlsConcept umlsConcept = new UmlsConcept( jcas );
+      umlsConcept.setCui( cui == null ? "" : cui );
+      umlsConcept.setTui( tui == null ? "" : tui );
+      umlsConcept.setPreferredText( title == null ? "" : title );
+      umlsConcept.setCodingScheme( OwlConcept.URI_CODING_SCHEME );
+      umlsConcept.setCode( test.getUri() );
+      final FSArray ontologyConcepts = new FSArray( jcas, 1 );
+      ontologyConcepts.set( 0, umlsConcept );
+      procedure.setOntologyConceptArr( ontologyConcepts );
+      procedure.addToIndexes();
+      return procedure;
    }
 
 }

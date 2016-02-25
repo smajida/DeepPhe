@@ -1,5 +1,7 @@
 package org.healthnlp.deepphe.uima.ae;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
@@ -8,11 +10,13 @@ import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.drools.runtime.StatefulKnowledgeSession;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.fhir.summary.TumorSummary;
+import org.healthnlp.deepphe.uima.drools.DroolsEngine;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRRegistry;
@@ -71,17 +75,26 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			for(TumorSummary ts: report.getTumorSummaries()){
 				cancerSummary.append(ts);
 			}
-		
-			
 			
 			//TODO: this is where you can start with RULES
 			// this is a temporary merge of all summaries together without
 			// much thought until we have something better
 		}
 
-		// lets print out cancer summary
-		System.out.println("\n\n\n---| Medical Record Cancer Summary |---");
-		System.out.println(cancerSummary.getSummaryText());
+		//TODO: rules, extract data
+	long stT = System.currentTimeMillis();	
+		
+		DroolsEngine de = new DroolsEngine();
+		StatefulKnowledgeSession droolsSession = de.getSession();
+		droolsSession.insert(cancerSummary);
+		droolsSession.fireAllRules();
+		droolsSession.dispose();
+System.out.println("DROOLS TIME: "+(System.currentTimeMillis() - stT)/1000+"  sec");
+		
+		String tCls = FHIRUtils.getConceptName(cancerSummary.getPhenotype().getPrimaryTumorClassification());
+		String nCls = FHIRUtils.getConceptName(cancerSummary.getPhenotype().getRegionalLymphNodeClassification());
+		String mCls = FHIRUtils.getConceptName(cancerSummary.getPhenotype().getDistantMetastasisClassification());
+		
 		
 		//this is where you save your work back to CAS
 		PhenotypeResourceFactory.saveMedicalRecordPatientSummary(patientSummary, jcas);

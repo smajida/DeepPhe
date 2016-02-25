@@ -1,24 +1,20 @@
 package org.apache.ctakes.cancer.stage;
 
 
-import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
-import org.apache.ctakes.cancer.type.textsem.CancerStage;
-import org.apache.ctakes.cancer.util.FinderUtil;
+import org.apache.ctakes.cancer.property.SpannedType;
+import org.apache.ctakes.cancer.property.SpannedValue;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
-import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.jcas.JCas;
-import org.apache.uima.jcas.cas.FSArray;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
-
-import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_DISORDER;
+import java.util.regex.Pattern;
 
 
 /**
@@ -33,69 +29,84 @@ final public class StageFinder {
 
    static private final Logger LOGGER = Logger.getLogger( "StageFinder" );
 
+   static private final StageInstanceUtil STAGE_INSTANCE_UTIL = new StageInstanceUtil();
 
-   static List<Stage> getStages( final String lookupWindow ) {
-      if ( lookupWindow.length() < 6 ) {
-         return Collections.emptyList();
-      }
-      final List<Stage> stages = new ArrayList<>();
-      for ( StageValue stageValue : StageValue.values() ) {
-         final Matcher matcher = stageValue.getMatcher( lookupWindow );
-         while ( matcher.find() ) {
-            stages.add( new Stage( matcher.start(), matcher.end(), stageValue ) );
-         }
-      }
-      Collections.sort( stages, SpanOffsetComparator.getInstance() );
-      return stages;
-   }
+   static private final String TYPE_REGEX = "Stage";
+   static private final String SHORT_VALUE = "([I]{1,3}|IV|IS|[0-4])[a-c]?";
+   static private final String LONG_VALUE = "N/?A\\b|recurrent|unknown|unspecified|indeterminate|(not assessed)";
+   static private final String NON_STAGE = "(in situ)|unknown|indeterminate|unspecified|recurrent Breast Carcinoma";
+
+   // Order is very important
+   static private final String FULL_REGEX = "\\b" + TYPE_REGEX + "\\s*"
+                                            + "((" + SHORT_VALUE + "\\b)"
+                                            + "|(" + LONG_VALUE + "))";
+   static private final Pattern FULL_PATTERN = Pattern.compile( FULL_REGEX, Pattern.CASE_INSENSITIVE );
+
 
    static public void addStages( final JCas jcas, final AnnotationFS lookupWindow,
-                                 final Iterable<IdentifiedAnnotation> lookupWindowT191s ) {
+                                 final Iterable<IdentifiedAnnotation> neoplasms ) {
       final Collection<Stage> stages = getStages( lookupWindow.getCoveredText() );
       if ( stages.isEmpty() ) {
          return;
       }
       final int windowStartOffset = lookupWindow.getBegin();
       for ( Stage stage : stages ) {
-         final IdentifiedAnnotation closestDiseaseMention
-               = FinderUtil.getClosestAnnotation( windowStartOffset + stage.getStartOffset(),
-               windowStartOffset + stage.getEndOffset(), lookupWindowT191s );
-         final CancerStage cancerStageAnnotation = createStageAnnotation( jcas, lookupWindow.getBegin(), stage );
-         addStageRelationToCas( jcas, cancerStageAnnotation, closestDiseaseMention );
+         STAGE_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, stage, neoplasms );
       }
    }
 
-   static private CancerStage createStageAnnotation( final JCas jcas, final int windowStartOffset, final Stage stage ) {
-      final int startOffset = windowStartOffset + stage.getStartOffset();
-      final int endOffset = windowStartOffset + stage.getEndOffset();
-      final CancerStage cancerStage = new CancerStage( jcas, startOffset, endOffset );
-//      cancerStage.setValue( stage.getValue().getCode() );
-      // Sets the receptor status annotation to match the umls concept.  I'm not sure that we want/need this
-      cancerStage.setTypeID( NE_TYPE_ID_DISORDER );
-      final UmlsConcept umlsConcept = new UmlsConcept( jcas );
-      umlsConcept.setCui( stage.getValue().getCui() );
-      umlsConcept.setTui( stage.getValue().getTui() );
-      umlsConcept.setPreferredText( stage.getValue().getTitle() );
-      final FSArray ontologyConcepts = new FSArray( jcas, 1 );
-      ontologyConcepts.set( 0, umlsConcept );
-      cancerStage.setOntologyConceptArr( ontologyConcepts );
-      return cancerStage;
+
+   static List<Stage> getStages( final String lookupWindow ) {
+      if ( lookupWindow.length() < 6 ) {
+         return Collections.emptyList();
+      }
+      final List<Stage> stages = new ArrayList<>();
+      final Matcher fullMatcher = FULL_PATTERN.matcher( lookupWindow );
+      while ( fullMatcher.find() ) {
+         final String matchWindow = lookupWindow.substring( fullMatcher.start(), fullMatcher.end() );
+         SpannedType<StageType> spannedType = null;
+         for ( StageType type : StageType.values() ) {
+            final Matcher typeMatcher = type.getMatcher( matchWindow );
+            while ( typeMatcher.find() ) {
+               final int typeStart = fullMatcher.start() + typeMatcher.start();
+               final int typeEnd = fullMatcher.start() + typeMatcher.end();
+               spannedType = new SpannedStageType( type, typeStart, typeEnd );
+               final SpannedValue<StageValue> spannedValue
+                     = getSpannedValue( lookupWindow, spannedType.getEndOffset(), fullMatcher.end() );
+               if ( spannedValue != null ) {
+                  stages.add( new Stage( spannedType, spannedValue ) );
+               }
+            }
+         }
+      }
+      // TODO add NON_STAGE in situ, unknown, etc.
+      Collections.sort( stages, SpanOffsetComparator.getInstance() );
+      return stages;
    }
 
 
-   /**
-    * Create a UIMA relation type based on arguments and the relation label. This
-    * allows subclasses to create/define their own types: e.g. coreference can
-    * create CoreferenceRelation instead of BinaryTextRelation
-    *
-    * @param jCas            - JCas object, needed to create new UIMA types
-    * @param cancerStage     - First argument to relation
-    * @param neoplasm - Second argument to relation
-    */
-   static private void addStageRelationToCas( final JCas jCas,
-                                              final CancerStage cancerStage,
-                                              final IdentifiedAnnotation neoplasm ) {
-      NeoplasmRelationFactory.createNeoplasmRelation( jCas, cancerStage, neoplasm, "Cancer_Stage_of" );
+   static private SpannedStageValue getSpannedValue( final String matchWindow,
+                                                     final int startOffset,
+                                                     final int endOffset ) {
+      final String valueLookupWindow = matchWindow.substring( startOffset, endOffset );
+      if ( valueLookupWindow.isEmpty() ) {
+         return null;
+      }
+      SpannedStageValue bestValue = null;
+      for ( StageValue value : StageValue.values() ) {
+         final Matcher valueMatcher = value.getMatcher( valueLookupWindow );
+         if ( valueMatcher.find() ) {
+            if ( bestValue == null
+                 || (valueMatcher.end() - valueMatcher.start() > bestValue.getEndOffset() - bestValue.getStartOffset())
+                 || (startOffset + valueMatcher.start() < bestValue.getStartOffset()) ) {
+               bestValue = new SpannedStageValue( value,
+                     startOffset + valueMatcher.start(),
+                     startOffset + valueMatcher.end() );
+            }
+         }
+      }
+      return bestValue;
    }
+
 
 }

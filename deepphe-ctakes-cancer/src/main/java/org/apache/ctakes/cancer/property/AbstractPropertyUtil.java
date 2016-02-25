@@ -1,0 +1,106 @@
+package org.apache.ctakes.cancer.property;
+
+
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.typesystem.type.relation.DegreeOfTextRelation;
+import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
+import org.apache.log4j.Logger;
+import org.apache.uima.fit.util.JCasUtil;
+import org.apache.uima.jcas.JCas;
+import org.apache.uima.jcas.tcas.Annotation;
+
+import java.util.Collection;
+
+/**
+ * @author SPF , chip-nlp
+ * @version %I%
+ * @since 2/8/2016
+ */
+abstract public class AbstractPropertyUtil<T extends Type, V extends Value> {
+
+   static private final Logger LOGGER = Logger.getLogger( "PropertyUtil" );
+
+   private final String _propertyName;
+
+   public AbstractPropertyUtil( final String propertyName ) {
+      _propertyName = propertyName;
+   }
+
+   /**
+    * @param annotation candidate property annotation
+    * @return true if the annotation is of the correct property according to URI match
+    */
+   abstract public boolean isCorrectProperty( final IdentifiedAnnotation annotation );
+
+   /**
+    * @param annotation candidate property annotation
+    * @param types      -
+    * @return true if the annotation is of the correct property according to URI match
+    */
+   protected boolean isCorrectProperty( final IdentifiedAnnotation annotation, final T[] types ) {
+      final Collection<String> uris = OwlOntologyConceptUtil.getUris( annotation );
+      for ( String uri : uris ) {
+         for ( T type : types ) {
+            if ( uri.equals( type.getUri() ) ) {
+               return true;
+            }
+         }
+      }
+      return false;
+   }
+
+   /**
+    * @param jcas       -
+    * @param annotation -
+    * @return the Value for the given annotation or an appropriate unknown value
+    */
+   public V getValue( final JCas jcas, final IdentifiedAnnotation annotation ) {
+      if ( !isCorrectProperty( annotation ) ) {
+         LOGGER.warn( annotation.getCoveredText() + " is not a " + _propertyName + " annotation" );
+         return null;
+      }
+      final Collection<DegreeOfTextRelation> degrees = JCasUtil.select( jcas, DegreeOfTextRelation.class );
+      if ( degrees == null || degrees.isEmpty() ) {
+         return getUnknownValue();
+      }
+      for ( DegreeOfTextRelation degree : degrees ) {
+         final Annotation argument1 = degree.getArg1().getArgument();
+         if ( !argument1.equals( annotation ) ) {
+            continue;
+         }
+         final Annotation argument2 = degree.getArg2().getArgument();
+         final Collection<String> uris = OwlOntologyConceptUtil.getUris( (IdentifiedAnnotation)argument2 );
+         final V value = getUriValue( uris );
+         if ( value != null ) {
+            return value;
+         }
+      }
+      return getUnknownValue();
+   }
+
+   /**
+    * @param uris uris associated with the possible property values
+    * @return Value with the given uri(s)
+    */
+   protected V getUriValue( final Collection<String> uris ) {
+      for ( String uri : uris ) {
+         final V value = getUriValue( uri );
+         if ( !value.equals( getUnknownValue() ) ) {
+            return value;
+         }
+      }
+      return null;
+   }
+
+   /**
+    * @param uri uri associated with the possible property values
+    * @return Value with the given uri
+    */
+   abstract protected V getUriValue( final String uri );
+
+   /**
+    * @return an appropriate value to represent unknown
+    */
+   abstract protected V getUnknownValue();
+
+}

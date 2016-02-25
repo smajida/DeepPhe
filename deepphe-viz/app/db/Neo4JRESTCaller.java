@@ -117,7 +117,7 @@ public class Neo4JRESTCaller {
         List<LinkedHashMap<String, Object>> out = new ArrayList<LinkedHashMap<String, Object>>();
         
         for(Object o:rows){
-        	LinkedHashMap<String, Object> rowmap = (LinkedHashMap<String, Object>)rows[0];
+	    LinkedHashMap<String, Object> rowmap = (LinkedHashMap<String, Object>) o;
         	
         	
         	LinkedHashMap<String, Object> datamap = (LinkedHashMap<String, Object>) rowmap.get("data");
