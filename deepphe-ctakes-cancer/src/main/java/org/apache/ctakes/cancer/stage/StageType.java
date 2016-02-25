@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  * @version %I%
  * @since 2/8/2016
  */
-public enum StageType implements Type {
+enum StageType implements Type {
    DEFAULT( "Stage", "Cancer_Stage", "Stage\\s*" );
 
    final private String _title;

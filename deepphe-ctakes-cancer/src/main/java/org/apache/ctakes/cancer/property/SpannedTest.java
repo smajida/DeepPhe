@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
  */
 public class SpannedTest<T extends Test> implements SpannedEntity {
 
-   static private final Logger LOGGER = Logger.getLogger( "SpannedType" );
+   static private final Logger LOGGER = Logger.getLogger( "SpannedTest" );
 
    private final T _test;
    private final int _startOffset;

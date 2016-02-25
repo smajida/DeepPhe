@@ -11,7 +11,7 @@ import javax.annotation.concurrent.Immutable;
  * @since 2/8/2016
  */
 @Immutable
-final public class SpannedStageValue extends SpannedValue<StageValue> {
+final class SpannedStageValue extends SpannedValue<StageValue> {
 
    static private final Logger LOGGER = Logger.getLogger( "SpannedStageValue" );
 

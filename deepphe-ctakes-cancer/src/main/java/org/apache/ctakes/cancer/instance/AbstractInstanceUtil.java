@@ -11,7 +11,6 @@ import org.apache.ctakes.typesystem.type.relation.RelationArgument;
 import org.apache.ctakes.typesystem.type.textsem.EventMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.Modifier;
-import org.apache.ctakes.typesystem.type.textsem.ProcedureMention;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 
@@ -19,7 +18,6 @@ import java.util.Collections;
 import java.util.logging.Logger;
 
 import static org.apache.ctakes.typesystem.type.constants.CONST.MODIFIER_TYPE_ID_SEVERITY_CLASS;
-import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_PROCEDURE;
 
 /**
  * @author SPF , chip-nlp
@@ -90,14 +88,14 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
     * @param windowStartOffset character offset of window containing the receptor status
     * @param spannedProperty   -
     * @param neoplasms         nearby neoplasms
-    * @param spannedTest       an associated test for the property.  Null if none
+    * @param diagnosticTests   nearby diagnostic tests
     * @return the property as a event mention
     */
    abstract public E createInstance( final JCas jcas,
                                      final int windowStartOffset,
                                      final SpannedProperty<T, V> spannedProperty,
                                      final Iterable<IdentifiedAnnotation> neoplasms,
-                                     final SpannedTest<? extends Test> spannedTest );
+                                     final Iterable<IdentifiedAnnotation> diagnosticTests );
 
    /**
     * Create a sign/symptom and add it to the cas
@@ -118,9 +116,9 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
       final V value = spannedValue.getValue();
       final T type = spannedType.getType();
       // Main Umls Concept
-      final String cui = value.getCui();
-      final String tui = value.getTui();
-      final String title = value.getTitle();
+      final String cui = type.getCui( value );
+      final String tui = type.getTui();
+      final String title = type.getTitle();
       UmlsConcept umlsConcept = new UmlsConcept( jcas );
       umlsConcept.setCui( cui == null ? "" : cui );
       umlsConcept.setTui( tui == null ? "" : tui );
@@ -269,82 +267,55 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
     *
     * @param jCas              -
     * @param windowStartOffset character offset of window containing the receptor status
+    * @param spannedProperty   -
     * @param eventMention      property as an event mention
-    * @param spannedTest       associated test
+    * @param diagnosticTests    nearby diagnostic tests
     */
    final protected void createEventMentionIndicator( final JCas jCas,
                                                      final int windowStartOffset,
+                                                     final SpannedProperty<T, V> spannedProperty,
                                                      final E eventMention,
-                                                     final SpannedTest<? extends Test> spannedTest ) {
-      if ( spannedTest == null ) {
+                                                     final Iterable<IdentifiedAnnotation> diagnosticTests ) {
+      if ( diagnosticTests == null ) {
          return;
       }
-      final ProcedureMention procedure = createTestProcedure( jCas, windowStartOffset, spannedTest );
-      final String relationName = spannedTest.getTest().getTitle().replace( ' ', '_' ) + "_for";
-      createEventMentionIndicator( jCas, eventMention, procedure, relationName );
+      final IdentifiedAnnotation closestDiagnostic
+            = FinderUtil.getClosestAnnotation( windowStartOffset + spannedProperty.getStartOffset(),
+            windowStartOffset + spannedProperty.getEndOffset(), diagnosticTests );
+      if ( closestDiagnostic != null ) {
+         createEventMentionIndicator( jCas, closestDiagnostic, eventMention, "Diagnostic_Test_for" );
+      }
    }
 
-   /**
-    * Create a modifier and add it to the cas
-    *
-    * @param jcas              -
-    * @param windowStartOffset character offset of window containing the property
-    * @param spannedTest       -
-    * @return the procedure mention representing the test for a property
-    */
-   final protected ProcedureMention createTestProcedure( final JCas jcas,
-                                                         final int windowStartOffset,
-                                                         final SpannedTest<? extends Test> spannedTest ) {
-      final ProcedureMention procedure = new ProcedureMention( jcas,
-            windowStartOffset + spannedTest.getStartOffset(),
-            windowStartOffset + spannedTest.getEndOffset() );
-      procedure.setTypeID( NE_TYPE_ID_PROCEDURE );
-      // Test uri concept
-      final Test test = spannedTest.getTest();
-      final String cui = test.getCui();
-      final String tui = test.getTui();
-      final String title = test.getTitle();
-      UmlsConcept umlsConcept = new UmlsConcept( jcas );
-      umlsConcept.setCui( cui == null ? "" : cui );
-      umlsConcept.setTui( tui == null ? "" : tui );
-      umlsConcept.setPreferredText( title == null ? "" : title );
-      umlsConcept.setCodingScheme( OwlConcept.URI_CODING_SCHEME );
-      umlsConcept.setCode( test.getUri() );
-      final FSArray ontologyConcepts = new FSArray( jcas, 1 );
-      ontologyConcepts.set( 0, umlsConcept );
-      procedure.setOntologyConceptArr( ontologyConcepts );
-      procedure.addToIndexes();
-      return procedure;
-   }
 
    /**
     * Create a "property_type_of" relation to a neoplasm.
     *
     * @param jCas         -
+    * @param diagnosticTest    the diagnostic test for the property
     * @param eventMention property as an event mention
-    * @param procedure    the associated neoplasm
-    * @param relationName e.g. tnm_of
+    * @param relationName e.g. Diagnostic_Test_for
     */
    final protected void createEventMentionIndicator( final JCas jCas,
+                                                     final IdentifiedAnnotation diagnosticTest,
                                                      final E eventMention,
-                                                     final IdentifiedAnnotation procedure,
                                                      final String relationName ) {
       if ( eventMention == null ) {
          LOGGER.info( "No argument for " + relationName
-                      + ((procedure != null) ? " of " + procedure.getCoveredText() : "") );
+                      + ((diagnosticTest != null) ? " of " + diagnosticTest.getCoveredText() : "") );
          return;
       }
-      if ( procedure == null ) {
+      if ( diagnosticTest == null ) {
          LOGGER.info( "No Test for " + relationName + " " + eventMention.getCoveredText() );
          return;
       }
       // add the relation to the CAS
       final RelationArgument eventArgument = new RelationArgument( jCas );
-      eventArgument.setArgument( eventMention );
+      eventArgument.setArgument( diagnosticTest );
       eventArgument.setRole( "Argument" );
       eventArgument.addToIndexes();
       final RelationArgument procedureArgument = new RelationArgument( jCas );
-      procedureArgument.setArgument( procedure );
+      procedureArgument.setArgument( eventMention );
       procedureArgument.setRole( "Related_to" );
       procedureArgument.addToIndexes();
       final IndicatesTextRelation indicatesRelation = new IndicatesTextRelation( jCas );

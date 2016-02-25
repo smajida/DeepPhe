@@ -1,5 +1,7 @@
 package org.apache.ctakes.cancer.receptor;
 
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
@@ -10,8 +12,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
 
 
 /**
@@ -43,14 +47,25 @@ final public class StatusFinder {
 
 
    static public void addReceptorStatuses( final JCas jcas, final AnnotationFS lookupWindow,
-                                           final Iterable<IdentifiedAnnotation> neoplasms ) {
+                                           final Iterable<IdentifiedAnnotation> neoplasms,
+                                           final Iterable<IdentifiedAnnotation> diagnostics ) {
       final Collection<Status> statuses = getReceptorStatuses( lookupWindow.getCoveredText() );
       if ( statuses.isEmpty() ) {
          return;
       }
       final int windowStartOffset = lookupWindow.getBegin();
+      final Collection<IdentifiedAnnotation> candidateTests = new ArrayList<>();
       for ( Status status : statuses ) {
-         STATUS_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, status, neoplasms );
+         final Collection<String> statusTestUris = status.getSpannedType().getType().getStatusTestUris();
+         for ( IdentifiedAnnotation diagnostic : diagnostics ) {
+            if ( OwlOntologyConceptUtil.getUris( diagnostic ).stream()
+                  .filter( statusTestUris::contains )
+                  .findFirst().isPresent() ) {
+               candidateTests.add( diagnostic );
+            }
+         }
+         STATUS_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, status, neoplasms, candidateTests );
+         candidateTests.clear();
       }
    }
 

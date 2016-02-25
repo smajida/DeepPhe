@@ -34,12 +34,12 @@ final public class TnmInstanceUtil extends AbstractInstanceUtil<TnmType, TnmValu
                                              final int windowStartOffset,
                                              final SpannedProperty<TnmType, TnmValue> tnm,
                                              final Iterable<IdentifiedAnnotation> neoplasms,
-                                             final SpannedTest<? extends Test> spannedTest ) {
+                                             final Iterable<IdentifiedAnnotation> diagnosticTests ) {
       final SignSymptomMention eventMention = createEventMention( jcas, windowStartOffset, tnm );
       final Modifier valueModifier = createValueModifier( jcas, windowStartOffset, tnm );
       createEventMentionDegree( jcas, eventMention, valueModifier );
       createEventMentionNeoplasm( jcas, windowStartOffset, tnm, eventMention, neoplasms );
-      createEventMentionIndicator( jcas, windowStartOffset, eventMention, spannedTest );
+      createEventMentionIndicator( jcas, windowStartOffset, tnm, eventMention, diagnosticTests );
       return eventMention;
    }
 

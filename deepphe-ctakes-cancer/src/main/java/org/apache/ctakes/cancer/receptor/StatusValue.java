@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  * @version %I%
  * @since 8/19/2015
  */
-public enum StatusValue implements Value {
+enum StatusValue implements Value {
    POSITIVE( "Positive", "Positive", "\\+?pos(itive)?|\\+(pos)?" ),
    NEGATIVE( "Negative", "Negative", "-?neg(ative)?|-(neg)?" ),
    UNKNOWN( "Unknown", "Unknown", "unknown|indeterminate|equivocal|(not assessed)|\\bN/?A\\b" );

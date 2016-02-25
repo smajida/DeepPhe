@@ -35,6 +35,7 @@ final public class OwlOntologyConceptUtil {
    private OwlOntologyConceptUtil() {
    }
 
+   static public final String SCHEMA_OWL = "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl";
    static public final String CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl";
    static public final String BREAST_CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl";
 

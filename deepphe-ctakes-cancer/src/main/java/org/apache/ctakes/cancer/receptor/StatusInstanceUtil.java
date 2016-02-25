@@ -34,12 +34,12 @@ final public class StatusInstanceUtil extends AbstractInstanceUtil<StatusType, S
                                              final int windowStartOffset,
                                              final SpannedProperty<StatusType, StatusValue> status,
                                              final Iterable<IdentifiedAnnotation> neoplasms,
-                                             final SpannedTest<? extends Test> spannedTest ) {
+                                             final Iterable<IdentifiedAnnotation> diagnosticTests ) {
       final SignSymptomMention eventMention = createEventMention( jcas, windowStartOffset, status );
       final Modifier valueModifier = createValueModifier( jcas, windowStartOffset, status );
       createEventMentionDegree( jcas, eventMention, valueModifier );
       createEventMentionNeoplasm( jcas, windowStartOffset, status, eventMention, neoplasms );
-      createEventMentionIndicator( jcas, windowStartOffset, eventMention, spannedTest );
+      createEventMentionIndicator( jcas, windowStartOffset, status, eventMention, diagnosticTests );
       return eventMention;
    }
 

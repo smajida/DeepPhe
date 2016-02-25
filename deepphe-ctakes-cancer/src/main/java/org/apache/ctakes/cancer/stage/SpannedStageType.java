@@ -11,7 +11,7 @@ import javax.annotation.concurrent.Immutable;
  * @since 2/8/2016
  */
 @Immutable
-final public class SpannedStageType extends SpannedType<StageType> {
+final class SpannedStageType extends SpannedType<StageType> {
 
    static private final Logger LOGGER = Logger.getLogger( "SpannedStageType" );
 

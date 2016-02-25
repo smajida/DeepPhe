@@ -1,10 +1,16 @@
 package org.apache.ctakes.cancer.tnm;
 
+import org.apache.ctakes.cancer.property.SpannedTest;
+import org.apache.ctakes.cancer.property.Test;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
+import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
+import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
+import org.apache.ctakes.typesystem.type.textsem.ProcedureMention;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.jcas.JCas;
+import org.apache.uima.jcas.cas.FSArray;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,6 +18,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_PROCEDURE;
 
 /**
  * @author SPF , chip-nlp
@@ -61,7 +69,13 @@ final public class TnmFinder {
       final int windowStartOffset = lookupWindow.getBegin();
       for ( Tnm tnm : tnms ) {
          final SpannedTnmPrefix tnmPrefix = getTnmPrefix( tnm, lookupWindow.getCoveredText() );
-         TNM_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, tnm, neoplasms, tnmPrefix );
+         if ( tnmPrefix != null ) {
+            final IdentifiedAnnotation diagnosticTest = createTestProcedure( jcas, windowStartOffset, tnmPrefix );
+            TNM_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, tnm, neoplasms, Collections
+                  .singletonList( diagnosticTest ) );
+         } else {
+            TNM_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, tnm, neoplasms );
+         }
       }
    }
 
@@ -163,5 +177,38 @@ final public class TnmFinder {
       return null;
    }
 
+
+   /**
+    * Create a modifier and add it to the cas
+    *
+    * @param jcas              -
+    * @param windowStartOffset character offset of window containing the property
+    * @param spannedTest       -
+    * @return the procedure mention representing the test for a property
+    */
+   static private ProcedureMention createTestProcedure( final JCas jcas,
+                                                        final int windowStartOffset,
+                                                        final SpannedTest<? extends Test> spannedTest ) {
+      final ProcedureMention procedure = new ProcedureMention( jcas,
+            windowStartOffset + spannedTest.getStartOffset(),
+            windowStartOffset + spannedTest.getEndOffset() );
+      procedure.setTypeID( NE_TYPE_ID_PROCEDURE );
+      // Test uri concept
+      final Test test = spannedTest.getTest();
+      final String cui = test.getCui();
+      final String tui = test.getTui();
+      final String title = test.getTitle();
+      UmlsConcept umlsConcept = new UmlsConcept( jcas );
+      umlsConcept.setCui( cui == null ? "" : cui );
+      umlsConcept.setTui( tui == null ? "" : tui );
+      umlsConcept.setPreferredText( title == null ? "" : title );
+      umlsConcept.setCodingScheme( OwlConcept.URI_CODING_SCHEME );
+      umlsConcept.setCode( test.getUri() );
+      final FSArray ontologyConcepts = new FSArray( jcas, 1 );
+      ontologyConcepts.set( 0, umlsConcept );
+      procedure.setOntologyConceptArr( ontologyConcepts );
+      procedure.addToIndexes();
+      return procedure;
+   }
 
 }

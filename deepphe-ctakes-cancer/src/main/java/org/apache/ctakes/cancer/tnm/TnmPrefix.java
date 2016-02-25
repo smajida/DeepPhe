@@ -1,5 +1,6 @@
 package org.apache.ctakes.cancer.tnm;
 
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.property.Test;
 
 import java.util.regex.Matcher;
@@ -12,21 +13,21 @@ import java.util.regex.Pattern;
  * @version %I%
  * @since 2/23/2016
  */
-public enum TnmPrefix implements Test {
+enum TnmPrefix implements Test {
    C( "Classification given by clinical examination",
-         "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl#DiagnosticProcedure", "c" ),
+         OwlOntologyConceptUtil.SCHEMA_OWL + "#" + "DiagnosticProcedure", "c" ),
    P( "Classification given by pathologic examination",
-         "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl#DiagnosticProcedure", "p" ),
+         OwlOntologyConceptUtil.SCHEMA_OWL + "#" + "DiagnosticProcedure", "p" ),
    Y( "Classification assessed after chemotherapy and/or radiation",
-         "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl#DiagnosticProcedure", "y" ),
+         OwlOntologyConceptUtil.SCHEMA_OWL + "#" + "DiagnosticProcedure", "y" ),
    R( "Classification for a recurrent tumor",
-         "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl#DiagnosticProcedure", "r" ),
+         OwlOntologyConceptUtil.SCHEMA_OWL + "#" + "DiagnosticProcedure", "r" ),
    A( "Classification determined at autopsy",
-         "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl#DiagnosticProcedure", "a" ),
+         OwlOntologyConceptUtil.SCHEMA_OWL + "#" + "DiagnosticProcedure", "a" ),
    U( "Classification determined by ultrasound or endosonography",
-         "http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#Endoscopic_Ultrasound", "u" ),
+         OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + "Endoscopic_Ultrasound", "u" ),
    UNSPECIFIED( "Classification determination unspecified; assume clinical examination",
-         "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl#DiagnosticProcedure", "-" );
+         OwlOntologyConceptUtil.SCHEMA_OWL + "#" + "DiagnosticProcedure", "-" );
 
 
    static private final String PARENT_URI = "#DiagnosticProcedure";
@@ -54,7 +55,6 @@ public enum TnmPrefix implements Test {
     */
    @Override
    public String getUri() {
-//      return OwlOntologyConceptUtil.CANCER_OWL + "#" + _uri;
       return _uri;
    }
 

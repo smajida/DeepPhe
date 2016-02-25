@@ -34,12 +34,12 @@ final public class StageInstanceUtil extends AbstractInstanceUtil<StageType, Sta
                                                  final int windowStartOffset,
                                                  final SpannedProperty<StageType, StageValue> stage,
                                                  final Iterable<IdentifiedAnnotation> neoplasms,
-                                                 final SpannedTest<? extends Test> spannedTest ) {
+                                                 final Iterable<IdentifiedAnnotation> diagnosticTests ) {
       final DiseaseDisorderMention eventMention = createEventMention( jcas, windowStartOffset, stage );
       final Modifier valueModifier = createValueModifier( jcas, windowStartOffset, stage );
       createEventMentionDegree( jcas, eventMention, valueModifier );
       createEventMentionNeoplasm( jcas, windowStartOffset, stage, eventMention, neoplasms );
-      createEventMentionIndicator( jcas, windowStartOffset, eventMention, spannedTest );
+      createEventMentionIndicator( jcas, windowStartOffset, stage, eventMention, diagnosticTests );
       return eventMention;
    }
 

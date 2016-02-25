@@ -54,8 +54,11 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
 
          if ( !breastNeoplasms.isEmpty() ) {
             TnmFinder.addTnms( jcas, lookupWindow, breastNeoplasms );
-            StatusFinder.addReceptorStatuses( jcas, lookupWindow, breastNeoplasms );
             StageFinder.addStages( jcas, lookupWindow, breastNeoplasms );
+
+            final Collection<IdentifiedAnnotation> diagnosticProcedures
+                  = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, "DiagnosticProcedure" );
+            StatusFinder.addReceptorStatuses( jcas, lookupWindow, breastNeoplasms, diagnosticProcedures );
          }
 
          final Collection<IdentifiedAnnotation> masses

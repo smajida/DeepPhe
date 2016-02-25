@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  * @version %I%
  * @since 8/20/2015
  */
-public enum StageValue implements Value {
+enum StageValue implements Value {
    IS_0( "In Situ", "In_Situ_Lesion", "(IS|0)\\b" ),
    I( "I", "Stage_I", "(I|1)\\b" ),
    I_A( "IA", "Stage_IA", "(IA|1A)\\b" ),
