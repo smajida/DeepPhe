@@ -1,9 +1,11 @@
 package org.apache.ctakes.cancer.stage;
 
-import org.apache.ctakes.cancer.util.SpannedEntity;
+import org.apache.ctakes.cancer.property.DefaultProperty;
+import org.apache.ctakes.cancer.property.SpannedType;
+import org.apache.ctakes.cancer.property.SpannedValue;
+import org.apache.log4j.Logger;
 
 import javax.annotation.concurrent.Immutable;
-import java.util.logging.Logger;
 
 /**
  * @author SPF , chip-nlp
@@ -11,33 +13,22 @@ import java.util.logging.Logger;
  * @since 8/20/2015
  */
 @Immutable
-final class Stage implements SpannedEntity {
+final class Stage extends DefaultProperty<StageType, StageValue> {
 
    static private final Logger LOGGER = Logger.getLogger( "Stage" );
 
 
-   private final int _startOffset;
-   private final int _endOffset;
-   private final StageValue _value;
-
-   Stage( final int startOffset, final int endOffset, final StageValue value ) {
-      _startOffset = startOffset;
-      _endOffset = endOffset;
-      _value = value;
+   Stage( final SpannedType<StageType> stageType, final SpannedValue<StageValue> stageValue ) {
+      super( stageType, stageValue );
    }
 
    @Override
-   public int getStartOffset() {
-      return _startOffset;
-   }
-
-   @Override
-   public int getEndOffset() {
-      return _endOffset;
-   }
-
-   StageValue getValue() {
-      return _value;
+   public String toString() {
+      final StageValue value = getSpannedValue().getValue();
+      if ( value == StageValue.IS_0 || value == StageValue.RCR || value == StageValue.UNKNOWN ) {
+         return value.getTitle() + " Breast Carcinoma";
+      }
+      return getSpannedType().getType().getTitle() + " " + value.getTitle() + " Breast Carcinoma";
    }
 
 }

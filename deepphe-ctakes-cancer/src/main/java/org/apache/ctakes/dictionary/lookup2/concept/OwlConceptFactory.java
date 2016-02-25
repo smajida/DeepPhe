@@ -13,6 +13,7 @@ import org.apache.uima.UimaContext;
 import java.io.FileNotFoundException;
 import java.util.*;
 
+import static org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory.ROOT_ELEMENT_NAME;
 
 /**
  * @author SPF , chip-nlp
@@ -83,7 +84,7 @@ public class OwlConceptFactory implements ConceptFactory {
       try {
          final IOntology ontology = OwlConnectionFactory.getInstance().getOntology( owlFilePath );
          final Map<Long, Concept> conceptMap = new HashMap<>();
-         final IClass root = ontology.getClass( "Annotation" );
+         final IClass root = ontology.getClass( ROOT_ELEMENT_NAME );
          for ( IClass childClass : root.getSubClasses() ) {
             conceptMap.putAll( createOwlConcepts( childClass ) );
          }

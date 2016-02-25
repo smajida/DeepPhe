@@ -11,8 +11,8 @@ import org.apache.uima.jcas.JCas;
 import java.util.Collection;
 
 /**
-* Add Event for each EventMention
-*/
+ * Add Event for each EventMention
+ */
 // TODO This should really be someplace else - Right now there are ~4 redundant internal copies in ctakes code
 final public class EventAdder extends JCasAnnotator_ImplBase {
 

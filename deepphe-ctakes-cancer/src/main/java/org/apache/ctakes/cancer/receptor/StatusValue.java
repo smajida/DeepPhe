@@ -1,8 +1,8 @@
 package org.apache.ctakes.cancer.receptor;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.property.Value;
 
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,18 +11,20 @@ import java.util.regex.Pattern;
  * @version %I%
  * @since 8/19/2015
  */
-public enum StatusValue {
-   POSITIVE( "Positive", Boolean.TRUE, "Positive", "\\+?pos(itive)?|\\+(pos)?" ),
-   NEGATIVE( "Negative", Boolean.FALSE, "Negative", "-?neg(ative)?|-(neg)?" ),
-   UNKNOWN( "Unknown", null, "Unknown", "unknown|indeterminate|equivocal|(not assessed)|\\bN/?A\\b" );
+public enum StatusValue implements Value {
+   POSITIVE( "Positive", "Positive", "\\+?pos(itive)?|\\+(pos)?" ),
+   NEGATIVE( "Negative", "Negative", "-?neg(ative)?|-(neg)?" ),
+   UNKNOWN( "Unknown", "Unknown", "unknown|indeterminate|equivocal|(not assessed)|\\bN/?A\\b" );
+   //   http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#Equivocal
    final private String _title;
-   final private Boolean _booleanValue;
    final private String _uri;
    final private Pattern _pattern;
 
-   StatusValue( final String title, final Boolean booleanValue, final String uri, final String regex ) {
+
+   static private final String VALUE_TYPE_URI = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#TNMValue";
+
+   StatusValue( final String title, final String uri, final String regex ) {
       _title = title;
-      _booleanValue = booleanValue;
       _uri = uri;
       _pattern = Pattern.compile( regex, Pattern.CASE_INSENSITIVE );
    }
@@ -32,23 +34,18 @@ public enum StatusValue {
    }
 
    public String getUri() {
-      return OwlOntologyConceptUtil.BREAST_CANCER_OWL + _uri;
+      return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + _uri;
    }
 
    public Matcher getMatcher( final CharSequence lookupWindow ) {
       return _pattern.matcher( lookupWindow );
    }
 
-   public Boolean getBooleanValue() {
-      return _booleanValue;
-   }
-
-
    /**
     * @param uri full uri
     * @return StatusValue with the given uri or UNKNOWN if not found
     */
-   static public StatusValue getUriStatusValue( final String uri ) {
+   static public StatusValue getUriValue( final String uri ) {
       for ( StatusValue statusValue : StatusValue.values() ) {
          if ( statusValue.getUri().equals( uri ) ) {
             return statusValue;

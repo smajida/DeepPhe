@@ -23,12 +23,12 @@ final public class CancerPipelineRunner {
    interface Options extends CancerPipelineOptions {
       @Option(
             shortName = "i",
-            description = "specify the path to the directory containing the clinical notes to be processed")
+            description = "specify the path to the directory containing the clinical notes to be processed" )
       String getInputDirectory();
 
       @Option(
             shortName = "o",
-            description = "specify the path to the directory where the output xmi files are to be saved")
+            description = "specify the path to the directory where the output xmi files are to be saved" )
       String getOutputDirectory();
    }
 

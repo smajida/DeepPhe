@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.ctakes.dictionary.lookup2.dictionary.RareWordTermMapCreator.CuiTerm;
+import static org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory.ROOT_ELEMENT_NAME;
 
 /**
  * @author SPF , chip-nlp
@@ -114,7 +115,7 @@ public class OwlDictionary implements RareWordDictionary {
       try {
          final IOntology ontology = OwlConnectionFactory.getInstance().getOntology( owlFilePath );
          final Collection<CuiTerm> cuiTerms = new ArrayList<>();
-         final IClass root = ontology.getClass( "Annotation" );
+         final IClass root = ontology.getClass( ROOT_ELEMENT_NAME );
          for ( IClass childClass : root.getSubClasses() ) {
             cuiTerms.addAll( createCuiTerms( childClass ) );
          }
