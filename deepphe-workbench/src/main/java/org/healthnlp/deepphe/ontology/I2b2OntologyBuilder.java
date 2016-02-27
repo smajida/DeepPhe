@@ -126,6 +126,8 @@ public class I2b2OntologyBuilder {
 			e.printStackTrace();
 		} catch (OWLOntologyCreationException e) {
 			e.printStackTrace();
+		} catch(URISyntaxException e) {
+			e.printStackTrace();
 		}
 		return o;
 	}
