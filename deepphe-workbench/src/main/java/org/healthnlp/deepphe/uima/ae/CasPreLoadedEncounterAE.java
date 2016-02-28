@@ -5,9 +5,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.receptor.StatusPropertyUtil;
+import org.apache.ctakes.cancer.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
-import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
-import org.apache.ctakes.cancer.type.textsem.TnmClassification;
+//import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
+//import org.apache.ctakes.cancer.type.textsem.TnmClassification;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.MedicationMention;
@@ -104,12 +107,18 @@ public class CasPreLoadedEncounterAE extends JCasAnnotator_ImplBase {
 				MedicationMention.type));
 		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
 				ProcedureMention.type));
-		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
-				TnmClassification.type));
+//		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
+//				TnmClassification.type));
 		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
 				CancerSize.type));
-		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
-				ReceptorStatus.type));
+//		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
+//				ReceptorStatus.type));
+
+		// TODO use OwlOntologyConceptUtil
+		identifiedAnnotations.addAll(
+				OwlOntologyConceptUtil.getAnnotationsByUriBranch( ctakesJCas, StatusPropertyUtil.getParentUri() ) );
+		identifiedAnnotations.addAll(
+				OwlOntologyConceptUtil.getAnnotationsByUriBranch( ctakesJCas, TnmPropertyUtil.getParentUri() ) );
 
 		for (IdentifiedAnnotation idAnnot : identifiedAnnotations) {
 			logger.debug(getClass().getSimpleName() + " found a "
