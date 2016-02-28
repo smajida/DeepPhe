@@ -1,5 +1,6 @@
 package org.apache.ctakes.cancer.instance;
 
+import org.apache.ctakes.cancer.owl.UriAnnotationFactory;
 import org.apache.ctakes.cancer.property.*;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.util.FinderUtil;
@@ -8,9 +9,7 @@ import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.relation.DegreeOfTextRelation;
 import org.apache.ctakes.typesystem.type.relation.IndicatesTextRelation;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
-import org.apache.ctakes.typesystem.type.textsem.EventMention;
-import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
-import org.apache.ctakes.typesystem.type.textsem.Modifier;
+import org.apache.ctakes.typesystem.type.textsem.*;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 
@@ -24,15 +23,15 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.MODIFIER_TYPE_ID
  * @version %I%
  * @since 2/17/2016
  */
-abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E extends EventMention> {
+abstract public class AbstractInstanceFactory<T extends Type, V extends Value, E extends EventMention> {
 
    // TODO add <..., P extends Test, ...>
 
-   static private final Logger LOGGER = Logger.getLogger( "AbstractInstanceUtil" );
+   static private final Logger LOGGER = Logger.getLogger( "AbstractInstanceFactory" );
 
    private final String _instanceTypeName;
 
-   public AbstractInstanceUtil( final String instanceTypeName ) {
+   public AbstractInstanceFactory( final String instanceTypeName ) {
       _instanceTypeName = instanceTypeName;
    }
 
@@ -97,6 +96,36 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
                                      final Iterable<IdentifiedAnnotation> neoplasms,
                                      final Iterable<IdentifiedAnnotation> diagnosticTests );
 
+
+   /**
+    * @param jcas            -
+    * @param typeUri         -
+    * @param typeBegin       -
+    * @param typeEnd         -
+    * @param valueUri        -
+    * @param valueBegin      -
+    * @param valueEnd        -
+    * @param neoplasms       -
+    * @param diagnosticTests -
+    * @return -
+    */
+   final public E createInstance( final JCas jcas,
+                                  final String typeUri, final int typeBegin, final int typeEnd,
+                                  final String valueUri, final int valueBegin, final int valueEnd,
+                                  final Iterable<IdentifiedAnnotation> neoplasms,
+                                  final Iterable<IdentifiedAnnotation> diagnosticTests ) {
+      final E eventMention = createEventMention( jcas, typeBegin, typeEnd );
+      final UmlsConcept umlsConcept = UriAnnotationFactory.createUmlsConcept( jcas, typeUri );
+      final FSArray conceptArray = new FSArray( jcas, 1 );
+      conceptArray.set( 0, umlsConcept );
+      eventMention.setOntologyConceptArr( conceptArray );
+      final Modifier valueModifier = createValueModifier( jcas, valueUri, valueBegin, valueEnd );
+      createEventMentionDegree( jcas, eventMention, valueModifier );
+      createEventMentionNeoplasm( jcas, typeBegin, typeEnd, typeUri, eventMention, neoplasms );
+      createEventMentionIndicator( jcas, typeBegin, typeEnd, eventMention, diagnosticTests );
+      return eventMention;
+   }
+
    /**
     * Create a sign/symptom and add it to the cas
     *
@@ -152,7 +181,7 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
                                                  final int windowStartOffset,
                                                  final SpannedProperty<T, V> spannedProperty ) {
       final SpannedValue<V> spannedValue = spannedProperty.getSpannedValue();
-      final Modifier valueModifier = new Modifier( jcas,
+      final SeverityModifier valueModifier = new SeverityModifier( jcas,
             windowStartOffset + spannedValue.getStartOffset(),
             windowStartOffset + spannedValue.getEndOffset() );
       valueModifier.setTypeID( MODIFIER_TYPE_ID_SEVERITY_CLASS );
@@ -175,6 +204,28 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
    }
 
    /**
+    * Create a modifier and add it to the cas
+    *
+    * @param jcas        -
+    * @param valueUri    uri for the value modifier
+    * @param beginOffset -
+    * @param endOffset   -
+    * @return the modifier representing the value of the property
+    */
+   static public Modifier createValueModifier( final JCas jcas, final String valueUri,
+                                               final int beginOffset, final int endOffset ) {
+      final SeverityModifier valueModifier = new SeverityModifier( jcas, beginOffset, endOffset );
+      valueModifier.setTypeID( MODIFIER_TYPE_ID_SEVERITY_CLASS );
+      // Value uri concept
+      final UmlsConcept umlsConcept = UriAnnotationFactory.createUmlsConcept( jcas, valueUri );
+      final FSArray ontologyConcepts = new FSArray( jcas, 1 );
+      ontologyConcepts.set( 0, umlsConcept );
+      valueModifier.setOntologyConceptArr( ontologyConcepts );
+      valueModifier.addToIndexes();
+      return valueModifier;
+   }
+
+   /**
     * Create the degree of relation and add is to the cas
     * http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Severity
     * http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Degree
@@ -183,9 +234,9 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
     * @param eventMention -
     * @param modifier     -
     */
-   final protected void createEventMentionDegree( final JCas jCas,
-                                                  final E eventMention,
-                                                  final Modifier modifier ) {
+   final public void createEventMentionDegree( final JCas jCas,
+                                               final E eventMention,
+                                               final Modifier modifier ) {
       final RelationArgument typeArgument = new RelationArgument( jCas );
       typeArgument.setArgument( eventMention );
       typeArgument.setRole( "Argument" );
@@ -205,7 +256,7 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
     * Create a "property_type_of" relation to a neoplasm.
     *
     * @param jCas              -
-    * @param windowStartOffset character offset of window containing the receptor status
+    * @param windowStartOffset character offset of window containing the property
     * @param spannedProperty   -
     * @param eventMention      property as an event mention
     * @param neoplasms         nearby neoplasms
@@ -215,14 +266,36 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
                                                     final SpannedProperty<T, V> spannedProperty,
                                                     final E eventMention,
                                                     final Iterable<IdentifiedAnnotation> neoplasms ) {
+      createEventMentionNeoplasm( jCas,
+            windowStartOffset + spannedProperty.getStartOffset(),
+            windowStartOffset + spannedProperty.getEndOffset(),
+            spannedProperty.getSpannedType().getType().getTitle(),
+            eventMention, neoplasms );
+   }
+
+   /**
+    * Create a "property_type_of" relation to a neoplasm.
+    *
+    * @param jCas         -
+    * @param typeBegin    character offset of the property
+    * @param typeEnd      -
+    * @param typeTitle    -
+    * @param eventMention property as an event mention
+    * @param neoplasms    nearby neoplasms
+    */
+   final protected void createEventMentionNeoplasm( final JCas jCas,
+                                                    final int typeBegin, final int typeEnd,
+                                                    final String typeTitle,
+                                                    final E eventMention,
+                                                    final Iterable<IdentifiedAnnotation> neoplasms ) {
       final IdentifiedAnnotation closestNeoplasm
-            = FinderUtil.getClosestAnnotation( windowStartOffset + spannedProperty.getStartOffset(),
-            windowStartOffset + spannedProperty.getEndOffset(), neoplasms );
+            = FinderUtil.getClosestAnnotation( typeBegin, typeEnd, neoplasms );
       if ( closestNeoplasm != null ) {
-         final String relationName = spannedProperty.getSpannedType().getType().getTitle().replace( ' ', '_' ) + "_of";
+         final String relationName = typeTitle.replace( ' ', '_' ) + "_of";
          createEventMentionNeoplasm( jCas, eventMention, closestNeoplasm, relationName );
       }
    }
+
 
    /**
     * Create a "property_type_of" relation to a neoplasm.
@@ -266,10 +339,10 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
     * Create a "test_indicates_property" relation
     *
     * @param jCas              -
-    * @param windowStartOffset character offset of window containing the receptor status
+    * @param windowStartOffset character offset of window containing the property
     * @param spannedProperty   -
     * @param eventMention      property as an event mention
-    * @param diagnosticTests    nearby diagnostic tests
+    * @param diagnosticTests   nearby diagnostic tests
     */
    final protected void createEventMentionIndicator( final JCas jCas,
                                                      final int windowStartOffset,
@@ -279,9 +352,25 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
       if ( diagnosticTests == null ) {
          return;
       }
+      createEventMentionIndicator( jCas, windowStartOffset + spannedProperty.getStartOffset(),
+            windowStartOffset + spannedProperty.getEndOffset(), eventMention, diagnosticTests );
+   }
+
+   /**
+    * Create a "test_indicates_property" relation to a neoplasm.
+    *
+    * @param jCas            -
+    * @param typeBegin       character offset of the property
+    * @param typeEnd         -
+    * @param eventMention    property as an event mention
+    * @param diagnosticTests nearby diagnostic tests
+    */
+   final public void createEventMentionIndicator( final JCas jCas,
+                                                  final int typeBegin, final int typeEnd,
+                                                  final E eventMention,
+                                                  final Iterable<IdentifiedAnnotation> diagnosticTests ) {
       final IdentifiedAnnotation closestDiagnostic
-            = FinderUtil.getClosestAnnotation( windowStartOffset + spannedProperty.getStartOffset(),
-            windowStartOffset + spannedProperty.getEndOffset(), diagnosticTests );
+            = FinderUtil.getClosestAnnotation( typeBegin, typeEnd, diagnosticTests );
       if ( closestDiagnostic != null ) {
          createEventMentionIndicator( jCas, closestDiagnostic, eventMention, "Diagnostic_Test_for" );
       }
@@ -291,10 +380,10 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
    /**
     * Create a "property_type_of" relation to a neoplasm.
     *
-    * @param jCas         -
-    * @param diagnosticTest    the diagnostic test for the property
-    * @param eventMention property as an event mention
-    * @param relationName e.g. Diagnostic_Test_for
+    * @param jCas           -
+    * @param diagnosticTest the diagnostic test for the property
+    * @param eventMention   property as an event mention
+    * @param relationName   e.g. Diagnostic_Test_for
     */
    final protected void createEventMentionIndicator( final JCas jCas,
                                                      final IdentifiedAnnotation diagnosticTest,
@@ -310,17 +399,17 @@ abstract public class AbstractInstanceUtil<T extends Type, V extends Value, E ex
          return;
       }
       // add the relation to the CAS
+      final RelationArgument diagnosticArgument = new RelationArgument( jCas );
+      diagnosticArgument.setArgument( diagnosticTest );
+      diagnosticArgument.setRole( "Argument" );
+      diagnosticArgument.addToIndexes();
       final RelationArgument eventArgument = new RelationArgument( jCas );
-      eventArgument.setArgument( diagnosticTest );
-      eventArgument.setRole( "Argument" );
+      eventArgument.setArgument( eventMention );
+      eventArgument.setRole( "Related_to" );
       eventArgument.addToIndexes();
-      final RelationArgument procedureArgument = new RelationArgument( jCas );
-      procedureArgument.setArgument( eventMention );
-      procedureArgument.setRole( "Related_to" );
-      procedureArgument.addToIndexes();
       final IndicatesTextRelation indicatesRelation = new IndicatesTextRelation( jCas );
-      indicatesRelation.setArg1( eventArgument );
-      indicatesRelation.setArg2( procedureArgument );
+      indicatesRelation.setArg1( diagnosticArgument );
+      indicatesRelation.setArg2( eventArgument );
       indicatesRelation.setCategory( relationName );
       indicatesRelation.addToIndexes();
    }

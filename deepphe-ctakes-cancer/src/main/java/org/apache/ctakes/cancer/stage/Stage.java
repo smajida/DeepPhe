@@ -1,5 +1,6 @@
 package org.apache.ctakes.cancer.stage;
 
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.property.DefaultProperty;
 import org.apache.ctakes.cancer.property.SpannedType;
 import org.apache.ctakes.cancer.property.SpannedValue;
@@ -17,6 +18,7 @@ final class Stage extends DefaultProperty<StageType, StageValue> {
 
    static private final Logger LOGGER = Logger.getLogger( "Stage" );
 
+   static final String STAGE_URI = OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Cancer_Stage";
 
    Stage( final SpannedType<StageType> stageType, final SpannedValue<StageValue> stageValue ) {
       super( stageType, stageValue );

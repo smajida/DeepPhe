@@ -42,7 +42,6 @@ enum StatusType implements Type {
 //   http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#Triple_Positive
 
 
-   static public final String PARENT_URI = OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Receptor_Status";
    static private final String RECEPTOR_EX = "(\\s*-?\\s*?Receptors?\\s*-?)?";
 
    final private String _title;

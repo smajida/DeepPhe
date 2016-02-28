@@ -14,7 +14,16 @@ final public class StatusPropertyUtil extends AbstractPropertyUtil<StatusType, S
 
    static private final Logger LOGGER = Logger.getLogger( "StatusPropertyUtil" );
 
-   public StatusPropertyUtil() {
+   static private class SingletonHolder {
+      static private StatusPropertyUtil INSTANCE = new StatusPropertyUtil();
+   }
+
+   static public StatusPropertyUtil getInstance() {
+      return SingletonHolder.INSTANCE;
+   }
+
+
+   private StatusPropertyUtil() {
       super( "Receptor Status" );
    }
 
@@ -38,10 +47,30 @@ final public class StatusPropertyUtil extends AbstractPropertyUtil<StatusType, S
     * {@inheritDoc}
     */
    @Override
+   public String getTypeUri( final String typeText ) {
+      return getTypeUri( typeText, StatusType.values() );
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public String getValueUri( final String valueText ) {
+      return getValueUri( valueText, StatusValue.values() );
+   }
+
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
    protected StatusValue getUnknownValue() {
       return StatusValue.UNKNOWN;
    }
 
+   static public String getParentUri() {
+      return Status.RECEPTOR_STATUS_URI;
+   }
 
 //
 //

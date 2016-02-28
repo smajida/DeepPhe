@@ -22,17 +22,17 @@ final public class NeoplasmRelationFactory {
 
    static private final Logger LOGGER = Logger.getLogger( "NeoplasmRelationFactory" );
 
-   static public void createNeoplasmRelation( final JCas jCas,
+   static public NeoplasmRelation createNeoplasmRelation( final JCas jCas,
                                               final IdentifiedAnnotation argumentEvent,
                                               final IdentifiedAnnotation neoplasm,
                                               final String relationType ) {
       if ( argumentEvent == null ) {
          LOGGER.info( "No argument neoplasm relation " + ((neoplasm != null) ? neoplasm.getCoveredText() : "") );
-         return;
+         return null;
       }
       if ( neoplasm == null ) {
          LOGGER.info( "No Neoplasm to relate to " + argumentEvent.getCoveredText() );
-         return;
+         return null;
       }
       // add the relation to the CAS
       final RelationArgument eventArgument = new RelationArgument( jCas );
@@ -48,6 +48,7 @@ final public class NeoplasmRelationFactory {
       neoplasmRelation.setArg2( neoplasmArgument );
       neoplasmRelation.setCategory( relationType );
       neoplasmRelation.addToIndexes();
+      return neoplasmRelation;
    }
 
 }

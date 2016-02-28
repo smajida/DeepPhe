@@ -29,7 +29,6 @@ final public class StageFinder {
 
    static private final Logger LOGGER = Logger.getLogger( "StageFinder" );
 
-   static private final StageInstanceUtil STAGE_INSTANCE_UTIL = new StageInstanceUtil();
 
    static private final String TYPE_REGEX = "Stage";
    static private final String SHORT_VALUE = "([I]{1,3}|IV|IS|[0-4])[a-c]?";
@@ -51,7 +50,7 @@ final public class StageFinder {
       }
       final int windowStartOffset = lookupWindow.getBegin();
       for ( Stage stage : stages ) {
-         STAGE_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, stage, neoplasms );
+         StageInstanceFactory.getInstance().createInstance( jcas, windowStartOffset, stage, neoplasms );
       }
    }
 

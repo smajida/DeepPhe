@@ -10,6 +10,7 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 
 import java.util.Collection;
+import java.util.regex.Matcher;
 
 /**
  * @author SPF , chip-nlp
@@ -22,7 +23,7 @@ abstract public class AbstractPropertyUtil<T extends Type, V extends Value> {
 
    private final String _propertyName;
 
-   public AbstractPropertyUtil( final String propertyName ) {
+   protected AbstractPropertyUtil( final String propertyName ) {
       _propertyName = propertyName;
    }
 
@@ -77,6 +78,43 @@ abstract public class AbstractPropertyUtil<T extends Type, V extends Value> {
       }
       return getUnknownValue();
    }
+
+   abstract public String getTypeUri( final String typeText );
+
+   abstract public String getValueUri( final String valueText );
+
+   protected String getTypeUri( final String typeText, final T[] types ) {
+      for ( T type : types ) {
+         if ( type.getMatcher( typeText ).matches() ) {
+            return type.getUri();
+         }
+      }
+      return "";
+   }
+
+   protected String getValueUri( final String valueText, final V[] values ) {
+      int bestBegin = Integer.MAX_VALUE;
+      int bestEnd = Integer.MIN_VALUE;
+      V bestValue = null;
+      for ( V value : values ) {
+         final Matcher valueMatcher = value.getMatcher( valueText );
+         if ( valueMatcher.find() ) {
+            if ( bestValue == null
+                 || (valueMatcher.end() - valueMatcher.start() > bestEnd - bestBegin)
+                 || (valueMatcher.start() < bestBegin) ) {
+               bestValue = value;
+               bestBegin = valueMatcher.start();
+               bestEnd = valueMatcher.end();
+            }
+         }
+      }
+      if ( bestValue == null ) {
+         return "";
+      }
+      return bestValue.getUri();
+   }
+
+
 
    /**
     * @param uris uris associated with the possible property values

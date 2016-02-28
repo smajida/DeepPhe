@@ -1,9 +1,7 @@
 package org.apache.ctakes.cancer.stage;
 
-import org.apache.ctakes.cancer.instance.AbstractInstanceUtil;
+import org.apache.ctakes.cancer.instance.AbstractInstanceFactory;
 import org.apache.ctakes.cancer.property.SpannedProperty;
-import org.apache.ctakes.cancer.property.SpannedTest;
-import org.apache.ctakes.cancer.property.Test;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.Modifier;
@@ -17,12 +15,19 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_DISOR
  * @version %I%
  * @since 2/8/2016
  */
-final public class StageInstanceUtil extends AbstractInstanceUtil<StageType, StageValue, DiseaseDisorderMention> {
+final public class StageInstanceFactory extends AbstractInstanceFactory<StageType, StageValue, DiseaseDisorderMention> {
 
-   static private final Logger LOGGER = Logger.getLogger( "StageInstanceUtil" );
+   static private final Logger LOGGER = Logger.getLogger( "StageInstanceFactory" );
 
+   static private class SingletonHolder {
+      static private StageInstanceFactory INSTANCE = new StageInstanceFactory();
+   }
 
-   public StageInstanceUtil() {
+   static public StageInstanceFactory getInstance() {
+      return SingletonHolder.INSTANCE;
+   }
+
+   private StageInstanceFactory() {
       super( "Stage" );
    }
 

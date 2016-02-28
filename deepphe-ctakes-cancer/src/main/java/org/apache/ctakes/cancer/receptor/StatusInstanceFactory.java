@@ -1,10 +1,8 @@
 package org.apache.ctakes.cancer.receptor;
 
 
-import org.apache.ctakes.cancer.instance.AbstractInstanceUtil;
+import org.apache.ctakes.cancer.instance.AbstractInstanceFactory;
 import org.apache.ctakes.cancer.property.SpannedProperty;
-import org.apache.ctakes.cancer.property.SpannedTest;
-import org.apache.ctakes.cancer.property.Test;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.Modifier;
 import org.apache.ctakes.typesystem.type.textsem.SignSymptomMention;
@@ -18,11 +16,19 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDI
  * @version %I%
  * @since 12/6/2015
  */
-final public class StatusInstanceUtil extends AbstractInstanceUtil<StatusType, StatusValue, SignSymptomMention> {
+final public class StatusInstanceFactory extends AbstractInstanceFactory<StatusType, StatusValue, SignSymptomMention> {
 
-   static private final Logger LOGGER = Logger.getLogger( "StatusInstanceUtil" );
+   static private final Logger LOGGER = Logger.getLogger( "StatusInstanceFactory" );
 
-   public StatusInstanceUtil() {
+   static private class SingletonHolder {
+      static private StatusInstanceFactory INSTANCE = new StatusInstanceFactory();
+   }
+
+   static public StatusInstanceFactory getInstance() {
+      return SingletonHolder.INSTANCE;
+   }
+
+   private StatusInstanceFactory() {
       super( "Receptor Status" );
    }
 

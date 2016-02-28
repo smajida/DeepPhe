@@ -110,6 +110,13 @@ final public class OwlParserUtil {
       return getConceptCodes( concept, ICD10CM_PATTERN );
    }
 
+   static public String getPreferredText( final IClass iClass ) {
+      return getPreferredText( iClass.getConcept() );
+   }
+
+   static public String getPreferredText( final Concept concept ) {
+      return concept.getPreferredTerm().getText();
+   }
 
    static private Collection<String> getConceptCodes( final Concept concept, final Pattern pattern ) {
       final Collection<Object> allCodes = concept.getCodes().values();

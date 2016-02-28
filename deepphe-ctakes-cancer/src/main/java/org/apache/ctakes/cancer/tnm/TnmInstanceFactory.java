@@ -1,9 +1,7 @@
 package org.apache.ctakes.cancer.tnm;
 
-import org.apache.ctakes.cancer.instance.AbstractInstanceUtil;
+import org.apache.ctakes.cancer.instance.AbstractInstanceFactory;
 import org.apache.ctakes.cancer.property.SpannedProperty;
-import org.apache.ctakes.cancer.property.SpannedTest;
-import org.apache.ctakes.cancer.property.Test;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.Modifier;
 import org.apache.ctakes.typesystem.type.textsem.SignSymptomMention;
@@ -17,12 +15,19 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDI
  * @version %I%
  * @since 2/8/2016
  */
-final public class TnmInstanceUtil extends AbstractInstanceUtil<TnmType, TnmValue, SignSymptomMention> {
+final public class TnmInstanceFactory extends AbstractInstanceFactory<TnmType, TnmValue, SignSymptomMention> {
 
-   static private final Logger LOGGER = Logger.getLogger( "TnmInstanceUtil" );
+   static private final Logger LOGGER = Logger.getLogger( "TnmInstanceFactory" );
 
+   static private class SingletonHolder {
+      static private TnmInstanceFactory INSTANCE = new TnmInstanceFactory();
+   }
 
-   public TnmInstanceUtil() {
+   static public TnmInstanceFactory getInstance() {
+      return SingletonHolder.INSTANCE;
+   }
+
+   private TnmInstanceFactory() {
       super( "TNM" );
    }
 
