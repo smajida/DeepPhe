@@ -37,10 +37,14 @@ public class DummyData extends Controller {
    public static String statementWrapper = "'{' \"statements\": [ {0} ] \" '}' ";
 		   
    
-   public static String createPatientQuery = "'{' \"statement\": \"create (p:Patient '{'name: \\\"{0}'\\\"'}') return id(p)\" '}' ";
-   public static String createDocumentQuery = "'{' \"statement\": \"create (d:Document '{'name: \\\"{0}'\\\"'}') return id(d)\" '}' ";
+   public static String createPatientQuery = "'{' \"statement\": \"create (p:Patient '{'name: \\\"{0}\\\"'}') return id(p)\" '}' ";
+   public static String createDocumentQuery = "'{' \"statement\": \"create (d:Document '{'name: \\\"{0}\\\", date: \\\"{1}\\\" '}') return id(d)\" '}' ";
    public static String createHasSubjectQuery = "'{' \"statement\": \"match (p:Patient),(d:Document) where p.name=\\\"{0}\\\" and d.name=\\\"{1}\\\" create (d)-[:hasSubject]->(p) return id(p);\"'}' ";
-	
+   public static String createDiagnosisQuery = "'{' \"statement\": \"create (dx:Diagnosis '{'name: \\\"{0}\\\", bodySites: \\\"{1}\\\", Stage: \\\"{2}\\\" '}') return id(dx)\" '}' ";
+   public static String createHasDiagnosisQuery = "'{' \"statement\": \"match (dx:Diagnosis),(d:Document) where dx.name=\\\"{0}\\\" and d.name=\\\"{1}\\\" create (d)-[:hasDiagnosis]->(dx) return id(d);\"'}' ";
+   
+   
+   
    public Result populate() {
 	   
 	    String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
@@ -51,9 +55,11 @@ public class DummyData extends Controller {
 	   		DataCreatorUtility caller = new DataCreatorUtility(SERVER_ROOT_URI, username, password);
 	   		String p1 = createPatient("George");
 	   		String p2 = createPatient("Harry");
-	   		String p3 = createDocument("doc1");
+	   		String p3 = createDocument("doc1","2015-12-15 09:00");
 	   		String p4 = createHasSubjectQuery("Harry","doc1");
-	   		String[] allStatements = new String[]{p1,p2,p3,p4};
+	   		String p5 = createDiagnosisQuery("Malignant Breast Neoplasm","[left breast]","II");
+	   		String p6 = createHasDiagnosisQuery("doc1","Malignant Breast Neoplasm");
+	   		String[] allStatements = new String[]{p1,p2,p3,p4,p5,p6};
 	   		String statementString = String.join(",",allStatements);
 	   		// split with a comma
 	   		Object[] params = new Object[]{statementString};
@@ -71,13 +77,22 @@ public class DummyData extends Controller {
 	   return formatQuery(createPatientQuery,new Object[]{name});
    }
    
-   public String createDocument(String name) {
-	   	return formatQuery(createDocumentQuery,new Object[]{name});
+   public String createDocument(String name,String date) {
+	   	return formatQuery(createDocumentQuery,new Object[]{name,date});
    }
    
    public String createHasSubjectQuery(String p,String d) {
 	   return formatQuery(createHasSubjectQuery,new Object[]{p,d});
    }
+   
+   public String createDiagnosisQuery(String name,String sites,String stage) {
+	   	return formatQuery(createDiagnosisQuery,new Object[]{name,sites,stage});
+   }
+   
+   public String createHasDiagnosisQuery(String dx,String d) {
+	   return formatQuery(createHasDiagnosisQuery,new Object[]{dx,d});
+   }
+   
    
   private String formatQuery(String template,Object[] params) {
 	  	MessageFormat form = new MessageFormat(template);
