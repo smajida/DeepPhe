@@ -12,6 +12,11 @@ enum DimensionUnit {
    CENTIMETER( "centimeter", "cm" ),
    MILLIMETER( "millimeter", "mm" );
 
+//   http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Unit
+//   http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#Centimeter
+//   http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#Unit_of_Length
+
+
    static private final String VALUES_REGEX = "\\d+(\\.\\d+)?( ?(x|\\*) ?\\d+(\\.\\d+)?){0,2} ?";
    static private final String END_REGEX = "(\\b|,|\\.|\\?|!|\\)|\\]|\\})";
 

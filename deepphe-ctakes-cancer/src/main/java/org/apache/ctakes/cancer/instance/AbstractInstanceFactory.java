@@ -42,7 +42,7 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.MODIFIER_TYPE_ID
  * @version %I%
  * @since 2/17/2016
  */
-abstract public class AbstractInstanceFactory<T extends Type, V extends Value, E extends EventMention> {
+abstract public class AbstractInstanceFactory<T extends Type, V extends Value, E extends IdentifiedAnnotation> {
 
    // TODO add <..., P extends Test, ...>
 

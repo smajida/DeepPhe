@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  * @version %I%
  * @since 2/8/2016
  */
-class Nvalue implements TnmValue {
+final class Nvalue implements TnmValue {
    static private final Nvalue[] VALUES;
 
    static {

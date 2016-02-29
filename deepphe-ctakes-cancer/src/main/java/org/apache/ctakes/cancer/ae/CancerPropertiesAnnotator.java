@@ -66,7 +66,8 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
          // Metastasis does not have all metastases as children
          masses.addAll( OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, "Metastatic_Neoplasm" ) );
 
-         SizeFinder.addSizes( jcas, lookupWindow, breastNeoplasms, masses );
+         masses.addAll( breastNeoplasms );
+         SizeFinder.addSizes( jcas, lookupWindow, masses );
 //         if ( LOGGER.isDebugEnabled() ) {
 //         printCancerFindings( jcas );
 //         }
