@@ -6,6 +6,19 @@ import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 
 /**
+ * Singleton class with Utilities to interact with neoplasm Receptor Status property annotations, mostly by uri.
+ *
+ * should be used to:
+ * <ul>
+ * test that an annotation is of the desired property {@link #isCorrectProperty(IdentifiedAnnotation)}
+ * get the property type uri from text {@link #getTypeUri(String)}
+ * get the property value uri from text {@link #getValueUri(String)}
+ *</ul>
+ *
+ * In addition there are static methods to:
+ * <ul>
+ * get the parent uri of the tnm property types {@link #getParentUri()}
+ * </ul>
  * @author SPF , chip-nlp
  * @version %I%
  * @since 12/6/2015
@@ -68,6 +81,9 @@ final public class StatusPropertyUtil extends AbstractPropertyUtil<StatusType, S
       return StatusValue.UNKNOWN;
    }
 
+   /**
+    * @return the uri acting as parent to all individual receptor status property uris
+    */
    static public String getParentUri() {
       return Status.RECEPTOR_STATUS_URI;
    }

@@ -336,7 +336,7 @@ final public class DocumentResourceFactory {
 //				list.add(createFinding(st));
 //		}
 		// add Stage to list
-		OwlOntologyConceptUtil.getAnnotationsByUriBranch( cas, StagePropertyUtil.getCoallescedUri() )
+		OwlOntologyConceptUtil.getAnnotationsByUriBranch( cas, StagePropertyUtil.getParentUri() )
 				.stream().map( DocumentResourceFactory::createFinding ).forEach( list::add );
 		return list;
 	}
@@ -830,7 +830,7 @@ final public class DocumentResourceFactory {
 				LOGGER.error( "No Cas exists for Stage annotations" );
 			} else {
 				final IdentifiedAnnotation fullStageAnnotation = StagePropertyUtil
-						.getCoallescedProperty( jcas, stageAnnotations );
+						.createCoallescedProperty( jcas, stageAnnotations );
 				CodeableConcept c = cTAKESUtils.getCodeableConcept( fullStageAnnotation );
 				c.setText( fullStageAnnotation.getCoveredText() );
 				stage.setSummary( c );
@@ -852,7 +852,7 @@ final public class DocumentResourceFactory {
 					LOGGER.error( "No Cas exists for TNM annotations" );
 				} else {
 					final IdentifiedAnnotation fullTnmAnnotation = TnmPropertyUtil
-							.getCoallescedProperty( jcas, tnmAnnotations );
+							.createCoallescedProperty( jcas, tnmAnnotations );
 					CodeableConcept c = cTAKESUtils.getCodeableConcept( fullTnmAnnotation );
 					c.setText( fullTnmAnnotation.getCoveredText() );
 					stage.setSummary( c );
@@ -867,7 +867,7 @@ final public class DocumentResourceFactory {
 			} else {
 				for ( IdentifiedAnnotation tnm : tnmAnnotations ) {
 					final IdentifiedAnnotation indiTnm = TnmPropertyUtil
-							.getCoallescedProperty( jcas, Collections.singletonList( tnm ) );
+							.createCoallescedProperty( jcas, Collections.singletonList( tnm ) );
 					Finding f = (Finding)FHIRRegistry.getInstance().getResource( indiTnm );
 					if ( f == null ) {
 						f = createFinding( indiTnm );
@@ -876,7 +876,8 @@ final public class DocumentResourceFactory {
 					//stage.setStringExtension(Stage.TNM_PRIMARY_TUMOR,cTAKESUtils.getConceptURI(st.getSize()));
 				}
 			}
-			final IdentifiedAnnotation fullTnmAnnotation = TnmPropertyUtil.getCoallescedProperty( jcas, tnmAnnotations );
+			final IdentifiedAnnotation fullTnmAnnotation = TnmPropertyUtil
+					.createCoallescedProperty( jcas, tnmAnnotations );
 			stage.addExtension( FHIRUtils.createMentionExtension( fullTnmAnnotation.getCoveredText(),
 					fullTnmAnnotation.getBegin(), fullTnmAnnotation.getEnd() ) );
 		}

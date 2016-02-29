@@ -13,6 +13,21 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 /**
+ * Singleton class with Utilities to interact with neoplasm Receptor Status property annotations, mostly by uri.
+ *
+ * should be used to:
+ * <ul>
+ * test that an annotation is of the desired property {@link #isCorrectProperty(IdentifiedAnnotation)}
+ * get the property type uri from text {@link #getTypeUri(String)}
+ * get the property value uri from text {@link #getValueUri(String)}
+ *</ul>
+ *
+ * In addition there are static methods to:
+ * <ul>
+ * get the parent uri of the tnm property types {@link #getParentUri()}
+ * create an annotation consisting of individual TNM types and values {@link #createCoallescedProperty(JCas, Collection)}
+ *       {@link #createCoallescedProperty(JCas, IdentifiedAnnotation)}
+ * </ul>
  * @author SPF , chip-nlp
  * @version %I%
  * @since 2/8/2016
@@ -74,24 +89,26 @@ final public class StagePropertyUtil extends AbstractPropertyUtil<StageType, Sta
       return getValueUri( valueText, StageValue.values() );
    }
 
-
-   static public String getCoallescedUri() {
+   /**
+    * @return the uri acting as parent to all individual stage property uris
+    */
+   static public String getParentUri() {
       return Stage.STAGE_URI;
    }
 
 
-   static public IdentifiedAnnotation getCoallescedProperty( final JCas jcas, final IdentifiedAnnotation neoplasm ) {
+   static public IdentifiedAnnotation createCoallescedProperty( final JCas jcas, final IdentifiedAnnotation neoplasm ) {
       final Collection<IdentifiedAnnotation> stageAnnotations
-            = InstanceUtil.getNeoplasmPropertiesBranch( jcas, neoplasm, getCoallescedUri() );
+            = InstanceUtil.getNeoplasmPropertiesBranch( jcas, neoplasm, getParentUri() );
       if ( stageAnnotations.size() > 1 ) {
          LOGGER.warn( "More than 1 Stage annotation associated with " + neoplasm.getCoveredText() );
       }
-      return getCoallescedProperty( jcas, stageAnnotations );
+      return createCoallescedProperty( jcas, stageAnnotations );
    }
 
 
-   static public IdentifiedAnnotation getCoallescedProperty( final JCas jcas,
-                                                             final Collection<IdentifiedAnnotation> stageAnnotations ) {
+   static public IdentifiedAnnotation createCoallescedProperty( final JCas jcas,
+                                                                final Collection<IdentifiedAnnotation> stageAnnotations ) {
       final Collection<IdentifiedAnnotation> values = stageAnnotations.stream()
             .map( InstanceUtil::getPropertyValues )
             .flatMap( Collection::stream )
@@ -104,9 +121,8 @@ final public class StagePropertyUtil extends AbstractPropertyUtil<StageType, Sta
       final int end = fullStages.stream()
             .map( InstanceUtil::getNeoplasmProperties ).flatMap( Collection::stream )
             .map( Annotation::getEnd ).max( Integer::max ).get();
-      return UriAnnotationFactory.createIdentifiedAnnotation( jcas, begin, end, StagePropertyUtil.getCoallescedUri() );
+      return UriAnnotationFactory.createIdentifiedAnnotation( jcas, begin, end, StagePropertyUtil.getParentUri() );
    }
-
 
 
 }

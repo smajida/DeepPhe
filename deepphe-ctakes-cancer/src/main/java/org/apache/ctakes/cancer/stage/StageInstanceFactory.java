@@ -11,6 +11,17 @@ import org.apache.uima.jcas.JCas;
 import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_DISORDER;
 
 /**
+ * Singleton that should be used to create full neoplasm Stage property instances.
+ * An instance is defined as the collection of all property types and values associated with a single neoplasm.
+ *
+ *
+ * Use of any {@code createInstance()} method will create:
+ * <ul>
+ * Stage type annotations
+ * neoplasm relations between the Stage type annotations and the nearest provided neoplasm in the text
+ * Stage value annotations
+ * degree-of relations between the Stage type annotations and the appropriate value annotations
+ * test-for relations between Stage type annotations and the nearest provided test in the text
  * @author SPF , chip-nlp
  * @version %I%
  * @since 2/8/2016

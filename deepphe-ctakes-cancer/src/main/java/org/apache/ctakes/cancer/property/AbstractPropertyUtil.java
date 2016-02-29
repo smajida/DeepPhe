@@ -13,6 +13,17 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 
 /**
+ * Abstract class with Utilities to interact with neoplasm property annotations, mostly by uri.
+ *
+ * Specific Property-type implementation singletons should be used to:
+ * <ul>
+ * test that an annotation is of the desired property {@link #isCorrectProperty(IdentifiedAnnotation)}
+ * get the property type uri from text {@link #getTypeUri(String)}
+ * get the property value uri from text {@link #getValueUri(String)}
+ *</ul>
+ * {@link org.apache.ctakes.cancer.tnm.TnmPropertyUtil}
+ * {@link org.apache.ctakes.cancer.receptor.StatusPropertyUtil}
+ * {@link org.apache.ctakes.cancer.stage.StagePropertyUtil}
  * @author SPF , chip-nlp
  * @version %I%
  * @since 2/8/2016

@@ -444,7 +444,7 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
-		return InstanceUtil.getNeoplasmProperties( jcas, neoplasm, StagePropertyUtil.getCoallescedUri() );
+		return InstanceUtil.getNeoplasmProperties( jcas, neoplasm, StagePropertyUtil.getParentUri() );
 	}
 
 	/**

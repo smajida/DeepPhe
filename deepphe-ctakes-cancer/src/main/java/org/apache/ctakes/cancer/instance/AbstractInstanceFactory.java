@@ -9,7 +9,10 @@ import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.relation.DegreeOfTextRelation;
 import org.apache.ctakes.typesystem.type.relation.IndicatesTextRelation;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
-import org.apache.ctakes.typesystem.type.textsem.*;
+import org.apache.ctakes.typesystem.type.textsem.EventMention;
+import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
+import org.apache.ctakes.typesystem.type.textsem.Modifier;
+import org.apache.ctakes.typesystem.type.textsem.SeverityModifier;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 
@@ -19,6 +22,22 @@ import java.util.logging.Logger;
 import static org.apache.ctakes.typesystem.type.constants.CONST.MODIFIER_TYPE_ID_SEVERITY_CLASS;
 
 /**
+ * Abstract for classes that should be used to create full neoplasm property instances.
+ * An instance is defined as the collection of all property types and values associated with a single neoplasm.
+ * Children of this factory exist for each property type, so full instance creation requires use of each.
+ * {@link org.apache.ctakes.cancer.tnm.TnmInstanceFactory}
+ * {@link org.apache.ctakes.cancer.receptor.StatusInstanceFactory}
+ * {@link org.apache.ctakes.cancer.stage.StageInstanceFactory}
+ *
+ *
+ * Use of any {@code createInstance()} method will create:
+ * <ul>
+ * appropriate property type annotations
+ * neoplasm relations between the property type annotations and the nearest provided neoplasm in the text
+ * property value annotations
+ * degree-of relations between the property type annotations and the appropriate value annotations
+ * test-for relations between property type annotations and the nearest provided test in the text
+ * </ul>
  * @author SPF , chip-nlp
  * @version %I%
  * @since 2/17/2016
@@ -82,6 +101,7 @@ abstract public class AbstractInstanceFactory<T extends Type, V extends Value, E
     * create the value as a modifier and add it to the cas,
     * create the type to value tie as a DegreeOfTextRelation
     * Tie the type as an event mention to the closest neoplasm
+    * Tie the type to the closest diagnostic test
     *
     * @param jcas              -
     * @param windowStartOffset character offset of window containing the receptor status
@@ -98,6 +118,11 @@ abstract public class AbstractInstanceFactory<T extends Type, V extends Value, E
 
 
    /**
+    * Create the type as an event mention and add it to the cas,
+    * create the value as a modifier and add it to the cas,
+    * create the type to value tie as a DegreeOfTextRelation
+    * Tie the type as an event mention to the closest neoplasm
+    * Tie the type to the closest diagnostic test
     * @param jcas            -
     * @param typeUri         -
     * @param typeBegin       -

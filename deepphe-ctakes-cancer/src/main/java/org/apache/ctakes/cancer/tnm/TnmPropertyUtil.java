@@ -13,6 +13,21 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 /**
+ * Singleton class with Utilities to interact with neoplasm TNM property annotations, mostly by uri.
+ *
+ * should be used to:
+ * <ul>
+ * test that an annotation is of the desired property {@link #isCorrectProperty(IdentifiedAnnotation)}
+ * get the property type uri from text {@link #getTypeUri(String)}
+ * get the property value uri from text {@link #getValueUri(String)}
+ *</ul>
+ *
+ * In addition there are static methods to:
+ * <ul>
+ * get the parent uri of the tnm property types {@link #getParentUri()}
+ * create an annotation consisting of individual TNM types and values {@link #createCoallescedProperty(JCas, Collection)}
+ *       {@link #createCoallescedProperty(JCas, IdentifiedAnnotation)}
+ * </ul>
  * @author SPF , chip-nlp
  * @version %I%
  * @since 2/8/2016
@@ -73,22 +88,25 @@ final public class TnmPropertyUtil extends AbstractPropertyUtil<TnmType, TnmValu
       return getValueUri( valueText, TnmValue.values() );
    }
 
+   /**
+    * @return the uri acting as parent to all individual tnm property uris
+    */
    static public String getParentUri() {
       return Tnm.TNM_URI;
    }
 
-   static public IdentifiedAnnotation getCoallescedProperty( final JCas jcas, final IdentifiedAnnotation neoplasm ) {
+   static public IdentifiedAnnotation createCoallescedProperty( final JCas jcas, final IdentifiedAnnotation neoplasm ) {
       final Collection<IdentifiedAnnotation> tnmAnnotations
             = InstanceUtil.getNeoplasmPropertiesBranch( jcas, neoplasm, getParentUri() );
       if ( tnmAnnotations.size() > 3 ) {
          LOGGER.warn( "More than 3 TNM annotations associated with " + neoplasm.getCoveredText() );
       }
-      return getCoallescedProperty( jcas, tnmAnnotations );
+      return createCoallescedProperty( jcas, tnmAnnotations );
    }
 
 
-   static public IdentifiedAnnotation getCoallescedProperty( final JCas jcas,
-                                                             final Collection<IdentifiedAnnotation> tnmAnnotations ) {
+   static public IdentifiedAnnotation createCoallescedProperty( final JCas jcas,
+                                                                final Collection<IdentifiedAnnotation> tnmAnnotations ) {
       final Collection<IdentifiedAnnotation> values = tnmAnnotations.stream()
             .map( InstanceUtil::getPropertyValues )
             .flatMap( Collection::stream )

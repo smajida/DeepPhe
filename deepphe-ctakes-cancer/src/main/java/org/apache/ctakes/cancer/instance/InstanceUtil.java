@@ -4,7 +4,10 @@ package org.apache.ctakes.cancer.instance;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.typesystem.type.refsem.*;
-import org.apache.ctakes.typesystem.type.relation.*;
+import org.apache.ctakes.typesystem.type.relation.BinaryTextRelation;
+import org.apache.ctakes.typesystem.type.relation.DegreeOfTextRelation;
+import org.apache.ctakes.typesystem.type.relation.IndicatesTextRelation;
+import org.apache.ctakes.typesystem.type.relation.LocationOfTextRelation;
 import org.apache.ctakes.typesystem.type.textsem.*;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.CASException;
@@ -20,6 +23,16 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 /**
+ * Utility class with methods that can be used to get information about Neoplasm Properties.
+ * It can be used to:
+ * <ul>
+ * get all neoplasm properties as a collection of annotations {@link #getNeoplasmProperties(JCas, IdentifiedAnnotation)}
+ * get neoplasm properties with a specified uri {@link #getNeoplasmProperties(JCas, IdentifiedAnnotation, String)}
+ * get neoplasm properties with a specified parent uri {@link #getNeoplasmPropertiesBranch(JCas, IdentifiedAnnotation, String)}
+ * get values associated with a specified property annotation {@link #getPropertyValues(JCas, IdentifiedAnnotation)}
+ * get diagnostic tests associated with a specified property annotation {@link #getDiagnosticTests(IdentifiedAnnotation)}
+ * get location annotations for a given neoplasm {@link #getLocations(IdentifiedAnnotation)}
+ * </ul>
  * @author SPF , chip-nlp
  * @version %I%
  * @since 2/25/2016
@@ -72,8 +85,8 @@ final public class InstanceUtil {
    /**
     * @param jcas      -
     * @param neoplasm  an annotation that would be the argument of a NeoplasmRelation
-    * @param parentUri uri for a property of interest
-    * @return annotations for properties of the given neoplasm with the given uri
+    * @param parentUri parent uri for a property of interest
+    * @return annotations for properties of the given neoplasm with the given parent uri
     */
    static public Collection<IdentifiedAnnotation> getNeoplasmPropertiesBranch( final JCas jcas,
                                                                                final IdentifiedAnnotation neoplasm,

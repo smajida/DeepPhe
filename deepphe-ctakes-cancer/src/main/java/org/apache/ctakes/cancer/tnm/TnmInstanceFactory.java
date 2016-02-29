@@ -11,6 +11,17 @@ import org.apache.uima.jcas.JCas;
 import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDING;
 
 /**
+ * Singleton that should be used to create full neoplasm T N M property instances.
+ * An instance is defined as the collection of all property types and values associated with a single neoplasm.
+ *
+ *
+ * Use of any {@code createInstance()} method will create:
+ * <ul>
+ * T N M type annotations
+ * neoplasm relations between the T N M type annotations and the nearest provided neoplasm in the text
+ * T N M value annotations
+ * degree-of relations between the T N M type annotations and the appropriate value annotations
+ * test-for relations between T N M type annotations and the nearest provided test in the text
  * @author SPF , chip-nlp
  * @version %I%
  * @since 2/8/2016
