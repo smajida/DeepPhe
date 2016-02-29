@@ -41,7 +41,7 @@ public class DummyData extends Controller {
    public static String createDocumentQuery = "'{' \"statement\": \"create (d:Document '{'name: \\\"{0}\\\", date: \\\"{1}\\\" '}') return id(d)\" '}' ";
    public static String createHasSubjectQuery = "'{' \"statement\": \"match (p:Patient),(d:Document) where p.name=\\\"{0}\\\" and d.name=\\\"{1}\\\" create (d)-[:hasSubject]->(p) return id(p);\"'}' ";
    public static String createDiagnosisQuery = "'{' \"statement\": \"create (dx:Diagnosis '{'name: \\\"{0}\\\", bodySites: \\\"{1}\\\", Stage: \\\"{2}\\\" '}') return id(dx)\" '}' ";
-   public static String createHasDiagnosisQuery = "'{' \"statement\": \"match (dx:Diagnosis),(d:Document) where dx.name=\\\"{0}\\\" and d.name=\\\"{1}\\\" create (d)-[:hasDiagnosis]->(dx) return id(d);\"'}' ";
+   public static String createHasDiagnosisQuery = "'{' \"statement\": \"match (dx:Diagnosis),(d:Document) where dx.name=\\\"{1}\\\" and d.name=\\\"{0}\\\" create (d)-[:hasDiagnosis]->(dx) return id(d);\"'}' ";
    
    
    
