@@ -1,9 +1,5 @@
 package org.apache.ctakes.cancer.size;
 
-import org.apache.ctakes.cancer.property.SpannedType;
-import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
-import org.apache.ctakes.cancer.type.textsem.CancerSize;
-import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
@@ -13,8 +9,6 @@ import org.apache.uima.jcas.JCas;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * @author SPF , chip-nlp
@@ -83,7 +77,8 @@ final public class SizeFinder {
                   final int valueStart = fullMatcher.start() + valueMatcher.start();
                   final int valueEnd = fullMatcher.start() + valueMatcher.end();
                   final DimensionValue value
-                        = new DimensionValue( lookupWindow.substring( valueStart, valueEnd ) + " " + unit );
+                        = new DimensionValue(
+                        lookupWindow.substring( valueStart, valueEnd ) + " " + unit.toLowerCase() );
                   final Dimension dimension
                         = new Dimension( spannedType, new SpannedDimensionValue( value, valueStart, valueEnd ) );
                   dimensions.add( dimension );

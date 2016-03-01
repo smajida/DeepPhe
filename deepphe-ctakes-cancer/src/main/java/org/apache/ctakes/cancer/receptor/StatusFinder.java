@@ -55,8 +55,7 @@ final public class StatusFinder {
          final Collection<String> statusTestUris = status.getSpannedType().getType().getStatusTestUris();
          for ( IdentifiedAnnotation diagnostic : diagnostics ) {
             if ( OwlOntologyConceptUtil.getUris( diagnostic ).stream()
-                  .filter( statusTestUris::contains )
-                  .findFirst().isPresent() ) {
+                  .anyMatch( statusTestUris::contains ) ) {
                candidateTests.add( diagnostic );
             }
          }

@@ -43,6 +43,19 @@ final public class SizeInstanceFactory
       super( "Size" );
    }
 
+
+   final public MeasurementAnnotation createInstance( final JCas jcas,
+                                                      final int typeBegin, final int typeEnd,
+                                                      final int valueBegin, final int valueEnd,
+                                                      final String value ) {
+      final SpannedDimensionType spannedType
+            = new SpannedDimensionType( DimensionType.MEASUREMENT, typeBegin, typeEnd );
+      final DimensionValue dimensionValue = new DimensionValue( value );
+      final SpannedDimensionValue spannedValue = new SpannedDimensionValue( dimensionValue, valueBegin, valueEnd );
+      final Dimension dimension = new Dimension( spannedType, spannedValue );
+      return createInstance( jcas, 0, dimension );
+   }
+
    /**
     * {@inheritDoc}
     */

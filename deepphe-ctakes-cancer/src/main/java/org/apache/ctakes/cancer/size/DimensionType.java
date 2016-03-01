@@ -25,7 +25,7 @@ enum DimensionType implements Type {
    DimensionType( final String title, final String uri, final String regex ) {
       _title = title;
       _uri = uri;
-      _pattern = Pattern.compile( "\\b" + regex, Pattern.CASE_INSENSITIVE );
+      _pattern = Pattern.compile( regex, Pattern.CASE_INSENSITIVE );
    }
 
    /**

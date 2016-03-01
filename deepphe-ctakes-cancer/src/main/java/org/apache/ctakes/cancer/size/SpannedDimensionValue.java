@@ -16,8 +16,8 @@ final class SpannedDimensionValue extends SpannedValue<DimensionValue> {
    static private final Logger LOGGER = Logger.getLogger( "SpannedDimensionValue" );
 
 
-   SpannedDimensionValue( final DimensionValue stageValue, final int startOffset, final int endOffset ) {
-      super( stageValue, startOffset, endOffset );
+   SpannedDimensionValue( final DimensionValue sizeValue, final int startOffset, final int endOffset ) {
+      super( sizeValue, startOffset, endOffset );
    }
 
 }
