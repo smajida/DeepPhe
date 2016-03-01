@@ -6,23 +6,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.ctakes.cancer.instance.InstanceUtil;
-import org.apache.ctakes.cancer.owl.UriAnnotationFactory;
 import org.apache.ctakes.cancer.receptor.StatusInstanceFactory;
 import org.apache.ctakes.cancer.receptor.StatusPropertyUtil;
+import org.apache.ctakes.cancer.size.SizeInstanceFactory;
 import org.apache.ctakes.cancer.tnm.TnmInstanceFactory;
 import org.apache.ctakes.cancer.tnm.TnmPropertyUtil;
-import org.apache.ctakes.cancer.type.textsem.CancerSize;
+//import org.apache.ctakes.cancer.type.textsem.CancerSize;
 //import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
-import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
+//import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 //import org.apache.ctakes.cancer.type.textsem.TnmClassification;
 //import org.apache.ctakes.cancer.type.textsem.TnmFeature;
 //import org.apache.ctakes.cancer.type.textsem.TnmPrefix;
 import org.apache.ctakes.typesystem.type.constants.CONST;
 import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
-import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
-import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.SignSymptomMention;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
@@ -123,7 +120,7 @@ public class DroolsToCtakesConverter {
 
 	private void cacheTumorSize(KbSummary summary) {
 		
-		final CancerSize cancerSize = new CancerSize(patientJCas, 0, 0);
+//		final CancerSize cancerSize = new CancerSize(patientJCas, 0, 0);
 		final List<Double> dimensions = new ArrayList<Double>();
 		
 		if (TumorSize.class.isAssignableFrom(summary.getClass())) {
@@ -133,20 +130,25 @@ public class DroolsToCtakesConverter {
 //			dimensions.add(2.0d);
 //		} 
 		if (!dimensions.isEmpty()) {
-			final FSArray measurementFeatures = new FSArray(patientJCas,
-					dimensions.size());
-			int measurementIndex = 0;
+//			final FSArray measurementFeatures = new FSArray(patientJCas,
+//					dimensions.size());
+//			int measurementIndex = 0;
 			for (Double dimension : dimensions) {
-				final SizeMeasurement measurementFeature = new SizeMeasurement(
-						patientJCas);
-				measurementFeature.setValue(dimension.floatValue());
-				measurementFeature.setUnit("cm");
-				measurementFeatures.set(measurementIndex, measurementFeature);
-				measurementIndex++;
+//				final SizeMeasurement measurementFeature = new SizeMeasurement(
+//						patientJCas);
+//				measurementFeature.setValue(dimension.floatValue());
+//				measurementFeature.setUnit("cm");
+//				measurementFeatures.set(measurementIndex, measurementFeature);
+//				measurementIndex++;
+				// TODO - replace with Identified Annotations with proper value URIs
+				// TODO - what are the possible summary basecodes wrt size?
+//			final String typeUri = SizePropertyUtil.getInstance().getTypeUri( summary.getBaseCode() );
+//			final String valueUri = SizePropertyUtil.getInstance().getValueUri( summary.getValue() );
+				SizeInstanceFactory.getInstance().createInstance( patientJCas, 0, 0, 0, 0, dimension+" cm" );
 			}
-			cancerSize.setMeasurements(measurementFeatures);
+//			cancerSize.setMeasurements(measurementFeatures);
 		}
-		cancerSize.addToIndexes();
+//		cancerSize.addToIndexes();
 	}
 
 	private void cacheTnmGrade() {

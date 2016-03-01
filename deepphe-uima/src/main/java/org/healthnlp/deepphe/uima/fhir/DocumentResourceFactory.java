@@ -7,9 +7,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.size.SizePropertyUtil;
 import org.apache.ctakes.cancer.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.tnm.TnmPropertyUtil;
-import org.apache.ctakes.cancer.type.textsem.CancerSize;
+//import org.apache.ctakes.cancer.type.textsem.CancerSize;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.core.util.DocumentIDAnnotationUtil;
 import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
@@ -361,9 +362,11 @@ final public class DocumentResourceFactory {
 //			list.add(createObservation(m));
 //		}
 		//TODO: this is a hack that will be removed after CancerSize becomes an obervation in cTAKES API
-		cTAKESUtils.getAnnotationsByType( cas, CancerSize.type ).stream()
-				.map( DocumentResourceFactory::createObservation )
-				.forEach( list::add );
+//		cTAKESUtils.getAnnotationsByType( cas, CancerSize.type ).stream()
+//				.map( DocumentResourceFactory::createObservation )
+//				.forEach( list::add );
+		OwlOntologyConceptUtil.getAnnotationsByUriBranch( cas, SizePropertyUtil.getParentUri() ).stream()
+				.map( DocumentResourceFactory::createObservation ).forEach( list::add );
 //		for(IdentifiedAnnotation m: cTAKESUtils.getAnnotationsByType(cas,CancerSize.type)){
 //			list.add(createObservation(m));
 //		}
@@ -677,7 +680,9 @@ final public class DocumentResourceFactory {
 		if(interpretation != null){
 			ob.setInterpretation(cTAKESUtils.getCodeableConcept(interpretation));
 		}
-		
+
+		// TODO - a lot of things got mucked up with the new "stick to ctakes" methods
+		// TODO - what to do with this?  We need measurement and unit.  Can we just split(" ") ?
 		// if cancer size, then use their value
 		SizeMeasurement num = cTAKESUtils.getSizeMeasurement(dm);
 		if(num != null){

@@ -394,6 +394,7 @@ public class cTAKESUtils {
 	 * @return -
 	 */
 	public static SizeMeasurement getSizeMeasurement(IdentifiedAnnotation dm){
+		// TODO - can we safely use a MeasurementAnnotation ?  Should we just stick to CancerSize for now?
 		// if cancer size, then use their value
 		if(dm instanceof CancerSize){
 			//ob.setCode(FHIRUtils.getCodeableConcept(FHIRConstants.TUMOR_SIZE_URI));
