@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 
 import org.healthnlp.deepphe.fhir.AnatomicalSite;
 import org.healthnlp.deepphe.fhir.Element;
+import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.hl7.fhir.instance.formats.XmlParser;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
@@ -708,7 +709,13 @@ public class FHIRUtils {
 		}
 		return s;
 	}
-	
+	public static String getMentionText(String text){
+		Matcher m = Pattern.compile("(.*) \\[(\\d+):(\\d+)\\]").matcher(text);
+		if(m.matches()){
+			return m.group(1);
+		}
+		return text;
+	}
 	
 	public static String getOntologyURL(String uri){
 		int x = uri.lastIndexOf("#");
@@ -728,6 +735,14 @@ public class FHIRUtils {
 				if(u != null && uu.equals(u))
 					return true;
 			}
+		}
+		return false;
+	}
+
+	public static boolean contains(List<Fact> list, Fact cc){
+		for(Fact c: list){
+			if(cc.getURI().equals(c.getURI()))
+				return true;
 		}
 		return false;
 	}

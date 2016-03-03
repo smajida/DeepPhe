@@ -4,28 +4,93 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.util.FHIRConstants;
-import org.hl7.fhir.instance.model.CodeableConcept;
 
 
 public class PatientSummary extends Summary {
-	private List<CodeableConcept> exposure, outcome, germlineSequenceVariant;
+	private Fact name, gender,ethnicity,birthDate,deathDate;
+	private PatientPhenotype phenotype;
+	private List<Fact> exposure, outcome, germlineSequenceVariant;
+	public static class PatientPhenotype {
+	}
+	
+	public Fact getName() {
+		return name;
+	}
 
-	public List<CodeableConcept> getExposure() {
+
+	public void setName(Fact name) {
+		this.name = name;
+	}
+
+
+	public Fact getGender() {
+		return gender;
+	}
+
+
+	public void setGender(Fact gender) {
+		this.gender = gender;
+	}
+
+
+	public Fact getEthnicity() {
+		return ethnicity;
+	}
+
+
+	public void setEthnicity(Fact ethnicity) {
+		this.ethnicity = ethnicity;
+	}
+
+
+	public Fact getBirthDate() {
+		return birthDate;
+	}
+
+
+	public void setBirthDate(Fact birthDate) {
+		this.birthDate = birthDate;
+	}
+
+
+	public Fact getDeathDate() {
+		return deathDate;
+	}
+
+
+	public void setDeathDate(Fact deathDate) {
+		this.deathDate = deathDate;
+	}
+
+	public PatientPhenotype getPhenotype(){
+		if(phenotype == null)
+			phenotype = new PatientPhenotype();
+		return phenotype;
+	}
+	
+	
+	public void setPhenotype(PatientPhenotype phenotype) {
+		this.phenotype = phenotype;
+	}
+
+
+	public List<Fact> getExposure() {
 		if(exposure == null)
-			exposure = new ArrayList<CodeableConcept>();
+			exposure = new ArrayList<Fact>();
 		return exposure;
 	}
 
-	public List<CodeableConcept> getOutcomes() {
+	public List<Fact> getOutcomes() {
 		if(outcome == null)
-			outcome = new ArrayList<CodeableConcept>();
+			outcome = new ArrayList<Fact>();
 		return outcome;
 	}
 
-	public List<CodeableConcept> getGermlineSequenceVariant() {
+	public List<Fact> getGermlineSequenceVariant() {
 		if(germlineSequenceVariant == null)
-			germlineSequenceVariant = new ArrayList<CodeableConcept>();
+			germlineSequenceVariant = new ArrayList<Fact>();
 		return germlineSequenceVariant;
 	}
 

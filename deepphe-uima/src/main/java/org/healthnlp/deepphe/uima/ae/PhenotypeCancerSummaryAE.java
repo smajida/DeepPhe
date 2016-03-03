@@ -82,18 +82,18 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		}
 
 		//TODO: rules, extract data
-	long stT = System.currentTimeMillis();	
+		long stT = System.currentTimeMillis();	
 		
 		DroolsEngine de = new DroolsEngine();
 		StatefulKnowledgeSession droolsSession = de.getSession();
 		droolsSession.insert(cancerSummary);
 		droolsSession.fireAllRules();
 		droolsSession.dispose();
-System.out.println("DROOLS TIME: "+(System.currentTimeMillis() - stT)/1000+"  sec");
+		System.out.println("DROOLS TIME: "+(System.currentTimeMillis() - stT)/1000+"  sec");
 		
-		String tCls = FHIRUtils.getConceptName(cancerSummary.getPhenotype().getPrimaryTumorClassification());
+		/*String tCls = FHIRUtils.getConceptName(cancerSummary.getPhenotype().getPrimaryTumorClassification());
 		String nCls = FHIRUtils.getConceptName(cancerSummary.getPhenotype().getRegionalLymphNodeClassification());
-		String mCls = FHIRUtils.getConceptName(cancerSummary.getPhenotype().getDistantMetastasisClassification());
+		String mCls = FHIRUtils.getConceptName(cancerSummary.getPhenotype().getDistantMetastasisClassification());*/
 		
 		
 		//this is where you save your work back to CAS

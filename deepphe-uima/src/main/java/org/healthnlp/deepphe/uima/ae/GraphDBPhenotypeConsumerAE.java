@@ -20,6 +20,7 @@ import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Procedure;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.Stage;
+import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary.CancerPhenotype;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
@@ -270,19 +271,19 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 		saveCodeableConcepts(tpn, "tumorExtent", tp.getTumorExtent());
 	}
 	
-	private void saveCodeableConcepts(Node n, String propertyName, List<CodeableConcept> cc){
+	private void saveCodeableConcepts(Node n, String propertyName, List<Fact> cc){
 		
 		List<String> ccnames = new ArrayList<String>();
-		for (CodeableConcept c : cc) {
-			ccnames.add(c.getText());
+		for (Fact c : cc) {
+			ccnames.add(c.getLabel());
 		}
 		if(ccnames.size()>0)
 			n.setProperty(propertyName, ccnames.toString());
 	}
 
-	private void saveCodeableConcept(Node n, String propertyName, CodeableConcept cc){
+	private void saveCodeableConcept(Node n, String propertyName, Fact cc){
 		if(cc!=null)
-			n.setProperty(propertyName, cc.getText());
+			n.setProperty(propertyName, cc.getLabel());
 	}
 
 

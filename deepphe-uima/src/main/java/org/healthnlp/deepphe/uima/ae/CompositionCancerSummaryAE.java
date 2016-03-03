@@ -19,6 +19,8 @@ import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.Stage;
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
@@ -161,33 +163,41 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		
 		// add body location
 		for(CodeableConcept cc: diagnosis.getBodySite()){
-			cancer.addBodySite(cc);
+			cancer.addBodySite(FactFactory.createFact(cc));
 		}
 		
 		// add TNM stage infromation
 		Stage stage = diagnosis.getStage();
 		if(stage != null){
-			phenotype.setCancerStage(stage.getSummary());
-			phenotype.setPrimaryTumorClassification(stage.getPrimaryTumorStageCode());
-			phenotype.setRegionalLymphNodeClassification(stage.getPrimaryTumorStageCode());
-			phenotype.setDistantMetastasisClassification(stage.getDistantMetastasisStageCode());
+			phenotype.setCancerStage(FactFactory.createFact(stage.getSummary()));
+			phenotype.setPrimaryTumorClassification(FactFactory.createFact(stage.getPrimaryTumorStageCode()));
+			phenotype.setRegionalLymphNodeClassification(FactFactory.createFact(stage.getPrimaryTumorStageCode()));
+			phenotype.setDistantMetastasisClassification(FactFactory.createFact(stage.getDistantMetastasisStageCode()));
 		}
+		
+		// create diagnosis fact
+		Fact dx = FactFactory.createFact(diagnosis);
 		
 		// adnecarcionma vs sarcoma
 		CodeableConcept ct = getCancerType(diagnosis);
-		if(ct != null)
-			phenotype.setCancerType(ct);
-		
+		if(ct != null){
+			Fact f = FactFactory.createFact(ct);
+			f.addProvenanceFact(dx);
+			phenotype.setCancerType(f);
+		}
 		// insitu vs invasive 
 		CodeableConcept te = getTumorExtent(diagnosis);
-		if(te != null)
-			phenotype.setTumorExtent(te);  
-	
+		if(te != null){
+			Fact f = FactFactory.createFact(te);
+			f.addProvenanceFact(dx);
+			phenotype.setTumorExtent(f);  
+		}
+			
 		//add treatment cancer.addTreatment(treatment);  //chemo
 		IClass treatmentCls = ontology.getClass(""+FHIRConstants.TREATMENT_URI);
 		for(Element treatment: report.getReportElements()){
 			if(isValueSet(treatment.getCode(), treatmentCls)){
-				cancer.addTreatment(treatment.getCode()); 
+				cancer.addTreatment(FactFactory.createFact(treatment)); 
 			}
 		}
 		
@@ -202,9 +212,13 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		TumorSummary.TumorPhenotype phenotype = tumor.getPhenotype();
 		
 		if(diagnosis != null){
+			// create diagnosis fact
+			Fact dx = FactFactory.createFact((Element)diagnosis);
+			
+			
 			// add body location
 			for(CodeableConcept cc: diagnosis.getBodySite()){
-				tumor.addBodySite(cc);
+				tumor.addBodySite(FactFactory.createFact(cc));
 			}
 			
 			// manifistation: 
@@ -213,28 +227,32 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			IClass manifistationCls = ontology.getClass(""+FHIRConstants.MANIFISTATION_URI);
 			for(Element element: report.getReportElements()){
 				if(isValueSet(element.getCode(),manifistationCls)){
-					phenotype.addManifestation(element.getCode()); 
+					phenotype.addManifestation(FactFactory.createFact(element)); 
 				}
 			}
 			
 			//phenotype.addHistologicType(null); // ductal, lobular infered from DX
 			CodeableConcept ht = getHistologicType(diagnosis);
-			if(ht != null)
-				phenotype.addHistologicType(ht);
-			
+			if(ht != null){
+				Fact f = FactFactory.createFact(ht);
+				f.addProvenanceFact(dx);
+				phenotype.addHistologicType(f);
+			}
 			// insitu vs invasive 
 			//phenotype.addTumorExtent(null);    // insitu vs invasive
 			CodeableConcept te = getTumorExtent(diagnosis);
-			if(te != null)
-				phenotype.addTumorExtent(te);  
-			
+			if(te != null){
+				Fact f = FactFactory.createFact(te);
+				f.addProvenanceFact(dx);
+				phenotype.addTumorExtent(f);  
+			}
 			
 			
 			// add treatment (// chemo)
 			IClass treatmentCls = ontology.getClass(""+FHIRConstants.TREATMENT_URI);
 			for(Element treatment: report.getReportElements()){
 				if(isValueSet(treatment.getCode(), treatmentCls)){
-					tumor.addTreatment(treatment.getCode()); 
+					tumor.addTreatment(FactFactory.createFact(treatment)); 
 				}
 			}
 			
@@ -244,7 +262,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			// cancer has to be more specific then a tumor, then infer
 			// else can't infer a type
 			//tumor.setTumorType(null);  // primary vs local recurance, distance recurance  infered from rules
-			if(cancer != null){
+			/*if(cancer != null){
 				URI tumorType = null;
 				if(hasCommonBodySite(cancer.getBodySites(),tumor.getBodySites())){
 					tumorType = FHIRConstants.PRIMARY_TUMOR_URI;
@@ -253,7 +271,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 				}
 				if(tumorType != null)
 					tumor.setTumorType(FHIRUtils.getCodeableConcept(tumorType));
-			}
+			}*/
 			
 			
 			//tumor.addOutcome(null); // tumor is gone

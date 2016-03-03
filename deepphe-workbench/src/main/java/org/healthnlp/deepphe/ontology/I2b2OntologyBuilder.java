@@ -122,9 +122,7 @@ public class I2b2OntologyBuilder {
 		try {
 			ontologyIRI = IRI.create(new URL(ontologyPath) );
 			o = manager.loadOntology(ontologyIRI);
-		} catch (MalformedURLException  e) {
-			e.printStackTrace();
-		} catch (OWLOntologyCreationException e) {
+		} catch (Exception  e) {
 			e.printStackTrace();
 		}
 		return o;

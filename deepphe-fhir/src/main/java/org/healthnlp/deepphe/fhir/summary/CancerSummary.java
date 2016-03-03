@@ -5,62 +5,74 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.healthnlp.deepphe.fhir.summary.TumorSummary.TumorPhenotype;
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
+import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.BackboneElement;
-import org.hl7.fhir.instance.model.CodeableConcept;
+
 
 public class CancerSummary extends Summary {
+	private CancerPhenotype phenotype;
+	private FactList bodySite, treatment, outcome;
+	private List<TumorSummary> tumors;
+	
+	public CancerSummary(){
+		phenotype = new CancerPhenotype();
+	}
+
+	
 	public static class CancerPhenotype extends BackboneElement{
-		private CodeableConcept cancerStage,cancerType,tumorExtent,primaryTumorClassification, distantMetastasisClassification,regionalLymphNodeClassification;
-		private List<CodeableConcept> manifestation;
+		private Fact cancerStage,cancerType,tumorExtent,primaryTumorClassification, distantMetastasisClassification,regionalLymphNodeClassification;
+		private FactList manifestation;
+			
 		public BackboneElement copy() {
 			// TODO Auto-generated method stub
 			return null;
 		}
-		public CodeableConcept getCancerStage() {
+		public Fact getCancerStage() {
 			return cancerStage;
 		}
-		public void setCancerStage(CodeableConcept cancerStage) {
+		public void setCancerStage(Fact cancerStage) {
 			this.cancerStage = cancerStage;
 		}
-		public CodeableConcept getCancerType() {
+		public Fact getCancerType() {
 			return cancerType;
 		}
-		public void setCancerType(CodeableConcept cancerType) {
+		public void setCancerType(Fact cancerType) {
 			this.cancerType = cancerType;
 		}
-		public CodeableConcept getTumorExtent() {
+		public Fact getTumorExtent() {
 			return tumorExtent;
 		}
-		public void setTumorExtent(CodeableConcept tumorExtent) {
+		public void setTumorExtent(Fact tumorExtent) {
 			this.tumorExtent = tumorExtent;
 		}
-		public CodeableConcept getPrimaryTumorClassification() {
+		public Fact getPrimaryTumorClassification() {
 			return primaryTumorClassification;
 		}
-		public void setPrimaryTumorClassification(CodeableConcept primaryTumorClassification) {
+		public void setPrimaryTumorClassification(Fact primaryTumorClassification) {
 			this.primaryTumorClassification = primaryTumorClassification;
 		}
-		public CodeableConcept getDistantMetastasisClassification() {
+		public Fact getDistantMetastasisClassification() {
 			return distantMetastasisClassification;
 		}
-		public void setDistantMetastasisClassification(CodeableConcept distantMetastasisClassification) {
+		public void setDistantMetastasisClassification(Fact distantMetastasisClassification) {
 			this.distantMetastasisClassification = distantMetastasisClassification;
 		}
-		public CodeableConcept getRegionalLymphNodeClassification() {
+		public Fact getRegionalLymphNodeClassification() {
 			return regionalLymphNodeClassification;
 		}
-		public void setRegionalLymphNodeClassification(CodeableConcept regionalLymphNodeClassification) {
+		public void setRegionalLymphNodeClassification(Fact regionalLymphNodeClassification) {
 			this.regionalLymphNodeClassification = regionalLymphNodeClassification;
 		}
-		public List<CodeableConcept> getManifestations() {
+		public FactList getManifestations() {
 			if(manifestation == null)
-				manifestation = new ArrayList<CodeableConcept>();
+				manifestation = new FactList();
 			return manifestation;
 		}
-		public void addManifestation(CodeableConcept manifestation) {
+		public void addManifestation(Fact manifestation) {
 			getManifestations().add(manifestation);
 		}
 		public String getDisplayText() {
@@ -73,22 +85,22 @@ public class CancerSummary extends Summary {
 			String s = null; 
 			StringBuffer st = new StringBuffer();
 			st.append(getDisplayText()+":\n");
-			s = getCancerStage() != null?getCancerStage().getText():"";
+			s = getCancerStage() != null?getCancerStage().getSummaryText():"";
 			st.append("\tStage:\t"+s+"\n");
-			s = getCancerType() != null?getCancerType().getText():"";
+			s = getCancerType() != null?getCancerType().getSummaryText():"";
 			st.append("\tType:\t"+s+"\n");
-			s = getTumorExtent() != null?getTumorExtent().getText():"";
+			s = getTumorExtent() != null?getTumorExtent().getSummaryText():"";
 			st.append("\tExtent:\t"+s+"\n");		
-			s = getPrimaryTumorClassification() != null?getPrimaryTumorClassification().getText():"";
+			s = getPrimaryTumorClassification() != null?getPrimaryTumorClassification().getSummaryText():"";
 			st.append("\tT Class:\t"+s+"\n");
-			s = getDistantMetastasisClassification() != null?getDistantMetastasisClassification().getText():"";
+			s = getDistantMetastasisClassification() != null?getDistantMetastasisClassification().getSummaryText():"";
 			st.append("\tM Class:\t"+s+"\n");
-			s = getRegionalLymphNodeClassification() != null?getRegionalLymphNodeClassification().getText():"";
+			s = getRegionalLymphNodeClassification() != null?getRegionalLymphNodeClassification().getSummaryText():"";
 			st.append("\tN Class:\t"+s+"\n");
 			if(!getManifestations().isEmpty()){
 				st.append("\tManifistations:\n");
-				for(CodeableConcept c: getManifestations()){
-					st.append("\t\t"+c.getText()+"\n");
+				for(Fact c: getManifestations()){
+					st.append("\t\t"+c.getSummaryText()+"\n");
 				}
 			}
 			return st.toString();
@@ -114,27 +126,21 @@ public class CancerSummary extends Summary {
 				setDistantMetastasisClassification(ph.getDistantMetastasisClassification());
 			if(ph.getRegionalLymphNodeClassification() != null && getRegionalLymphNodeClassification() == null)
 				setRegionalLymphNodeClassification(ph.getRegionalLymphNodeClassification());
-			for(CodeableConcept c: ph.getManifestations()){
+			for(Fact c: ph.getManifestations()){
 				if(!FHIRUtils.contains(getManifestations(), c)){
 					addManifestation(c);
 				}
 			}
 		}
 	}
-	private CancerPhenotype phenotype;
-	private List<CodeableConcept> bodySite, treatment, outcome;
-	private List<TumorSummary> tumors;
 	
-	public CancerSummary(){
-		phenotype = new CancerPhenotype();
-	}
 	
-	public List<CodeableConcept> getBodySites() {
+	public FactList getBodySites() {
 		if(bodySite == null)
-			bodySite = new ArrayList<CodeableConcept>();
+			bodySite = new FactList();
 		return bodySite;
 	}
-	public void addBodySite(CodeableConcept bodySite) {
+	public void addBodySite(Fact bodySite) {
 		getBodySites().add(bodySite);
 	}
 	public List<CancerPhenotype> getPhenotypes() {
@@ -147,9 +153,9 @@ public class CancerSummary extends Summary {
 		getPhenotypes().add(phenotype);
 	}*/
 	
-	public List<CodeableConcept> getTreatments() {
+	public FactList getTreatments() {
 		if(treatment == null)
-			treatment = new ArrayList<CodeableConcept>();
+			treatment = new FactList();
 		return treatment;
 	}
 	public CancerPhenotype getPhenotype() {
@@ -158,15 +164,15 @@ public class CancerSummary extends Summary {
 	public void setPhenotype(CancerPhenotype phenotype) {
 		this.phenotype = phenotype;
 	}
-	public void addTreatment(CodeableConcept treatment) {
+	public void addTreatment(Fact treatment) {
 		getTreatments().add(treatment);
 	}
-	public List<CodeableConcept> getOutcomes() {
+	public FactList getOutcomes() {
 		if(outcome == null)
-			outcome = new ArrayList<CodeableConcept>();
+			outcome = new FactList();
 		return outcome;
 	}
-	public void addOutcome(CodeableConcept outcome) {
+	public void addOutcome(Fact outcome) {
 		getOutcomes().add(outcome);
 	}
 	public List<TumorSummary> getTumors() {
@@ -188,19 +194,19 @@ public class CancerSummary extends Summary {
 		StringBuffer st = new StringBuffer();
 		st.append(getDisplayText()+":\n");
 		st.append("\tBody Sites:\t");
-		for(CodeableConcept c: getBodySites()){
-			st.append(c.getText()+"  ");
+		for(Fact c: getBodySites()){
+			st.append(c.getSummaryText()+"  ");
 		}
 		st.append("\n");
 		// look at treatment
 		st.append("\tTreatments:\n");
-		for(CodeableConcept c: getTreatments()){
-			st.append("\t\t"+c.getText()+"\n");
+		for(Fact c: getTreatments()){
+			st.append("\t\t"+c.getSummaryText()+"\n");
 		}
 		// look at outcomes
 		st.append("\tOutcomes:\n");
-		for(CodeableConcept c: getOutcomes()){
-			st.append("\t\t"+c.getText()+"\n");
+		for(Fact c: getOutcomes()){
+			st.append("\t\t"+c.getSummaryText()+"\n");
 		}
 		// look at phenotypes
 		//for(CancerPhenotype ph: getPhenotypes()){
@@ -226,17 +232,17 @@ public class CancerSummary extends Summary {
 	public void append(Summary s) {
 		CancerSummary summary = (CancerSummary) s;
 		// add body site
-		for(CodeableConcept c: summary.getBodySites()){
+		for(Fact c: summary.getBodySites()){
 			if(!FHIRUtils.contains(getBodySites(),c))
 				addBodySite(c);
 		}
 		// add treatment
-		for(CodeableConcept c: summary.getTreatments()){
+		for(Fact c: summary.getTreatments()){
 			if(!FHIRUtils.contains(getTreatments(),c))
 				addTreatment(c);
 		}
 		// add outcome
-		for(CodeableConcept c: summary.getOutcomes()){
+		for(Fact c: summary.getOutcomes()){
 			if(!FHIRUtils.contains(getOutcomes(),c))
 				addOutcome(c);
 		}

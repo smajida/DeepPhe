@@ -51,12 +51,12 @@ public class FHIRConstants {
 	public static final String N_STAGE = "Generic_Regional_Lymph_Nodes_TNM_Finding";
 	
 	// predefined URIs
-	public static final URI PATIENT_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"/"+PATIENT);
-	public static final URI CANCER_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"/"+CANCER);
-	public static final URI TUMOR_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"/"+TUMOR);
-	public static final URI CANCER_PHENOTYPE_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"/"+CANCER_PHENOTYPE);
-	public static final URI TUMOR_PHENOTYPE_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"/"+TUMOR_PHENOTYPE);
-	
+	public static final URI PATIENT_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"#"+PATIENT);
+	public static final URI CANCER_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"#"+CANCER);
+	public static final URI TUMOR_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"#"+TUMOR);
+	public static final URI CANCER_PHENOTYPE_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"#"+CANCER_PHENOTYPE);
+	public static final URI TUMOR_PHENOTYPE_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"#"+TUMOR_PHENOTYPE);
+	public static final URI MEDICAL_RECORD_URI = URI.create(SCHEMA_URL+"#MedicalRecord");
 	
 	// mention level URIs
 	public static final URI OBSERVATION_URI = URI.create(SCHEMA_URL+"#"+OBSERVATION);
