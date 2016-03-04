@@ -3,8 +3,10 @@ package org.healthnlp.deepphe.fhir.summary;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
+import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.fact.FactList;
@@ -17,11 +19,23 @@ public class CancerSummary extends Summary {
 	private CancerPhenotype phenotype;
 	private FactList bodySite, treatment, outcome;
 	private List<TumorSummary> tumors;
+	private Report report;
 	
 	public CancerSummary(){
 		phenotype = new CancerPhenotype();
 	}
 
+	public List<Fact> getAllFacts(){
+		List<Fact> list = new ArrayList<Fact>();
+		list.addAll(bodySite);
+		list.addAll(treatment);
+		list.addAll(outcome);
+		list.addAll(getPhenotype().getAllFacts());
+		for(TumorSummary ts: getTumors()){
+			list.addAll(ts.getAllFacts());
+		}
+		return list;
+	}
 	
 	public static class CancerPhenotype extends BackboneElement{
 		private Fact cancerStage,cancerType,tumorExtent,primaryTumorClassification, distantMetastasisClassification,regionalLymphNodeClassification;
@@ -30,6 +44,17 @@ public class CancerSummary extends Summary {
 		public BackboneElement copy() {
 			// TODO Auto-generated method stub
 			return null;
+		}
+		public List<Fact> getAllFacts() {
+			List<Fact> list = new ArrayList<Fact>();
+			list.add(cancerStage);
+			list.add(cancerType);
+			list.add(tumorExtent);
+			list.add(primaryTumorClassification);
+			list.add(distantMetastasisClassification);
+			list.add(regionalLymphNodeClassification);
+			list.addAll(manifestation);
+			return list;
 		}
 		public Fact getCancerStage() {
 			return cancerStage;
@@ -131,6 +156,24 @@ public class CancerSummary extends Summary {
 					addManifestation(c);
 				}
 			}
+		}
+	}
+	
+	
+	
+	
+	public Report getReport() {
+		return report;
+	}
+	
+	public void setReport(Report report) {
+		this.report = report;
+		// set report name to all text mentions
+		String id = report.getResourceIdentifier();
+		String tp = report.getType() == null?null:report.getType().getText();
+		for(Fact f: getAllFacts()){
+			f.setDocumentIdentifier(id);
+			f.setDocumentType(tp);
 		}
 	}
 	

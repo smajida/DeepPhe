@@ -1,6 +1,7 @@
 package org.healthnlp.deepphe.fhir.summary;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.healthnlp.deepphe.fhir.fact.Fact;
@@ -17,6 +18,18 @@ public class TumorSummary extends Summary {
 	public TumorSummary(){
 		phenotype = new TumorPhenotype();
 	}
+	
+	public List<Fact> getAllFacts() {
+		List<Fact> list = new ArrayList<Fact>();
+		list.addAll(treatment);
+		list.add(tumorType);
+		list.addAll(tumorSequenceVarient);
+		list.addAll(outcome);
+		list.addAll(bodySite);
+		list.addAll(getPhenotype().getAllFacts());
+		return list;
+	}
+	
 	public static class TumorPhenotype extends BackboneElement{
 		private FactList manifestation, histologicType, tumorExtent;
 		
@@ -24,6 +37,14 @@ public class TumorSummary extends Summary {
 			if(manifestation == null)
 				manifestation = new FactList();
 			return manifestation;
+		}
+
+		public List<Fact> getAllFacts() {
+			List<Fact> list = new ArrayList<Fact>();
+			list.addAll(histologicType);
+			list.addAll(tumorExtent);
+			list.addAll(manifestation);
+			return list;
 		}
 
 		public void addManifestation(Fact m) {
@@ -251,4 +272,5 @@ public class TumorSummary extends Summary {
 		getPhenotype().append(summary.getPhenotype());
 			
 	}
+	
 }

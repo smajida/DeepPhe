@@ -24,6 +24,7 @@ import org.healthnlp.deepphe.fhir.Stage;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
+import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.fhir.summary.TumorSummary;
@@ -1433,17 +1434,76 @@ public class PhenotypeResourceFactory {
 		}
 		return null;
 	}
-	public static void saveMedicalRecordCancerSummary(CancerSummary summaryFHIR, JCas jcas) {
-		//TODO: create actual medical record annotation
-		
-		saveCancerSummary(summaryFHIR, jcas);
-	}
-	public static void saveMedicalRecordPatientSummary(PatientSummary summaryFHIR, JCas jcas) {
-		//TODO:
-	}
-	
+
 	public static PatientSummary loadMedicalRecordPatientSummary(JCas jcas){
 		return null;
+	}
+
+	/**
+	 * create medical record
+	 * @param record
+	 * @param jcas
+	 */
+	public static org.healthnlp.deepphe.uima.types.MedicalRecord saveMedicalRecord(MedicalRecord record, JCas jcas) {
+		Annotation a = getAnnotationByIdentifer(jcas,record.getResourceIdentifier());
+		org.healthnlp.deepphe.uima.types.MedicalRecord summaryAnnotation = (a == null)?new org.healthnlp.deepphe.uima.types.MedicalRecord(jcas):(org.healthnlp.deepphe.uima.types.MedicalRecord)a;
+		
+		summaryAnnotation.setHasURI(""+record.getConceptURI());
+		summaryAnnotation.setHasIdentifier(record.getResourceIdentifier());
+		
+		Patient patientAnnotation = savePatientSummary(record.getPatientSummary(), jcas);
+		Cancer cancerAnnoation = saveCancerSummary(record.getCancerSummary(), jcas);
+		
+		summaryAnnotation.setHasMedicalRecordSummaryCancer(getValue(jcas,cancerAnnoation));
+		summaryAnnotation.setHasMedicalRecordSummaryPatient(getValue(jcas,patientAnnotation));
+		
+		List<FeatureStructure> list = new ArrayList<FeatureStructure>();
+		for(Report r:  record.getReports()){
+			Composition c = (Composition) getAnnotationByIdentifer(jcas,r.getResourceIdentifier());
+			if(c != null)
+				list.add(c);
+		}
+		summaryAnnotation.setHasComposition(getValues(jcas,list));
+		summaryAnnotation.addToIndexes();
+		
+		return summaryAnnotation;
+	}
+	
+
+	private static Patient savePatientSummary(PatientSummary patientSummary, JCas jcas) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private static PatientSummary loadPatientSummary(Patient patient) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	/**
+	 * create medical record
+	 * @param record
+	 * @param jcas
+	 */
+	public static MedicalRecord loadMedicalRecord(JCas jcas) {
+		org.healthnlp.deepphe.uima.types.MedicalRecord annotationRecord = null;
+		for(Annotation a: getAnnotations(jcas,org.healthnlp.deepphe.uima.types.MedicalRecord.type)){
+			annotationRecord = (org.healthnlp.deepphe.uima.types.MedicalRecord) a;
+		}	
+		
+		MedicalRecord record = new MedicalRecord();
+		
+		// add reports
+		record.setReports(loadReports(jcas));
+		for(int i=0;i< getSize(annotationRecord.getHasMedicalRecordSummaryCancer()); i++){
+			record.setCancerSummary(loadCancerSummary(annotationRecord.getHasMedicalRecordSummaryCancer(i)));
+		}
+		for(int i=0;i< getSize(annotationRecord.getHasPatient()); i++){
+			record.setPatientSummary(loadPatientSummary(annotationRecord.getHasPatient(i)));
+		}
+		record.setPatient(loadPatient(jcas));
+		
+		return record;
+		
 	}
 		
 }

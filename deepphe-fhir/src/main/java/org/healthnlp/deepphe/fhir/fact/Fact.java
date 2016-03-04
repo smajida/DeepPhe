@@ -66,5 +66,21 @@ public class Fact {
 	public CodeableConcept getCodeableConcept(){
 		return FactFactory.createCodeableConcept(this);
 	}
-	
+	public String getDocumentType(){
+		for(TextMention t: getProvenanceText()){
+			if(t.getDocumentType() != null)
+				return t.getDocumentType();
+		}
+		return null;
+	}
+	public void setDocumentType(String docType){
+		for(TextMention t: getProvenanceText()){
+			t.setDocumentType(docType);
+		}
+	}
+	public void setDocumentIdentifier(String id){
+		for(TextMention t: getProvenanceText()){
+			t.setDocumentIdentifier(id);
+		}
+	}
 }

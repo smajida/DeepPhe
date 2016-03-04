@@ -28,7 +28,7 @@ public class MedicalRecord implements Element {
 		return (patient != null? patient.getPatientName():"Generic")+" Medical Record";
 	}
 	public String getResourceIdentifier() {
-		return FHIRUtils.createResourceIdentifier(this);
+		return getDisplayText();
 	}
 	public String getSummaryText() {
 		StringBuffer b = new StringBuffer(getDisplayText());
