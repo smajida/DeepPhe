@@ -1,30 +1,29 @@
 package org.healthnlp.deepphe.uima.fhir;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
+import java.util.regex.Pattern;
 
+import org.apache.ctakes.cancer.instance.InstanceUtil;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
-import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
+import org.apache.ctakes.cancer.stage.StagePropertyUtil;
+import org.apache.ctakes.cancer.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
-import org.apache.ctakes.cancer.type.textsem.CancerStage;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
-import org.apache.ctakes.cancer.type.textsem.TnmClassification;
+import org.apache.ctakes.core.util.OntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.refsem.*;
+//import org.apache.ctakes.typesystem.type.refsem.Date;
 import org.apache.ctakes.typesystem.type.relation.*;
 import org.apache.ctakes.typesystem.type.textsem.*;
+import org.apache.log4j.Logger;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.cas.FeatureStructure;
 import org.apache.uima.cas.Type;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
+import org.apache.uima.jcas.cas.TOP;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.jcas.tcas.DocumentAnnotation;
-import org.healthnlp.deepphe.uima.types.TNMClassification;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
@@ -34,12 +33,16 @@ import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 
 public class cTAKESUtils {
+
+	static private final Logger LOGGER = Logger.getLogger( "cTAKESUtils" );
+
+
 	/**
 	 * get FHIR date object from cTAKES time mention
-	 * @param tm
-	 * @return
+	 * @param tm -
+	 * @return -
 	 */
-	public static Date getDate(TimeMention tm){
+	public static java.util.Date getDate( TimeMention tm ) {
 		Time t  = tm.getTime();
 		org.apache.ctakes.typesystem.type.refsem.Date dt = tm.getDate();
 		String yr = dt.getYear();
@@ -57,8 +60,8 @@ public class cTAKESUtils {
 	
 	/**
 	 * get codeblce concept form OntologyConcept annotation
-	 * @param c
-	 * @return
+	 * @param ia -
+	 * @return -
 	 */
 	public static CodeableConcept getCodeableConcept(IdentifiedAnnotation ia){
 		return setCodeableConcept(new CodeableConcept(),ia);
@@ -66,8 +69,9 @@ public class cTAKESUtils {
 	
 	/**
 	 * get codeblce concept form OntologyConcept annotation
-	 * @param c
-	 * @return
+	 * @param cc -
+	 * @param ia -
+	 * @return -
 	 */
 	public static CodeableConcept setCodeableConcept(CodeableConcept cc,IdentifiedAnnotation ia){
 		cc.setText(ia.getCoveredText());
@@ -111,49 +115,55 @@ public class cTAKESUtils {
 		
 		return cc;
 	}
-	
-	
+
+
+	static private final Pattern CUI_PATTERN = Pattern.compile( "CL?\\d{6,7}" );
+	static private final java.util.function.Predicate<String> CUI_PREDICATE = CUI_PATTERN.asPredicate();
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param ia -
+	 * @return -
 	 */
 	public static String getConceptCode(IdentifiedAnnotation ia){
-		String cui = null;
-		for(int i=0;i<ia.getOntologyConceptArr().size();i++){
-			OntologyConcept c = ia.getOntologyConceptArr(i);
-			if(c instanceof UmlsConcept){
-				cui = ((UmlsConcept)c).getCui();
-			}else{
-				cui = c.getCode();
-			}
-			if(cui != null && cui.matches("CL?\\d{6,7}"))
-				break;
-		}
-		return cui;
+		// TODO - can use OntologyConceptUtil.getCuis( ia );
+		return OntologyConceptUtil.getCuis( ia ).stream().filter( CUI_PREDICATE ).findFirst().get();
+//		String cui = null;
+//		for(int i=0;i<ia.getOntologyConceptArr().size();i++){
+//			OntologyConcept c = ia.getOntologyConceptArr(i);
+//			if(c instanceof UmlsConcept){
+//				cui = ((UmlsConcept)c).getCui();
+//			}else{
+//				cui = c.getCode();
+//			}
+//			if(cui != null && cui.matches("CL?\\d{6,7}"))
+//				break;
+//		}
+//		return cui;
 	}
 	
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param ia -
+	 * @return -
 	 */
 	public static String getConceptURI(IdentifiedAnnotation ia){
-		String cui = null;
-		for(int i=0;i<ia.getOntologyConceptArr().size();i++){
-			OntologyConcept c = ia.getOntologyConceptArr(i);
-			cui = c.getCode();
-			if(cui != null && cui.startsWith("http://"))
-				break;
-		}
-		return cui;
+		// TODO - can use OwlOntologyConceptUtil.getUris( ia );
+		return OwlOntologyConceptUtil.getUris( ia ).stream().findFirst().get();
+//		String cui = null;
+//		for(int i=0;i<ia.getOntologyConceptArr().size();i++){
+//			OntologyConcept c = ia.getOntologyConceptArr(i);
+//			cui = c.getCode();
+//			if(cui != null && cui.startsWith("http://"))
+//				break;
+//		}
+//		return cui;
 	}
 	
 	
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param ia -
+	 * @return -
 	 */
 	public static String getConceptName(IdentifiedAnnotation ia){
 		if(ia == null)
@@ -167,9 +177,9 @@ public class cTAKESUtils {
 	
 	/**
 	 * get related item from cTAKES
-	 * @param source
-	 * @param relation
-	 * @return
+	 * @param source -
+	 * @param relation -
+	 * @return -
 	 */
 	public static IdentifiedAnnotation getRelatedItem(IdentifiedAnnotation source , Relation relation){
 		if(relation != null ){
@@ -186,8 +196,8 @@ public class cTAKESUtils {
 	
 	/**
 	 * get document text for a given annotated JCas
-	 * @param cas
-	 * @return
+	 * @param cas -
+	 * @return -
 	 */
 	public static String getDocumentText(JCas cas){
 		Iterator<Annotation> it = cas.getAnnotationIndex(DocumentAnnotation.type).iterator();
@@ -198,8 +208,9 @@ public class cTAKESUtils {
 	
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param ont -
+	 * @param m -
+	 * @return -
 	 */
 	public static IClass getConceptClass(IOntology ont, IdentifiedAnnotation m){
 		// CancerSize doesn't have a CUI, but can be mapped
@@ -213,12 +224,12 @@ public class cTAKESUtils {
 	
 	/**
 	 * get a set of concept by type from the annotated document
-	 * @param doc
-	 * @param type
-	 * @return
+	 * @param cas -
+	 * @param type -
+	 * @return -
 	 */
 	public static List<IdentifiedAnnotation> getAnnotationsByType(JCas cas, int type){
-		List<IdentifiedAnnotation> list = new ArrayList<IdentifiedAnnotation>();
+		List<IdentifiedAnnotation> list = new ArrayList<>();
 		Iterator<Annotation> it = cas.getAnnotationIndex(type).iterator();
 		while(it.hasNext()){
 			IdentifiedAnnotation ia = (IdentifiedAnnotation) it.next();
@@ -231,28 +242,30 @@ public class cTAKESUtils {
 	
 	/**
 	 * get a set of concept by type from the annotated document
-	 * @param doc
-	 * @param type
-	 * @return
+	 * @param cas -
+	 * @param type -
+	 * @return -
 	 */
 	public static List<IdentifiedAnnotation> getAnnotationsByType(JCas cas, URI type){
-		List<IdentifiedAnnotation> annotations = new ArrayList<IdentifiedAnnotation>();
-		for(IdentifiedAnnotation a: OwlOntologyConceptUtil.getAnnotationsByUriBranch(cas,type.toString())){
-			annotations.add(a);
-		}
-		return annotations;
+		// TODO is manipulation required?
+		return new ArrayList<>( OwlOntologyConceptUtil.getAnnotationsByUriBranch( cas, type.toString() ) );
+//		List<IdentifiedAnnotation> annotations = new ArrayList<IdentifiedAnnotation>();
+//		for(IdentifiedAnnotation a: OwlOntologyConceptUtil.getAnnotationsByUriBranch(cas,type.toString())){
+//			annotations.add(a);
+//		}
+//		return annotations;
 	}
 	
 	
 	
 	/**
 	 * get a set of concept by type from the annotated document
-	 * @param doc
-	 * @param type
-	 * @return
+	 * @param cas -
+	 * @param type -
+	 * @return -
 	 */
 	public static List<Relation> getRelationsByType(JCas cas, Type type){
-		List<Relation> list = new ArrayList<Relation>();
+		List<Relation> list = new ArrayList<>();
 		Iterator<FeatureStructure> it = cas.getFSIndexRepository().getAllIndexedFS(type);
 		while(it.hasNext()){
 			list.add((Relation)it.next());
@@ -262,9 +275,9 @@ public class cTAKESUtils {
 	
 	/**
 	 * get a set of concept by type from the annotated document
-	 * @param doc
-	 * @param type
-	 * @return
+	 * @param an -
+	 * @param classType -
+	 * @return -
 	 */
 	public static List<Annotation> getRelatedAnnotationsByType(IdentifiedAnnotation an, Class classType){
 		JCas cas = null;
@@ -294,23 +307,31 @@ public class cTAKESUtils {
 	
 	/**
 	 * get anatomic location of an annotation
-	 * @param an
-	 * @return
+	 * @param an -
+	 * @return -
 	 */
 	public static AnatomicalSiteMention getAnatimicLocation(IdentifiedAnnotation an){
-		JCas cas = null;
-		try {
-			cas = an.getCAS().getJCas();
-		} catch (CASException e) {
-			e.printStackTrace();
+//		JCas cas = null;
+//		try {
+//			cas = an.getCAS().getJCas();
+//		} catch (CASException e) {
+//			e.printStackTrace();
+//		}
+//		for(Relation r: getRelationsByType(cas,new LocationOfTextRelation(cas).getType())){
+//			LocationOfTextRelation lr = (LocationOfTextRelation) r;
+//			if(equals(lr.getArg1(),an) && lr.getArg2().getArgument() instanceof AnatomicalSiteMention){
+//				return (AnatomicalSiteMention) lr.getArg2().getArgument();
+//			}
+//		}
+//		return null;
+		// TODO - can use InstanceUtil.getLocations( an ) - there may be occasions where there are more than 1: breast ; nipple
+		final JCas jcas = getJcas( an );
+		if ( jcas == null ) {
+			return null;
 		}
-		for(Relation r: getRelationsByType(cas,new LocationOfTextRelation(cas).getType())){
-			LocationOfTextRelation lr = (LocationOfTextRelation) r;
-			if(equals(lr.getArg1(),an) && lr.getArg2().getArgument() instanceof AnatomicalSiteMention){
-				return (AnatomicalSiteMention) lr.getArg2().getArgument();
-			}
-		}
-		return null;
+		return (AnatomicalSiteMention)InstanceUtil.getLocations( jcas, an ).stream()
+				.filter( AnatomicalSiteMention.class::isInstance )
+				.findFirst().get();
 	}
 	/*
 	 * is relation argument equals to identified annotation?
@@ -324,23 +345,29 @@ public class cTAKESUtils {
 	
 	/**
 	 * get anatomic location of an annotation
-	 * @param an
-	 * @return
+	 * @param an -
+	 * @return -
 	 */
 	public static IdentifiedAnnotation getDegreeOf(IdentifiedAnnotation an){
-		JCas cas = null;
-		try {
-			cas = an.getCAS().getJCas();
-		} catch (CASException e) {
-			e.printStackTrace();
+//		JCas cas = null;
+//		try {
+//			cas = an.getCAS().getJCas();
+//		} catch (CASException e) {
+//			e.printStackTrace();
+//		}
+//		for(Relation r: getRelationsByType(cas,new DegreeOfTextRelation(cas).getType())){
+//			DegreeOfTextRelation lr = (DegreeOfTextRelation) r;
+//			if(lr.getArg1().getArgument().equals(an) && lr.getArg2().getArgument() instanceof IdentifiedAnnotation){
+//				return (IdentifiedAnnotation) lr.getArg2().getArgument();
+//			}
+//		}
+//		return null;
+		// TODO - can use InstanceUtil.getPropertyValues( an )
+		final JCas jcas = getJcas( an );
+		if ( jcas == null ) {
+			return null;
 		}
-		for(Relation r: getRelationsByType(cas,new DegreeOfTextRelation(cas).getType())){
-			DegreeOfTextRelation lr = (DegreeOfTextRelation) r;
-			if(lr.getArg1().getArgument().equals(an) && lr.getArg2().getArgument() instanceof IdentifiedAnnotation){
-				return (IdentifiedAnnotation) lr.getArg2().getArgument();
-			}
-		}
-		return null;
+		return InstanceUtil.getPropertyValues( jcas, an ).stream().findFirst().get();
 	}
 	
 	
@@ -363,10 +390,11 @@ public class cTAKESUtils {
 	
 	/**
 	 * get size measurement of an identified annotation, if such exists
-	 * @param dm
-	 * @return
+	 * @param dm -
+	 * @return -
 	 */
 	public static SizeMeasurement getSizeMeasurement(IdentifiedAnnotation dm){
+		// TODO - can we safely use a MeasurementAnnotation ?  Should we just stick to CancerSize for now?
 		// if cancer size, then use their value
 		if(dm instanceof CancerSize){
 			//ob.setCode(FHIRUtils.getCodeableConcept(FHIRConstants.TUMOR_SIZE_URI));
@@ -387,23 +415,50 @@ public class cTAKESUtils {
 		}
 		return false;
 	}
-	
-	public static TnmClassification getTnmClassification(IdentifiedAnnotation dm){
-		for(Annotation  a: cTAKESUtils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
-			if(a instanceof TnmClassification){
-				return (TnmClassification) a;
-			}
+
+	//	public static TnmClassification getTnmClassification(IdentifiedAnnotation dm){
+//		for(Annotation  a: cTAKESUtils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
+//			if(a instanceof TnmClassification){
+//				return (TnmClassification) a;
+//			}
+//		}
+//		return null;
+//	}
+	public static Collection<IdentifiedAnnotation> getTnmClassifications( final IdentifiedAnnotation neoplasm ) {
+		final JCas jcas = getJcas( neoplasm );
+		if ( jcas == null ) {
+			return null;
+		}
+		return InstanceUtil.getNeoplasmProperties( jcas, neoplasm, TnmPropertyUtil.getParentUri() );
+	}
+
+	//	public static CancerStage getCancerStage(IdentifiedAnnotation dm){
+//		for(Annotation  a: cTAKESUtils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
+//			if(a instanceof CancerStage){
+//				return (CancerStage) a;
+//			}
+//		}
+//		return null;
+//	}
+	public static Collection<IdentifiedAnnotation> getCancerStages( final IdentifiedAnnotation neoplasm ) {
+		final JCas jcas = getJcas( neoplasm );
+		if ( jcas == null ) {
+			return null;
+		}
+		return InstanceUtil.getNeoplasmProperties( jcas, neoplasm, StagePropertyUtil.getParentUri() );
+	}
+
+	/**
+	 * @param annotation any type of annotation
+	 * @return jcas containing the annotation or null if there is none
+	 */
+	static public JCas getJcas( final TOP annotation ) {
+		try {
+			return annotation.getCAS().getJCas();
+		} catch ( CASException casE ) {
+			LOGGER.error( casE.getMessage() );
 		}
 		return null;
 	}
-	
-	public static CancerStage getCancerStage(IdentifiedAnnotation dm){
-		for(Annotation  a: cTAKESUtils.getRelatedAnnotationsByType(dm,NeoplasmRelation.class)){
-			if(a instanceof CancerStage){
-				return (CancerStage) a;
-			}
-		}
-		return null;
-	}
-	
+
 }

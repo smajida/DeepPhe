@@ -27,16 +27,25 @@ public class SpannedValue<T extends Value> implements SpannedEntity {
       return _value;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    final public int getStartOffset() {
       return _startOffset;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    final public int getEndOffset() {
       return _endOffset;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    final public String toString() {
       return _value.getTitle() + " at " + getStartOffset() + "-" + getEndOffset();

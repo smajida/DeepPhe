@@ -16,6 +16,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.healthnlp.deepphe.fhir.AnatomicalSite;
 import org.healthnlp.deepphe.fhir.Element;
@@ -95,8 +96,8 @@ public class FHIRUtils {
 	
 	/**
 	 * get document type
-	 * @param type
-	 * @return
+	 * @param type -
+	 * @return -
 	 */
 	public static CodeableConcept getDocumentType(String type){
 		if(reportTypes == null){
@@ -118,9 +119,9 @@ public class FHIRUtils {
 	
 	/**
 	 * get codable concept that has a name and code from UMLS
-	 * @param cui
-	 * @param name
-	 * @return
+	 * @param cui -
+	 * @param name -
+	 * @return -
 	 */
 	public static CodeableConcept getCodeableConcept(String name,String cui,String scheme){
 		CodeableConcept c = new CodeableConcept();
@@ -140,8 +141,8 @@ public class FHIRUtils {
 	
 	/**
 	 * parse date from string
-	 * @param text
-	 * @return
+	 * @param text -
+	 * @return -
 	 */
 	public static Date getDate(String text){
 		return TextTools.parseDate(text);
@@ -150,8 +151,8 @@ public class FHIRUtils {
 	
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param u -
+	 * @return -
 	 */
 	public static String getConceptName(URI u){
 		try {
@@ -163,8 +164,8 @@ public class FHIRUtils {
 	}
 	/**
 	 * get preferred concept code for a given codable concept
-	 * @param c
-	 * @return
+	 * @param c -
+	 * @return -
 	 */
 	public static String getConceptCode(CodeableConcept c){
 		for(Coding cc: c.getCoding()){
@@ -178,8 +179,8 @@ public class FHIRUtils {
 	
 	/**
 	 * get preferred concept code for a given codable concept
-	 * @param c
-	 * @return
+	 * @param c -
+	 * @return -
 	 */
 	public static String getConceptName(CodeableConcept c){
 		String name = c.getText();
@@ -196,8 +197,8 @@ public class FHIRUtils {
 	
 	/**
 	 * get codeblce concept form OntologyConcept annotation
-	 * @param c
-	 * @return
+	 * @param c -
+	 * @return -
 	 *
 	public static CodeableConcept getCodeableConcept(Mention c){
 		CodeableConcept cc = new CodeableConcept();
@@ -207,8 +208,8 @@ public class FHIRUtils {
 	*/
 	/**
 	 * get codeblce concept form OntologyConcept annotation
-	 * @param c
-	 * @return
+	 * @param c -
+	 * @return -
 	 */
 	public static CodeableConcept getCodeableConcept(IClass c){
 		CodeableConcept cc = new CodeableConcept();
@@ -256,8 +257,9 @@ public class FHIRUtils {
 	*/
 	/**
 	 * get codeblce concept form OntologyConcept annotation
-	 * @param c
-	 * @return
+	 * @param cc -
+	 * @param cls -
+	 * @return -
 	 */
 	public static CodeableConcept setCodeableConcept(CodeableConcept cc,IClass cls){
 		Concept c = cls.getConcept();
@@ -296,8 +298,8 @@ public class FHIRUtils {
 
 	/**
 	 * create a narrative from the text
-	 * @param coveredText
-	 * @return
+	 * @param text -
+	 * @return -
 	 */
 	public static Narrative getNarrative(String text) {
 		Narrative n = new Narrative();
@@ -311,8 +313,8 @@ public class FHIRUtils {
 	
 	/**
 	 * parse specially formatted document to extract header information
-	 * @param text
-	 * @return
+	 * @param text -
+	 * @return -
 	 */
 	public static Map<String,String> getHeaderValues(String text){
 		Map<String,String> map = new java.util.LinkedHashMap<String,String>();
@@ -359,7 +361,7 @@ public class FHIRUtils {
 	/**
 	 * create a string resource identifier for a given element
 	 * @param e - element
-	 * @return
+	 * @return -
 	 */
 	public static String createResourceIdentifier(Element e){
 		int hash = FHIRUtils.getMentionExtensions((DomainResource)e.getResource()).hashCode();  
@@ -469,8 +471,9 @@ public class FHIRUtils {
 	
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param ontology -
+	 * @param c -
+	 * @return -
 	 */
 	public static IClass getConceptClass(IOntology ontology,  Concept c){
 		String code = c.getCode();
@@ -481,8 +484,9 @@ public class FHIRUtils {
 	
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param ontology -
+	 * @param c -
+	 * @return -
 	 */
 	public static IClass getConceptClass(IOntology ontology, CodeableConcept c){
 		for(Coding coding : c.getCoding()){
@@ -516,8 +520,9 @@ public class FHIRUtils {
 	
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param ontology -
+	 * @param m -
+	 * @return -
 	 */
 	public static IClass getConceptClass(IOntology ontology,  Mention m){
 		return getConceptClass(ontology, m.getConcept());
@@ -525,8 +530,8 @@ public class FHIRUtils {
 	
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param c -
+	 * @return -
 	 */
 	public static String getConceptCode(Concept c){
 		String cui = null;
@@ -552,9 +557,17 @@ public class FHIRUtils {
 	
 	/**
 	 * get report elements
-	 * @return
+	 * @param entireList -
+	 * @param cls -
+	 * @return -
 	 */
 	public static List getSubList(Collection entireList, Class cls) {
+		// TODO can use stream
+//	public static <T extends TT, TT extends Object> List<T> getSubList(Collection<TT> entireList, Class<T> cls) {
+//		return entireList.stream()
+// 			.filter( cls::isInstance )
+// 			.map( cls::cast )
+// 			.collect( Collectors.toList() );
 		List list = new ArrayList();
 		for(Object e: entireList){
 			if(cls.isInstance(e))
@@ -633,10 +646,10 @@ public class FHIRUtils {
 
 	/**
 	 * get nearest mention to a target mention 
-	 * @param m
-	 * @param doc
-	 * @param type
-	 * @return
+	 //	 * @param target -
+	 //	 * @param doc -
+	 //	 * @param type -
+	 * @return -
 	 *
 	public static Mention getNearestMention(Mention target, Document doc, String type){
 		List<Mention> mentions = getMentionsByType(doc, type);
@@ -663,9 +676,9 @@ public class FHIRUtils {
 	
 	/**
 	 * does this mention has another mention that is more specific?
-	 * @param m
-	 * @param list
-	 * @return
+	 //	 * @param mm -
+	 //	 * @param list -
+	 * @return -
 	 
 	
 	private static boolean hasMoreSpecific(IdentifiedAnnotation mm, List<IdentifiedAnnotation> list) {

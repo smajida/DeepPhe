@@ -1,5 +1,6 @@
 package org.apache.ctakes.cancer.receptor;
 
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.property.DefaultProperty;
 import org.apache.ctakes.cancer.property.SpannedType;
 import org.apache.ctakes.cancer.property.SpannedValue;
@@ -14,6 +15,8 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 final class Status extends DefaultProperty<StatusType, StatusValue> {
 
+
+   static final String RECEPTOR_STATUS_URI = OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Receptor_Status";
 
    Status( final SpannedType<StatusType> statusType, final SpannedValue<StatusValue> statusValue ) {
       super( statusType, statusValue );

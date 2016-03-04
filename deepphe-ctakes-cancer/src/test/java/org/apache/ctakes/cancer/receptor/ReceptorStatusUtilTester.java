@@ -32,8 +32,6 @@ public class ReceptorStatusUtilTester {
 
    static private final Logger LOGGER = Logger.getLogger( "ReceptorStatusUtilTester" );
 
-   static private final StatusInstanceUtil STATUS_INSTANCE_UTIL = new StatusInstanceUtil();
-   static private final StatusPropertyUtil STATUS_UTIL = new StatusPropertyUtil();
 
    @BeforeClass
    static public void setupTestCas() throws UIMAException {
@@ -77,7 +75,7 @@ public class ReceptorStatusUtilTester {
       final SpannedStatusType spannedType = new SpannedStatusType( type, offset, offset + 10 );
       final SpannedStatusValue spannedValue = new SpannedStatusValue( value, offset + 20, offset + 30 );
       final Status status = new Status( spannedType, spannedValue );
-      return STATUS_INSTANCE_UTIL.createInstance( _testCas, 0, status );
+      return StatusInstanceFactory.getInstance().createInstance( _testCas, 0, status );
    }
 
    @BeforeClass
@@ -106,30 +104,32 @@ public class ReceptorStatusUtilTester {
 
    @Test
    public void testIsReceptorStatus() {
-      assertTrue( "PR Positive not Receptor Status", STATUS_UTIL.isCorrectProperty( PR_PLUS_1 ) );
-      assertTrue( "PR Positive not Receptor Status", STATUS_UTIL.isCorrectProperty( PR_PLUS_2 ) );
-      assertTrue( "PR Negative not Receptor Status", STATUS_UTIL.isCorrectProperty( PR_MINUS_1 ) );
-      assertTrue( "ER Positive not Receptor Status", STATUS_UTIL.isCorrectProperty( ER_PLUS_1 ) );
-      assertTrue( "ER Negative not Receptor Status", STATUS_UTIL.isCorrectProperty( ER_MINUS_1 ) );
-      assertTrue( "ER Negative not Receptor Status", STATUS_UTIL.isCorrectProperty( ER_MINUS_2 ) );
-      assertTrue( "HER2 Positive not Receptor Status", STATUS_UTIL.isCorrectProperty( HER2_PLUS_1 ) );
-      assertTrue( "HER2 Negative not Receptor Status", STATUS_UTIL.isCorrectProperty( HER2_MINUS_1 ) );
-      assertTrue( "HER2 Unknown not Receptor Status", STATUS_UTIL.isCorrectProperty( HER2_UNKNOWN_1 ) );
-      assertFalse( "Generic Sign Symptom is Receptor Status", STATUS_UTIL.isCorrectProperty( NOT_RECEPTOR_SS ) );
+      final StatusPropertyUtil util = StatusPropertyUtil.getInstance();
+      assertTrue( "PR Positive not Receptor Status", util.isCorrectProperty( PR_PLUS_1 ) );
+      assertTrue( "PR Positive not Receptor Status", util.isCorrectProperty( PR_PLUS_2 ) );
+      assertTrue( "PR Negative not Receptor Status", util.isCorrectProperty( PR_MINUS_1 ) );
+      assertTrue( "ER Positive not Receptor Status", util.isCorrectProperty( ER_PLUS_1 ) );
+      assertTrue( "ER Negative not Receptor Status", util.isCorrectProperty( ER_MINUS_1 ) );
+      assertTrue( "ER Negative not Receptor Status", util.isCorrectProperty( ER_MINUS_2 ) );
+      assertTrue( "HER2 Positive not Receptor Status", util.isCorrectProperty( HER2_PLUS_1 ) );
+      assertTrue( "HER2 Negative not Receptor Status", util.isCorrectProperty( HER2_MINUS_1 ) );
+      assertTrue( "HER2 Unknown not Receptor Status", util.isCorrectProperty( HER2_UNKNOWN_1 ) );
+      assertFalse( "Generic Sign Symptom is Receptor Status", util.isCorrectProperty( NOT_RECEPTOR_SS ) );
    }
 
    @Test
    public void testGetStatusValue() {
-      assertEquals( "PR Positive not Positive", STATUS_UTIL.getValue( _testCas, PR_PLUS_1 ), POSITIVE );
-      assertEquals( "PR Positive not Positive", STATUS_UTIL.getValue( _testCas, PR_PLUS_2 ), POSITIVE );
-      assertEquals( "PR Negative not Negative", STATUS_UTIL.getValue( _testCas, PR_MINUS_1 ), NEGATIVE );
-      assertEquals( "ER Positive not Positive", STATUS_UTIL.getValue( _testCas, ER_PLUS_1 ), POSITIVE );
-      assertEquals( "ER Negative not Negative", STATUS_UTIL.getValue( _testCas, ER_MINUS_1 ), NEGATIVE );
-      assertEquals( "ER Negative not Negative", STATUS_UTIL.getValue( _testCas, ER_MINUS_2 ), NEGATIVE );
-      assertEquals( "HER2 Positive not Positive", STATUS_UTIL.getValue( _testCas, HER2_PLUS_1 ), POSITIVE );
-      assertEquals( "HER2 Negative not Negative", STATUS_UTIL.getValue( _testCas, HER2_MINUS_1 ), NEGATIVE );
-      assertEquals( "HER2 Unknown not Unknown", STATUS_UTIL.getValue( _testCas, HER2_UNKNOWN_1 ), UNKNOWN );
-      assertNull( "Generic Sign Symptom value not Null", STATUS_UTIL.getValue( _testCas, NOT_RECEPTOR_SS ) );
+      final StatusPropertyUtil util = StatusPropertyUtil.getInstance();
+      assertEquals( "PR Positive not Positive", util.getValue( _testCas, PR_PLUS_1 ), POSITIVE );
+      assertEquals( "PR Positive not Positive", util.getValue( _testCas, PR_PLUS_2 ), POSITIVE );
+      assertEquals( "PR Negative not Negative", util.getValue( _testCas, PR_MINUS_1 ), NEGATIVE );
+      assertEquals( "ER Positive not Positive", util.getValue( _testCas, ER_PLUS_1 ), POSITIVE );
+      assertEquals( "ER Negative not Negative", util.getValue( _testCas, ER_MINUS_1 ), NEGATIVE );
+      assertEquals( "ER Negative not Negative", util.getValue( _testCas, ER_MINUS_2 ), NEGATIVE );
+      assertEquals( "HER2 Positive not Positive", util.getValue( _testCas, HER2_PLUS_1 ), POSITIVE );
+      assertEquals( "HER2 Negative not Negative", util.getValue( _testCas, HER2_MINUS_1 ), NEGATIVE );
+      assertEquals( "HER2 Unknown not Unknown", util.getValue( _testCas, HER2_UNKNOWN_1 ), UNKNOWN );
+      assertNull( "Generic Sign Symptom value not Null", util.getValue( _testCas, NOT_RECEPTOR_SS ) );
    }
 
    // createFullReceptorStatusMention is mostly tested by the setup and other tests

@@ -1,9 +1,7 @@
 package org.apache.ctakes.cancer.tnm;
 
-import org.apache.ctakes.cancer.instance.AbstractInstanceUtil;
+import org.apache.ctakes.cancer.instance.AbstractInstanceFactory;
 import org.apache.ctakes.cancer.property.SpannedProperty;
-import org.apache.ctakes.cancer.property.SpannedTest;
-import org.apache.ctakes.cancer.property.Test;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.Modifier;
 import org.apache.ctakes.typesystem.type.textsem.SignSymptomMention;
@@ -13,16 +11,34 @@ import org.apache.uima.jcas.JCas;
 import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDING;
 
 /**
+ * Singleton that should be used to create full neoplasm T N M property instances.
+ * An instance is defined as the collection of all property types and values associated with a single neoplasm.
+ *
+ *
+ * Use of any {@code createInstance()} method will create:
+ * <ul>
+ * T N M type annotations
+ * neoplasm relations between the T N M type annotations and the nearest provided neoplasm in the text
+ * T N M value annotations
+ * degree-of relations between the T N M type annotations and the appropriate value annotations
+ * test-for relations between T N M type annotations and the nearest provided test in the text
  * @author SPF , chip-nlp
  * @version %I%
  * @since 2/8/2016
  */
-final public class TnmInstanceUtil extends AbstractInstanceUtil<TnmType, TnmValue, SignSymptomMention> {
+final public class TnmInstanceFactory extends AbstractInstanceFactory<TnmType, TnmValue, SignSymptomMention> {
 
-   static private final Logger LOGGER = Logger.getLogger( "TnmInstanceUtil" );
+   static private final Logger LOGGER = Logger.getLogger( "TnmInstanceFactory" );
 
+   static private class SingletonHolder {
+      static private TnmInstanceFactory INSTANCE = new TnmInstanceFactory();
+   }
 
-   public TnmInstanceUtil() {
+   static public TnmInstanceFactory getInstance() {
+      return SingletonHolder.INSTANCE;
+   }
+
+   private TnmInstanceFactory() {
       super( "TNM" );
    }
 

@@ -27,16 +27,25 @@ public class SpannedTest<T extends Test> implements SpannedEntity {
       return _test;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    final public int getStartOffset() {
       return _startOffset;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    final public int getEndOffset() {
       return _endOffset;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    final public String toString() {
       return _test.getTitle() + " at " + getStartOffset() + "-" + getEndOffset();

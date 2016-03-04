@@ -1,10 +1,8 @@
 package org.apache.ctakes.cancer.receptor;
 
 
-import org.apache.ctakes.cancer.instance.AbstractInstanceUtil;
+import org.apache.ctakes.cancer.instance.AbstractInstanceFactory;
 import org.apache.ctakes.cancer.property.SpannedProperty;
-import org.apache.ctakes.cancer.property.SpannedTest;
-import org.apache.ctakes.cancer.property.Test;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.Modifier;
 import org.apache.ctakes.typesystem.type.textsem.SignSymptomMention;
@@ -14,15 +12,35 @@ import org.apache.uima.jcas.JCas;
 import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDING;
 
 /**
+ * Singleton that should be used to create full neoplasm receptor status property instances.
+ * An instance is defined as the collection of all property types and values associated with a single neoplasm.
+ *
+ *
+ * Use of any {@code createInstance()} method will create:
+ * <ul>
+ * Receptor Status type annotations
+ * neoplasm relations between the Receptor Status type annotations and the nearest provided neoplasm in the text
+ * Receptor Status value annotations
+ * degree-of relations between the Receptor Status type annotations and the appropriate value annotations
+ * test-for relations between Receptor Status type annotations and the nearest provided test in the text
+ * </ul>
  * @author SPF , chip-nlp
  * @version %I%
  * @since 12/6/2015
  */
-final public class StatusInstanceUtil extends AbstractInstanceUtil<StatusType, StatusValue, SignSymptomMention> {
+final public class StatusInstanceFactory extends AbstractInstanceFactory<StatusType, StatusValue, SignSymptomMention> {
 
-   static private final Logger LOGGER = Logger.getLogger( "StatusInstanceUtil" );
+   static private final Logger LOGGER = Logger.getLogger( "StatusInstanceFactory" );
 
-   public StatusInstanceUtil() {
+   static private class SingletonHolder {
+      static private StatusInstanceFactory INSTANCE = new StatusInstanceFactory();
+   }
+
+   static public StatusInstanceFactory getInstance() {
+      return SingletonHolder.INSTANCE;
+   }
+
+   private StatusInstanceFactory() {
       super( "Receptor Status" );
    }
 

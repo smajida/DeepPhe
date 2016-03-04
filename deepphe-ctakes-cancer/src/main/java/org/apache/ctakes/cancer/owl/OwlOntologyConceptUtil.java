@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 
 /**
+ * Utility used to obtain annotations in a cas using owl uris
  * @author SPF , chip-nlp
  * @version %I%
  * @since 11/24/2015

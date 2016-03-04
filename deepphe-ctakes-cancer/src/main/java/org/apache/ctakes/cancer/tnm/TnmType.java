@@ -25,9 +25,6 @@ enum TnmType implements Type {
          "Generic_Distant_Metastasis_TNM_Finding",
          "M" );
 
-
-   static private final String PARENT_URI = "#TNMClassification";
-
    final private String _title;
    final private String _uri;
    final private Pattern _pattern;

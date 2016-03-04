@@ -27,16 +27,25 @@ public class SpannedType<T extends Type> implements SpannedEntity {
       return _type;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    final public int getStartOffset() {
       return _startOffset;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    final public int getEndOffset() {
       return _endOffset;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    final public String toString() {
       return _type.getTitle() + " at " + getStartOffset() + "-" + getEndOffset();

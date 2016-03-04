@@ -10,6 +10,9 @@ import org.apache.uima.jcas.JCas;
 import javax.annotation.concurrent.Immutable;
 
 /**
+ * A Neoplasm Relation is a special relation that links a neoplasm annotation with a property annotation.
+ * Though useful, neoplasm relations should normally be created using subclasses of
+ * {@link org.apache.ctakes.cancer.instance.AbstractInstanceFactory}
  * @author SPF , chip-nlp
  * @version %I%
  * @since 12/5/2015
@@ -22,17 +25,24 @@ final public class NeoplasmRelationFactory {
 
    static private final Logger LOGGER = Logger.getLogger( "NeoplasmRelationFactory" );
 
-   static public void createNeoplasmRelation( final JCas jCas,
+   /**
+    * @param jCas          ye olde ...
+    * @param argumentEvent neoplasm property annotation
+    * @param neoplasm      neoplasm
+    * @param relationType  name for neoplasm relation, e.g. "size_of"
+    * @return a new neoplasm relation that has been added to the cas
+    */
+   static public NeoplasmRelation createNeoplasmRelation( final JCas jCas,
                                               final IdentifiedAnnotation argumentEvent,
                                               final IdentifiedAnnotation neoplasm,
                                               final String relationType ) {
       if ( argumentEvent == null ) {
          LOGGER.info( "No argument neoplasm relation " + ((neoplasm != null) ? neoplasm.getCoveredText() : "") );
-         return;
+         return null;
       }
       if ( neoplasm == null ) {
          LOGGER.info( "No Neoplasm to relate to " + argumentEvent.getCoveredText() );
-         return;
+         return null;
       }
       // add the relation to the CAS
       final RelationArgument eventArgument = new RelationArgument( jCas );
@@ -48,6 +58,7 @@ final public class NeoplasmRelationFactory {
       neoplasmRelation.setArg2( neoplasmArgument );
       neoplasmRelation.setCategory( relationType );
       neoplasmRelation.addToIndexes();
+      return neoplasmRelation;
    }
 
 }

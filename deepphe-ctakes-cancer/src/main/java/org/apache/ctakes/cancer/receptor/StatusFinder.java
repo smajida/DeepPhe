@@ -1,7 +1,6 @@
 package org.apache.ctakes.cancer.receptor;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
-import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
@@ -12,10 +11,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.StreamSupport;
 
 
 /**
@@ -30,7 +27,6 @@ final public class StatusFinder {
 
    static private final Logger LOGGER = Logger.getLogger( "StatusFinder" );
 
-   static private final StatusInstanceUtil STATUS_INSTANCE_UTIL = new StatusInstanceUtil();
 
    static private final String TYPE_REGEX
          = "(Estrogen( and Progesterone)?)|(ER( ?(/|and) ?PR)?)|(Progesterone|PR)|(HER-?2( ?/ ?neu)?)";
@@ -59,12 +55,12 @@ final public class StatusFinder {
          final Collection<String> statusTestUris = status.getSpannedType().getType().getStatusTestUris();
          for ( IdentifiedAnnotation diagnostic : diagnostics ) {
             if ( OwlOntologyConceptUtil.getUris( diagnostic ).stream()
-                  .filter( statusTestUris::contains )
-                  .findFirst().isPresent() ) {
+                  .anyMatch( statusTestUris::contains ) ) {
                candidateTests.add( diagnostic );
             }
          }
-         STATUS_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, status, neoplasms, candidateTests );
+         StatusInstanceFactory.getInstance()
+               .createInstance( jcas, windowStartOffset, status, neoplasms, candidateTests );
          candidateTests.clear();
       }
    }

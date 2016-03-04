@@ -3,15 +3,12 @@ package org.apache.ctakes.cancer.receptor;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.property.Type;
 import org.apache.ctakes.cancer.property.Value;
-import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static org.apache.ctakes.cancer.receptor.StatusTest.*;
 
@@ -42,7 +39,6 @@ enum StatusType implements Type {
 //   http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#Triple_Positive
 
 
-   static public final String PARENT_URI = OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Receptor_Status";
    static private final String RECEPTOR_EX = "(\\s*-?\\s*?Receptors?\\s*-?)?";
 
    final private String _title;

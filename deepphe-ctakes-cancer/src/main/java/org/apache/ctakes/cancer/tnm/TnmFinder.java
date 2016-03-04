@@ -33,7 +33,6 @@ final public class TnmFinder {
 
    static private final Logger LOGGER = Logger.getLogger( "TnmFinder" );
 
-   static private final TnmInstanceUtil TNM_INSTANCE_UTIL = new TnmInstanceUtil();
 
    static private final Pattern WHITESPACE_PATTERN = Pattern.compile( "\\s+" );
 
@@ -71,10 +70,10 @@ final public class TnmFinder {
          final SpannedTnmPrefix tnmPrefix = getTnmPrefix( tnm, lookupWindow.getCoveredText() );
          if ( tnmPrefix != null ) {
             final IdentifiedAnnotation diagnosticTest = createTestProcedure( jcas, windowStartOffset, tnmPrefix );
-            TNM_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, tnm, neoplasms, Collections
+            TnmInstanceFactory.getInstance().createInstance( jcas, windowStartOffset, tnm, neoplasms, Collections
                   .singletonList( diagnosticTest ) );
          } else {
-            TNM_INSTANCE_UTIL.createInstance( jcas, windowStartOffset, tnm, neoplasms );
+            TnmInstanceFactory.getInstance().createInstance( jcas, windowStartOffset, tnm, neoplasms );
          }
       }
    }
