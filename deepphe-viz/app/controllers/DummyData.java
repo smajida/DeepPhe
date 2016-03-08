@@ -33,29 +33,30 @@ import views.html.neo4jdemo;
 
 public class DummyData extends Controller {
 
-   public static String queries ="{ \"statements\": " +
-		  " [ {  \"statement\": \"create (p:Patient {name: \\\"Elena\\\"}) return id(p)\" }, "+
-		   "  {  \"statement\": \"create (d:Document {name: \\\"ed1\\\"})  return id(d)\" }, " +
-		   "  {  \"statement\": \"match (p:Patient),(d:Document) where p.name=\\\"Elena\\\" and d.name=\\\"ed1\\\" create (d)-[:hasSubject]->(p) return id(p);\"} " +
-		    " ] }";
+    	   
+    String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
+    String username = "neo4j";
+    String password = "neo4jpass";
+
    
    public static String statementWrapper = "'{' \"statements\": [ {0} ] \" '}' ";
+
+    public static String deleteString = "{ \"statement\" : \" match (n) optional match (n)-[r]-() delete n,r\" }";
 		   
    
-   public static String createHasSubjectQuery = "'{' \"statement\": \"match (p:Patient),(d:Document) where p.name=\\\"{0}\\\" and d.name=\\\"{1}\\\" create (d)-[:hasSubject]->(p) return id(p);\"'}' ";
-   public static String createHasDiagnosisQuery = "'{' \"statement\": \"match (dx:Diagnosis),(d:Document) where dx.name=\\\"{1}\\\" and d.name=\\\"{0}\\\" create (d)-[:hasDiagnosis]->(dx) return id(d);\"'}' ";
    
-   public static String createNodeQuery = "'{' \"statement\": \"create (n:{0} {1}) return id(n)\" '}' ";  // {0} is node type, {1} is the map of attributes
+   public static String createNodeQuery = "'{' \"statement\": \"create (n:{0} {1}) return id(n)\" '}'";  // {0} is node type, {1} is the map of attributes
    public static String createAttribute   = "{0}: \\\"{1}\\\" ";
    public static String createNodeAttributes = "  '{' {0} '}'";
    
+   public static String createRelationQuery = "'{' \"statement\": \"match (dx:{0}),(d:{1}) where dx.name=\\\"{2}\\\" and d.name=\\\"{3}\\\" create (d)-[:{4}]->(dx) return id(d);\"'}' ";
+   
+   
+   
    public Result populate() {
 	   
-	    String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
-	   	String username = "neo4j";
-	   	String password = "neo4jpass";
-	   
 	   	try {
+		    System.err.println("======= STARTING POPULATE=====");
 	   		DataCreatorUtility caller = new DataCreatorUtility(SERVER_ROOT_URI, username, password);
 	   		String p1 = createPatient("George");
 	   		String p2 = createPatient("Harry");
@@ -69,7 +70,7 @@ public class DummyData extends Controller {
 	   		Object[] params = new Object[]{statementString};
 	   		String queries = MessageFormat.format(statementWrapper,params);
 	   		String result=caller.executeQueries(queries);
-	   		return ok(result);
+			return ok(result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ok(index.render(e.getMessage()));
@@ -77,15 +78,32 @@ public class DummyData extends Controller {
 	    
     }
 
+    public Result clear() {
+	try {
+	    DataCreatorUtility caller = new DataCreatorUtility(SERVER_ROOT_URI, username, password);
+
+	    System.err.println("delete string is .."+deleteString);
+	    Object[] params = new Object[]{deleteString};
+	    String queries = MessageFormat.format(statementWrapper,params);
+	    String result=caller.executeQueries(queries);
+	    System.err.println("result..."+result);
+	    return ok(result);
+	} catch (Exception e) {
+	    e.printStackTrace();
+	    return ok(index.render(e.getMessage()));
+	}
+	
+    }
+
    
-   public String createPatient(String name) {
+   private String createPatient(String name) {
 	   // put "name" and name into a map for attributes
 	   HashMap<String,String> atts = new HashMap<String,String>();
 	   atts.put("name",name);
-	   return createQuery("Patient",atts);
+	   return createNodeQuery("Patient",atts);
    }
    
-   private String createQuery(String type,Map<String,String> atts) {
+   private String createNodeQuery(String type,Map<String,String> atts) {
 	   //convert the attributes into a formatted query
 	   String attributes = getAttributeClauses(atts);
 	   // format the whole thing wih createNodeQuery
@@ -93,27 +111,27 @@ public class DummyData extends Controller {
    }
    
    
-   public String createDocument(String name,String date) {
+   private String createDocument(String name,String date) {
 	   HashMap<String,String> atts = new HashMap<String,String>();
 	   atts.put("name",name);
 	   atts.put("date",date);
-	   return createQuery("Document",atts);
+	   return createNodeQuery("Document",atts);
    }
    
-   public String createDiagnosis(String name,String sites,String stage) {
+   private String createDiagnosis(String name,String sites,String stage) {
 	   HashMap<String,String> atts = new HashMap<String,String>();
 	   atts.put("name",name);
 	   atts.put("bodySites",sites);
 	   atts.put("Stage",stage);
-	   return createQuery("Diagnosis",atts);
+	   return createNodeQuery("Diagnosis",atts);
    }
    
-   public String createHasSubjectQuery(String p,String d) {
-	   return formatQuery(createHasSubjectQuery,new Object[]{p,d});
+   private String createHasSubjectQuery(String p,String d) {
+	   return formatQuery(createRelationQuery, new Object[]{"Patient","Document",p,d,"hasSubject"});
    }
   
-   public String createHasDiagnosisQuery(String dx,String d) {
-	   return formatQuery(createHasDiagnosisQuery,new Object[]{dx,d});
+   private String createHasDiagnosisQuery(String dx,String d) {
+	   return formatQuery(createRelationQuery,new Object[]{"Diagnosis","Document",d,dx,"hasDiagnosis"});
    }
    
   // turn each pair in map into  name: \\\"value\\\", and separate by commas.

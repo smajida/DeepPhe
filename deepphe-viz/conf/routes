@@ -5,7 +5,9 @@
 # Home page
 GET     /                           controllers.Application.index()
 GET     /neo4jdemo                  controllers.Neo4JDemo.demo()
-GET 	/populateDummyData		    controllers.DummyData.populate()
+GET 	/populateDummyData	    controllers.DummyData.populate()
+GET	/cleardb		    controllers.DummyData.clear()
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
