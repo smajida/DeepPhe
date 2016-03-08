@@ -3,6 +3,11 @@ package controllers;
 import java.io.IOException;
 import java.util.List;
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.Map;
+import java.util.ArrayList;
+
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -37,13 +42,12 @@ public class DummyData extends Controller {
    public static String statementWrapper = "'{' \"statements\": [ {0} ] \" '}' ";
 		   
    
-   public static String createPatientQuery = "'{' \"statement\": \"create (p:Patient '{'name: \\\"{0}\\\"'}') return id(p)\" '}' ";
-   public static String createDocumentQuery = "'{' \"statement\": \"create (d:Document '{'name: \\\"{0}\\\", date: \\\"{1}\\\" '}') return id(d)\" '}' ";
    public static String createHasSubjectQuery = "'{' \"statement\": \"match (p:Patient),(d:Document) where p.name=\\\"{0}\\\" and d.name=\\\"{1}\\\" create (d)-[:hasSubject]->(p) return id(p);\"'}' ";
-   public static String createDiagnosisQuery = "'{' \"statement\": \"create (dx:Diagnosis '{'name: \\\"{0}\\\", bodySites: \\\"{1}\\\", Stage: \\\"{2}\\\" '}') return id(dx)\" '}' ";
    public static String createHasDiagnosisQuery = "'{' \"statement\": \"match (dx:Diagnosis),(d:Document) where dx.name=\\\"{1}\\\" and d.name=\\\"{0}\\\" create (d)-[:hasDiagnosis]->(dx) return id(d);\"'}' ";
    
-   
+   public static String createNodeQuery = "'{' \"statement\": \"create (n:{0} {1}) return id(n)\" '}' ";  // {0} is node type, {1} is the map of attributes
+   public static String createAttribute   = "{0}: \\\"{1}\\\" ";
+   public static String createNodeAttributes = "  '{' {0} '}'";
    
    public Result populate() {
 	   
@@ -57,7 +61,7 @@ public class DummyData extends Controller {
 	   		String p2 = createPatient("Harry");
 	   		String p3 = createDocument("doc1","2015-12-15 09:00");
 	   		String p4 = createHasSubjectQuery("Harry","doc1");
-	   		String p5 = createDiagnosisQuery("Malignant Breast Neoplasm","[left breast]","II");
+	   		String p5 = createDiagnosis("Malignant Breast Neoplasm","[left breast]","II");
 	   		String p6 = createHasDiagnosisQuery("doc1","Malignant Breast Neoplasm");
 	   		String[] allStatements = new String[]{p1,p2,p3,p4,p5,p6};
 	   		String statementString = String.join(",",allStatements);
@@ -72,28 +76,62 @@ public class DummyData extends Controller {
 		}
 	    
     }
+
    
    public String createPatient(String name) {
-	   return formatQuery(createPatientQuery,new Object[]{name});
+	   // put "name" and name into a map for attributes
+	   HashMap<String,String> atts = new HashMap<String,String>();
+	   atts.put("name",name);
+	   return createQuery("Patient",atts);
    }
    
+   private String createQuery(String type,Map<String,String> atts) {
+	   //convert the attributes into a formatted query
+	   String attributes = getAttributeClauses(atts);
+	   // format the whole thing wih createNodeQuery
+	   return formatQuery(createNodeQuery,new Object[]{type,attributes});
+   }
+   
+   
    public String createDocument(String name,String date) {
-	   	return formatQuery(createDocumentQuery,new Object[]{name,date});
+	   HashMap<String,String> atts = new HashMap<String,String>();
+	   atts.put("name",name);
+	   atts.put("date",date);
+	   return createQuery("Document",atts);
+   }
+   
+   public String createDiagnosis(String name,String sites,String stage) {
+	   HashMap<String,String> atts = new HashMap<String,String>();
+	   atts.put("name",name);
+	   atts.put("bodySites",sites);
+	   atts.put("Stage",stage);
+	   return createQuery("Diagnosis",atts);
    }
    
    public String createHasSubjectQuery(String p,String d) {
 	   return formatQuery(createHasSubjectQuery,new Object[]{p,d});
    }
-   
-   public String createDiagnosisQuery(String name,String sites,String stage) {
-	   	return formatQuery(createDiagnosisQuery,new Object[]{name,sites,stage});
-   }
-   
+  
    public String createHasDiagnosisQuery(String dx,String d) {
 	   return formatQuery(createHasDiagnosisQuery,new Object[]{dx,d});
    }
    
-   
+  // turn each pair in map into  name: \\\"value\\\", and separate by commas.
+  private String getAttributeClauses(Map<String,String> atts) {
+	  ArrayList<String> pairs  =new ArrayList<String>();
+	  MessageFormat form = new MessageFormat(createAttribute);
+	  Set<String> keys = atts.keySet();
+	  for (String key: keys) {
+		  String val = atts.get(key);
+		  String attString  = form.format(new Object[]{key,val});
+		  pairs.add(attString);
+	  }	  
+	  // put all in a list
+	 String attListString =  String.join(",",pairs);
+	 form = new MessageFormat(createNodeAttributes);
+	 return form.format(new Object[]{attListString});
+  }
+  
   private String formatQuery(String template,Object[] params) {
 	  	MessageFormat form = new MessageFormat(template);
 	  	String q = form.format(params);
