@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.CodeableConcept;
  */
 public class Fact {
 	private String name,uri,identifier,label;
+	private List<String> ancestors;
 	private List<Fact> provenanceFacts;
 	private List<TextMention> provenanceText;
 	public String getName() {
@@ -61,6 +62,14 @@ public class Fact {
 	}
 	public String getSummaryText(){
 		return getLabel();
+	}
+	public List<String> getAncestors() {
+		if(ancestors == null)
+			ancestors = new ArrayList<String>();
+		return ancestors;
+	}
+	public void setAncestors(List<String> ancestors) {
+		this.ancestors = ancestors;
 	}
 	
 	public CodeableConcept getCodeableConcept(){

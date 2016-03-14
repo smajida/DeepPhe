@@ -2,67 +2,63 @@ package org.healthnlp.deepphe.fhir.summary;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
+import org.healthnlp.deepphe.util.FHIRUtils;
+
 
 
 public class PatientSummary extends Summary {
-	private Fact name, gender,ethnicity,birthDate,deathDate;
 	private PatientPhenotype phenotype;
-	private List<Fact> exposure, outcome, germlineSequenceVariant;
-	public static class PatientPhenotype {
+
+	public static class PatientPhenotype extends Summary {
+		public String getSummaryText() {
+			StringBuffer st = new StringBuffer();
+			st.append(getDisplayText()+":\n");
+			for(String category: getContent().keySet()){
+				st.append("\t"+FHIRUtils.getPropertyDisplayLabel(category)+":\n");
+				for(Fact c: getFacts(category)){
+					st.append("\t\t"+c.getSummaryText()+"\n");
+				}
+			}
+			return st.toString();
+		}
+		public String getDisplayText() {
+			return  getClass().getSimpleName();
+		}
+		public String getResourceIdentifier() {
+			return getClass().getSimpleName()+"_"+Math.abs(hashCode());
+		}
+		public URI getConceptURI() {
+			return FHIRConstants.PATIENT_PHENOTYPE_SUMMARY_URI;
+		}
+		public boolean isAppendable(Summary s) {
+			return s instanceof PatientPhenotype;
+		}
 	}
 	
-	public Fact getName() {
-		return name;
+	public FactList getName() {
+		return getFacts(FHIRConstants.HAS_NAME);
+	}
+	
+	public FactList getGender() {
+		return getFacts(FHIRConstants.HAS_GENDER);
 	}
 
-
-	public void setName(Fact name) {
-		this.name = name;
+	public FactList getBirthDate() {
+		return getFacts(FHIRConstants.HAS_BIRTH_DATE);
 	}
 
-
-	public Fact getGender() {
-		return gender;
+	public FactList getDeathDate() {
+		return getFacts(FHIRConstants.HAS_DEATH_DATE);
 	}
 
-
-	public void setGender(Fact gender) {
-		this.gender = gender;
-	}
-
-
-	public Fact getEthnicity() {
-		return ethnicity;
-	}
-
-
-	public void setEthnicity(Fact ethnicity) {
-		this.ethnicity = ethnicity;
-	}
-
-
-	public Fact getBirthDate() {
-		return birthDate;
-	}
-
-
-	public void setBirthDate(Fact birthDate) {
-		this.birthDate = birthDate;
-	}
-
-
-	public Fact getDeathDate() {
-		return deathDate;
-	}
-
-
-	public void setDeathDate(Fact deathDate) {
-		this.deathDate = deathDate;
-	}
 
 	public PatientPhenotype getPhenotype(){
 		if(phenotype == null)
@@ -76,22 +72,12 @@ public class PatientSummary extends Summary {
 	}
 
 
-	public List<Fact> getExposure() {
-		if(exposure == null)
-			exposure = new ArrayList<Fact>();
-		return exposure;
+	public FactList getOutcomes() {
+		return getFacts(FHIRConstants.HAS_OUTCOME);
 	}
 
-	public List<Fact> getOutcomes() {
-		if(outcome == null)
-			outcome = new ArrayList<Fact>();
-		return outcome;
-	}
-
-	public List<Fact> getGermlineSequenceVariant() {
-		if(germlineSequenceVariant == null)
-			germlineSequenceVariant = new ArrayList<Fact>();
-		return germlineSequenceVariant;
+	public FactList getSequenceVariant() {
+		return getFacts(FHIRConstants.HAS_SEQUENCE_VARIENT);
 	}
 
 	public String getDisplayText() {
@@ -103,8 +89,18 @@ public class PatientSummary extends Summary {
 	}
 
 	public String getSummaryText() {
-		// TODO Auto-generated method stub
-		return getDisplayText();
+		StringBuffer st = new StringBuffer();
+		st.append(getDisplayText()+":\n");
+		
+		for(String category: getContent().keySet()){
+			st.append("\t"+FHIRUtils.getPropertyDisplayLabel(category)+":\n");
+			for(Fact c: getFacts(category)){
+				st.append("\t\t"+c.getSummaryText()+"\n");
+			}
+		}
+		
+		st.append(getPhenotype().getSummaryText()+"\n");
+		return st.toString();
 	}
 
 	public URI getConceptURI() {
@@ -112,12 +108,13 @@ public class PatientSummary extends Summary {
 	}
 
 	public boolean isAppendable(Summary s) {
-		//TODO: nothing to do here for now
 		return s instanceof PatientSummary;
 	}
 
 	public void append(Summary s) {
-		// TODO: nothing to do here for now
+		super.append(s);
+		PatientSummary summary = (PatientSummary) s;
+		getPhenotype().append(summary.getPhenotype());
 		
 	}
 }

@@ -54,7 +54,8 @@ public class DeePheTypeGenerator {
 	
 	
 	private String getSuperType(IClass cls){
-		String superType = "uima.tcas.Annotation"; //uima.cas.TOP
+		//String superType = "uima.tcas.Annotation"; //uima.cas.TOP
+		String superType = TYPE_PREFIX+"Fact"; //uima.cas.TOP
 		IClass [] parents =  cls.getDirectSuperClasses();
 		for(IClass s: parents){
 			if(!s.equals(ontology.getRoot()) && !(s.getName().equals(CLASS_SUMMARY_MODEL) && parents.length > 1)){
@@ -86,12 +87,13 @@ public class DeePheTypeGenerator {
 		
 		Element features = doc.createElement("features");
 		// add TOP level attribute
+		/*
 		if(superType.equals("uima.tcas.Annotation")){
 			features.appendChild(createFeatureDesciption(doc,"hasURI"));
 			features.appendChild(createFeatureDesciption(doc,"hasPreferredName"));
 			features.appendChild(createFeatureDesciption(doc,"hasIdentifier"));
 		}
-		
+		*/
 		
 		// add other features
 		for(Element fd: createFeatureDesciptions(doc,cls)){
@@ -102,7 +104,64 @@ public class DeePheTypeGenerator {
 		return element;
 	}
 
+	private Element createTypeDescriptionRoot(Document doc) {
+		Element element = doc.createElement("typeDescription");
 	
+		Element e = doc.createElement("name");
+		e.setTextContent(TYPE_PREFIX+"Fact");
+		element.appendChild(e);
+	
+		e = doc.createElement("description");
+		e.setTextContent("This type represents Ontology Fact"); 
+		element.appendChild(e);
+		
+		String superType = "uima.tcas.Annotation";
+		e = doc.createElement("supertypeName");
+		e.setTextContent(superType);
+		element.appendChild(e);
+		
+		Element features = doc.createElement("features");
+		
+		// add TOP level attribute
+		features.appendChild(createFeatureDesciption(doc,"hasURI"));
+		features.appendChild(createFeatureDesciption(doc,"hasPreferredName"));
+		features.appendChild(createFeatureDesciption(doc,"hasIdentifier"));
+		features.appendChild(createFeatureDesciption(doc,"hasLabel"));
+		features.appendChild(createFeatureDesciption(doc,"hasProvenanceFacts",null,"uima.cas.FSArray",TYPE_PREFIX+"Fact"));
+		features.appendChild(createFeatureDesciption(doc,"hasProvenanceText",null,"uima.cas.FSArray","uima.cas.String"));
+		features.appendChild(createFeatureDesciption(doc,"hasProperties",null,"uima.cas.FSArray",TYPE_PREFIX+"Property"));
+
+		element.appendChild(features);
+
+		return element;
+	}
+	
+	private Element createTypeDescriptionProperty(Document doc) {
+		Element element = doc.createElement("typeDescription");
+	
+		Element e = doc.createElement("name");
+		e.setTextContent(TYPE_PREFIX+"Property");
+		element.appendChild(e);
+	
+		e = doc.createElement("description");
+		e.setTextContent("Utility for storing property value pairs"); 
+		element.appendChild(e);
+		
+		String superType = "uima.tcas.Annotation";
+		e = doc.createElement("supertypeName");
+		e.setTextContent(superType);
+		element.appendChild(e);
+		
+		Element features = doc.createElement("features");
+		
+		// add TOP level attribute
+		features.appendChild(createFeatureDesciption(doc,"name"));
+		features.appendChild(createFeatureDesciption(doc,"value"));
+	
+		element.appendChild(features);
+
+		return element;
+	}
 	
 	private List<Element> createFeatureDesciptions(Document doc, IClass cls) {
 		List<Element> list = new ArrayList<Element>();
@@ -234,8 +293,13 @@ public class DeePheTypeGenerator {
 
 
 	private List<Element> createTypeDescriptions(Document doc) {
+		Element prop = createTypeDescriptionProperty(doc);
+		Element root = createTypeDescriptionRoot(doc);
+		
 		List<Element> list = new ArrayList<Element>();
-	
+		list.add(root);
+		list.add(prop);
+		
 		for(IClass cls: ontology.getRoot().getSubClasses()){
 			if(isTypeWorthy(cls))
 				list.add(createTypeDescription(doc,cls));
@@ -305,6 +369,7 @@ public class DeePheTypeGenerator {
 		root.appendChild(doc.createElement("vendor"));
 		
 		Element types = doc.createElement("types");
+		
 		
 		for(Element td: createTypeDescriptions(doc)){
 			types.appendChild(td);

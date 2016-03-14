@@ -47,9 +47,6 @@
         <Class IRI="#Attribute"/>
     </Declaration>
     <Declaration>
-        <Class IRI="#BodySite"/>
-    </Declaration>
-    <Declaration>
         <Class IRI="#Composition"/>
     </Declaration>
     <Declaration>
@@ -117,9 +114,6 @@
     </Declaration>
     <Declaration>
         <Class IRI="#SummaryAttribute"/>
-    </Declaration>
-    <Declaration>
-        <Class IRI="#SummaryModel"/>
     </Declaration>
     <Declaration>
         <Class IRI="#TherapeuticProcedure"/>
@@ -206,15 +200,6 @@
         <ObjectProperty IRI="#functionally_related_to"/>
     </Declaration>
     <Declaration>
-        <ObjectProperty IRI="#has1dimension"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#has2dimension"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#has3dimension"/>
-    </Declaration>
-    <Declaration>
         <ObjectProperty IRI="#hasAgeAbatement"/>
     </Declaration>
     <Declaration>
@@ -266,9 +251,6 @@
         <ObjectProperty IRI="#hasDeltaFlag"/>
     </Declaration>
     <Declaration>
-        <ObjectProperty IRI="#hasDenominator"/>
-    </Declaration>
-    <Declaration>
         <ObjectProperty IRI="#hasDocType"/>
     </Declaration>
     <Declaration>
@@ -299,6 +281,9 @@
         <ObjectProperty IRI="#hasEvent"/>
     </Declaration>
     <Declaration>
+        <ObjectProperty IRI="#hasExclusion"/>
+    </Declaration>
+    <Declaration>
         <ObjectProperty IRI="#hasExperiencer"/>
     </Declaration>
     <Declaration>
@@ -308,16 +293,10 @@
         <ObjectProperty IRI="#hasGender"/>
     </Declaration>
     <Declaration>
-        <ObjectProperty IRI="#hasHighQuantity"/>
-    </Declaration>
-    <Declaration>
         <ObjectProperty IRI="#hasInterpretation"/>
     </Declaration>
     <Declaration>
         <ObjectProperty IRI="#hasLinguisticModifier"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#hasLowQuantity"/>
     </Declaration>
     <Declaration>
         <ObjectProperty IRI="#hasMRSummaryAttribute"/>
@@ -342,9 +321,6 @@
     </Declaration>
     <Declaration>
         <ObjectProperty IRI="#hasNumValue"/>
-    </Declaration>
-    <Declaration>
-        <ObjectProperty IRI="#hasNumerator"/>
     </Declaration>
     <Declaration>
         <ObjectProperty IRI="#hasNumericModifier"/>
@@ -503,6 +479,15 @@
         <DataProperty IRI="#asNeededBoolean"/>
     </Declaration>
     <Declaration>
+        <DataProperty IRI="#has1DimensionValue"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#has2DimensionValue"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#has3DimensionValue"/>
+    </Declaration>
+    <Declaration>
         <DataProperty IRI="#hasAbatementBoolean"/>
     </Declaration>
     <Declaration>
@@ -545,6 +530,9 @@
         <DataProperty IRI="#hasDeathDate"/>
     </Declaration>
     <Declaration>
+        <DataProperty IRI="#hasDenominatorValue"/>
+    </Declaration>
+    <Declaration>
         <DataProperty IRI="#hasDocumentID"/>
     </Declaration>
     <Declaration>
@@ -557,6 +545,9 @@
         <DataProperty IRI="#hasFullName"/>
     </Declaration>
     <Declaration>
+        <DataProperty IRI="#hasHighValue"/>
+    </Declaration>
+    <Declaration>
         <DataProperty IRI="#hasLastName"/>
     </Declaration>
     <Declaration>
@@ -564,6 +555,9 @@
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasLocation"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasLowValue"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasMaxMinFlag"/>
@@ -576,6 +570,9 @@
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasNameSuffix"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasNumeratorValue"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasProcedureCategory"/>
@@ -600,6 +597,9 @@
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasTotalNumberProcedure"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasValue"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#isDeceased"/>
@@ -645,32 +645,46 @@
         </DataSomeValuesFrom>
     </EquivalentClasses>
     <SubClassOf>
-        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#DimensionalMeasurement"/>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#BodySite"/>
         <ObjectSomeValuesFrom>
-            <ObjectProperty IRI="#has1dimension"/>
-            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity"/>
+            <ObjectProperty IRI="#hasBodySiteModifier"/>
+            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#BodyModifier"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#BodySite"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#hasBodySiteModifier"/>
+            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#BodySide"/>
         </ObjectSomeValuesFrom>
     </SubClassOf>
     <SubClassOf>
         <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#DimensionalMeasurement"/>
         <ObjectSomeValuesFrom>
-            <ObjectProperty IRI="#has2dimension"/>
-            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity"/>
+            <ObjectProperty IRI="#hasUnit"/>
+            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Unit"/>
         </ObjectSomeValuesFrom>
     </SubClassOf>
     <SubClassOf>
         <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#DimensionalMeasurement"/>
-        <ObjectSomeValuesFrom>
-            <ObjectProperty IRI="#has3dimension"/>
-            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity"/>
-        </ObjectSomeValuesFrom>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#has1DimensionValue"/>
+            <Datatype abbreviatedIRI="xsd:double"/>
+        </DataSomeValuesFrom>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Dosage"/>
-        <ObjectSomeValuesFrom>
-            <ObjectProperty IRI="#hasBodySite"/>
-            <Class IRI="#BodySite"/>
-        </ObjectSomeValuesFrom>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#DimensionalMeasurement"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#has2DimensionValue"/>
+            <Datatype abbreviatedIRI="xsd:double"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#DimensionalMeasurement"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#has3DimensionValue"/>
+            <Datatype abbreviatedIRI="xsd:double"/>
+        </DataSomeValuesFrom>
     </SubClassOf>
     <SubClassOf>
         <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Dosage"/>
@@ -762,30 +776,44 @@
     <SubClassOf>
         <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#RangeModifier"/>
         <ObjectSomeValuesFrom>
-            <ObjectProperty IRI="#hasHighQuantity"/>
-            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity"/>
+            <ObjectProperty IRI="#hasUnit"/>
+            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Unit"/>
         </ObjectSomeValuesFrom>
     </SubClassOf>
     <SubClassOf>
         <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#RangeModifier"/>
-        <ObjectSomeValuesFrom>
-            <ObjectProperty IRI="#hasLowQuantity"/>
-            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity"/>
-        </ObjectSomeValuesFrom>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#hasHighValue"/>
+            <Datatype abbreviatedIRI="xsd:double"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#RangeModifier"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#hasLowValue"/>
+            <Datatype abbreviatedIRI="xsd:double"/>
+        </DataSomeValuesFrom>
     </SubClassOf>
     <SubClassOf>
         <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Ratio"/>
         <ObjectSomeValuesFrom>
-            <ObjectProperty IRI="#hasDenominator"/>
-            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity"/>
+            <ObjectProperty IRI="#hasUnit"/>
+            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Unit"/>
         </ObjectSomeValuesFrom>
     </SubClassOf>
     <SubClassOf>
         <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Ratio"/>
-        <ObjectSomeValuesFrom>
-            <ObjectProperty IRI="#hasNumerator"/>
-            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity"/>
-        </ObjectSomeValuesFrom>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#hasDenominatorValue"/>
+            <Datatype abbreviatedIRI="xsd:double"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Ratio"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#hasNumeratorValue"/>
+            <Datatype abbreviatedIRI="xsd:double"/>
+        </DataSomeValuesFrom>
     </SubClassOf>
     <SubClassOf>
         <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Stage"/>
@@ -909,31 +937,6 @@
         </DataSomeValuesFrom>
     </SubClassOf>
     <SubClassOf>
-        <Class IRI="#BodySite"/>
-        <Class IRI="#Entity"/>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#BodySite"/>
-        <ObjectSomeValuesFrom>
-            <ObjectProperty IRI="#hasBodySiteModifier"/>
-            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#BodyModifier"/>
-        </ObjectSomeValuesFrom>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#BodySite"/>
-        <ObjectSomeValuesFrom>
-            <ObjectProperty IRI="#hasBodySiteModifier"/>
-            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#BodySide"/>
-        </ObjectSomeValuesFrom>
-    </SubClassOf>
-    <SubClassOf>
-        <Class IRI="#BodySite"/>
-        <ObjectSomeValuesFrom>
-            <ObjectProperty IRI="#hasPatient"/>
-            <Class IRI="#Patient"/>
-        </ObjectSomeValuesFrom>
-    </SubClassOf>
-    <SubClassOf>
         <Class IRI="#Composition"/>
         <Class IRI="#Summary"/>
     </SubClassOf>
@@ -998,7 +1001,7 @@
         <Class IRI="#Condition"/>
         <ObjectSomeValuesFrom>
             <ObjectProperty IRI="#hasBodySite"/>
-            <Class IRI="#BodySite"/>
+            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#BodySite"/>
         </ObjectSomeValuesFrom>
     </SubClassOf>
     <SubClassOf>
@@ -1257,7 +1260,7 @@
         <Class IRI="#Observation"/>
         <ObjectSomeValuesFrom>
             <ObjectProperty IRI="#hasBodySite"/>
-            <Class IRI="#BodySite"/>
+            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#BodySite"/>
         </ObjectSomeValuesFrom>
     </SubClassOf>
     <SubClassOf>
@@ -1353,7 +1356,7 @@
         <Class IRI="#Procedure"/>
         <ObjectSomeValuesFrom>
             <ObjectProperty IRI="#hasBodySite"/>
-            <Class IRI="#BodySite"/>
+            <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#BodySite"/>
         </ObjectSomeValuesFrom>
     </SubClassOf>
     <SubClassOf>
@@ -1530,24 +1533,12 @@
         <ObjectProperty IRI="#associated_with"/>
     </SubObjectPropertyOf>
     <SubObjectPropertyOf>
-        <ObjectProperty IRI="#has1dimension"/>
-        <ObjectProperty IRI="#hasNumericModifier"/>
-    </SubObjectPropertyOf>
-    <SubObjectPropertyOf>
-        <ObjectProperty IRI="#has2dimension"/>
-        <ObjectProperty IRI="#hasNumericModifier"/>
-    </SubObjectPropertyOf>
-    <SubObjectPropertyOf>
-        <ObjectProperty IRI="#has3dimension"/>
-        <ObjectProperty IRI="#hasNumericModifier"/>
-    </SubObjectPropertyOf>
-    <SubObjectPropertyOf>
         <ObjectProperty IRI="#hasAgeAbatement"/>
-        <ObjectProperty IRI="#hasSemanticModifier"/>
+        <ObjectProperty IRI="#hasNumericModifier"/>
     </SubObjectPropertyOf>
     <SubObjectPropertyOf>
         <ObjectProperty IRI="#hasAgeOnset"/>
-        <ObjectProperty IRI="#hasSemanticModifier"/>
+        <ObjectProperty IRI="#hasNumericModifier"/>
     </SubObjectPropertyOf>
     <SubObjectPropertyOf>
         <ObjectProperty IRI="#hasAgeRange"/>
@@ -1606,16 +1597,12 @@
         <ObjectProperty IRI="#hasSemanticModifier"/>
     </SubObjectPropertyOf>
     <SubObjectPropertyOf>
-        <ObjectProperty IRI="#hasDenominator"/>
-        <ObjectProperty IRI="#hasNumericModifier"/>
-    </SubObjectPropertyOf>
-    <SubObjectPropertyOf>
         <ObjectProperty IRI="#hasDocType"/>
         <ObjectProperty IRI="#hasCompositionAttribute"/>
     </SubObjectPropertyOf>
     <SubObjectPropertyOf>
         <ObjectProperty IRI="#hasDosage"/>
-        <ObjectProperty IRI="#hasSemanticModifier"/>
+        <ObjectProperty IRI="#hasNumericModifier"/>
     </SubObjectPropertyOf>
     <SubObjectPropertyOf>
         <ObjectProperty IRI="#hasDosageQuantity"/>
@@ -1666,20 +1653,12 @@
         <ObjectProperty IRI="#hasSemanticModifier"/>
     </SubObjectPropertyOf>
     <SubObjectPropertyOf>
-        <ObjectProperty IRI="#hasHighQuantity"/>
-        <ObjectProperty IRI="#hasNumericModifier"/>
-    </SubObjectPropertyOf>
-    <SubObjectPropertyOf>
         <ObjectProperty IRI="#hasInterpretation"/>
         <ObjectProperty IRI="#hasSemanticModifier"/>
     </SubObjectPropertyOf>
     <SubObjectPropertyOf>
         <ObjectProperty IRI="#hasLinguisticModifier"/>
         <ObjectProperty IRI="#hasModifier"/>
-    </SubObjectPropertyOf>
-    <SubObjectPropertyOf>
-        <ObjectProperty IRI="#hasLowQuantity"/>
-        <ObjectProperty IRI="#hasNumericModifier"/>
     </SubObjectPropertyOf>
     <SubObjectPropertyOf>
         <ObjectProperty IRI="#hasMRSummaryAttribute"/>
@@ -1707,10 +1686,6 @@
     </SubObjectPropertyOf>
     <SubObjectPropertyOf>
         <ObjectProperty IRI="#hasNumValue"/>
-        <ObjectProperty IRI="#hasSemanticModifier"/>
-    </SubObjectPropertyOf>
-    <SubObjectPropertyOf>
-        <ObjectProperty IRI="#hasNumerator"/>
         <ObjectProperty IRI="#hasNumericModifier"/>
     </SubObjectPropertyOf>
     <SubObjectPropertyOf>
@@ -1942,10 +1917,6 @@
         <Class IRI="#Procedure"/>
     </ObjectPropertyDomain>
     <ObjectPropertyDomain>
-        <ObjectProperty IRI="#hasBodySiteModifier"/>
-        <Class IRI="#BodySite"/>
-    </ObjectPropertyDomain>
-    <ObjectPropertyDomain>
         <ObjectProperty IRI="#hasCertainty"/>
         <Class IRI="#Event"/>
     </ObjectPropertyDomain>
@@ -2042,6 +2013,14 @@
         <Class IRI="#Episode"/>
     </ObjectPropertyDomain>
     <ObjectPropertyDomain>
+        <ObjectProperty IRI="#hasExclusion"/>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Modifier"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#hasExclusion"/>
+        <Class IRI="#Annotation"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
         <ObjectProperty IRI="#hasExperiencer"/>
         <Class IRI="#Event"/>
     </ObjectPropertyDomain>
@@ -2104,10 +2083,6 @@
     <ObjectPropertyDomain>
         <ObjectProperty IRI="#hasPatient"/>
         <Class IRI="#AllergyIntolerance"/>
-    </ObjectPropertyDomain>
-    <ObjectPropertyDomain>
-        <ObjectProperty IRI="#hasPatient"/>
-        <Class IRI="#BodySite"/>
     </ObjectPropertyDomain>
     <ObjectPropertyDomain>
         <ObjectProperty IRI="#hasPatient"/>
@@ -2214,10 +2189,6 @@
         <Class IRI="#Anchor"/>
     </ObjectPropertyRange>
     <ObjectPropertyRange>
-        <ObjectProperty IRI="#hasBodySite"/>
-        <Class IRI="#BodySite"/>
-    </ObjectPropertyRange>
-    <ObjectPropertyRange>
         <ObjectProperty IRI="#hasBodySiteModifier"/>
         <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#BodyModifier"/>
     </ObjectPropertyRange>
@@ -2236,10 +2207,6 @@
     <ObjectPropertyRange>
         <ObjectProperty IRI="#hasCompositionSummary"/>
         <Class IRI="#Annotation"/>
-    </ObjectPropertyRange>
-    <ObjectPropertyRange>
-        <ObjectProperty IRI="#hasCompositionSummary"/>
-        <Class IRI="#SummaryModel"/>
     </ObjectPropertyRange>
     <ObjectPropertyRange>
         <ObjectProperty IRI="#hasDocType"/>
@@ -2270,16 +2237,20 @@
         <Class IRI="#Annotation"/>
     </ObjectPropertyRange>
     <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasExclusion"/>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Modifier"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasExclusion"/>
+        <Class IRI="#Annotation"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
         <ObjectProperty IRI="#hasMRSummaryAttribute"/>
         <Class IRI="#SummaryAttribute"/>
     </ObjectPropertyRange>
     <ObjectPropertyRange>
         <ObjectProperty IRI="#hasMedicalRecordSummary"/>
         <Class IRI="#Annotation"/>
-    </ObjectPropertyRange>
-    <ObjectPropertyRange>
-        <ObjectProperty IRI="#hasMedicalRecordSummary"/>
-        <Class IRI="#SummaryModel"/>
     </ObjectPropertyRange>
     <ObjectPropertyRange>
         <ObjectProperty IRI="#hasMethod"/>
@@ -2338,8 +2309,40 @@
         <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Allergen"/>
     </ObjectPropertyRange>
     <SubDataPropertyOf>
+        <DataProperty IRI="#has1DimensionValue"/>
+        <DataProperty IRI="#hasValue"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#has2DimensionValue"/>
+        <DataProperty IRI="#hasValue"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#has3DimensionValue"/>
+        <DataProperty IRI="#hasValue"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasDenominatorValue"/>
+        <DataProperty IRI="#hasValue"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
         <DataProperty IRI="#hasFromLocation"/>
         <DataProperty IRI="#hasLocation"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasHighValue"/>
+        <DataProperty IRI="#hasValue"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasLowValue"/>
+        <DataProperty IRI="#hasValue"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasNumeratorValue"/>
+        <DataProperty IRI="#hasValue"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasQuantityValue"/>
+        <DataProperty IRI="#hasValue"/>
     </SubDataPropertyOf>
     <SubDataPropertyOf>
         <DataProperty IRI="#hasToLocation"/>
@@ -2387,6 +2390,18 @@
     <FunctionalDataProperty>
         <DataProperty IRI="#wasNotGiven"/>
     </FunctionalDataProperty>
+    <DataPropertyDomain>
+        <DataProperty IRI="#has1DimensionValue"/>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#DimensionalMeasurement"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#has2DimensionValue"/>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#DimensionalMeasurement"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#has3DimensionValue"/>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#DimensionalMeasurement"/>
+    </DataPropertyDomain>
     <DataPropertyDomain>
         <DataProperty IRI="#hasAbatementBoolean"/>
         <Class IRI="#Condition"/>
@@ -2444,6 +2459,10 @@
         <Class IRI="#Patient"/>
     </DataPropertyDomain>
     <DataPropertyDomain>
+        <DataProperty IRI="#hasDenominatorValue"/>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Ratio"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
         <DataProperty IRI="#hasDocumentID"/>
         <Class IRI="#Annotation"/>
     </DataPropertyDomain>
@@ -2460,12 +2479,20 @@
         <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#HumanName"/>
     </DataPropertyDomain>
     <DataPropertyDomain>
+        <DataProperty IRI="#hasHighValue"/>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#RangeModifier"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
         <DataProperty IRI="#hasLastName"/>
         <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#HumanName"/>
     </DataPropertyDomain>
     <DataPropertyDomain>
         <DataProperty IRI="#hasLastOccurence"/>
         <Class IRI="#AllergyIntolerance"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#hasLowValue"/>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#RangeModifier"/>
     </DataPropertyDomain>
     <DataPropertyDomain>
         <DataProperty IRI="#hasMiddleName"/>
@@ -2480,8 +2507,16 @@
         <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#HumanName"/>
     </DataPropertyDomain>
     <DataPropertyDomain>
+        <DataProperty IRI="#hasNumeratorValue"/>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Ratio"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
         <DataProperty IRI="#hasProcedureCategory"/>
         <Class IRI="#Procedure"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#hasQuantityValue"/>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity"/>
     </DataPropertyDomain>
     <DataPropertyDomain>
         <DataProperty IRI="#hasReasonNotTaken"/>
@@ -2512,6 +2547,10 @@
         <Class IRI="#TherapeuticProcedure"/>
     </DataPropertyDomain>
     <DataPropertyDomain>
+        <DataProperty IRI="#hasValue"/>
+        <Class IRI="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#NumericModifier"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
         <DataProperty IRI="#isDeceased"/>
         <Class IRI="#Patient"/>
     </DataPropertyDomain>
@@ -2530,6 +2569,18 @@
     <DataPropertyRange>
         <DataProperty IRI="#asNeededBoolean"/>
         <Datatype abbreviatedIRI="xsd:boolean"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#has1DimensionValue"/>
+        <Datatype abbreviatedIRI="xsd:double"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#has2DimensionValue"/>
+        <Datatype abbreviatedIRI="xsd:double"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#has3DimensionValue"/>
+        <Datatype abbreviatedIRI="xsd:double"/>
     </DataPropertyRange>
     <DataPropertyRange>
         <DataProperty IRI="#hasAbatementBoolean"/>
@@ -2597,6 +2648,10 @@
         <Datatype abbreviatedIRI="xsd:dateTime"/>
     </DataPropertyRange>
     <DataPropertyRange>
+        <DataProperty IRI="#hasDenominatorValue"/>
+        <Datatype abbreviatedIRI="xsd:double"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
         <DataProperty IRI="#hasDocumentID"/>
         <Datatype abbreviatedIRI="xsd:string"/>
     </DataPropertyRange>
@@ -2613,12 +2668,20 @@
         <Datatype abbreviatedIRI="xsd:string"/>
     </DataPropertyRange>
     <DataPropertyRange>
+        <DataProperty IRI="#hasHighValue"/>
+        <Datatype abbreviatedIRI="xsd:double"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
         <DataProperty IRI="#hasLastName"/>
         <Datatype abbreviatedIRI="xsd:string"/>
     </DataPropertyRange>
     <DataPropertyRange>
         <DataProperty IRI="#hasLastOccurence"/>
         <Datatype abbreviatedIRI="xsd:dateTime"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#hasLowValue"/>
+        <Datatype abbreviatedIRI="xsd:double"/>
     </DataPropertyRange>
     <DataPropertyRange>
         <DataProperty IRI="#hasMaxMinFlag"/>
@@ -2638,6 +2701,10 @@
     <DataPropertyRange>
         <DataProperty IRI="#hasNameSuffix"/>
         <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#hasNumeratorValue"/>
+        <Datatype abbreviatedIRI="xsd:double"/>
     </DataPropertyRange>
     <DataPropertyRange>
         <DataProperty IRI="#hasProcedureCategory"/>
@@ -2672,6 +2739,14 @@
     </DataPropertyRange>
     <DataPropertyRange>
         <DataProperty IRI="#hasTotalNumberProcedure"/>
+        <Datatype abbreviatedIRI="xsd:integer"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#hasValue"/>
+        <Datatype abbreviatedIRI="xsd:double"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#hasValue"/>
         <Datatype abbreviatedIRI="xsd:integer"/>
     </DataPropertyRange>
     <DataPropertyRange>

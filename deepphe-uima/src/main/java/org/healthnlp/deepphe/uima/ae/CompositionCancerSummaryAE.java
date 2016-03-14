@@ -46,6 +46,8 @@ import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	public static final String PARAM_ONTOLOGY_PATH = "ONTOLOGY_PATH";
 	private IOntology ontology;
+	
+	//TODO: don't hard-code this
 	public static final List<String> tumorTriggers  = Arrays.asList("Lesion","Neoplasm");
 	public static final List<String> cancerTriggers = Arrays.asList("Malignant_Breast_Neoplasm"); //"Metastatic_Neoplasm"
 	public static final List<String> documentTypeTriggers = Arrays.asList("SP");
@@ -79,8 +81,32 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		}
 	}
 
+	
+	/**
+	 * load template based on the ontology
+	 * @param summary
+	 * @param uri
+	 */
+	private void loadTemplate(Summary summary){
+		IClass summaryClass = ontology.getClass(""+summary.getConceptURI());
+		if(summaryClass != null){
+			//TODO: load empty lists
+		}
+	}
+	
+	
+	private void loadElementsFromReport(Summary summary, Report report){
+		for(String category: summary.getFactCategories()){
+			//IClass 
+			//TODO: load appropriate entries
+		}
+		
+	}
+	
+	
 	private PatientSummary createPatientSummary(Patient loadPatient) {
 		PatientSummary ps = new PatientSummary();
+		loadTemplate(ps);
 		// TODO: actually fill it out
 		return ps;
 	}
@@ -158,21 +184,23 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	 */
 	private CancerSummary createCancerSummary(Report report, Disease diagnosis){
 		CancerSummary cancer = new CancerSummary();
+		loadTemplate(cancer);
 		CancerSummary.CancerPhenotype phenotype = cancer.getPhenotype();
+		loadTemplate(phenotype);
 		//cancer.addPhenotype(phenotype);
 		
 		// add body location
 		for(CodeableConcept cc: diagnosis.getBodySite()){
-			cancer.addBodySite(FactFactory.createFact(cc));
+			cancer.addFact(FHIRConstants.HAS_BODY_SITE,FactFactory.createFact(cc));
 		}
 		
 		// add TNM stage infromation
 		Stage stage = diagnosis.getStage();
 		if(stage != null){
-			phenotype.setCancerStage(FactFactory.createFact(stage.getSummary()));
-			phenotype.setPrimaryTumorClassification(FactFactory.createFact(stage.getPrimaryTumorStageCode()));
-			phenotype.setRegionalLymphNodeClassification(FactFactory.createFact(stage.getPrimaryTumorStageCode()));
-			phenotype.setDistantMetastasisClassification(FactFactory.createFact(stage.getDistantMetastasisStageCode()));
+			phenotype.addFact(FHIRConstants.HAS_CANCER_STAGE,FactFactory.createFact(stage.getSummary()));
+			phenotype.addFact(FHIRConstants.HAS_T_CLASSIFICATION,FactFactory.createFact(stage.getPrimaryTumorStageCode()));
+			phenotype.addFact(FHIRConstants.HAS_N_CLASSIFICATION,FactFactory.createFact(stage.getRegionalLymphNodeStageCode()));
+			phenotype.addFact(FHIRConstants.HAS_M_CLASSIFICATION,FactFactory.createFact(stage.getDistantMetastasisStageCode()));
 		}
 		
 		// create diagnosis fact
@@ -183,60 +211,43 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		if(ct != null){
 			Fact f = FactFactory.createFact(ct);
 			f.addProvenanceFact(dx);
-			phenotype.setCancerType(f);
+			phenotype.addFact(FHIRConstants.HAS_CANCER_TYPE,f);
 		}
 		// insitu vs invasive 
 		CodeableConcept te = getTumorExtent(diagnosis);
 		if(te != null){
 			Fact f = FactFactory.createFact(te);
 			f.addProvenanceFact(dx);
-			phenotype.setTumorExtent(f);  
+			phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,f);  
 		}
 			
-		//add treatment cancer.addTreatment(treatment);  //chemo
-		IClass treatmentCls = ontology.getClass(""+FHIRConstants.TREATMENT_URI);
-		for(Element treatment: report.getReportElements()){
-			if(isValueSet(treatment.getCode(), treatmentCls)){
-				cancer.addTreatment(FactFactory.createFact(treatment)); 
-			}
-		}
-		
-		//cancer.addOutcome(outcome); 	   // death
+		loadElementsFromReport(cancer, report);
 			
 		return cancer;
 	}
-
-
+	
+	
 	private TumorSummary createTumorSummary(Report report, Condition diagnosis, CancerSummary cancer){
 		TumorSummary tumor = new TumorSummary();
+		loadTemplate(tumor);
 		TumorSummary.TumorPhenotype phenotype = tumor.getPhenotype();
+		loadTemplate(phenotype);
 		
 		if(diagnosis != null){
 			// create diagnosis fact
 			Fact dx = FactFactory.createFact((Element)diagnosis);
-			
-			
+		
 			// add body location
 			for(CodeableConcept cc: diagnosis.getBodySite()){
-				tumor.addBodySite(FactFactory.createFact(cc));
+				tumor.addFact(FHIRConstants.HAS_BODY_SITE,FactFactory.createFact(cc));
 			}
-			
-			// manifistation: 
-			//phenotype.addManifistation(null);  // Receptor Status, Tumor size 
-			//List<IClass> manifestationClasses = getManifestationForTumor();
-			IClass manifistationCls = ontology.getClass(""+FHIRConstants.MANIFISTATION_URI);
-			for(Element element: report.getReportElements()){
-				if(isValueSet(element.getCode(),manifistationCls)){
-					phenotype.addManifestation(FactFactory.createFact(element)); 
-				}
-			}
-			
+				
 			//phenotype.addHistologicType(null); // ductal, lobular infered from DX
 			CodeableConcept ht = getHistologicType(diagnosis);
 			if(ht != null){
 				Fact f = FactFactory.createFact(ht);
 				f.addProvenanceFact(dx);
-				phenotype.addHistologicType(f);
+				phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,f);
 			}
 			// insitu vs invasive 
 			//phenotype.addTumorExtent(null);    // insitu vs invasive
@@ -244,17 +255,15 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			if(te != null){
 				Fact f = FactFactory.createFact(te);
 				f.addProvenanceFact(dx);
-				phenotype.addTumorExtent(f);  
+				phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,f);  
 			}
 			
 			
 			// add treatment (// chemo)
-			IClass treatmentCls = ontology.getClass(""+FHIRConstants.TREATMENT_URI);
-			for(Element treatment: report.getReportElements()){
-				if(isValueSet(treatment.getCode(), treatmentCls)){
-					tumor.addTreatment(FactFactory.createFact(treatment)); 
-				}
-			}
+			loadElementsFromReport(tumor, report);
+			loadElementsFromReport(phenotype, report);
+			
+			
 			
 			// document type RULE
 			// if cancer location is the same as tumor location, then tumor is 'primary'
@@ -272,11 +281,6 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 				if(tumorType != null)
 					tumor.setTumorType(FHIRUtils.getCodeableConcept(tumorType));
 			}*/
-			
-			
-			//tumor.addOutcome(null); // tumor is gone
-			//tumor.addTumorSequenceVarient(null); // don't have one
-			
 		}
 
 		return tumor;

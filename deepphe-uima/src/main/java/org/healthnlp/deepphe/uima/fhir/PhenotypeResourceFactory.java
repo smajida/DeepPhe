@@ -282,10 +282,10 @@ public class PhenotypeResourceFactory {
 		summaryAnnotation.setHasPhenotype(getValue(jcas,phenotypeAnnotation));
 		
 		// add body site
-		if(!summaryFHIR.getBodySites().isEmpty()){
+		if(!summaryFHIR.getBodySite().isEmpty()){
 			int i = 0;
-			summaryAnnotation.setHasBodySite(new FSArray(jcas,summaryFHIR.getBodySites().size()));
-			for(Fact cc : summaryFHIR.getBodySites()){
+			summaryAnnotation.setHasBodySite(new FSArray(jcas,summaryFHIR.getBodySite().size()));
+			for(Fact cc : summaryFHIR.getBodySite()){
 				BodySite ex = (BodySite) getAnnotationByIdentifer(jcas,cc.getIdentifier());
 				if(ex == null){
 					ex = new BodySite(jcas);
@@ -436,10 +436,10 @@ public class PhenotypeResourceFactory {
 		}
 		
 		// add body site
-		if(!summaryFHIR.getBodySites().isEmpty()){
+		if(!summaryFHIR.getBodySite().isEmpty()){
 			int i = 0;
-			summaryAnnotation.setHasBodySite(new FSArray(jcas,summaryFHIR.getBodySites().size()));
-			for(Fact cc : summaryFHIR.getBodySites()){
+			summaryAnnotation.setHasBodySite(new FSArray(jcas,summaryFHIR.getBodySite().size()));
+			for(Fact cc : summaryFHIR.getBodySite()){
 				BodySite ex = (BodySite) getAnnotationByIdentifer(jcas,cc.getIdentifier());
 				if(ex == null){
 					ex = new BodySite(jcas);

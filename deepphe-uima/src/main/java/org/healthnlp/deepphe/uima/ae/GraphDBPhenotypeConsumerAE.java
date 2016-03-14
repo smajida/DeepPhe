@@ -201,7 +201,7 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 		csn.setProperty("summaryText", cs.getSummaryText());
 		csn.setProperty("conceptURI", cs.getConceptURI().toString());
 		
-		saveCodeableConcepts(csn, "bodySites", cs.getBodySites());
+		saveCodeableConcepts(csn, "bodySites", cs.getBodySite());
 		saveCodeableConcepts(csn, "outcomes", cs.getOutcomes());
 		saveCodeableConcepts(csn, "treatments", cs.getTreatments());
 		
@@ -214,13 +214,12 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 			cpn.setProperty("summaryText", cp.getSummaryText());
 			cpn.setProperty("conceptURI", cp.getConceptURI().toString());
 			
-			saveCodeableConcept(cpn, "cancerStage", cp.getCancerStage());
-			saveCodeableConcept(cpn, "cancerType", cp.getCancerType());
-			saveCodeableConcept(cpn, "distantMetastasisClassification", cp.getDistantMetastasisClassification());
-			saveCodeableConcepts(cpn, "manifestations", cp.getManifestations());
-			saveCodeableConcept(cpn, "primaryTumorClassification", cp.getPrimaryTumorClassification());
-			saveCodeableConcept(cpn, "regionalLympNodeClassification", cp.getRegionalLymphNodeClassification());
-			saveCodeableConcept(cpn, "tumorExtent", cp.getTumorExtent());
+			saveCodeableConcepts(cpn, "cancerStage", cp.getCancerStage());
+			saveCodeableConcepts(cpn, "cancerType", cp.getCancerType());
+			saveCodeableConcepts(cpn, "distantMetastasisClassification", cp.getDistantMetastasisClassification());
+			saveCodeableConcepts(cpn, "primaryTumorClassification", cp.getPrimaryTumorClassification());
+			saveCodeableConcepts(cpn, "regionalLympNodeClassification", cp.getRegionalLymphNodeClassification());
+			saveCodeableConcepts(cpn, "tumorExtent", cp.getTumorExtent());
 		}
 		
 		for(TumorSummary ts:cs.getTumors()){
@@ -238,8 +237,8 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 		psn.setProperty("summaryText", ps.getSummaryText());
 		psn.setProperty("conceptURI", ps.getConceptURI().toString());
 		
-		saveCodeableConcepts(psn, "exposure", ps.getExposure());
-		saveCodeableConcepts(psn, "germlineSequenceVariant",ps.getGermlineSequenceVariant());
+		//saveCodeableConcepts(psn, "exposure", ps.getExposure());
+		saveCodeableConcepts(psn, "germlineSequenceVariant",ps.getSequenceVariant());
 		saveCodeableConcepts(psn, "outcomes", ps.getOutcomes());
 		
 	}
@@ -251,11 +250,11 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 		tsn.setProperty("conceptURI", ts.getConceptURI().toString());
 		
 		
-		saveCodeableConcepts(tsn, "bodySites", ts.getBodySites());
-		saveCodeableConcepts(tsn, "outcomes", ts.getOutcomes());
-		saveCodeableConcepts(tsn, "treatments", ts.getTreatments());
-		saveCodeableConcepts(tsn, "tumorSequenceVariants", ts.getTumorSequenceVarients());
-		saveCodeableConcept(tsn, "tumorType", ts.getTumorType());
+		saveCodeableConcepts(tsn, "bodySites", ts.getBodySite());
+		saveCodeableConcepts(tsn, "outcomes", ts.getOutcome());
+		saveCodeableConcepts(tsn, "treatments", ts.getTreatment());
+		saveCodeableConcepts(tsn, "tumorSequenceVariants", ts.getSequenceVarients());
+		saveCodeableConcepts(tsn, "tumorType", ts.getTumorType());
 		
 		TumorPhenotype tp = ts.getPhenotype();
 		Node tpn = graphDb.createNode(GraphDBConstants.Nodes.TumorPhenotype);

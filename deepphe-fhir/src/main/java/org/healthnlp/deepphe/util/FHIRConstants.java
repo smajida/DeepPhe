@@ -27,6 +27,7 @@ public class FHIRConstants {
 	public static final String CANCER = "Cancer";
 	public static final String TUMOR_PHENOTYPE = "TumorPhenotype";
 	public static final String CANCER_PHENOTYPE = "CancerPhenotype";
+	public static final String PATIENT_PHENOTYPE = "PatientPhenotype";
 	
 	public static final String DIAGNOSIS = "DiseaseDisorder";
 	public static final String PROCEDURE = "Procedure";
@@ -45,10 +46,27 @@ public class FHIRConstants {
 	public static final String TREATMENT = "Treatment";
 	public static final String MANIFISTATION = "ManifestationOfDisease";
 	
+	public static final String HAS_BODY_SITE = "hasBodySite";
+	public static final String HAS_TREATMENT = "hasTreatment";
+	public static final String HAS_OUTCOME = "hasOutcome";
+	public static final String HAS_CANCER_STAGE = "hasCancerStage";
+	public static final String HAS_CANCER_TYPE = "hasCancerType";
+	public static final String HAS_TUMOR_EXTENT = "hasTumorExtent";
+	public static final String HAS_T_CLASSIFICATION = "hasTClassification";
+	public static final String HAS_N_CLASSIFICATION = "hasNClassification";
+	public static final String HAS_M_CLASSIFICATION = "hasMClassification";
+	public static final String HAS_TUMOR_TYPE = "hasTumorType";
+	public static final String HAS_SEQUENCE_VARIENT = "hasSequenceVarient";
+	public static final String HAS_HISTOLOGIC_TYPE = "hasHistologicType";
+	public static final String HAS_MANIFESTATION = "hasManifestation";
+	public static final String HAS_NAME = "hasName";
+	public static final String HAS_GENDER = "hasGender";
+	public static final String HAS_BIRTH_DATE = "hasBirthDate";
+	public static final String HAS_DEATH_DATE = "hasDeathDate";
 	
-	public static final String T_STAGE = "Generic_Primary_Tumor_TNM_Finding";
-	public static final String M_STAGE = "Generic_Distant_Metastasis_TNM_Finding";
-	public static final String N_STAGE = "Generic_Regional_Lymph_Nodes_TNM_Finding";
+	public static final String T_STAGE = "T_Stage";
+	public static final String M_STAGE = "M_Stage";
+	public static final String N_STAGE = "N_Stage";
 	
 	// predefined URIs
 	public static final URI PATIENT_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"#"+PATIENT);
@@ -56,6 +74,8 @@ public class FHIRConstants {
 	public static final URI TUMOR_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"#"+TUMOR);
 	public static final URI CANCER_PHENOTYPE_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"#"+CANCER_PHENOTYPE);
 	public static final URI TUMOR_PHENOTYPE_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"#"+TUMOR_PHENOTYPE);
+
+	public static final URI PATIENT_PHENOTYPE_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"#"+PATIENT_PHENOTYPE);;
 	public static final URI MEDICAL_RECORD_URI = URI.create(SCHEMA_URL+"#MedicalRecord");
 	
 	// mention level URIs
@@ -77,5 +97,8 @@ public class FHIRConstants {
 	public static final URI PRIMARY_TUMOR_URI = URI.create(MODEL_CANCER_URL+"#PrimaryTumor");
 	public static final URI RECURRENT_TUMOR_URI = URI.create(MODEL_CANCER_URL+"#Recurrent_Tumor");
 	//public static final URI TUMOR_SIZE_URI = URI.create(MODEL_CANCER_URL+"/"+TUMOR_PHENOTYPE);
+
+
+
 	
 }

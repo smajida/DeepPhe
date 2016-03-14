@@ -766,6 +766,13 @@ public class FHIRUtils {
 		//System.out.println(getOntologyURL("http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl#ClinicalPhenotypicComponent"));
 	}
 
+	public static String getPropertyDisplayLabel(String str) {
+		if(str.startsWith("has"))
+			str = str.substring(3);
+		// insert space into camel back
+		return str.replaceAll("([a-z])([A-Z])","$1 $2");
+	}
+
 
 	
 }
