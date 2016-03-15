@@ -26,6 +26,7 @@ import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.DomainResource;
+import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Narrative;
@@ -84,9 +85,9 @@ public class FHIRUtils {
 	public static final String RELATED_FACTOR = "RelatedFactor";
 	
 	
-	public static final String T_STAGE = "Generic_Primary_Tumor_TNM_Finding";
+	/*public static final String T_STAGE = "Generic_Primary_Tumor_TNM_Finding";
 	public static final String M_STAGE = "Generic_Distant_Metastasis_TNM_Finding";
-	public static final String N_STAGE = "Generic_Regional_Lymph_Nodes_TNM_Finding";
+	public static final String N_STAGE = "Generic_Regional_Lymph_Nodes_TNM_Finding";*/
 	
 	public static final String STAGE_REGEX = "p?(T[X0-4a-z]{1,4})(N[X0-4a-z]{1,4})(M[X0-4a-z]{1,4})";
 	
@@ -107,6 +108,14 @@ public class FHIRUtils {
 			reportTypes.put("DS",getCodeableConcept("Discharge Summary","C0743221",SCHEMA_UMLS));
 			reportTypes.put("PGN",getCodeableConcept("Progress Note","C0747978",SCHEMA_UMLS));
 			reportTypes.put("NOTE",getCodeableConcept("Progress Note","C0747978",SCHEMA_UMLS));
+			
+			/*
+			reportTypes.put("SP",getCodeableConcept("Pathology Report",""+FHIRConstants.PATHOLOGY_REPORT_URI,SCHEMA_OWL)); //"C0807321",SCHEMA_UMLS
+			reportTypes.put("RAD",getCodeableConcept("Radiology Report",""+FHIRConstants.RADIOLOGY_REPORT_URI,SCHEMA_OWL)); //"C1299496",SCHEMA_UMLS
+			reportTypes.put("DS",getCodeableConcept("Discharge Summary",""+FHIRConstants.DISCHARGE_SUMMARY_URI,SCHEMA_OWL)); //"C0743221",SCHEMA_UMLS
+			reportTypes.put("PGN",getCodeableConcept("Progress Note",""+FHIRConstants.PROGRESS_NOTE_URI,SCHEMA_OWL)); //"C0747978",SCHEMA_UMLS
+			reportTypes.put("NOTE",getCodeableConcept("Progress Note",""+FHIRConstants.PROGRESS_NOTE_URI,SCHEMA_OWL)); //"C0747978",SCHEMA_UMLS
+			*/
 			
 			reportTypes.put("Pathology Report",reportTypes.get("SP"));
 			reportTypes.put("Radiology Report",reportTypes.get("RAD"));
@@ -137,6 +146,14 @@ public class FHIRUtils {
 		return getCodeableConcept(getConceptName(uri),uri.toString(),SCHEMA_OWL);
 	}
 	
+	
+	public static CodeableConcept getCodeableConcept(AdministrativeGender gender){
+		if(AdministrativeGender.MALE.equals(gender))
+			return getCodeableConcept(FHIRConstants.MALE_URI);
+		else if(AdministrativeGender.FEMALE.equals(gender))
+			return getCodeableConcept(FHIRConstants.FEMALE_URI);
+		return null;
+	}
 
 	
 	/**
@@ -155,8 +172,11 @@ public class FHIRUtils {
 	 * @return -
 	 */
 	public static String getConceptName(URI u){
+		if(u == null)
+			return null;
+		
 		try {
-			return u.toURL().getRef().replaceAll("_"," ");
+			return u.toURL().getRef(); //.replaceAll("_"," ")
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -753,6 +773,9 @@ public class FHIRUtils {
 	}
 
 	public static boolean contains(List<Fact> list, Fact cc){
+		if(list == null)
+			return false;
+		
 		for(Fact c: list){
 			if(cc.getURI().equals(c.getURI()))
 				return true;
@@ -767,6 +790,9 @@ public class FHIRUtils {
 	}
 
 	public static String getPropertyDisplayLabel(String str) {
+		if(str == null)
+			return "Unknown";
+		
 		if(str.startsWith("has"))
 			str = str.substring(3);
 		// insert space into camel back

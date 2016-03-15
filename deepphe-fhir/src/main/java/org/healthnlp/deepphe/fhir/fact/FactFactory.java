@@ -46,20 +46,23 @@ public class FactFactory {
 	private static Fact createFact(CodeableConcept cc, Fact fact){
 		URI uri = FHIRUtils.getConceptURI(cc);
 		String id = FHIRUtils.getResourceIdentifer(cc);
-		
-		fact.setURI(uri.toString());
-		try {
-			fact.setName(uri.toURL().getRef());
-			fact.setLabel(fact.getName().replaceAll("_"," "));
-		} catch (MalformedURLException e) {
-			throw new Error(e);
+		fact.setURI(""+uri);
+		if(uri != null){
+			try {
+				fact.setName(uri.toURL().getRef());
+				fact.setLabel(fact.getName().replaceAll("_"," "));
+			} catch (MalformedURLException e) {
+				throw new Error(e);
+			}
 		}
+		//TODO: URI SHOULD NOT BE NULL???????
 		if(id != null)
 			fact.setIdentifier(id);
 		
 		return fact;
 		
 	}
+	
 	
 	public static TextMention createTextMention(String mention){
 		int [] se = FHIRUtils.getMentionSpan(mention);
@@ -95,5 +98,16 @@ public class FactFactory {
 		return fact;
 	}
 
+	
+	/**
+	 * create empty fact of a given type
+	 * @param type
+	 * @return
+	 */
+	public static Fact createFact(String type){
+		Fact fact = new Fact();
+		//TODO: implement
+		return fact;
+	}
 	
 }

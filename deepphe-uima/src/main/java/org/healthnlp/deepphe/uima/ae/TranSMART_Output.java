@@ -32,7 +32,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 		Patient patient = PhenotypeResourceFactory.loadPatient(jcas);
 		String patientName = patient != null?patient.getPatientName():"unknown";
 		
-		// get appropriate entries	
+		/*// get appropriate entries	
 		StringBuffer summary = new StringBuffer();
 		PatientSummary patientSummary = PhenotypeResourceFactory.loadMedicalRecordPatientSummary(jcas);
 		if(patientSummary != null)
@@ -51,7 +51,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 			saveText(summary.toString(),new File(outputDir,patientName+File.separator+"MEDICAL_RECORD_SUMMARY.txt"));
 		} catch (IOException e) {
 			throw new AnalysisEngineProcessException(e);
-		}
+		}*/
 	
 	}
 	

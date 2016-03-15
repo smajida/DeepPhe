@@ -38,22 +38,22 @@ public class CancerSummary extends Summary {
 	
 	public static class CancerPhenotype extends Summary{
 		public FactList getCancerStage() {
-			return getFacts(FHIRConstants.HAS_CANCER_STAGE);
+			return getFactsOrInsert(FHIRConstants.HAS_CANCER_STAGE);
 		}
 		public FactList getCancerType() {
-			return getFacts(FHIRConstants.HAS_CANCER_TYPE);
+			return getFactsOrInsert(FHIRConstants.HAS_CANCER_TYPE);
 		}
 		public FactList getTumorExtent() {
-			return getFacts(FHIRConstants.HAS_TUMOR_EXTENT);
+			return getFactsOrInsert(FHIRConstants.HAS_TUMOR_EXTENT);
 		}
 		public FactList getPrimaryTumorClassification() {
-			return getFacts(FHIRConstants.HAS_T_CLASSIFICATION);
+			return getFactsOrInsert(FHIRConstants.HAS_T_CLASSIFICATION);
 		}
 		public FactList getDistantMetastasisClassification() {
-			return getFacts(FHIRConstants.HAS_M_CLASSIFICATION);
+			return getFactsOrInsert(FHIRConstants.HAS_M_CLASSIFICATION);
 		}
 		public FactList getRegionalLymphNodeClassification() {
-			return getFacts(FHIRConstants.HAS_N_CLASSIFICATION);
+			return getFactsOrInsert(FHIRConstants.HAS_N_CLASSIFICATION);
 		}
 		public String getDisplayText() {
 			return getClass().getSimpleName();
@@ -97,14 +97,14 @@ public class CancerSummary extends Summary {
 	}
 
 	public FactList getBodySite() {
-		return getFacts(FHIRConstants.HAS_BODY_SITE);
+		return getFactsOrInsert(FHIRConstants.HAS_BODY_SITE);
 	}
 	public List<CancerPhenotype> getPhenotypes() {
 		return Arrays.asList(getPhenotype());
 	}
 	
 	public FactList getTreatments() {
-		return getFacts(FHIRConstants.HAS_TREATMENT);
+		return getFactsOrInsert(FHIRConstants.HAS_TREATMENT);
 	}
 	public CancerPhenotype getPhenotype() {
 		return phenotype;
@@ -134,7 +134,7 @@ public class CancerSummary extends Summary {
 		StringBuffer st = new StringBuffer();
 		st.append(getDisplayText()+":\n");
 		
-		for(String category: getContent().keySet()){
+		for(String category: getFactCategories()){
 			st.append("\t"+FHIRUtils.getPropertyDisplayLabel(category)+":\n");
 			for(Fact c: getFacts(category)){
 				st.append("\t\t"+c.getSummaryText()+"\n");

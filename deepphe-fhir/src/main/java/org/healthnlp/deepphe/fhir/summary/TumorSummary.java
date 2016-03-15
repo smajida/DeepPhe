@@ -28,16 +28,16 @@ public class TumorSummary extends Summary {
 	
 	public static class TumorPhenotype extends Summary{
 		public FactList getManifestations() {
-			return getFacts(FHIRConstants.HAS_MANIFESTATION);
+			return getFactsOrInsert(FHIRConstants.HAS_MANIFESTATION);
 		}
 		
 		public FactList getHistologicTypes() {
-			return getFacts(FHIRConstants.HAS_HISTOLOGIC_TYPE);
+			return getFactsOrInsert(FHIRConstants.HAS_HISTOLOGIC_TYPE);
 		}
 
 	
 		public FactList getTumorExtent() {
-			return getFacts(FHIRConstants.HAS_TUMOR_EXTENT);
+			return getFactsOrInsert(FHIRConstants.HAS_TUMOR_EXTENT);
 		}
 
 	
@@ -77,16 +77,16 @@ public class TumorSummary extends Summary {
 		this.phenotype = phenotype;
 	}
 	public FactList getTreatment() {
-		return getFacts(FHIRConstants.HAS_TREATMENT);
+		return getFactsOrInsert(FHIRConstants.HAS_TREATMENT);
 	}
 	public FactList getSequenceVarients() {
-		return getFacts(FHIRConstants.HAS_SEQUENCE_VARIENT);
+		return getFactsOrInsert(FHIRConstants.HAS_SEQUENCE_VARIENT);
 	}
 	public FactList getOutcome() {
-		return getFacts(FHIRConstants.HAS_OUTCOME);
+		return getFactsOrInsert(FHIRConstants.HAS_OUTCOME);
 	}
 	public FactList getBodySite() {
-		return getFacts(FHIRConstants.HAS_BODY_SITE);
+		return getFactsOrInsert(FHIRConstants.HAS_BODY_SITE);
 	}
 	public String getDisplayText() {
 		return  getClass().getSimpleName();

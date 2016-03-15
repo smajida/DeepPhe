@@ -21,6 +21,7 @@ import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.Stage;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactFactory;
+import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
@@ -31,8 +32,10 @@ import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
+import edu.pitt.dbmi.nlp.noble.ontology.ILogicExpression;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
+import edu.pitt.dbmi.nlp.noble.ontology.IRestriction;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 
@@ -77,7 +80,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			PhenotypeResourceFactory.saveReport(report,jcas);
 			
 			// print out
-			//System.out.println(report.getSummaryText());
+			System.out.println(report.getSummaryText());
 		}
 	}
 
@@ -90,17 +93,86 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	private void loadTemplate(Summary summary){
 		IClass summaryClass = ontology.getClass(""+summary.getConceptURI());
 		if(summaryClass != null){
-			//TODO: load empty lists
+			// see if there is a more specific
+			for(IClass cls: summaryClass.getDirectSubClasses()){
+				summaryClass = cls;
+				break;
+			}
+			
+			// now lets pull all of the properties
+			for(Object o: summaryClass.getNecessaryRestrictions()){
+				if(o instanceof IRestriction){
+					IRestriction r = (IRestriction) o;
+					if(isSummarizableRestriction(r)){
+						if(!summary.getContent().containsKey(r.getProperty().getName())){
+							FactList facts = new FactList();
+							facts.setCategory(r.getProperty().getName());
+							facts.setTypes(getClassNames(r.getParameter()));
+							summary.getContent().put(r.getProperty().getName(),facts);
+						}else{
+							for(String type: getClassNames(r.getParameter())){
+								summary.getContent().get(r.getProperty().getName()).getTypes().add(type);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	
+	/**
+	 * should this restriction be used for summarization
+	 * @param r
+	 * @return
+	 */
+	private boolean isSummarizableRestriction(IRestriction r){
+		IClass bs = ontology.getClass(FHIRConstants.BODY_SITE);
+		IClass event = ontology.getClass(FHIRConstants.EVENT);
 	
+		if(r.getProperty().isObjectProperty()){
+			for(String name : getClassNames(r.getParameter())){
+				IClass cls = ontology.getClass(name);
+				return cls.hasSuperClass(event) || cls.equals(bs) || cls.hasSuperClass(bs);
+			}
+		}
+		return false;
+	}
+	
+
+	private List<String> getClassNames(ILogicExpression exp){
+		List<String> list = new ArrayList<String>();
+		for(Object o: exp){
+			if(o instanceof IClass){
+				list.add(((IClass)o).getName());
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 * load fact categories from the template
+	 * @param summary
+	 * @param report
+	 */
 	private void loadElementsFromReport(Summary summary, Report report){
 		for(String category: summary.getFactCategories()){
-			//IClass 
-			//TODO: load appropriate entries
-		}
-		
+			for(String name: summary.getFacts(category).getTypes()){
+				IClass cls = ontology.getClass(name);
+				if(cls != null){
+					for(Element e: report.getReportElements()){
+						URI uri  = FHIRUtils.getConceptURI(e.getCode());
+						if(uri != null){
+							IClass c = ontology.getClass(""+uri);
+							if(c != null){
+								if(c.equals(cls) || c.hasSuperClass(cls)){
+									summary.addFact(category,FactFactory.createFact(e));
+								}
+							}
+						}
+					}
+				}
+			}
+		}	
 	}
 	
 	

@@ -223,8 +223,8 @@ public class FHIRObjectMocker {
 				allowing(cancerPhenotype).getDistantMetastasisClassification();
 				will(returnValue(distantMetastasisClassificationCC));
 				
-				allowing(cancerPhenotype).getManifestations();
-				will(returnValue(Collections.singletonList(manifestationsCC)));
+				/*allowing(cancerPhenotype).getManifestations();
+				will(returnValue(Collections.singletonList(manifestationsCC)));*/
 				
 				allowing(cancerPhenotype).getPrimaryTumorClassification();
 				will(returnValue(primaryTumorClassificationCC));
@@ -255,14 +255,14 @@ public class FHIRObjectMocker {
 				allowing(tumorSummary).getBodySite();
 				will(returnValue(Collections.singletonList(bodySiteCC)));
 
-				allowing(tumorSummary).getOutcomes();
+				/*allowing(tumorSummary).getOutcomes();
 				will(returnValue(Collections.singletonList(outcomesCC)));
 
 				allowing(tumorSummary).getTreatments();
 				will(returnValue(Collections.singletonList(treatmentCC)));
 				
 				allowing(tumorSummary).getTumorSequenceVarients();
-				will(returnValue(Collections.singletonList(tumorSequenceVariantsCC)));
+				will(returnValue(Collections.singletonList(tumorSequenceVariantsCC)));*/
 				
 				allowing(tumorSummary).getTumorType();
 				will(returnValue(tumorTypeCC));
@@ -306,11 +306,11 @@ public class FHIRObjectMocker {
 				allowing(patientSummary).getConceptURI();
 				will(returnValue(FHIRConstants.PATIENT_SUMMARY_URI));
 				
-				allowing(patientSummary).getExposure();
+				/*allowing(patientSummary).getExposure();
 				will(returnValue(Collections.singletonList(exposureCC)));
 				
 				allowing(patientSummary).getGermlineSequenceVariant();
-				will(returnValue(Collections.singletonList(germlineSequenceVariantCC)));
+				will(returnValue(Collections.singletonList(germlineSequenceVariantCC)));*/
 				
 				allowing(patientSummary).getOutcomes();
 				will(returnValue(Collections.singletonList(outcomesCC)));

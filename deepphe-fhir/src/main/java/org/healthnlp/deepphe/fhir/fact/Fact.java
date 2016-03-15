@@ -11,7 +11,7 @@ import org.hl7.fhir.instance.model.CodeableConcept;
  *
  */
 public class Fact {
-	private String name,uri,identifier,label;
+	private String name,uri,identifier,label,type;
 	private List<String> ancestors;
 	private List<Fact> provenanceFacts;
 	private List<TextMention> provenanceText;
@@ -23,6 +23,13 @@ public class Fact {
 	}
 	public String getURI() {
 		return uri;
+	}
+	
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
 	}
 	public void setURI(String uri) {
 		this.uri = uri;
@@ -45,6 +52,13 @@ public class Fact {
 		if(provenanceText == null)
 			provenanceText = new ArrayList<TextMention>();
 		return provenanceText;
+	}
+	public List<String> getProvenanceMentions() {
+		List<String> list = new ArrayList<String>();
+		for(TextMention t: getProvenanceText()){
+			list.add(t.toString());
+		}
+		return list;
 	}
 	public void addProvenanceText(TextMention mention) {
 		getProvenanceText().add(mention);

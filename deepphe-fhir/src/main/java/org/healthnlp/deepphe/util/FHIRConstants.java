@@ -21,6 +21,7 @@ public class FHIRConstants {
 	public static final String INTERPRETATION_NEGATIVE = "Negative";
 	
 	public static final String ELEMENT = "Element";
+	public static final String EVENT ="Event";
 	public static final String COMPOSITION = "Composition";
 	public static final String PATIENT = "Patient";
 	public static final String TUMOR = "Tumor";
@@ -97,6 +98,12 @@ public class FHIRConstants {
 	public static final URI PRIMARY_TUMOR_URI = URI.create(MODEL_CANCER_URL+"#PrimaryTumor");
 	public static final URI RECURRENT_TUMOR_URI = URI.create(MODEL_CANCER_URL+"#Recurrent_Tumor");
 	//public static final URI TUMOR_SIZE_URI = URI.create(MODEL_CANCER_URL+"/"+TUMOR_PHENOTYPE);
+	public static final URI MALE_URI = URI.create(MODEL_CANCER_URL+"#Male_Gender");
+	public static final URI FEMALE_URI = URI.create(MODEL_CANCER_URL+"#Female_Gender");
+/*	public static final String PATHOLOGY_REPORT_URI = URI.create(MODEL_CANCER_URL+"#Female_Gender");;
+	public static final String RADIOLOGY_REPORT_URI = null;
+	public static final String DISCHARGE_SUMMARY_URI = null;
+	public static final String PROGRESS_NOTE_URI = null;*/
 
 
 

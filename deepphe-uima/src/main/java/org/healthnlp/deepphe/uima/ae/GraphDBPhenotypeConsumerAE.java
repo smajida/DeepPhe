@@ -171,7 +171,8 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 				}
 				for (Observation p : report.getObservations()) {
 					Node n = graphDb.createNode(GraphDBConstants.Nodes.Observation);
-					n.setProperty("name", p.getDisplayText());
+					if(p.getDisplayText() != null)
+						n.setProperty("name", p.getDisplayText());
 					n.setProperty("value", p.getObservationValue());
 					CodeableConcept cc = p.getBodySite();
 					n.setProperty("bodySites", new String[] { cc.getText() }.toString());
@@ -271,6 +272,8 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 	}
 	
 	private void saveCodeableConcepts(Node n, String propertyName, List<Fact> cc){
+		if(cc == null)
+			return;
 		
 		List<String> ccnames = new ArrayList<String>();
 		for (Fact c : cc) {

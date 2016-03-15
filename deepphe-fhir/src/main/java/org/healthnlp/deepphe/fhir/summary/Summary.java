@@ -40,6 +40,21 @@ public abstract class Summary extends List_  implements Element {
 	}
 	
 	/**
+	 * get facts of a given category
+	 * @param category
+	 * @return
+	 */
+	protected FactList getFactsOrInsert(String category){
+		FactList list = getContent().get(category);
+		if(list == null){
+			list = new FactList();
+			list.setCategory(category);
+			getContent().put(category,list);
+		}
+		return list;
+	}
+	
+	/**
 	 * get fact categories
 	 * @return
 	 */
@@ -51,6 +66,7 @@ public abstract class Summary extends List_  implements Element {
 		FactList list =  getContent().get(category);
 		if(list == null){
 			list = new FactList();
+			list.setCategory(category);
 			getContent().put(category,list);
 		}
 		list.add(fact);
@@ -101,7 +117,7 @@ public abstract class Summary extends List_  implements Element {
 		// add body site
 		for(String cat : ph.getFactCategories()){
 			for(Fact c: ph.getFacts(cat)){
-				if(!FHIRUtils.contains(getFacts(cat),c)){
+				if(getFacts(cat) == null || !FHIRUtils.contains(getFacts(cat),c)){
 					addFact(cat,c);
 				}
 			}

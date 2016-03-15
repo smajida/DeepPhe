@@ -44,19 +44,19 @@ public class PatientSummary extends Summary {
 	}
 	
 	public FactList getName() {
-		return getFacts(FHIRConstants.HAS_NAME);
+		return getFactsOrInsert(FHIRConstants.HAS_NAME);
 	}
 	
 	public FactList getGender() {
-		return getFacts(FHIRConstants.HAS_GENDER);
+		return getFactsOrInsert(FHIRConstants.HAS_GENDER);
 	}
 
 	public FactList getBirthDate() {
-		return getFacts(FHIRConstants.HAS_BIRTH_DATE);
+		return getFactsOrInsert(FHIRConstants.HAS_BIRTH_DATE);
 	}
 
 	public FactList getDeathDate() {
-		return getFacts(FHIRConstants.HAS_DEATH_DATE);
+		return getFactsOrInsert(FHIRConstants.HAS_DEATH_DATE);
 	}
 
 

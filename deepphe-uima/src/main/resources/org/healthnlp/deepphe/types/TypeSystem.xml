@@ -31,6 +31,11 @@
                <rangeTypeName>uima.cas.String</rangeTypeName>
             </featureDescription>
             <featureDescription>
+               <name>hasType</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
                <name>hasProvenanceFacts</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
@@ -39,8 +44,7 @@
             <featureDescription>
                <name>hasProvenanceText</name>
                <description/>
-               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>uima.cas.String</elementType>
+               <rangeTypeName>uima.cas.StringArray</rangeTypeName>
             </featureDescription>
             <featureDescription>
                <name>hasProperties</name>
@@ -68,16 +72,33 @@
          </features>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.c_modifier</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.TNM_Modifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.EventFreeSurvival</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Observation</supertypeName>
-         <features/>
+         <name>org.healthnlp.deepphe.uima.types.FactList</name>
+         <description>This type represents Fact list</description>
+         <supertypeName>uima.tcas.Annotation</supertypeName>
+         <features>
+            <featureDescription>
+               <name>hasTypes</name>
+               <description/>
+               <rangeTypeName>uima.cas.StringArray</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
+               <name>hasCategory</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
+               <name>hasFacts</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasProperties</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Property</elementType>
+            </featureDescription>
+         </features>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Patient</name>
@@ -104,13 +125,13 @@
                <name>hasGender</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.Gender</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasEthnicity</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.EthnicGroup</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasBirthDate</name>
@@ -120,58 +141,16 @@
          </features>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.NotHispanicorLatino</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.EthnicGroup</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Gender</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Decreased</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.DeltaFlag</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Mild</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Severity</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.CrudeSurvival</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Observation</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Equivocal</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.OrdinalInterpretation</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Left</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.BodySide</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.TNM_Modifier</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Tumor</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Model</supertypeName>
          <features>
+            <featureDescription>
+               <name>hasTreatment</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.MedicationStatement</elementType>
+            </featureDescription>
             <featureDescription>
                <name>hasPhenotype</name>
                <description/>
@@ -182,32 +161,20 @@
                <name>hasTumorType</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.TumorType</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasContent</name>
+               <description>generic content</description>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.FactList</elementType>
             </featureDescription>
          </features>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.DiagnosticEpisode</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Episode</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.ProgressionfreeSurvival</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Observation</supertypeName>
-         <features/>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Summary</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Fact</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.CancerType</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Finding</supertypeName>
          <features/>
       </typeDescription>
       <typeDescription>
@@ -225,39 +192,9 @@
                <name>hasEpisodeType</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.EpisodeType</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
          </features>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.PossiblyWorse</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Worse</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.InSituLesion</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Finding</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Moderate</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Severity</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.ProcedureCompletionStatus</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Nostatuschange</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.DeltaFlag</supertypeName>
-         <features/>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Condition</name>
@@ -268,7 +205,7 @@
                <name>hasDeltaFlag</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.DeltaFlag</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasBodySite</name>
@@ -313,7 +250,7 @@
                <name>hasCourse</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.Course</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasAbatementBoolean</name>
@@ -324,13 +261,13 @@
                <name>hasAgeOnset</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.Age</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasSeverity</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.Severity</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasDateAbatement</name>
@@ -338,12 +275,6 @@
                <rangeTypeName>uima.cas.String</rangeTypeName>
             </featureDescription>
          </features>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Remitting</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Intermittent</supertypeName>
-         <features/>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.MedicalRecord</name>
@@ -372,7 +303,7 @@
                <name>hasMedicalRecordSummaryPatient</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.Patient</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.PatientSummary</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasMedicalRecordSummaryCancer</name>
@@ -395,16 +326,17 @@
          <features/>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.InvasiveLesion</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Finding</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Phenotype</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Model</supertypeName>
-         <features/>
+         <features>
+            <featureDescription>
+               <name>hasContent</name>
+               <description>generic content</description>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.FactList</elementType>
+            </featureDescription>
+         </features>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Stage</name>
@@ -426,12 +358,6 @@
          </features>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Weaklypositive</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Positive</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Finding</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Condition</supertypeName>
@@ -442,24 +368,6 @@
                <rangeTypeName>uima.cas.String</rangeTypeName>
             </featureDescription>
          </features>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.hyperacute</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Acute</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.AshkenaziJew</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.EthnicGroup</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Mexican</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.HispanicorLatino</supertypeName>
-         <features/>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Procedure</name>
@@ -503,36 +411,6 @@
          </features>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.TumorType</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Secondaryto</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Course</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Fluctuatingqualifiervalue</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Intermittent</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Chronicaggressive</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Chronic</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Aggressivecourse</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Course</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.DimensionalMeasurement</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.NumericModifier</supertypeName>
@@ -551,7 +429,7 @@
                <name>hasUnit</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.Unit</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>has3DimensionValue</name>
@@ -559,12 +437,6 @@
                <rangeTypeName>uima.cas.Double</rangeTypeName>
             </featureDescription>
          </features>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.HistologicType</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Finding</supertypeName>
-         <features/>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.TNMClassification</name>
@@ -575,27 +447,9 @@
                <name>hasTNMModifier</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.TNM_Modifier</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
          </features>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Relapsingcourse</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Intermittent</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Seasonalcourse</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Recurrent</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Unit</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.NumericModifier</supertypeName>
-         <features/>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Quantity</name>
@@ -611,69 +465,9 @@
                <name>hasUnit</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.Unit</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
          </features>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Recurrentacute</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Recurrent</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.NNodestages</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.TNMStagingSystem</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Progressive</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Course</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Positive</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.OrdinalInterpretation</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.StagingEpisode</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Episode</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.BodyModifier</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.DiagnosticProcedure</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Procedure</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Indolent</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Course</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Paroxysmal</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Intermittent</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Allergen</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.AllergyIntolerance</name>
@@ -699,7 +493,7 @@
                <name>hasSubstance</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.Allergen</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasPatient</name>
@@ -711,7 +505,7 @@
                <name>hasSeverity</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.Severity</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasRecordedDate</name>
@@ -726,42 +520,6 @@
          </features>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.ObservedSurvival</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Observation</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Spanish</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.HispanicorLatino</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Cuban</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.HispanicorLatino</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.CentralAmerican</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.HispanicorLatino</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.RecurrentTumor</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.TumorType</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.TumorExtent</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Finding</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.TNMValue</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
@@ -770,21 +528,9 @@
                <name>hasTNMModifier</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.TNM_Modifier</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
          </features>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Slightlyworse</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Worse</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.MMetastasisstages</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.TNMStagingSystem</supertypeName>
-         <features/>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Annotation</name>
@@ -832,12 +578,6 @@
          </features>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.OtherDiagnositcProcedure</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.DiagnosticProcedure</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Cancer</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Model</supertypeName>
@@ -853,6 +593,18 @@
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
                <elementType>org.healthnlp.deepphe.uima.types.CancerPhenotype</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasTreatment</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.MedicationStatement</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasContent</name>
+               <description>generic content</description>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.FactList</elementType>
             </featureDescription>
          </features>
       </typeDescription>
@@ -894,75 +646,9 @@
          </features>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Episodic</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Intermittent</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Modifier</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Fact</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.MuchBetter</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Better</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.FemaleGender</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Gender</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.SomewhatBetter</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Better</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.DefinitelyBetter</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Better</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.SectionType</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.CompositionAttribute</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Better</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.DeltaFlag</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.RecurrenceEpisode</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.EpisodeType</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Certainty</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.LinguisticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.ProcedurePreparationStatus</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Unknown</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.OrdinalInterpretation</supertypeName>
          <features/>
       </typeDescription>
       <typeDescription>
@@ -983,154 +669,22 @@
          </features>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Intermittent</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Chronic</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.MaritalStatus</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Chronic</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Course</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Acuteonchronic</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Chronic</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Stabilizationofstatus</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.DeltaFlag</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.MicroinvasiveLesion</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.InvasiveLesion</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.TNMStagingSystem</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Finding</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Severe</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Severity</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Age</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Quantity</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.BodySite</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
          <features>
             <featureDescription>
-               <name>hasBodySiteModifierBodySide</name>
+               <name>hasBodySiteModifier</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.BodySide</elementType>
-            </featureDescription>
-            <featureDescription>
-               <name>hasBodySiteModifierBodyModifier</name>
-               <description/>
-               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.BodyModifier</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
          </features>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Bilateral</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.BodySide</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.FollowUpEpisode</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Episode</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.OutcomeDeath</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Finding</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Race</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.CancerStage</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Finding</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Experiencer</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.LinguisticModifier</supertypeName>
-         <features/>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Entity</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Annotation</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.BodySide</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Right</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.BodySide</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Local</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.RecurrentTumor</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Unstablestatus</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.DeltaFlag</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Minimum</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Severity</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.p_modifier</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.TNM_Modifier</supertypeName>
          <features/>
       </typeDescription>
       <typeDescription>
@@ -1140,63 +694,9 @@
          <features/>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.MedicationRoute</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.SephardicJew</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.EthnicGroup</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.NumericModifier</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Modifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Recurrent</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Intermittent</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.TreatmentEpisode</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Episode</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.MinimallyInvasiveLesion</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.InvasiveLesion</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Chronicmigratory</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Chronic</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Increase</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.DeltaFlag</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.OrdinalInterpretation</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Cyclicalrelapsing</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Relapsingcourse</supertypeName>
          <features/>
       </typeDescription>
       <typeDescription>
@@ -1208,25 +708,19 @@
                <name>hasEthnicity</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.EthnicGroup</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
-               <name>hasOutcomeNetSurvival</name>
+               <name>hasOutcome</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.NetSurvival</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasGender</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.Gender</elementType>
-            </featureDescription>
-            <featureDescription>
-               <name>hasOutcomeProgressionfreeSurvival</name>
-               <description/>
-               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.ProgressionfreeSurvival</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasPhenotype</name>
@@ -1235,39 +729,9 @@
                <elementType>org.healthnlp.deepphe.uima.types.PatientPhenotype</elementType>
             </featureDescription>
             <featureDescription>
-               <name>hasOutcomeCrudeSurvival</name>
-               <description/>
-               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.CrudeSurvival</elementType>
-            </featureDescription>
-            <featureDescription>
-               <name>hasOutcomeObservedSurvival</name>
-               <description/>
-               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.ObservedSurvival</elementType>
-            </featureDescription>
-            <featureDescription>
-               <name>hasOutcomeEventFreeSurvival</name>
-               <description/>
-               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.EventFreeSurvival</elementType>
-            </featureDescription>
-            <featureDescription>
-               <name>hasOutcomeDiseaseFreeSurvival</name>
-               <description/>
-               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.DiseaseFreeSurvival</elementType>
-            </featureDescription>
-            <featureDescription>
                <name>hasDeathDate</name>
                <description/>
                <rangeTypeName>uima.cas.String</rangeTypeName>
-            </featureDescription>
-            <featureDescription>
-               <name>hasOutcomeOutcomeDeath</name>
-               <description/>
-               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.OutcomeDeath</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasBirthDate</name>
@@ -1280,25 +744,13 @@
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
                <elementType>org.healthnlp.deepphe.uima.types.Cancer</elementType>
             </featureDescription>
+            <featureDescription>
+               <name>hasContent</name>
+               <description>generic content</description>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.FactList</elementType>
+            </featureDescription>
          </features>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.PrimaryTumor</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.TumorType</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Polarity</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.LinguisticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Acute</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Course</supertypeName>
-         <features/>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Ratio</name>
@@ -1309,7 +761,7 @@
                <name>hasUnit</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.Unit</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasNumeratorValue</name>
@@ -1360,7 +812,7 @@
                <name>hasDocType</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.DocumentOntology</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasCompositionSummaryTumor</name>
@@ -1372,7 +824,7 @@
                <name>hasCompositionSummaryPatient</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.Patient</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.PatientSummary</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasCompositionSummaryCancer</name>
@@ -1383,18 +835,6 @@
          </features>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Chronicactive</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Chronic</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.OtherHispanicorLatinoa</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.HispanicorLatino</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.TumorPhenotype</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Phenotype</supertypeName>
@@ -1403,39 +843,27 @@
                <name>hasHistologicType</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.HistologicType</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasTumorExtent</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.TumorExtent</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasCancerType</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.CancerType</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasContent</name>
+               <description>generic content</description>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.FactList</elementType>
             </featureDescription>
          </features>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.DeltaFlag</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.DiseaseFreeSurvival</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Observation</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.MultipleHispanic</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.HispanicorLatino</supertypeName>
-         <features/>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.TherapeuticProcedure</name>
@@ -1461,63 +889,9 @@
          </features>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Indeterminate</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.OrdinalInterpretation</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.EpisodeType</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.EpisodeAttribute</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Degree</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.LinguisticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.ContextualModality</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.LinguisticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Temporality</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.LinguisticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.CompositionAttribute</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Attribute</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.WidelyInvasiveLesion</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.InvasiveLesion</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.EthnicGroup</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.MaleGender</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Gender</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Negative</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.OrdinalInterpretation</supertypeName>
          <features/>
       </typeDescription>
       <typeDescription>
@@ -1529,7 +903,7 @@
                <name>hasInterpretation</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.OrdinalInterpretation</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasNumValue</name>
@@ -1582,24 +956,6 @@
          <features/>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Continual</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Chronic</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Regional</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.RecurrentTumor</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.OtherMedication</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.MedicationStatement</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Dosage</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
@@ -1608,7 +964,7 @@
                <name>hasRoute</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.MedicationRoute</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasNumValue</name>
@@ -1630,12 +986,6 @@
          </features>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.MuchWorse</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Worse</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.DocumentSection</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.CompositionAttribute</supertypeName>
@@ -1644,7 +994,7 @@
                <name>hasSectionType</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.SectionType</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasTitle</name>
@@ -1706,27 +1056,9 @@
          </features>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.ContextualAspect</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.LinguisticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Distant</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.RecurrentTumor</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.EpisodeAttribute</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Attribute</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Localized</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Course</supertypeName>
          <features/>
       </typeDescription>
       <typeDescription>
@@ -1736,87 +1068,28 @@
          <features/>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Course</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.OtherBodySite</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.BodySite</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.Event</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Annotation</supertypeName>
          <features/>
       </typeDescription>
       <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.HispanicorLatino</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.EthnicGroup</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.PuertoRican</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.HispanicorLatino</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.PatientPhenotype</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Phenotype</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Permanence</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.LinguisticModifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Chronicpersistent</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Chronic</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Chronicgranulomatous</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Chronic</supertypeName>
-         <features/>
+         <features>
+            <featureDescription>
+               <name>hasContent</name>
+               <description>generic content</description>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.FactList</elementType>
+            </featureDescription>
+         </features>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.SemanticModifier</name>
          <description/>
          <supertypeName>org.healthnlp.deepphe.uima.types.Modifier</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.TTumorstages</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.TNMStagingSystem</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Marked</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Severity</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.SomewhatWorse</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Worse</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Severity</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.SemanticModifier</supertypeName>
          <features/>
       </typeDescription>
       <typeDescription>
@@ -1828,69 +1101,51 @@
                <name>hasCancerStage</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.CancerStage</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasMClassification</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.MMetastasisstages</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasTumorExtent</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.TumorExtent</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasHistologicType</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.HistologicType</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasNClassification</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.NNodestages</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasCancerType</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.CancerType</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasTClassification</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.TTumorstages</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasContent</name>
+               <description>generic content</description>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.FactList</elementType>
             </featureDescription>
          </features>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Worse</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.DeltaFlag</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.PrimaryEpisode</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.EpisodeType</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.CubanorCubanAmerican</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.HispanicorLatino</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.PossiblyBetter</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Better</supertypeName>
-         <features/>
       </typeDescription>
       <typeDescription>
          <name>org.healthnlp.deepphe.uima.types.RangeModifier</name>
@@ -1911,63 +1166,9 @@
                <name>hasUnit</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.Unit</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
          </features>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.MexicanorMexicanAmerican</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.HispanicorLatino</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.PrediagnosticEpisode</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Episode</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.MexicanAmerican</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.HispanicorLatino</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.DocumentOntology</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.CompositionAttribute</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.NetSurvival</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Observation</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Boost</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Increase</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.DefinitelyWorse</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Worse</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.Chronicmiliary</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.Chronic</supertypeName>
-         <features/>
-      </typeDescription>
-      <typeDescription>
-         <name>org.healthnlp.deepphe.uima.types.OtherTherapeuticProcedure</name>
-         <description/>
-         <supertypeName>org.healthnlp.deepphe.uima.types.TherapeuticProcedure</supertypeName>
-         <features/>
       </typeDescription>
    </types>
 </typeSystemDescription>

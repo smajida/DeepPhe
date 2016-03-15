@@ -33,4 +33,10 @@ public class TextMention {
 	public void setEnd(int end) {
 		this.end = end;
 	}
+	public String toString(){
+		return getMention();
+	}
+	public String getMention(){
+		return text+" ["+start+":"+end+"]";
+	}
 }
