@@ -8,6 +8,7 @@ import java.util.List;
 import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
@@ -87,6 +88,33 @@ public class MedicalRecord implements Element {
 	}
 	public void addReport(Report r){
 		getReports().add(r);
+	}
+	
+	/**
+	 *  return all facts that are contained within report level summaries
+	 * @return
+	 */
+	public List<Fact> getReportLevelFacts(){
+		List<Fact> list =  new ArrayList<Fact>();
+		for(Report r: getReports()){
+			for(Summary s: r.getCompositionSummaries()){
+				list.addAll(s.getContainedFacts());
+			}
+		}
+		return list;
+	}
+	
+	/**
+	 *  return all facts that are contained within phenotype level summaries
+	 * @return
+	 */
+	public List<Fact> getRecordLevelFacts(){
+		List<Fact> list =  new ArrayList<Fact>();
+		if(cancerSummary != null)
+			list.addAll(cancerSummary.getContainedFacts());
+		if(patientSummary != null)
+			list.addAll(patientSummary.getContainedFacts());
+		return list;
 	}
 	
 }

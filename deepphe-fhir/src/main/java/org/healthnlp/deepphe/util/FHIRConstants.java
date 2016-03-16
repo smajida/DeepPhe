@@ -30,6 +30,7 @@ public class FHIRConstants {
 	public static final String CANCER_PHENOTYPE = "CancerPhenotype";
 	public static final String PATIENT_PHENOTYPE = "PatientPhenotype";
 	
+	public static final String CONDITION = "Condition";
 	public static final String DIAGNOSIS = "DiseaseDisorder";
 	public static final String PROCEDURE = "Procedure";
 	public static final String OBSERVATION = "Observation";
@@ -37,6 +38,7 @@ public class FHIRConstants {
 	public static final String MEDICATION = "MedicationStatement";
 	public static final String BODY_SITE = "BodySite";
 	public static final String TUMOR_SIZE = "Tumor_Size";
+	public static final String QUANTITY = "Quantity";
 	public static final String STAGE = "Generic_TNM_Finding";
 	public static final String AGE = "Age";
 	public static final String GENDER = "Gender";
@@ -104,6 +106,9 @@ public class FHIRConstants {
 	public static final String RADIOLOGY_REPORT_URI = null;
 	public static final String DISCHARGE_SUMMARY_URI = null;
 	public static final String PROGRESS_NOTE_URI = null;*/
+	public static final URI QUANTITY_URI = URI.create("http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity");
+
+
 
 
 

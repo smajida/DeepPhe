@@ -305,6 +305,13 @@ public class PhenotypeResourceFactory {
 	 * @return
 	 */
 	private static Fact loadFact(org.healthnlp.deepphe.uima.types.Fact annotation) {
+		// try to convert if annotation
+		Element element = loadElement(annotation);
+		if(element != null){
+			return FactFactory.createFact(element);
+		}
+		
+		// create a generic fact if possible		
 		Fact fact = FactFactory.createFact(annotation.getHasType());
 		fact.setName(annotation.getHasPreferredName());
 		fact.setURI(annotation.getHasURI());
@@ -1324,11 +1331,13 @@ public class PhenotypeResourceFactory {
 		
 		// add reports
 		record.setReports(loadReports(jcas));
-		for(int i=0;i< getSize(annotationRecord.getHasMedicalRecordSummaryCancer()); i++){
-			record.setCancerSummary(loadCancerSummary(annotationRecord.getHasMedicalRecordSummaryCancer(i)));
-		}
-		for(int i=0;i< getSize(annotationRecord.getHasMedicalRecordSummaryPatient()); i++){
-			record.setPatientSummary(loadPatientSummary(annotationRecord.getHasMedicalRecordSummaryPatient(i)));
+		if(annotationRecord != null){
+			for(int i=0;i< getSize(annotationRecord.getHasMedicalRecordSummaryCancer()); i++){
+				record.setCancerSummary(loadCancerSummary(annotationRecord.getHasMedicalRecordSummaryCancer(i)));
+			}
+			for(int i=0;i< getSize(annotationRecord.getHasMedicalRecordSummaryPatient()); i++){
+				record.setPatientSummary(loadPatientSummary(annotationRecord.getHasMedicalRecordSummaryPatient(i)));
+			}
 		}
 		record.setPatient(loadPatient(jcas));
 		

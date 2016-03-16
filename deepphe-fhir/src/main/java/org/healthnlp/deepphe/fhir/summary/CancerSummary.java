@@ -3,35 +3,40 @@ package org.healthnlp.deepphe.fhir.summary;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
-import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
-import org.hl7.fhir.instance.model.BackboneElement;
 
 
 public class CancerSummary extends Summary {
 	private CancerPhenotype phenotype;
 	private List<TumorSummary> tumors;
-	private Report report;
 	
 	public CancerSummary(){
 		phenotype = new CancerPhenotype();
 	}
-		
-	public List<Fact> getAllFacts(){
-		List<Fact> list = super.getAllFacts();
-		list.addAll(getPhenotype().getAllFacts());
+
+	public void setReport(Report r){
+		super.setReport(r);
+		getPhenotype().setReport(r);
 		for(TumorSummary ts: getTumors()){
-			list.addAll(ts.getAllFacts());
+			ts.setReport(r);
+		}
+	}
+		
+	/**
+	 * return all facts that are contained within this fact
+	 * @return
+	 */
+	public List<Fact> getContainedFacts(){
+		List<Fact> list = super.getContainedFacts();
+		list.addAll(getPhenotype().getContainedFacts());	
+		for(TumorSummary ts: getTumors()){
+			list.addAll(ts.getContainedFacts());
 		}
 		return list;
 	}
@@ -61,17 +66,6 @@ public class CancerSummary extends Summary {
 		public String getResourceIdentifier() {
 			return getClass().getSimpleName()+"_"+Math.abs(hashCode());
 		}
-		public String getSummaryText() {
-			StringBuffer st = new StringBuffer();
-			st.append(getDisplayText()+":\n");
-			for(String category: getFactCategories()){
-				st.append("\t"+FHIRUtils.getPropertyDisplayLabel(category)+":\n");
-				for(Fact c: getFacts(category)){
-					st.append("\t\t"+c.getSummaryText()+"\n");
-				}
-			}
-			return st.toString();
-		}
 		public URI getConceptURI() {
 			return FHIRConstants.CANCER_PHENOTYPE_SUMMARY_URI;
 		}
@@ -80,21 +74,6 @@ public class CancerSummary extends Summary {
 		}
 	}
 	
-	
-	public Report getReport() {
-		return report;
-	}
-	
-	public void setReport(Report report) {
-		this.report = report;
-		// set report name to all text mentions
-		String id = report.getResourceIdentifier();
-		String tp = report.getType() == null?null:report.getType().getText();
-		for(Fact f: getAllFacts()){
-			f.setDocumentIdentifier(id);
-			f.setDocumentType(tp);
-		}
-	}
 
 	public FactList getBodySite() {
 		return getFactsOrInsert(FHIRConstants.HAS_BODY_SITE);
@@ -131,25 +110,11 @@ public class CancerSummary extends Summary {
 		return getClass().getSimpleName()+"_"+Math.abs(hashCode());
 	}
 	public String getSummaryText() {
-		StringBuffer st = new StringBuffer();
-		st.append(getDisplayText()+":\n");
-		
-		for(String category: getFactCategories()){
-			st.append("\t"+FHIRUtils.getPropertyDisplayLabel(category)+":\n");
-			for(Fact c: getFacts(category)){
-				st.append("\t\t"+c.getSummaryText()+"\n");
-			}
-		}
-		
-		// look at phenotypes
-		//for(CancerPhenotype ph: getPhenotypes()){
+		StringBuffer st = new StringBuffer(super.getSummaryText());
 		st.append(getPhenotype().getSummaryText()+"\n");
-		//}
-		// look at tumors
 		for(TumorSummary ts: getTumors()){
 			st.append(ts.getSummaryText()+"\n");
 		}
-		
 		return st.toString();
 	}
 	public URI getConceptURI() {

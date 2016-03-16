@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.healthnlp.deepphe.fhir.Element;
+import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
@@ -21,7 +22,8 @@ import org.hl7.fhir.instance.model.Resource;
 
 
 public abstract class Summary extends List_  implements Element {
-	private Report report;
+	protected Report report;
+	protected Patient patient;
 	private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
 	protected Map<String,FactList> content;
 	public Map<String, FactList> getContent() {
@@ -71,17 +73,22 @@ public abstract class Summary extends List_  implements Element {
 		}
 		list.add(fact);
 	}
-	public List<Fact> getAllFacts(){
-		List<Fact> list = new ArrayList<Fact>();
-		for(FactList l: getContent().values())
-			list.addAll(l);
-		return list;
-	}
-
-	
+		
 	public abstract String getDisplayText();
 	public abstract String getResourceIdentifier();
-	public abstract String getSummaryText();
+	
+	public String getSummaryText() {
+		StringBuffer st = new StringBuffer();
+		st.append(getDisplayText()+":\n");
+		for(String category: getFactCategories()){
+			st.append("\t"+FHIRUtils.getPropertyDisplayLabel(category)+":\n");
+			for(Fact c: getFacts(category)){
+				st.append("\t\t"+c.getSummaryText()+"\n");
+			}
+		}
+		return st.toString();
+	}
+	
 	public Resource getResource(){
 		return this;
 	}
@@ -90,6 +97,27 @@ public abstract class Summary extends List_  implements Element {
 
 	public void setReport(Report r) {
 		report = r;
+		if(r.getPatient() != null)
+			setPatient(r.getPatient());
+		// set report name to all text mentions
+		String id = report.getResourceIdentifier();
+		String tp = report.getType() == null?null:report.getType().getText();
+		for(Fact f: getContainedFacts()){
+			f.setDocumentIdentifier(id);
+			f.setDocumentType(tp);
+		}
+	}
+
+	public Patient getPatient() {
+		return patient;
+	}
+
+	public void setPatient(Patient patient) {
+		this.patient = patient;
+	}
+
+	public Report getReport() {
+		return report;
 	}
 
 	public void save(File e) throws Exception {
@@ -129,6 +157,41 @@ public abstract class Summary extends List_  implements Element {
 	}
 	public void setAnnotationType(String annotationType) {
 		this.annotationType = annotationType;
+	}
+	
+	
+	private void addIdentifiersToFact(Fact fact, String category){
+		String reportId = report != null?report.getResourceIdentifier():null;
+		String reportType = report != null?(report.getType() == null?null:report.getType().getText()):null;
+		String patientId = patient != null?patient.getResourceIdentifier():null;
+		fact.setCategory(category);
+		fact.setDocumentIdentifier(reportId);
+		fact.setDocumentType(reportType);
+		fact.setPatientIdentifier(patientId);
+		fact.addContainerIdentifier(getResourceIdentifier());
+	}
+	
+	
+	/**
+	 * return all facts that are contained within this fact
+	 * @return
+	 */
+	public List<Fact> getContainedFacts(){
+		ArrayList<Fact> list =  new ArrayList<Fact>();
+			
+		for(String category: getFactCategories()){
+			for(Fact fact: getFacts(category)){
+				// add IDs from this container and documents
+				addIdentifiersToFact(fact, category);
+				list.add(fact);
+				for(Fact f: fact.getContainedFacts()){
+					addIdentifiersToFact(f, category);
+					list.add(f);
+				}
+			}
+		}
+		
+		return list;
 	}
 	
 }

@@ -2,7 +2,7 @@ package org.healthnlp.deepphe.fhir;
 
 import org.healthnlp.deepphe.util.FHIRUtils;
 
-public class Finding extends Condition  implements Element{
+public class Finding extends Condition {
 
 	public Finding(){
 		setCategory(FHIRUtils.CONDITION_CATEGORY_FINDING);

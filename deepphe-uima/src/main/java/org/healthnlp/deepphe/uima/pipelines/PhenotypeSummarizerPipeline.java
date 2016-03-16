@@ -56,8 +56,8 @@ final public class PhenotypeSummarizerPipeline {
 		final CollectionReader collectionReader = createCollectionReader(inputDirectory);
 		final AnalysisEngine compositionSummarizerAE = AnalysisEngineFactory.createEngine(
 				CompositionCancerSummaryAE.class, CompositionCancerSummaryAE.PARAM_ONTOLOGY_PATH, ontologyPath);
-		final AnalysisEngine cancerSummarizerAE = AnalysisEngineFactory.createEngine(PhenotypeCancerSummaryAE.class,
-				PhenotypeCancerSummaryAE.PARAM_ONTOLOGY_PATH, ontologyPath);
+		//final AnalysisEngine cancerSummarizerAE = AnalysisEngineFactory.createEngine(PhenotypeCancerSummaryAE.class,
+		//		PhenotypeCancerSummaryAE.PARAM_ONTOLOGY_PATH, ontologyPath);
 		// final AnalysisEngine phenotypeSummarizerAE =
 		// createPhenotypeSummarizerAE(clipsDirectoryPath,ontologyPath);
 		// final AnalysisEngine i2B2OutputAE = createI2B2OutputAE();
@@ -66,15 +66,16 @@ final public class PhenotypeSummarizerPipeline {
 		// SimplePipeline.runPipeline(collectionReader, phenotypeSummarizerAE,
 		// i2B2OutputAE);
 
-		final AnalysisEngine graphDBConsumerAE = AnalysisEngineFactory.createEngine(GraphDBPhenotypeConsumerAE.class,
-				GraphDBPhenotypeConsumerAE.PARAM_DBPATH, outputDirectory + File.separator + "neo4jdb");
+		//final AnalysisEngine graphDBConsumerAE = AnalysisEngineFactory.createEngine(GraphDBPhenotypeConsumerAE.class,
+		//		GraphDBPhenotypeConsumerAE.PARAM_DBPATH, outputDirectory + File.separator + "neo4jdb");
 
 		final AnalysisEngine summaryAE = AnalysisEngineFactory.createEngine(SummaryTextOutput.class,SummaryTextOutput.PARAM_OUTPUTDIR,outputDirectory); 
-		final AnalysisEngine transmartAE = AnalysisEngineFactory.createEngine(TranSMART_Output.class,TranSMART_Output.PARAM_OUTPUTDIR,outputDirectory); 
+		//final AnalysisEngine transmartAE = AnalysisEngineFactory.createEngine(TranSMART_Output.class,TranSMART_Output.PARAM_OUTPUTDIR,outputDirectory); 
 		
 		
 		// run the damn pipeline
-		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE, cancerSummarizerAE, xmiWriter,summaryAE,transmartAE,graphDBConsumerAE);
+		//SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE, cancerSummarizerAE, xmiWriter,summaryAE,transmartAE,graphDBConsumerAE);
+		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE,xmiWriter,summaryAE);
 	}
 
 	private static CollectionReader createCollectionReader(String inputDirectory)

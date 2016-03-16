@@ -19,10 +19,15 @@ import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.Stage;
+import org.healthnlp.deepphe.fhir.fact.BodySiteFact;
+import org.healthnlp.deepphe.fhir.fact.ConditionFact;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.fact.FactList;
+import org.healthnlp.deepphe.fhir.fact.ObservationFact;
+import org.healthnlp.deepphe.fhir.fact.ProcedureFact;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
+import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.fhir.summary.TumorSummary;
@@ -69,19 +74,23 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	 */
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
 		
+		MedicalRecord record = new MedicalRecord();
+		record.setPatient(PhenotypeResourceFactory.loadPatient(jcas));
+		
 		for(Report report: PhenotypeResourceFactory.loadReports(jcas)){
-			
 			PatientSummary patient = createPatientSummary(report.getPatient());
 			List<Summary> summaries = createSummaries(report);
 			
 			report.addCompositionSummaries(summaries);
 			report.addCompositionSummary(patient);
 			
-			PhenotypeResourceFactory.saveReport(report,jcas);
+			//PhenotypeResourceFactory.saveReport(report,jcas);
 			
 			// print out
+			record.addReport(report);
 			System.out.println(report.getSummaryText());
 		}
+		
 	}
 
 	
@@ -165,7 +174,9 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 							IClass c = ontology.getClass(""+uri);
 							if(c != null){
 								if(c.equals(cls) || c.hasSuperClass(cls)){
-									summary.addFact(category,FactFactory.createFact(e));
+									Fact fact = FactFactory.createFact(e);
+									addAncestors(fact);
+									summary.addFact(category,fact);
 								}
 							}
 						}
@@ -212,6 +223,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		
 		// explicit mentions mentions of cancer, carcinoma, any disease under 'malignant breast neoplasm' class "metastatic neoplasm"
 		// If in pathology report, then generate tumor instance as well.
+		//TODO: what to do about multiple diagnosis and tumors
 		Disease cancerDx = null;
 		for(Disease c: report.getDiagnoses()){
 			if(hasTrigger(cancerTriggers,c)){
@@ -247,6 +259,46 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		return list;
 	}
 
+	/**
+	 * create a fact
+	 * @param cc
+	 * @return
+	 */
+	private Fact createFact(CodeableConcept cc){
+		Fact fact = null;
+		URI uri = FHIRUtils.getConceptURI(cc);
+		if(uri != null){
+			IClass cls = ontology.getClass(""+uri);
+			if(cls != null){
+				fact = new Fact();
+				if(cls.hasSuperClass(ontology.getClass(FHIRConstants.OBSERVATION)))
+					fact = new ObservationFact();
+				else if(cls.hasSuperClass(ontology.getClass(FHIRConstants.CONDITION)))
+					fact = new ConditionFact();
+				else if(cls.hasSuperClass(ontology.getClass(FHIRConstants.BODY_SITE)))
+					fact = new BodySiteFact();
+				else if(cls.hasSuperClass(ontology.getClass(FHIRConstants.PROCEDURE)))
+					fact = new ProcedureFact();
+				fact = FactFactory.createFact(cc,fact);
+				addAncestors(fact);
+				
+			}else{
+				System.err.println("WTF no class; "+cc.getText()+" "+uri);
+			}
+		}
+		return fact;
+	}
+	
+	
+	private void addAncestors(Fact fact){
+		IClass cls = ontology.getClass(fact.getURI());
+		if(cls != null){
+			for(IClass parent: cls.getSuperClasses()){
+				fact.addAncestor(parent.getName());
+			}
+		}
+	}
+	
 	
 	/**
 	 * create cancer summary
@@ -263,36 +315,45 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		
 		// add body location
 		for(CodeableConcept cc: diagnosis.getBodySite()){
-			cancer.addFact(FHIRConstants.HAS_BODY_SITE,FactFactory.createFact(cc));
+			cancer.addFact(FHIRConstants.HAS_BODY_SITE,createFact(cc));
 		}
 		
 		// add TNM stage infromation
 		Stage stage = diagnosis.getStage();
 		if(stage != null){
-			phenotype.addFact(FHIRConstants.HAS_CANCER_STAGE,FactFactory.createFact(stage.getSummary()));
-			phenotype.addFact(FHIRConstants.HAS_T_CLASSIFICATION,FactFactory.createFact(stage.getPrimaryTumorStageCode()));
-			phenotype.addFact(FHIRConstants.HAS_N_CLASSIFICATION,FactFactory.createFact(stage.getRegionalLymphNodeStageCode()));
-			phenotype.addFact(FHIRConstants.HAS_M_CLASSIFICATION,FactFactory.createFact(stage.getDistantMetastasisStageCode()));
+			phenotype.addFact(FHIRConstants.HAS_CANCER_STAGE,createFact(stage.getSummary()));
+			phenotype.addFact(FHIRConstants.HAS_T_CLASSIFICATION,createFact(stage.getPrimaryTumorStageCode()));
+			phenotype.addFact(FHIRConstants.HAS_N_CLASSIFICATION,createFact(stage.getRegionalLymphNodeStageCode()));
+			phenotype.addFact(FHIRConstants.HAS_M_CLASSIFICATION,createFact(stage.getDistantMetastasisStageCode()));
 		}
 		
 		// create diagnosis fact
 		Fact dx = FactFactory.createFact(diagnosis);
+		addAncestors(dx);
 		
 		// adnecarcionma vs sarcoma
 		CodeableConcept ct = getCancerType(diagnosis);
 		if(ct != null){
-			Fact f = FactFactory.createFact(ct);
+			Fact f = createFact(ct);
 			f.addProvenanceFact(dx);
 			phenotype.addFact(FHIRConstants.HAS_CANCER_TYPE,f);
 		}
 		// insitu vs invasive 
 		CodeableConcept te = getTumorExtent(diagnosis);
 		if(te != null){
-			Fact f = FactFactory.createFact(te);
+			Fact f = createFact(te);
 			f.addProvenanceFact(dx);
 			phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,f);  
 		}
-			
+		
+		//phenotype.addHistologicType(null); // ductal, lobular infered from DX
+		CodeableConcept ht = getHistologicType(diagnosis);
+		if(ht != null){
+			Fact f = createFact(ht);
+			f.addProvenanceFact(dx);
+			phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,f);
+		}
+		
 		loadElementsFromReport(cancer, report);
 			
 		return cancer;
@@ -308,16 +369,16 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		if(diagnosis != null){
 			// create diagnosis fact
 			Fact dx = FactFactory.createFact((Element)diagnosis);
-		
+			addAncestors(dx);
 			// add body location
 			for(CodeableConcept cc: diagnosis.getBodySite()){
-				tumor.addFact(FHIRConstants.HAS_BODY_SITE,FactFactory.createFact(cc));
+				tumor.addFact(FHIRConstants.HAS_BODY_SITE,createFact(cc));
 			}
 				
 			//phenotype.addHistologicType(null); // ductal, lobular infered from DX
 			CodeableConcept ht = getHistologicType(diagnosis);
 			if(ht != null){
-				Fact f = FactFactory.createFact(ht);
+				Fact f = createFact(ht);
 				f.addProvenanceFact(dx);
 				phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,f);
 			}
@@ -325,7 +386,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			//phenotype.addTumorExtent(null);    // insitu vs invasive
 			CodeableConcept te = getTumorExtent(diagnosis);
 			if(te != null){
-				Fact f = FactFactory.createFact(te);
+				Fact f = createFact(te);
 				f.addProvenanceFact(dx);
 				phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,f);  
 			}

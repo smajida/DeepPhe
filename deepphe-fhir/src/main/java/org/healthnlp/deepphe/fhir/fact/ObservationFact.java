@@ -1,8 +1,28 @@
 package org.healthnlp.deepphe.fhir.fact;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.healthnlp.deepphe.util.FHIRConstants;
+
 public class ObservationFact extends Fact {
 	private Fact interpretation, method, value;
-	
+	private FactList bodySite;
+	public ObservationFact(){
+		setType(FHIRConstants.OBSERVATION);
+	}
+	public FactList getBodySite() {
+		if(bodySite == null){
+			bodySite = new FactList();
+			bodySite.addType(FHIRConstants.BODY_SITE);
+		}
+		return bodySite;
+	}
+
+	public void setBodySite(FactList bodySite) {
+		this.bodySite = bodySite;
+	}
+
 	public Fact getInterpretation() {
 		return interpretation;
 	}
@@ -30,11 +50,28 @@ public class ObservationFact extends Fact {
 	public String getSummaryText(){
 		StringBuffer b = new StringBuffer(getLabel());
 		if(value != null)
-			b.append(" value: "+value.getSummaryText());
+			b.append(" | value: "+value.getSummaryText());
 		if(interpretation != null)
-			b.append(" interpretation: "+interpretation.getSummaryText());
+			b.append(" | interpretation: "+interpretation.getSummaryText());
 		if(method != null)
-			b.append(" method: "+method.getSummaryText());
+			b.append(" | method: "+method.getSummaryText());
 		return b.toString();
+	}
+	
+	public List<Fact> getContainedFacts(){
+		List<Fact> facts = new ArrayList<Fact>();
+		if(method != null){
+			addContainedFact(facts,method);
+		}
+		if(interpretation != null){
+			addContainedFact(facts,interpretation);
+		}
+		if(value != null){
+			addContainedFact(facts,value);
+		}
+		for(Fact fact: getBodySite()){
+			addContainedFact(facts, fact);
+		}
+		return facts;
 	}
 }

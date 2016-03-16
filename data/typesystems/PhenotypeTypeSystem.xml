@@ -146,16 +146,78 @@
          <supertypeName>org.healthnlp.deepphe.uima.types.Model</supertypeName>
          <features>
             <featureDescription>
-               <name>hasTreatment</name>
+               <name>hasAbatementBoolean</name>
+               <description/>
+               <rangeTypeName>uima.cas.Boolean</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
+               <name>hasBodySite</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-               <elementType>org.healthnlp.deepphe.uima.types.MedicationStatement</elementType>
+               <elementType>org.healthnlp.deepphe.uima.types.BodySite</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasRecordedDate</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
+               <name>hasDateOfOnset</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
+               <name>hasDateAbatement</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
+               <name>hasEncounter</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Encounter</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasPhenotype</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
                <elementType>org.healthnlp.deepphe.uima.types.TumorPhenotype</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasPatient</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.PatientSummary</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasDeltaFlag</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasManifestation</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Event</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasCourse</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasTreatment</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.MedicationStatement</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasAgeOnset</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasTumorType</name>
@@ -589,16 +651,84 @@
                <elementType>org.healthnlp.deepphe.uima.types.Tumor</elementType>
             </featureDescription>
             <featureDescription>
+               <name>hasDeltaFlag</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasCourse</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasPatient</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.PatientSummary</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasStage</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Stage</elementType>
+            </featureDescription>
+            <featureDescription>
                <name>hasPhenotype</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
                <elementType>org.healthnlp.deepphe.uima.types.CancerPhenotype</elementType>
             </featureDescription>
             <featureDescription>
+               <name>hasAgeOnset</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasDateAbatement</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
                <name>hasTreatment</name>
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
                <elementType>org.healthnlp.deepphe.uima.types.MedicationStatement</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasEncounter</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Encounter</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasManifestation</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Event</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasAbatementBoolean</name>
+               <description/>
+               <rangeTypeName>uima.cas.Boolean</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
+               <name>hasBodySite</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.BodySite</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasRecordedDate</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
+            </featureDescription>
+            <featureDescription>
+               <name>hasDateOfOnset</name>
+               <description/>
+               <rangeTypeName>uima.cas.String</rangeTypeName>
             </featureDescription>
             <featureDescription>
                <name>hasContent</name>
@@ -858,6 +988,12 @@
                <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
             </featureDescription>
             <featureDescription>
+               <name>hasManifestation</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Event</elementType>
+            </featureDescription>
+            <featureDescription>
                <name>hasContent</name>
                <description>generic content</description>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
@@ -1114,6 +1250,12 @@
                <description/>
                <rangeTypeName>uima.cas.FSArray</rangeTypeName>
                <elementType>org.healthnlp.deepphe.uima.types.Fact</elementType>
+            </featureDescription>
+            <featureDescription>
+               <name>hasManifestation</name>
+               <description/>
+               <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+               <elementType>org.healthnlp.deepphe.uima.types.Event</elementType>
             </featureDescription>
             <featureDescription>
                <name>hasHistologicType</name>

@@ -1,17 +1,12 @@
 package org.healthnlp.deepphe.fhir.summary;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
+import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
-import org.hl7.fhir.instance.model.BackboneElement;
 
 
 public class TumorSummary extends Summary {
@@ -19,12 +14,22 @@ public class TumorSummary extends Summary {
 	public TumorSummary(){
 		phenotype = new TumorPhenotype();
 	}
+
+	public void setReport(Report r){
+		super.setReport(r);
+		getPhenotype().setReport(r);
+	}
 	
-	public List<Fact> getAllFacts() {
-		List<Fact> list = super.getAllFacts();
-		list.addAll(getPhenotype().getAllFacts());
+	/**
+	 * return all facts that are contained within this fact
+	 * @return
+	 */
+	public List<Fact> getContainedFacts(){
+		List<Fact> list = super.getContainedFacts();
+		list.addAll(getPhenotype().getContainedFacts());	
 		return list;
 	}
+	
 	
 	public static class TumorPhenotype extends Summary{
 		public FactList getManifestations() {
@@ -50,17 +55,6 @@ public class TumorSummary extends Summary {
 		public String getDisplayText() {
 			return getClass().getSimpleName();
 		}		
-		public String getSummaryText() {
-			StringBuffer st = new StringBuffer();
-			st.append(getDisplayText()+":\n");
-			for(String category: getContent().keySet()){
-				st.append("\t"+FHIRUtils.getPropertyDisplayLabel(category)+":\n");
-				for(Fact c: getFacts(category)){
-					st.append("\t\t"+c.getSummaryText()+"\n");
-				}
-			}
-			return st.toString();
-		}
 		public boolean isAppendable(Summary s) {
 			return s instanceof TumorPhenotype;
 		}
@@ -95,22 +89,11 @@ public class TumorSummary extends Summary {
 		return getClass().getSimpleName()+"_"+Math.abs(hashCode());
 	}
 	public String getSummaryText() {
-		StringBuffer st = new StringBuffer();
-		st.append(getDisplayText()+":\n");
-		
-		for(String category: getContent().keySet()){
-			st.append("\t"+FHIRUtils.getPropertyDisplayLabel(category)+":\n");
-			for(Fact c: getFacts(category)){
-				st.append("\t\t"+c.getSummaryText()+"\n");
-			}
-		}
-		
+		StringBuffer st = new StringBuffer(super.getSummaryText());
 		// add phenotype
 		if(getPhenotype() != null){
 			st.append(getPhenotype().getSummaryText()+"\n");
 		}
-		
-	
 		return st.toString();
 	}
 	public URI getConceptURI() {

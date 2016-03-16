@@ -1,8 +1,11 @@
 package org.healthnlp.deepphe.fhir.fact;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 
 /**
@@ -11,10 +14,14 @@ import org.hl7.fhir.instance.model.CodeableConcept;
  *
  */
 public class Fact {
-	private String name,uri,identifier,label,type;
-	private List<String> ancestors;
+	private String name,uri,identifier,label,category,type;
+	private Set<String> ancestors;
 	private List<Fact> provenanceFacts;
 	private List<TextMention> provenanceText;
+	
+	private transient String documentIdentifier, patientIdentifier, documentType;
+	private transient Set<String> containerIdentifier;
+	
 	public String getName() {
 		return name;
 	}
@@ -35,6 +42,8 @@ public class Fact {
 		this.uri = uri;
 	}
 	public String getIdentifier() {
+		if(identifier == null)
+			identifier = FactFactory.createIdentifier(this);
 		return identifier;
 	}
 	public void setIdentifier(String identifier) {
@@ -75,21 +84,24 @@ public class Fact {
 		return getName();
 	}
 	public String getSummaryText(){
-		return getLabel();
+		return getName();
 	}
-	public List<String> getAncestors() {
+	public Set<String> getAncestors() {
 		if(ancestors == null)
-			ancestors = new ArrayList<String>();
+			ancestors = new LinkedHashSet<String>();
 		return ancestors;
 	}
-	public void setAncestors(List<String> ancestors) {
-		this.ancestors = ancestors;
+	public void addAncestor(String a) {
+		getAncestors().add(a);
 	}
 	
 	public CodeableConcept getCodeableConcept(){
 		return FactFactory.createCodeableConcept(this);
 	}
 	public String getDocumentType(){
+		if(documentType != null)
+			return documentType;
+		// else search in province text
 		for(TextMention t: getProvenanceText()){
 			if(t.getDocumentType() != null)
 				return t.getDocumentType();
@@ -97,13 +109,59 @@ public class Fact {
 		return null;
 	}
 	public void setDocumentType(String docType){
+		documentType = docType;
 		for(TextMention t: getProvenanceText()){
 			t.setDocumentType(docType);
 		}
 	}
 	public void setDocumentIdentifier(String id){
+		documentIdentifier = id;
 		for(TextMention t: getProvenanceText()){
 			t.setDocumentIdentifier(id);
 		}
+	}
+	public String getCategory() {
+		return category;
+	}
+	public void setCategory(String category) {
+		this.category = category;
+	}
+	public String getDocumentIdentifer() {
+		return documentIdentifier;
+	}
+	public String getPatientIdentifier() {
+		return patientIdentifier;
+	}
+	public void setPatientIdentifier(String patientIdentifier) {
+		this.patientIdentifier = patientIdentifier;
+	}
+	public Set<String> getContainerIdentifier() {
+		if(containerIdentifier == null)
+			containerIdentifier = new LinkedHashSet<String>();
+		return containerIdentifier;
+	}
+	public void addContainerIdentifier(String containerIdentifier) {
+		getContainerIdentifier().add(containerIdentifier);
+	}
+	
+	/**
+	 * return all facts that are contained within this fact
+	 * @return
+	 */
+	public List<Fact> getContainedFacts(){
+		return new ArrayList<Fact>();
+	}
+	
+	/**
+	 * convinience method to add all contained facts
+	 * @param facts
+	 * @param fact
+	 * @return
+	 */
+	protected List<Fact> addContainedFact(List<Fact> facts, Fact fact){
+		fact.addContainerIdentifier(getIdentifier());
+		facts.add(fact);
+		facts.addAll(fact.getContainedFacts());
+		return facts;
 	}
 }

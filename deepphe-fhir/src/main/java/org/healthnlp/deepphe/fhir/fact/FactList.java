@@ -18,6 +18,9 @@ public class FactList extends ArrayList<Fact> {
 	public void setTypes(List<String> type) {
 		this.types = type;
 	}
+	public void addType(String type) {
+		getTypes().add(type);
+	}
 
 	public String getCategory() {
 		return category;
@@ -26,5 +29,12 @@ public class FactList extends ArrayList<Fact> {
 	public void setCategory(String category) {
 		this.category = category;
 	}
+
+	public boolean add(Fact e) {
+		if(e != null)
+			return super.add(e);
+		return false;
+	}
+	
 	
 }

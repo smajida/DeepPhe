@@ -529,9 +529,11 @@ public class FHIRUtils {
 	}
 	
 	public static String getResourceIdentifer(CodeableConcept c){
-		for(Coding coding : c.getCoding()){
-			if(coding.getCode() != null && SCHEMA_REFERENCE.equals(coding.getSystem())){
-				return coding.getCode();
+		if(c != null){
+			for(Coding coding : c.getCoding()){
+				if(coding.getCode() != null && SCHEMA_REFERENCE.equals(coding.getSystem())){
+					return coding.getCode();
+				}
 			}
 		}
 		return null;
@@ -781,6 +783,11 @@ public class FHIRUtils {
 				return true;
 		}
 		return false;
+	}
+	
+	public static boolean hasConceptURI(CodeableConcept cc){
+		return getConceptURI(cc) != null;
+		
 	}
 	
 	

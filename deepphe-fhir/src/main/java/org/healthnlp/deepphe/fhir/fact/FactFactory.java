@@ -4,12 +4,20 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
 
+import org.healthnlp.deepphe.fhir.AnatomicalSite;
+import org.healthnlp.deepphe.fhir.Condition;
 import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Observation;
+import org.healthnlp.deepphe.fhir.Procedure;
+import org.healthnlp.deepphe.fhir.Stage;
+import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
+import org.hl7.fhir.instance.model.BodySite;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DomainResource;
+import org.hl7.fhir.instance.model.Quantity;
+
 
 /**
  * create different facts
@@ -17,6 +25,7 @@ import org.hl7.fhir.instance.model.DomainResource;
  *
  */
 public class FactFactory {
+	
 	/**
 	 * return codeable concept representation of a given Fact
 	 * @param fact
@@ -43,19 +52,21 @@ public class FactFactory {
 	/**
 	 * create a generic fact based on a codeable concept
 	 */
-	private static Fact createFact(CodeableConcept cc, Fact fact){
+	public static Fact createFact(CodeableConcept cc, Fact fact){
 		URI uri = FHIRUtils.getConceptURI(cc);
 		String id = FHIRUtils.getResourceIdentifer(cc);
 		fact.setURI(""+uri);
+		fact.setLabel(cc.getText());
+		
 		if(uri != null){
 			try {
 				fact.setName(uri.toURL().getRef());
-				fact.setLabel(fact.getName().replaceAll("_"," "));
 			} catch (MalformedURLException e) {
 				throw new Error(e);
 			}
+		}else{
+			fact.setName(fact.getLabel());
 		}
-		//TODO: URI SHOULD NOT BE NULL???????
 		if(id != null)
 			fact.setIdentifier(id);
 		
@@ -75,6 +86,17 @@ public class FactFactory {
 	}
 
 	public static Fact createFact(Element resource) {
+		if(resource instanceof Observation)
+			return createFact((Observation)resource);
+		if(resource instanceof AnatomicalSite)
+			return createFact((AnatomicalSite)resource);
+		if(resource instanceof Condition)
+			return createFact((Condition)resource);
+		if(resource instanceof Procedure)
+			return createFact((Procedure)resource);
+		if(resource instanceof Quantity)
+			return createFact((Quantity)resource);
+		
 		return createFact(resource,new Fact());
 	}
 
@@ -90,14 +112,97 @@ public class FactFactory {
 		return fact;
 	}
 	
-	public static Fact createFact(Observation ob) {
+	
+	/**
+	 * create Fact from quantity
+	 * @param q
+	 * @return
+	 */
+	public static ValueFact createFact(Quantity q){
+		URI uri = FHIRConstants.QUANTITY_URI;
+		String name;
+		try {
+			name = uri.toURL().getRef();
+		} catch (MalformedURLException e) {
+			throw new Error(e);
+		}
+		
+		double value = q.getValue().doubleValue();
+		String units = q.getUnit();
+		
+		ValueFact fact = new ValueFact();
+		fact.setName(name);
+		fact.setLabel(name);
+		fact.setURI(""+uri);
+		fact.setType(name);
+		fact.setIdentifier((name.toUpperCase()+"_"+value+" "+units).trim());
+		
+		fact.setValue(value);
+		fact.setUnit(units);
+		
+		return fact;
+	}
+	
+	/**
+	 * create observation fact
+	 * @param ob
+	 * @return
+	 */
+	public static ObservationFact createFact(Observation ob) {
 		ObservationFact fact = (ObservationFact) createFact(ob,new ObservationFact());
-		if(ob.getInterpretation() != null)
+		if(FHIRUtils.hasConceptURI(ob.getInterpretation())){
 			fact.setInterpretation(createFact(ob.getInterpretation()));
-		//TODO: implement further
+		}
+		if(ob.getValue() != null && ob.getValue() instanceof Quantity){
+			try {
+				fact.setValue(createFact(ob.getValueQuantity()));
+			} catch (Exception e) {
+				throw new Error(e);
+			}
+		}
+		if(FHIRUtils.hasConceptURI(ob.getMethod())){
+			fact.setMethod(createFact(ob.getMethod()));
+		}
 		return fact;
 	}
 
+	/**
+	 * create observation fact
+	 * @param ob
+	 * @return
+	 */
+	public static ConditionFact createFact(Condition condition) {
+		ConditionFact fact = (ConditionFact) createFact(condition,new ConditionFact());
+		for(CodeableConcept cc: condition.getBodySite()){
+			fact.getBodySite().add(createFact(cc));
+		}
+		return fact;
+	}
+
+	
+	/**
+	 * create observation fact
+	 * @param ob
+	 * @return
+	 */
+	public static ProcedureFact createFact(Procedure condition) {
+		ProcedureFact fact = (ProcedureFact) createFact(condition,new ProcedureFact());
+		for(CodeableConcept cc: condition.getBodySite()){
+			fact.getBodySite().add(createFact(cc));
+		}
+		//TODO: handle method
+		return fact;
+	}
+	/**
+	 * create observation fact
+	 * @param ob
+	 * @return
+	 */
+	public static BodySiteFact createFact(AnatomicalSite location) {
+		BodySiteFact fact = (BodySiteFact) createFact(location,new BodySiteFact());
+		return fact;
+	}
+	
 	
 	/**
 	 * create empty fact of a given type
@@ -105,9 +210,25 @@ public class FactFactory {
 	 * @return
 	 */
 	public static Fact createFact(String type){
-		Fact fact = new Fact();
-		//TODO: implement
+		Fact fact = null;
+		if(FHIRConstants.BODY_SITE.equals(type)){
+			fact = new BodySiteFact();
+		}else if(FHIRConstants.OBSERVATION.equals(type)){
+			fact = new ObservationFact();
+		}else if(FHIRConstants.CONDITION.equals(type)){
+			fact = new ConditionFact();
+		}else if(FHIRConstants.PROCEDURE.equals(type)){
+			fact = new ProcedureFact();
+		}else if(FHIRConstants.QUANTITY.equals(type)){
+			fact = new ValueFact();
+		}else{
+			fact = new Fact();
+		}
 		return fact;
+	}
+	
+	public static String createIdentifier(Fact fact){
+		return fact.getType()+"_"+fact.getName().replaceAll("\\W+","_")+"_"+Math.abs(fact.getProvenanceMentions().hashCode());
 	}
 	
 }

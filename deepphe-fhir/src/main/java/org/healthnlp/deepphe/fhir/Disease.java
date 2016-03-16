@@ -6,7 +6,7 @@ import org.healthnlp.deepphe.util.FHIRUtils;
  * This class represents a diagnosis mention in a report
  * @author tseytlin
  */
-public class Disease extends Condition implements Element {
+public class Disease extends Condition {
 	
 	public Disease(){
 		setCategory(FHIRUtils.CONDITION_CATEGORY_DIAGNOSIS);

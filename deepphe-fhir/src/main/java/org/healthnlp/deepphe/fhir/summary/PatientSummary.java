@@ -1,34 +1,34 @@
 package org.healthnlp.deepphe.fhir.summary;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
+import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
-import org.healthnlp.deepphe.util.FHIRUtils;
 
 
 
 public class PatientSummary extends Summary {
 	private PatientPhenotype phenotype;
 
+	public void setReport(Report r){
+		super.setReport(r);
+		getPhenotype().setReport(r);
+	}
+
+	/**
+	 * return all facts that are contained within this fact
+	 * @return
+	 */
+	public List<Fact> getContainedFacts(){
+		List<Fact> list = super.getContainedFacts();
+		list.addAll(getPhenotype().getContainedFacts());	
+		return list;
+	}
+	
 	public static class PatientPhenotype extends Summary {
-		public String getSummaryText() {
-			StringBuffer st = new StringBuffer();
-			st.append(getDisplayText()+":\n");
-			for(String category: getContent().keySet()){
-				st.append("\t"+FHIRUtils.getPropertyDisplayLabel(category)+":\n");
-				for(Fact c: getFacts(category)){
-					st.append("\t\t"+c.getSummaryText()+"\n");
-				}
-			}
-			return st.toString();
-		}
 		public String getDisplayText() {
 			return  getClass().getSimpleName();
 		}
@@ -89,16 +89,7 @@ public class PatientSummary extends Summary {
 	}
 
 	public String getSummaryText() {
-		StringBuffer st = new StringBuffer();
-		st.append(getDisplayText()+":\n");
-		
-		for(String category: getContent().keySet()){
-			st.append("\t"+FHIRUtils.getPropertyDisplayLabel(category)+":\n");
-			for(Fact c: getFacts(category)){
-				st.append("\t\t"+c.getSummaryText()+"\n");
-			}
-		}
-		
+		StringBuffer st = new StringBuffer(super.getSummaryText());
 		st.append(getPhenotype().getSummaryText()+"\n");
 		return st.toString();
 	}
