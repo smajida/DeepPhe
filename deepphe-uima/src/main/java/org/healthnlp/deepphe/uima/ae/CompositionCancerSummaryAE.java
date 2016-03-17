@@ -84,11 +84,15 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			report.addCompositionSummaries(summaries);
 			report.addCompositionSummary(patient);
 			
-			//PhenotypeResourceFactory.saveReport(report,jcas);
+			PhenotypeResourceFactory.saveReport(report,jcas);
 			
 			// print out
 			record.addReport(report);
 			System.out.println(report.getSummaryText());
+		}
+		
+		for(Fact f: record.getReportLevelFacts()){
+			System.out.println(f.getInfo());
 		}
 		
 	}

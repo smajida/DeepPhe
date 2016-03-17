@@ -12,6 +12,8 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
@@ -65,7 +67,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		for(Report report: PhenotypeResourceFactory.loadReports(jcas)){
 			record.addReport(report);
 			
-			// append patient summary
+			/*// append patient summary
 			PatientSummary p = report.getPatientSummary();
 			if(p != null && patientSummary.isAppendable(p)){
 				patientSummary.append(p);
@@ -88,10 +90,28 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			//TODO: this is where you can start with RULES
 			// this is a temporary merge of all summaries together without
 			// much thought until we have something better
-		}
+*/		}
 
+		for(Fact f: record.getReportLevelFacts()){
+			System.out.println(f.getInfo());
+		}
+		
 		//TODO: rules, extract data
 		long stT = System.currentTimeMillis();	
+		
+		FactList pT = record.getCancerSummary().getPhenotype().getPrimaryTumorClassification();
+		FactList pM = record.getCancerSummary().getPhenotype().getDistantMetastasisClassification();
+		FactList pN = record.getCancerSummary().getPhenotype().getRegionalLymphNodeClassification();
+	
+		//record.getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_T_CLASSIFICATION, fact);
+		
+		/*for(Fact f: pT){
+			f.getType();
+			pT.get(0).getName();
+			List<String> anc = pT.get(0).getAncestors();
+		}*/
+		
+		pT = record.getCancerSummary().getPhenotype().getFacts("hasTClassification");
 		
 		/*DroolsEngine de = new DroolsEngine();
 		StatefulKnowledgeSession droolsSession = de.getSession();

@@ -144,6 +144,21 @@ public class Fact {
 		getContainerIdentifier().add(containerIdentifier);
 	}
 	
+	public String getInfo(){
+		StringBuffer b = new StringBuffer();
+		b.append("name: "+getName()+"|");
+		b.append("uri: "+getURI()+"|");
+		b.append("category: "+getCategory()+"|");
+		b.append("type: "+getType()+"|");
+		b.append("id: "+getIdentifier()+"|");
+		b.append("patient id: "+getPatientIdentifier()+"|");
+		b.append("document id: "+getDocumentIdentifer()+"|");
+		b.append("document tyoe: "+getDocumentType()+"|");
+		b.append("container ids: "+getContainerIdentifier()+"|");
+		b.append("ancestors: "+getAncestors()+"\n");
+		return b.toString();
+	}
+	
 	/**
 	 * return all facts that are contained within this fact
 	 * @return
