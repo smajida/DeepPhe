@@ -13,6 +13,7 @@ import org.apache.uima.UimaContext;
 import java.io.FileNotFoundException;
 import java.util.*;
 
+import static org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory.MODIFIER_ELEMENT_NAME;
 import static org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory.ROOT_ELEMENT_NAME;
 
 /**
@@ -86,6 +87,10 @@ public class OwlConceptFactory implements ConceptFactory {
          final Map<Long, Concept> conceptMap = new HashMap<>();
          final IClass root = ontology.getClass( ROOT_ELEMENT_NAME );
          for ( IClass childClass : root.getSubClasses() ) {
+            conceptMap.putAll( createOwlConcepts( childClass ) );
+         }
+         final IClass root2 = ontology.getClass( MODIFIER_ELEMENT_NAME );
+         for ( IClass childClass : root2.getSubClasses() ) {
             conceptMap.putAll( createOwlConcepts( childClass ) );
          }
          return conceptMap;

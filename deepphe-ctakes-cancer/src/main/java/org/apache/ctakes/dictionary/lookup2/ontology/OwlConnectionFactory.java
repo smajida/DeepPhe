@@ -23,6 +23,7 @@ public enum OwlConnectionFactory {
    }
 
    static public final String ROOT_ELEMENT_NAME = "Annotation";
+   static public final String MODIFIER_ELEMENT_NAME = "Modifier";
 
    static private final Logger LOGGER = Logger.getLogger( "OwlConnectionFactory" );
    static private final Logger DOT_LOGGER = Logger.getLogger( "ProgressAppender" );
