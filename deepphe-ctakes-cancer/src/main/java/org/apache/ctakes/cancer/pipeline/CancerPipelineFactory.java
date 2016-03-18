@@ -43,10 +43,6 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 final public class CancerPipelineFactory {
 
-//   Is the ExtractionPrepAnnotator necessary?
-//   builder.add( AnalysisEngineFactory.createEngineDescription( ExtractionPrepAnnotator.class,
-//         "AnnotationVersion", 2,
-//         "AnnotationVersionPropKey", "ANNOTATION_VERSION" ) );
 
    static private final String CTAKES_DIR_PREFIX = "/org/apache/ctakes/";
 
@@ -105,11 +101,6 @@ final public class CancerPipelineFactory {
 
    public static CollectionReader createFilesReader( final String inputDirectory )
          throws ResourceInitializationException {
-//      return CollectionReaderFactory.createReader( FilesInDirectoryCollectionReader.class,
-//            FilesInDirectoryCollectionReader.PARAM_INPUTDIR,
-//            inputDirectory,
-//            FilesInDirectoryCollectionReader.PARAM_RECURSE,
-//            true );
       return CollectionReaderFactory.createReader( FileTreeReader.class,
             FilesInDirectoryCollectionReader.PARAM_INPUTDIR,
             inputDirectory );
@@ -117,9 +108,6 @@ final public class CancerPipelineFactory {
 
    public static AnalysisEngine createXMIWriter( final String outputDirectory )
          throws ResourceInitializationException {
-//      return AnalysisEngineFactory.createEngine( XMIWriter.class,
-//            XMIWriter.PARAM_OUTPUTDIR,
-//            outputDirectory );
       return AnalysisEngineFactory.createEngine( FileTreeXmiWriter.class,
             FileTreeXmiWriter.PARAM_OUTPUTDIR,
             outputDirectory );

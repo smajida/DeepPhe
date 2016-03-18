@@ -14,6 +14,10 @@ import java.util.regex.Matcher;
  */
 interface TnmValue extends Value {
 
+   String PARENT_URI = "#TNM_Staging_System";
+   String URI_SUFFIX = "_TNM_Finding";
+
+
    TnmValue UNKNOWN = new TnmValue() {
       public String getTitle() {
          return "Unknown";

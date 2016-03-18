@@ -17,15 +17,15 @@ final class Nvalue implements TnmValue {
 
    static {
       final Collection<Nvalue> values = new ArrayList<>();
-      values.add( new Nvalue( "X", "NX_Stage_Finding", "X" ) );
-      values.add( new Nvalue( "0", "N0_Stage_Finding", "0" ) );
+      values.add( new Nvalue( "X", "NX", "X" ) );
+      values.add( new Nvalue( "0", "N0", "0" ) );
       for ( int i = 1; i < 4; i++ ) {
-         values.add( new Nvalue( "" + i, "N" + i + "_Stage_Finding", "[I]{" + i + "}|" + i ) );
+         values.add( new Nvalue( "" + i, "N" + i, "[I]{" + i + "}|" + i ) );
       }
       for ( int i = 1; i < 4; i++ ) {
          for ( char c = 'a'; c <= 'z'; c++ ) {
             values.add( new Nvalue(
-                  "" + i + c, "N" + i + c + "_Stage_Finding", "([I]{" + i + "}|" + i + ")" + c ) );
+                  "" + i + c, "N" + i + c, "([I]{" + i + "}|" + i + ")" + c ) );
          }
       }
       VALUES = values.toArray( new Nvalue[ values.size() ] );
@@ -35,7 +35,7 @@ final class Nvalue implements TnmValue {
       return VALUES;
    }
 
-   static private final String PARENT_URI = "#TNMValue";
+   static private final String PARENT_URI = "#N_Stage";
 
    final private String _title;
    final private String _uri;
@@ -44,7 +44,7 @@ final class Nvalue implements TnmValue {
 
    Nvalue( final String title, final String uri, final String regex ) {
       _title = title;
-      _uri = uri;
+      _uri = uri + URI_SUFFIX + "_v7";
       _pattern = Pattern.compile( regex, Pattern.CASE_INSENSITIVE );
    }
 
