@@ -40,6 +40,11 @@ final public class OwlOntologyConceptUtil {
    static public final String CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl";
    static public final String BREAST_CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl";
 
+   static public final String DISEASE_DISORDER_URI = SCHEMA_OWL + "#DiseaseDisorder";
+   static public final String SIGN_SYMPTOM_URI = SCHEMA_OWL + "#SignSymptom";
+   static public final String PROCEDURE_URI = SCHEMA_OWL + "#Procedure";
+   static public final String MEDICATION_URI = SCHEMA_OWL + "#MedicationStatement";
+
 //   static private final Function<String, String> asSelf = self -> self;
 
    static private final BinaryOperator<Collection<IdentifiedAnnotation>> mergeSets
@@ -184,10 +189,19 @@ final public class OwlOntologyConceptUtil {
     */
    static public Collection<IdentifiedAnnotation> getAnnotationsByUriBranch( final JCas jcas,
                                                                              final String rootUri ) {
+      return getAnnotationStreamByUriBranch( jcas, rootUri ).collect( Collectors.toSet() );
+   }
+
+   /**
+    * @param jcas    -
+    * @param rootUri uri of interest
+    * @return all IdentifiedAnnotations for the given uri and its children
+    */
+   static public Stream<IdentifiedAnnotation> getAnnotationStreamByUriBranch( final JCas jcas,
+                                                                              final String rootUri ) {
       return getUriBranchStream( rootUri )
             .map( uri -> getAnnotationsByUri( jcas, uri ) )
-            .flatMap( Collection::stream )
-            .collect( Collectors.toSet() );
+            .flatMap( Collection::stream );
    }
 
    /**

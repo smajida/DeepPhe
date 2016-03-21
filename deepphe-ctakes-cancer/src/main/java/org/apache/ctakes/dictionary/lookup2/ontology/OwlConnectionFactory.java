@@ -4,10 +4,15 @@ import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 import org.apache.ctakes.core.resource.FileLocator;
+import org.apache.ctakes.core.util.DotLogger;
 import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -23,10 +28,9 @@ public enum OwlConnectionFactory {
    }
 
    static public final String ROOT_ELEMENT_NAME = "Annotation";
+   static public final String MODIFIER_ELEMENT_NAME = "Modifier";
 
    static private final Logger LOGGER = Logger.getLogger( "OwlConnectionFactory" );
-   static private final Logger DOT_LOGGER = Logger.getLogger( "ProgressAppender" );
-   static private final Logger EOL_LOGGER = Logger.getLogger( "ProgressDone" );
 
 
    private final Map<String, IOntology> ONTOLOGIES = Collections.synchronizedMap( new HashMap<>() );
@@ -44,18 +48,12 @@ public enum OwlConnectionFactory {
          return ontology;
       }
       LOGGER.info( "Loading Ontology at " + fullOwlPath + ":" );
-      final Timer timer = new Timer();
-      timer.scheduleAtFixedRate( new DotPlotter(), 333, 333 );
-      try {
+      try ( DotLogger dotter = new DotLogger() ) {
          ontology = OOntology.loadOntology( fullOwlPath );
-      } catch ( IOntologyException ontE ) {
-         timer.cancel();
-         EOL_LOGGER.error( "" );
+      } catch ( IOntologyException | IOException multE ) {
          LOGGER.error( "Could not load Ontology at " + fullOwlPath );
-         throw ontE;
+         throw new IOntologyException( multE.getMessage() );
       }
-      timer.cancel();
-      EOL_LOGGER.info( "" );
       LOGGER.info( "Ontology loaded" );
       ONTOLOGIES.put( fullOwlPath, ontology );
       if ( ONTOLOGIES.size() == 1 ) {
@@ -69,20 +67,6 @@ public enum OwlConnectionFactory {
          throw new IOntologyException( "No Default Ontology" );
       }
       return getOntology( _defaultOntologyPath );
-   }
-
-
-   static private class DotPlotter extends TimerTask {
-      private int _count = 0;
-
-      @Override
-      public void run() {
-         DOT_LOGGER.info( "." );
-         _count++;
-         if ( _count % 50 == 0 ) {
-            EOL_LOGGER.info( " " + _count );
-         }
-      }
    }
 
 }

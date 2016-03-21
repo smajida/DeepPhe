@@ -17,11 +17,11 @@ final class Mvalue implements TnmValue {
 
    static {
       final Collection<Mvalue> values = new ArrayList<>();
-      values.add( new Mvalue( "X", "MX_Stage_Finding", "X" ) );
-      values.add( new Mvalue( "0", "M0_Stage_Finding", "0" ) );
-      values.add( new Mvalue( "1", "M1_Stage_Finding", "(I|1)" ) );
+      values.add( new Mvalue( "X", "MX", "X" ) );
+      values.add( new Mvalue( "0", "M0", "0" ) );
+      values.add( new Mvalue( "1", "M1", "(I|1)" ) );
       for ( char c = 'a'; c <= 'z'; c++ ) {
-         values.add( new Mvalue( "1" + c, "M1" + c + "_Stage_Finding", "(I|1)" + c ) );
+         values.add( new Mvalue( "1" + c, "M1" + c, "(I|1)" + c ) );
       }
       VALUES = values.toArray( new Mvalue[ values.size() ] );
    }
@@ -30,7 +30,7 @@ final class Mvalue implements TnmValue {
       return VALUES;
    }
 
-   static private final String PARENT_URI = "#TNMValue";
+   static private final String PARENT_URI = "#M_Stage";
 
    final private String _title;
    final private String _uri;
@@ -39,7 +39,7 @@ final class Mvalue implements TnmValue {
 
    Mvalue( final String title, final String uri, final String regex ) {
       _title = title;
-      _uri = uri;
+      _uri = uri + URI_SUFFIX + "_v7";
       _pattern = Pattern.compile( regex, Pattern.CASE_INSENSITIVE );
    }
 

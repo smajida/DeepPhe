@@ -3,7 +3,6 @@ package org.apache.ctakes.cancer.instance;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
-import org.apache.ctakes.typesystem.type.refsem.*;
 import org.apache.ctakes.typesystem.type.relation.BinaryTextRelation;
 import org.apache.ctakes.typesystem.type.relation.DegreeOfTextRelation;
 import org.apache.ctakes.typesystem.type.relation.IndicatesTextRelation;
@@ -14,10 +13,8 @@ import org.apache.uima.cas.CASException;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.TOP;
-import org.apache.uima.jcas.tcas.Annotation;
 
 import javax.annotation.concurrent.Immutable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -167,6 +164,26 @@ final public class InstanceUtil {
       return getFirstArguments( relations, locatable );
    }
 
+   static public Collection<IdentifiedAnnotation> getNeoplasms( final IdentifiedAnnotation locatable ) {
+      final JCas jcas = getJcas( locatable );
+      if ( jcas == null ) {
+         return Collections.emptyList();
+      }
+      return getNeoplasms( jcas, locatable );
+   }
+
+   static public Collection<IdentifiedAnnotation> getNeoplasms( final JCas jcas,
+                                                                final IdentifiedAnnotation locatable ) {
+      final Collection<NeoplasmRelation> relations = JCasUtil.select( jcas, NeoplasmRelation.class );
+      if ( relations == null || relations.isEmpty() ) {
+         return Collections.emptyList();
+      }
+      return getSecondArguments( relations, locatable );
+   }
+
+
+
+
 
    static public JCas getJcas( final Collection<IdentifiedAnnotation> annotations ) {
       return annotations.stream()
@@ -208,120 +225,6 @@ final public class InstanceUtil {
             .filter( IdentifiedAnnotation.class::isInstance )
             .map( a -> (IdentifiedAnnotation)a )
             .collect( Collectors.toList() );
-   }
-
-
-   /**
-    * @param annotation -
-    * @return a line of text with doctimerel, modality, aspect and permanence ; if available
-    */
-   static private String getAnnotationProperties( final IdentifiedAnnotation annotation ) {
-      final StringBuilder sb = new StringBuilder();
-      if ( annotation.getPolarity() < 0 ) {
-         sb.append( " negated" );
-      }
-      if ( annotation.getUncertainty() == 1 ) {
-         sb.append( " uncertain" );
-      }
-      if ( annotation.getGeneric() ) {
-         sb.append( " generic" );
-      }
-      if ( annotation.getConditional() ) {
-         sb.append( " conditional" );
-      }
-      if ( annotation.getHistoryOf() == 1 ) {
-         sb.append( " in history" );
-      }
-      if ( annotation.getSubject() != null && !annotation.getSubject().isEmpty() ) {
-         sb.append( " for " ).append( annotation.getSubject() );
-      }
-      return sb.toString();
-   }
-
-   /**
-    * @param eventMention -
-    * @return a line of text with doctimerel, modality, aspect and permanence ; if available
-    */
-   static private String getEventProperties( final EventMention eventMention ) {
-      final Event event = eventMention.getEvent();
-      if ( event == null ) {
-         return "";
-      }
-      final EventProperties eventProperties = event.getProperties();
-      if ( eventProperties == null ) {
-         return "";
-      }
-      final StringBuilder sb = new StringBuilder();
-      sb.append( " occurred " );
-      sb.append( eventProperties.getDocTimeRel().toLowerCase() );
-      sb.append( " document time" );
-      // modality is: Actual, hypothetical, hedged, generic
-      final String modality = eventProperties.getContextualModality();
-      if ( modality != null && !modality.isEmpty() ) {
-         sb.append( ", " );
-         sb.append( modality.toLowerCase() );
-      }
-      // Aspect is: Intermittent (or not)
-      final String aspect = eventProperties.getContextualAspect();
-      if ( aspect != null && !aspect.isEmpty() ) {
-         sb.append( ", " );
-         sb.append( aspect.toLowerCase() );
-      }
-      // Permanence is: Finite or permanent
-      final String permanence = eventProperties.getPermanence();
-      if ( permanence != null && !permanence.isEmpty() ) {
-         sb.append( ", " );
-         sb.append( permanence.toLowerCase() );
-      }
-      return sb.toString();
-   }
-
-   /**
-    * @param anatomicalSite -
-    * @return a line of text with body laterality and side ; if available
-    */
-   static private String getAnatomicalProperties( final AnatomicalSiteMention anatomicalSite ) {
-      StringBuilder sb = new StringBuilder();
-      final BodyLateralityModifier laterality = anatomicalSite.getBodyLaterality();
-      if ( laterality != null ) {
-         final Attribute normalized = laterality.getNormalizedForm();
-         if ( normalized != null && normalized instanceof BodyLaterality ) {
-            sb.append( ", " );
-            sb.append( ((BodyLaterality)normalized).getValue() );
-         }
-      }
-      final BodySideModifier bodySide = anatomicalSite.getBodySide();
-      if ( bodySide != null ) {
-         final Attribute normalized = bodySide.getNormalizedForm();
-         if ( normalized != null && normalized instanceof BodySide ) {
-            sb.append( ", " );
-            sb.append( ((BodySide)normalized).getValue() );
-         }
-      }
-      return sb.toString();
-   }
-
-   /**
-    * @param jcas       ye olde ...
-    * @param annotation of interest
-    * @return all relations with the given annotation as the first or second argument
-    */
-   static private Collection<String> getRelations( final JCas jcas, final IdentifiedAnnotation annotation ) {
-      final Collection<BinaryTextRelation> relations = JCasUtil.select( jcas, BinaryTextRelation.class );
-      if ( relations == null || relations.isEmpty() ) {
-         return Collections.emptyList();
-      }
-      final Collection<String> relationTexts = new ArrayList<>();
-      for ( BinaryTextRelation relation : relations ) {
-         final Annotation argument1 = relation.getArg1().getArgument();
-         final Annotation argument2 = relation.getArg2().getArgument();
-         if ( annotation.equals( argument1 ) || annotation.equals( argument2 ) ) {
-            relationTexts.add( argument1.getCoveredText()
-                               + " " + relation.getCategory().toLowerCase()
-                               + " " + argument2.getCoveredText() );
-         }
-      }
-      return relationTexts;
    }
 
 

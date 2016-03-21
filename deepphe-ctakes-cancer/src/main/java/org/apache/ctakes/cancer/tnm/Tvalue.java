@@ -17,22 +17,22 @@ final class Tvalue implements TnmValue {
 
    static {
       final Collection<Tvalue> values = new ArrayList<>();
-      values.add( new Tvalue( "X", "TX_Stage_Finding", "X" ) );
-      values.add( new Tvalue( "IS", "TIS_Stage_Finding", "IS" ) );
-      values.add( new Tvalue( "A", "TA_Stage_Finding", "A" ) );
-      values.add( new Tvalue( "0", "T0_Stage_Finding", "0" ) );
-      values.add( new Tvalue( "4", "T4_Stage_Finding", "(IV|4)" ) );
+      values.add( new Tvalue( "X", "TX", "X" ) );
+      values.add( new Tvalue( "IS", "Tis", "IS" ) );
+      values.add( new Tvalue( "A", "TA", "A" ) );
+      values.add( new Tvalue( "0", "T0", "0" ) );
+      values.add( new Tvalue( "4", "T4", "(IV|4)" ) );
       for ( int i = 1; i < 4; i++ ) {
-         values.add( new Tvalue( "" + i, "T" + i + "_Stage_Finding", "[I]{" + i + "}|" + i ) );
+         values.add( new Tvalue( "" + i, "T" + i, "[I]{" + i + "}|" + i ) );
       }
       for ( int i = 1; i < 4; i++ ) {
          for ( char c = 'a'; c <= 'z'; c++ ) {
             values.add( new Tvalue(
-                  "" + i + c, "T" + i + c + "_Stage_Finding", "([I]{" + i + "}|" + i + ")" + c ) );
+                  "" + i + c, "T" + i + c, "([I]{" + i + "}|" + i + ")" + c ) );
          }
       }
       for ( char c = 'a'; c <= 'z'; c++ ) {
-         values.add( new Tvalue( "4" + c, "T4" + c + "_Stage_Finding", "(IV|4)" + c ) );
+         values.add( new Tvalue( "4" + c, "T4" + c, "(IV|4)" + c ) );
       }
       VALUES = values.toArray( new Tvalue[ values.size() ] );
    }
@@ -41,7 +41,7 @@ final class Tvalue implements TnmValue {
       return VALUES;
    }
 
-   static private final String PARENT_URI = "#TNMValue";
+   static private final String PARENT_URI = "#T_Stage";
 
    final private String _title;
    final private String _uri;
@@ -50,7 +50,7 @@ final class Tvalue implements TnmValue {
 
    Tvalue( final String title, final String uri, final String regex ) {
       _title = title;
-      _uri = uri;
+      _uri = uri + URI_SUFFIX;
       _pattern = Pattern.compile( regex, Pattern.CASE_INSENSITIVE );
    }
 
