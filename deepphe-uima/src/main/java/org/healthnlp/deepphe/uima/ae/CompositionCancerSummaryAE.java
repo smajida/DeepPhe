@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 
 import org.apache.uima.UimaContext;
@@ -35,6 +37,8 @@ import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
+
+import com.clarkparsia.owlapi.explanation.util.OntologyUtils;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.ILogicExpression;
@@ -84,13 +88,14 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			report.addCompositionSummaries(summaries);
 			report.addCompositionSummary(patient);
 			
-			//PhenotypeResourceFactory.saveReport(report,jcas);
+			PhenotypeResourceFactory.saveReport(report,jcas);
 			
 			// print out
 			record.addReport(report);
-			System.out.println(report.getSummaryText());
+			//System.out.println(report.getSummaryText());
 		}
 		
+		PhenotypeResourceFactory.saveMedicalRecord(record, jcas);
 	}
 
 	
@@ -291,12 +296,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	
 	
 	private void addAncestors(Fact fact){
-		IClass cls = ontology.getClass(fact.getURI());
-		if(cls != null){
-			for(IClass parent: cls.getSuperClasses()){
-				fact.addAncestor(parent.getName());
-			}
-		}
+		new org.healthnlp.deepphe.uima.fhir.OntologyUtils(ontology).addAncestors(fact);
 	}
 	
 	

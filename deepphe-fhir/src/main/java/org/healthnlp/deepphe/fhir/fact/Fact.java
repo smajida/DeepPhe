@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 
 /**
@@ -14,7 +12,7 @@ import org.hl7.fhir.instance.model.CodeableConcept;
  *
  */
 public class Fact {
-	private String name,uri,identifier,label,category,type;
+	private String name,uri,identifier,label,category,type = getClass().getSimpleName();
 	private Set<String> ancestors;
 	private List<Fact> provenanceFacts;
 	private List<TextMention> provenanceText;
