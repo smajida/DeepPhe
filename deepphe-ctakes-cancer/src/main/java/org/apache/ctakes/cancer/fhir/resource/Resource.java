@@ -1,8 +1,14 @@
-package org.apache.ctakes.cancer.instance;
+package org.apache.ctakes.cancer.fhir.resource;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
-import org.apache.ctakes.typesystem.type.refsem.*;
-import org.apache.ctakes.typesystem.type.textsem.*;
+import org.apache.ctakes.typesystem.type.refsem.BodyLaterality;
+import org.apache.ctakes.typesystem.type.refsem.BodySide;
+import org.apache.ctakes.typesystem.type.refsem.Event;
+import org.apache.ctakes.typesystem.type.refsem.EventProperties;
+import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
+import org.apache.ctakes.typesystem.type.textsem.EventMention;
+import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
+import org.apache.ctakes.typesystem.type.textsem.Modifier;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.ArrayList;
@@ -19,14 +25,14 @@ import java.util.stream.Stream;
  * @since 3/17/2016
  */
 @Immutable
-final public class OwlInstance {
+final public class Resource {
 
-   static private final Logger LOGGER = Logger.getLogger( "OwlInstance" );
+   static private final Logger LOGGER = Logger.getLogger( "Resource" );
 
    private final String _uri;
    private final IdentifiedAnnotation _annotation;
 
-   public OwlInstance( final String uri, final IdentifiedAnnotation annotation ) {
+   public Resource( final String uri, final IdentifiedAnnotation annotation ) {
       _uri = uri;
       _annotation = annotation;
    }

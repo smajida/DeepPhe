@@ -1,20 +1,24 @@
 package org.healthnlp.deepphe.uima.fhir;
 
-import java.net.URI;
-import java.util.*;
-import java.util.regex.Pattern;
-
-import org.apache.ctakes.cancer.instance.InstanceUtil;
+import edu.pitt.dbmi.nlp.noble.ontology.IClass;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
+import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+import org.apache.ctakes.cancer.fhir.resource.InstanceUtil;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.core.util.OntologyConceptUtil;
-import org.apache.ctakes.typesystem.type.refsem.*;
-//import org.apache.ctakes.typesystem.type.refsem.Date;
-import org.apache.ctakes.typesystem.type.relation.*;
-import org.apache.ctakes.typesystem.type.textsem.*;
+import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
+import org.apache.ctakes.typesystem.type.refsem.Time;
+import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
+import org.apache.ctakes.typesystem.type.relation.BinaryTextRelation;
+import org.apache.ctakes.typesystem.type.relation.Relation;
+import org.apache.ctakes.typesystem.type.relation.RelationArgument;
+import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
+import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
+import org.apache.ctakes.typesystem.type.textsem.TimeMention;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.cas.FeatureStructure;
@@ -28,9 +32,11 @@ import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 
-import edu.pitt.dbmi.nlp.noble.ontology.IClass;
-import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
-import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+import java.net.URI;
+import java.util.*;
+import java.util.regex.Pattern;
+
+//import org.apache.ctakes.typesystem.type.refsem.Date;
 
 public class cTAKESUtils {
 

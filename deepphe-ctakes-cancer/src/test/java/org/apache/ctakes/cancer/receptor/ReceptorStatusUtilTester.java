@@ -4,24 +4,19 @@ import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.SignSymptomMention;
+import org.apache.log4j.Logger;
 import org.apache.uima.UIMAException;
 import org.apache.uima.fit.factory.JCasFactory;
 import org.apache.uima.jcas.JCas;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import org.apache.log4j.Logger;
-
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNull;
-
 import static org.apache.ctakes.cancer.receptor.StatusType.*;
 import static org.apache.ctakes.cancer.receptor.StatusValue.*;
+import static org.junit.Assert.*;
 
 /**
  * @author SPF , chip-nlp
@@ -75,7 +70,7 @@ public class ReceptorStatusUtilTester {
       final SpannedStatusType spannedType = new SpannedStatusType( type, offset, offset + 10 );
       final SpannedStatusValue spannedValue = new SpannedStatusValue( value, offset + 20, offset + 30 );
       final Status status = new Status( spannedType, spannedValue );
-      return StatusInstanceFactory.getInstance().createInstance( _testCas, 0, status );
+      return StatusResourceFactory.getInstance().createResource( _testCas, 0, status );
    }
 
    @BeforeClass

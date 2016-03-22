@@ -6,7 +6,10 @@ import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.jcas.JCas;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,7 +56,7 @@ final public class SizeFinder {
       }
       final int windowStartOffset = lookupWindow.getBegin();
       for ( Dimension dimension : dimensions ) {
-         SizeInstanceFactory.getInstance().createInstance( jcas, windowStartOffset, dimension, masses );
+         SizeResourceFactory.getInstance().createResource( jcas, windowStartOffset, dimension, masses );
       }
    }
 

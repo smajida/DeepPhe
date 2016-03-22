@@ -1,4 +1,4 @@
-package org.apache.ctakes.cancer.instance;
+package org.apache.ctakes.cancer.fhir.resource;
 
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
@@ -7,7 +7,7 @@ import org.apache.ctakes.typesystem.type.relation.BinaryTextRelation;
 import org.apache.ctakes.typesystem.type.relation.DegreeOfTextRelation;
 import org.apache.ctakes.typesystem.type.relation.IndicatesTextRelation;
 import org.apache.ctakes.typesystem.type.relation.LocationOfTextRelation;
-import org.apache.ctakes.typesystem.type.textsem.*;
+import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.fit.util.JCasUtil;

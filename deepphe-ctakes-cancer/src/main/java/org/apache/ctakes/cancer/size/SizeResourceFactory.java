@@ -1,6 +1,6 @@
 package org.apache.ctakes.cancer.size;
 
-import org.apache.ctakes.cancer.instance.AbstractInstanceFactory;
+import org.apache.ctakes.cancer.fhir.resource.AbstractResourceFactory;
 import org.apache.ctakes.cancer.property.SpannedProperty;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.MeasurementAnnotation;
@@ -15,7 +15,7 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_PHENO
  * An instance is defined as the collection of all property types and values associated with a single neoplasm.
  * <p>
  * <p>
- * Use of any {@code createInstance()} method will create:
+ * Use of any {@code createResource()} method will create:
  * <ul>
  * size type annotations
  * neoplasm relations between the size type annotations and the nearest provided neoplasm in the text
@@ -26,20 +26,20 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_PHENO
  * @version %I%
  * @since 2/8/2016
  */
-final public class SizeInstanceFactory
-      extends AbstractInstanceFactory<DimensionType, DimensionValue, MeasurementAnnotation> {
+final public class SizeResourceFactory
+      extends AbstractResourceFactory<DimensionType, DimensionValue, MeasurementAnnotation> {
 
-   static private final Logger LOGGER = Logger.getLogger( "SizeInstanceFactory" );
+   static private final Logger LOGGER = Logger.getLogger( "SizeResourceFactory" );
 
    static private class SingletonHolder {
-      static private SizeInstanceFactory INSTANCE = new SizeInstanceFactory();
+      static private SizeResourceFactory INSTANCE = new SizeResourceFactory();
    }
 
-   static public SizeInstanceFactory getInstance() {
+   static public SizeResourceFactory getInstance() {
       return SingletonHolder.INSTANCE;
    }
 
-   private SizeInstanceFactory() {
+   private SizeResourceFactory() {
       super( "Size" );
    }
 
@@ -53,14 +53,14 @@ final public class SizeInstanceFactory
       final DimensionValue dimensionValue = new DimensionValue( value );
       final SpannedDimensionValue spannedValue = new SpannedDimensionValue( dimensionValue, valueBegin, valueEnd );
       final Dimension dimension = new Dimension( spannedType, spannedValue );
-      return createInstance( jcas, 0, dimension );
+      return createResource( jcas, 0, dimension );
    }
 
    /**
     * {@inheritDoc}
     */
    @Override
-   public MeasurementAnnotation createInstance( final JCas jcas,
+   public MeasurementAnnotation createResource( final JCas jcas,
                                                 final int windowStartOffset,
                                                 final SpannedProperty<DimensionType, DimensionValue> size,
                                                 final Iterable<IdentifiedAnnotation> neoplasms,

@@ -1,7 +1,7 @@
 package org.apache.ctakes.cancer.receptor;
 
 
-import org.apache.ctakes.cancer.instance.AbstractInstanceFactory;
+import org.apache.ctakes.cancer.fhir.resource.AbstractResourceFactory;
 import org.apache.ctakes.cancer.property.SpannedProperty;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.Modifier;
@@ -16,7 +16,7 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDI
  * An instance is defined as the collection of all property types and values associated with a single neoplasm.
  *
  *
- * Use of any {@code createInstance()} method will create:
+ * Use of any {@code createResource()} method will create:
  * <ul>
  * Receptor Status type annotations
  * neoplasm relations between the Receptor Status type annotations and the nearest provided neoplasm in the text
@@ -28,19 +28,19 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDI
  * @version %I%
  * @since 12/6/2015
  */
-final public class StatusInstanceFactory extends AbstractInstanceFactory<StatusType, StatusValue, SignSymptomMention> {
+final public class StatusResourceFactory extends AbstractResourceFactory<StatusType, StatusValue, SignSymptomMention> {
 
-   static private final Logger LOGGER = Logger.getLogger( "StatusInstanceFactory" );
+   static private final Logger LOGGER = Logger.getLogger( "StatusResourceFactory" );
 
    static private class SingletonHolder {
-      static private StatusInstanceFactory INSTANCE = new StatusInstanceFactory();
+      static private StatusResourceFactory INSTANCE = new StatusResourceFactory();
    }
 
-   static public StatusInstanceFactory getInstance() {
+   static public StatusResourceFactory getInstance() {
       return SingletonHolder.INSTANCE;
    }
 
-   private StatusInstanceFactory() {
+   private StatusResourceFactory() {
       super( "Receptor Status" );
    }
 
@@ -48,7 +48,7 @@ final public class StatusInstanceFactory extends AbstractInstanceFactory<StatusT
     * {@inheritDoc}
     */
    @Override
-   public SignSymptomMention createInstance( final JCas jcas,
+   public SignSymptomMention createResource( final JCas jcas,
                                              final int windowStartOffset,
                                              final SpannedProperty<StatusType, StatusValue> status,
                                              final Iterable<IdentifiedAnnotation> neoplasms,

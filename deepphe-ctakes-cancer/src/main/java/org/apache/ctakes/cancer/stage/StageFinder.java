@@ -50,7 +50,7 @@ final public class StageFinder {
       }
       final int windowStartOffset = lookupWindow.getBegin();
       for ( Stage stage : stages ) {
-         StageInstanceFactory.getInstance().createInstance( jcas, windowStartOffset, stage, neoplasms );
+         StageResourceFactory.getInstance().createResource( jcas, windowStartOffset, stage, neoplasms );
       }
    }
 

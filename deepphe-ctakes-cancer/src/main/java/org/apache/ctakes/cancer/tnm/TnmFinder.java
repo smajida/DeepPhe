@@ -70,10 +70,10 @@ final public class TnmFinder {
          final SpannedTnmPrefix tnmPrefix = getTnmPrefix( tnm, lookupWindow.getCoveredText() );
          if ( tnmPrefix != null ) {
             final IdentifiedAnnotation diagnosticTest = createTestProcedure( jcas, windowStartOffset, tnmPrefix );
-            TnmInstanceFactory.getInstance().createInstance( jcas, windowStartOffset, tnm, neoplasms, Collections
+            TnmResourceFactory.getInstance().createResource( jcas, windowStartOffset, tnm, neoplasms, Collections
                   .singletonList( diagnosticTest ) );
          } else {
-            TnmInstanceFactory.getInstance().createInstance( jcas, windowStartOffset, tnm, neoplasms );
+            TnmResourceFactory.getInstance().createResource( jcas, windowStartOffset, tnm, neoplasms );
          }
       }
    }

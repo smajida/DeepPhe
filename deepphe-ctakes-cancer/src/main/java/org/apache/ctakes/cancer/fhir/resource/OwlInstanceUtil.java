@@ -1,4 +1,4 @@
-package org.apache.ctakes.cancer.instance;
+package org.apache.ctakes.cancer.fhir.resource;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
@@ -26,8 +26,8 @@ final public class OwlInstanceUtil {
     * @param uri  uri for instance of interest
     * @return collection of instances with the given uri
     */
-   static public Collection<OwlInstance> getOwlInstances( final JCas jCas, final String uri ) {
-      final Function<IdentifiedAnnotation, OwlInstance> createInstance = a -> new OwlInstance( uri, a );
+   static public Collection<Resource> getOwlInstances( final JCas jCas, final String uri ) {
+      final Function<IdentifiedAnnotation, Resource> createInstance = a -> new Resource( uri, a );
       return OwlOntologyConceptUtil.getAnnotationsByUri( jCas, uri )
             .stream()
             .map( createInstance )

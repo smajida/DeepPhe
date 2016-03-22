@@ -1,6 +1,6 @@
 package org.apache.ctakes.cancer.size;
 
-import org.apache.ctakes.cancer.instance.InstanceUtil;
+import org.apache.ctakes.cancer.fhir.resource.InstanceUtil;
 import org.apache.ctakes.cancer.owl.UriAnnotationFactory;
 import org.apache.ctakes.cancer.property.AbstractPropertyUtil;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;

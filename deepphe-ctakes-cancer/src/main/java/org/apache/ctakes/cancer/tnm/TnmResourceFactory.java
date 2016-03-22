@@ -1,6 +1,6 @@
 package org.apache.ctakes.cancer.tnm;
 
-import org.apache.ctakes.cancer.instance.AbstractInstanceFactory;
+import org.apache.ctakes.cancer.fhir.resource.AbstractResourceFactory;
 import org.apache.ctakes.cancer.property.SpannedProperty;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.Modifier;
@@ -15,7 +15,7 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDI
  * An instance is defined as the collection of all property types and values associated with a single neoplasm.
  *
  *
- * Use of any {@code createInstance()} method will create:
+ * Use of any {@code createResource()} method will create:
  * <ul>
  * T N M type annotations
  * neoplasm relations between the T N M type annotations and the nearest provided neoplasm in the text
@@ -26,19 +26,19 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDI
  * @version %I%
  * @since 2/8/2016
  */
-final public class TnmInstanceFactory extends AbstractInstanceFactory<TnmType, TnmValue, SignSymptomMention> {
+final public class TnmResourceFactory extends AbstractResourceFactory<TnmType, TnmValue, SignSymptomMention> {
 
-   static private final Logger LOGGER = Logger.getLogger( "TnmInstanceFactory" );
+   static private final Logger LOGGER = Logger.getLogger( "TnmResourceFactory" );
 
    static private class SingletonHolder {
-      static private TnmInstanceFactory INSTANCE = new TnmInstanceFactory();
+      static private TnmResourceFactory INSTANCE = new TnmResourceFactory();
    }
 
-   static public TnmInstanceFactory getInstance() {
+   static public TnmResourceFactory getInstance() {
       return SingletonHolder.INSTANCE;
    }
 
-   private TnmInstanceFactory() {
+   private TnmResourceFactory() {
       super( "TNM" );
    }
 
@@ -46,7 +46,7 @@ final public class TnmInstanceFactory extends AbstractInstanceFactory<TnmType, T
     * {@inheritDoc}
     */
    @Override
-   public SignSymptomMention createInstance( final JCas jcas,
+   public SignSymptomMention createResource( final JCas jcas,
                                              final int windowStartOffset,
                                              final SpannedProperty<TnmType, TnmValue> tnm,
                                              final Iterable<IdentifiedAnnotation> neoplasms,

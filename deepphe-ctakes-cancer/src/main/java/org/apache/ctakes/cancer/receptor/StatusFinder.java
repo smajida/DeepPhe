@@ -59,8 +59,8 @@ final public class StatusFinder {
                candidateTests.add( diagnostic );
             }
          }
-         StatusInstanceFactory.getInstance()
-               .createInstance( jcas, windowStartOffset, status, neoplasms, candidateTests );
+         StatusResourceFactory.getInstance()
+               .createResource( jcas, windowStartOffset, status, neoplasms, candidateTests );
          candidateTests.clear();
       }
    }

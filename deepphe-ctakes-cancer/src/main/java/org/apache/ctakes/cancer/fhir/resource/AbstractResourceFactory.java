@@ -1,7 +1,10 @@
-package org.apache.ctakes.cancer.instance;
+package org.apache.ctakes.cancer.fhir.resource;
 
 import org.apache.ctakes.cancer.owl.UriAnnotationFactory;
 import org.apache.ctakes.cancer.property.*;
+import org.apache.ctakes.cancer.receptor.StatusResourceFactory;
+import org.apache.ctakes.cancer.stage.StageResourceFactory;
+import org.apache.ctakes.cancer.tnm.TnmResourceFactory;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.cancer.util.FinderUtil;
 import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
@@ -9,7 +12,6 @@ import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.relation.DegreeOfTextRelation;
 import org.apache.ctakes.typesystem.type.relation.IndicatesTextRelation;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
-import org.apache.ctakes.typesystem.type.textsem.EventMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.Modifier;
 import org.apache.ctakes.typesystem.type.textsem.SeverityModifier;
@@ -25,12 +27,12 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.MODIFIER_TYPE_ID
  * Abstract for classes that should be used to create full neoplasm property instances.
  * An instance is defined as the collection of all property types and values associated with a single neoplasm.
  * Children of this factory exist for each property type, so full instance creation requires use of each.
- * {@link org.apache.ctakes.cancer.tnm.TnmInstanceFactory}
- * {@link org.apache.ctakes.cancer.receptor.StatusInstanceFactory}
- * {@link org.apache.ctakes.cancer.stage.StageInstanceFactory}
+ * {@link TnmResourceFactory}
+ * {@link StatusResourceFactory}
+ * {@link StageResourceFactory}
  *
  *
- * Use of any {@code createInstance()} method will create:
+ * Use of any {@code createResource()} method will create:
  * <ul>
  * appropriate property type annotations
  * neoplasm relations between the property type annotations and the nearest provided neoplasm in the text
@@ -42,23 +44,23 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.MODIFIER_TYPE_ID
  * @version %I%
  * @since 2/17/2016
  */
-abstract public class AbstractInstanceFactory<T extends Type, V extends Value, E extends IdentifiedAnnotation> {
+abstract public class AbstractResourceFactory<T extends Type, V extends Value, E extends IdentifiedAnnotation> {
 
    // TODO add <..., P extends Test, ...>
 
-   static private final Logger LOGGER = Logger.getLogger( "AbstractInstanceFactory" );
+   static private final Logger LOGGER = Logger.getLogger( "AbstractResourceFactory" );
 
-   private final String _instanceTypeName;
+   private final String _resourceTypeName;
 
-   public AbstractInstanceFactory( final String instanceTypeName ) {
-      _instanceTypeName = instanceTypeName;
+   public AbstractResourceFactory( final String resourceTypeName ) {
+      _resourceTypeName = resourceTypeName;
    }
 
    /**
     * @return the name of the type of instance, e.g. "TNM", "Receptor Status", "Stage"
     */
-   final public String getInstanceTypeName() {
-      return _instanceTypeName;
+   final public String getResourceTypeName() {
+      return _resourceTypeName;
    }
 
    /**
@@ -71,10 +73,10 @@ abstract public class AbstractInstanceFactory<T extends Type, V extends Value, E
     * @param spannedProperty   -
     * @return the property as a event mention
     */
-   final public E createInstance( final JCas jcas,
+   final public E createResource( final JCas jcas,
                                   final int windowStartOffset,
                                   final SpannedProperty<T, V> spannedProperty ) {
-      return createInstance( jcas, windowStartOffset, spannedProperty, Collections.emptyList() );
+      return createResource( jcas, windowStartOffset, spannedProperty, Collections.emptyList() );
    }
 
    /**
@@ -89,11 +91,11 @@ abstract public class AbstractInstanceFactory<T extends Type, V extends Value, E
     * @param neoplasms         nearby neoplasms
     * @return the property as a event mention
     */
-   final public E createInstance( final JCas jcas,
+   final public E createResource( final JCas jcas,
                                   final int windowStartOffset,
                                   final SpannedProperty<T, V> spannedProperty,
                                   final Iterable<IdentifiedAnnotation> neoplasms ) {
-      return createInstance( jcas, windowStartOffset, spannedProperty, neoplasms, null );
+      return createResource( jcas, windowStartOffset, spannedProperty, neoplasms, null );
    }
 
    /**
@@ -110,7 +112,7 @@ abstract public class AbstractInstanceFactory<T extends Type, V extends Value, E
     * @param diagnosticTests   nearby diagnostic tests
     * @return the property as a event mention
     */
-   abstract public E createInstance( final JCas jcas,
+   abstract public E createResource( final JCas jcas,
                                      final int windowStartOffset,
                                      final SpannedProperty<T, V> spannedProperty,
                                      final Iterable<IdentifiedAnnotation> neoplasms,
@@ -134,7 +136,7 @@ abstract public class AbstractInstanceFactory<T extends Type, V extends Value, E
     * @param diagnosticTests -
     * @return -
     */
-   final public E createInstance( final JCas jcas,
+   final public E createResource( final JCas jcas,
                                   final String typeUri, final int typeBegin, final int typeEnd,
                                   final String valueUri, final int valueBegin, final int valueEnd,
                                   final Iterable<IdentifiedAnnotation> neoplasms,

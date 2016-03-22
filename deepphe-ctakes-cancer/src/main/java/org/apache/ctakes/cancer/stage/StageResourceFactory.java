@@ -1,6 +1,6 @@
 package org.apache.ctakes.cancer.stage;
 
-import org.apache.ctakes.cancer.instance.AbstractInstanceFactory;
+import org.apache.ctakes.cancer.fhir.resource.AbstractResourceFactory;
 import org.apache.ctakes.cancer.property.SpannedProperty;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
@@ -15,7 +15,7 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_DISOR
  * An instance is defined as the collection of all property types and values associated with a single neoplasm.
  *
  *
- * Use of any {@code createInstance()} method will create:
+ * Use of any {@code createResource()} method will create:
  * <ul>
  * Stage type annotations
  * neoplasm relations between the Stage type annotations and the nearest provided neoplasm in the text
@@ -26,19 +26,19 @@ import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_DISOR
  * @version %I%
  * @since 2/8/2016
  */
-final public class StageInstanceFactory extends AbstractInstanceFactory<StageType, StageValue, DiseaseDisorderMention> {
+final public class StageResourceFactory extends AbstractResourceFactory<StageType, StageValue, DiseaseDisorderMention> {
 
-   static private final Logger LOGGER = Logger.getLogger( "StageInstanceFactory" );
+   static private final Logger LOGGER = Logger.getLogger( "StageResourceFactory" );
 
    static private class SingletonHolder {
-      static private StageInstanceFactory INSTANCE = new StageInstanceFactory();
+      static private StageResourceFactory INSTANCE = new StageResourceFactory();
    }
 
-   static public StageInstanceFactory getInstance() {
+   static public StageResourceFactory getInstance() {
       return SingletonHolder.INSTANCE;
    }
 
-   private StageInstanceFactory() {
+   private StageResourceFactory() {
       super( "Stage" );
    }
 
@@ -46,7 +46,7 @@ final public class StageInstanceFactory extends AbstractInstanceFactory<StageTyp
     * {@inheritDoc}
     */
    @Override
-   public DiseaseDisorderMention createInstance( final JCas jcas,
+   public DiseaseDisorderMention createResource( final JCas jcas,
                                                  final int windowStartOffset,
                                                  final SpannedProperty<StageType, StageValue> stage,
                                                  final Iterable<IdentifiedAnnotation> neoplasms,
