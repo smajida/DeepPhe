@@ -805,7 +805,5 @@ public class FHIRUtils {
 		// insert space into camel back
 		return str.replaceAll("([a-z])([A-Z])","$1 $2");
 	}
-
-
 	
 }

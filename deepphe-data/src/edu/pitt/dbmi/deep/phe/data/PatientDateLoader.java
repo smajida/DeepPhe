@@ -140,9 +140,9 @@ public class PatientDateLoader {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		File dir = new File("/home/tseytlin/Data/DeepPhe/Samples/Sample-Jan-2015/Breast/");
-		File in  = new File(dir,"breast.tsv");
-		File out = new File(dir,"breast_patients+dates.csv");
+		File dir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/");
+		File in  = new File(dir,"TCGA.tsv");
+		File out = new File(dir,"TCGA_patients+dates.csv");
 		System.out.print("converting "+in.getAbsolutePath()+" ..");
 		convert(in,out);
 		System.out.println("done");
