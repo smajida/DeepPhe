@@ -329,16 +329,16 @@ final public class DocumentResourceFactory {
 //			}
 //		}
 		// add individual T N M to list
-		OwlOntologyConceptUtil.getAnnotationsByUriBranch( cas, TnmPropertyUtil.getParentUri() )
-				.stream().map( DocumentResourceFactory::createFinding ).forEach( list::add );
+		OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( cas, TnmPropertyUtil.getParentUri() )
+				.map( DocumentResourceFactory::createFinding ).forEach( list::add );
 //		for(Annotation  a: cTAKESUtils.getAnnotationsByType(cas,DiseaseDisorderMention.type)){
 //			CancerStage st = cTAKESUtils.getCancerStage((IdentifiedAnnotation)a);
 //			if(st != null)
 //				list.add(createFinding(st));
 //		}
 		// add Stage to list
-		OwlOntologyConceptUtil.getAnnotationsByUriBranch( cas, StagePropertyUtil.getParentUri() )
-				.stream().map( DocumentResourceFactory::createFinding ).forEach( list::add );
+		OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( cas, StagePropertyUtil.getParentUri() )
+				.map( DocumentResourceFactory::createFinding ).forEach( list::add );
 		return list;
 	}
 
@@ -365,7 +365,7 @@ final public class DocumentResourceFactory {
 //		cTAKESUtils.getAnnotationsByType( cas, CancerSize.type ).stream()
 //				.map( DocumentResourceFactory::createObservation )
 //				.forEach( list::add );
-		OwlOntologyConceptUtil.getAnnotationsByUriBranch( cas, SizePropertyUtil.getParentUri() ).stream()
+		OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( cas, SizePropertyUtil.getParentUri() )
 				.map( DocumentResourceFactory::createObservation ).forEach( list::add );
 //		for(IdentifiedAnnotation m: cTAKESUtils.getAnnotationsByType(cas,CancerSize.type)){
 //			list.add(createObservation(m));
@@ -556,9 +556,8 @@ final public class DocumentResourceFactory {
 //				}
 				// TODO - use OwlOntologyConceptUtil.getAnnotationsByUriBranch  - should this use a coallesced annotation?
 				final IdentifiedAnnotation tnm
-						= OwlOntologyConceptUtil.getAnnotationsByUriBranch( mention.getCAS().getJCas(),
+						= OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( mention.getCAS().getJCas(),
 						TnmPropertyUtil.getParentUri() )
-						.stream()
 						.filter( mention::equals )
 						.findFirst().get();
 				if ( tnm != null ) {
