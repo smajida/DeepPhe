@@ -30,37 +30,6 @@ public class TumorSummary extends Summary {
 		return list;
 	}
 	
-	
-	public static class TumorPhenotype extends Summary{
-		public FactList getManifestations() {
-			return getFactsOrInsert(FHIRConstants.HAS_MANIFESTATION);
-		}
-		
-		public FactList getHistologicTypes() {
-			return getFactsOrInsert(FHIRConstants.HAS_HISTOLOGIC_TYPE);
-		}
-
-	
-		public FactList getTumorExtent() {
-			return getFactsOrInsert(FHIRConstants.HAS_TUMOR_EXTENT);
-		}
-
-	
-		public String getResourceIdentifier() {
-			return getClass().getSimpleName()+"_"+Math.abs(hashCode());
-		}
-		public URI getConceptURI() {
-			return FHIRConstants.TUMOR_PHENOTYPE_SUMMARY_URI;
-		}
-		public String getDisplayText() {
-			return getClass().getSimpleName();
-		}		
-		public boolean isAppendable(Summary s) {
-			return s instanceof TumorPhenotype;
-		}
-				
-	}
-	
 	public FactList getTumorType() {
 		return getFacts(FHIRConstants.HAS_TUMOR_TYPE);
 	}
