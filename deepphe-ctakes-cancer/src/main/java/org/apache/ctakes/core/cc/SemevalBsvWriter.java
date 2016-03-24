@@ -137,7 +137,7 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       sb.append( getAttributeText( resource.isHypothetical() ) );
       // Bodyloc_value|Bodyloc_span|
       sb.append( getSpannedCuiText( resource.getLocationAnnotations() ) );
-      // DocTimeRel
+      // DocTimeRel|DocTimeRelSpan|
       sb.append( getAttributeText( resource.getDocTimeRel() ) );
       // Value_Spans|CUI|
       sb.append( getSpannedCuiText( resource.getValueAnnotations() ) );
