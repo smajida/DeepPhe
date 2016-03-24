@@ -27,13 +27,7 @@ import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.fhir.fact.TextMention;
-import org.healthnlp.deepphe.fhir.summary.CancerSummary;
-import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
-import org.healthnlp.deepphe.fhir.summary.PatientSummary;
-import org.healthnlp.deepphe.fhir.summary.PatientSummary.PatientPhenotype;
-import org.healthnlp.deepphe.fhir.summary.Summary;
-import org.healthnlp.deepphe.fhir.summary.TumorSummary;
-import org.healthnlp.deepphe.fhir.summary.TumorSummary.TumorPhenotype;
+import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.uima.types.Attribute;
 import org.healthnlp.deepphe.uima.types.BodySite;
 import org.healthnlp.deepphe.uima.types.Cancer;
@@ -474,7 +468,7 @@ public class PhenotypeResourceFactory {
 	 * @return
 	 */
 
-	private static CancerPhenotype saveCancerPhenotype(org.healthnlp.deepphe.fhir.summary.CancerSummary.CancerPhenotype phenotype, JCas jcas) {
+	private static CancerPhenotype saveCancerPhenotype(org.healthnlp.deepphe.fhir.summary.CancerPhenotype phenotype, JCas jcas) {
 		Annotation a = getAnnotationByIdentifer(jcas,phenotype.getResourceIdentifier());
 		CancerPhenotype summaryAnnotation = (a == null)?new CancerPhenotype(jcas):(CancerPhenotype)a;
 		
@@ -1207,7 +1201,7 @@ public class PhenotypeResourceFactory {
 		// add phenotypes
 		for(int i=0;i<getSize(summaryAnnotation.getHasPhenotype());i++){
 			org.healthnlp.deepphe.uima.types.PatientPhenotype pheneAnnotation = summaryAnnotation.getHasPhenotype(i);
-			PatientSummary.PatientPhenotype phenotype = new PatientSummary.PatientPhenotype();
+			PatientPhenotype phenotype = new PatientPhenotype();
 			
 			// add generic values
 			for(int j=0;j<getSize(pheneAnnotation.getHasContent());j++){
@@ -1241,7 +1235,7 @@ public class PhenotypeResourceFactory {
 		// add phenotypes
 		for(int i=0;i<getSize(summaryAnnotation.getHasPhenotype());i++){
 			CancerPhenotype pheneAnnotation = summaryAnnotation.getHasPhenotype(i);
-			CancerSummary.CancerPhenotype phenotype = new CancerSummary.CancerPhenotype();
+			org.healthnlp.deepphe.fhir.summary.CancerPhenotype phenotype = new org.healthnlp.deepphe.fhir.summary.CancerPhenotype();
 			
 			// add generic values
 			for(int j=0;j<getSize(pheneAnnotation.getHasContent());j++){
@@ -1274,7 +1268,7 @@ public class PhenotypeResourceFactory {
 		// add phenotypes
 		for(int i=0;i<getSize(summaryAnnotation.getHasPhenotype());i++){
 			org.healthnlp.deepphe.uima.types.TumorPhenotype pheneAnnotation = summaryAnnotation.getHasPhenotype(i);
-			TumorSummary.TumorPhenotype phenotype = new TumorSummary.TumorPhenotype();
+			TumorPhenotype phenotype = new TumorPhenotype();
 			// add generic values
 			for(int j=0;j<getSize(pheneAnnotation.getHasContent());j++){
 				FactList flist = loadFactList(pheneAnnotation.getHasContent(j));

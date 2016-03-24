@@ -13,11 +13,9 @@ import org.healthnlp.deepphe.fhir.Procedure;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.Stage;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
-import org.healthnlp.deepphe.fhir.summary.CancerSummary.CancerPhenotype;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.fhir.summary.TumorSummary;
-import org.healthnlp.deepphe.fhir.summary.TumorSummary.TumorPhenotype;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.jmock.Expectations;
@@ -39,8 +37,8 @@ public class FHIRObjectMocker {
 	final CancerSummary cancerSummary = context.mock(CancerSummary.class);
 	final TumorSummary tumorSummary = context.mock(TumorSummary.class);
 	final PatientSummary patientSummary = context.mock(PatientSummary.class);
-	final CancerPhenotype cancerPhenotype = context.mock(CancerPhenotype.class);
-	final TumorPhenotype tumorPhenotype = context.mock(TumorPhenotype.class);
+	final org.healthnlp.deepphe.fhir.summary.CancerPhenotype cancerPhenotype = context.mock(org.healthnlp.deepphe.fhir.summary.CancerPhenotype.class);
+	final org.healthnlp.deepphe.fhir.summary.TumorPhenotype tumorPhenotype = context.mock(org.healthnlp.deepphe.fhir.summary.TumorPhenotype.class);
 	
 	
 	public FHIRObjectMocker() {

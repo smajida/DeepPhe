@@ -10,6 +10,8 @@ import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.drools.event.rule.DebugAgendaEventListener;
+import org.drools.event.rule.DebugWorkingMemoryEventListener;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
@@ -64,6 +66,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		record.setCancerSummary(cancerSummary);
 		
 		
+		
 		for(Report report: PhenotypeResourceFactory.loadReports(jcas)){
 			record.addReport(report);
 			
@@ -92,29 +95,53 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			// much thought until we have something better
 */		}
 
-		for(Fact f: record.getReportLevelFacts()){
-			System.out.println(f.getInfo());
+		//insert record into drools
+		long stT = System.currentTimeMillis();	
+		DroolsEngine de = new DroolsEngine();
+		StatefulKnowledgeSession droolsSession = null;
+		try {
+			droolsSession = de.getSession();
+			droolsSession.addEventListener( new DebugAgendaEventListener() );
+			droolsSession.addEventListener( new DebugWorkingMemoryEventListener() );
+			
+			droolsSession.insert(record);
+					
+			for(Fact f: record.getReportLevelFacts()){
+				System.out.println(f.getInfo());
+				droolsSession.insert(f);
+			}
+			
+			droolsSession.fireAllRules();
+			droolsSession.dispose();
+			System.out.println("DROOLS TIME: "+(System.currentTimeMillis() - stT)/1000+"  sec");
+System.out.println("Patient from MR: "+record.getPatient());
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
-		//TODO: rules, extract data
-		long stT = System.currentTimeMillis();	
 		
-		FactList pT = record.getCancerSummary().getPhenotype().getPrimaryTumorClassification();
+		
+		//TODO: rules, extract data
+		
+		
+		/*FactList pT = record.getCancerSummary().getPhenotype().getPrimaryTumorClassification();
 		FactList pM = record.getCancerSummary().getPhenotype().getDistantMetastasisClassification();
 		FactList pN = record.getCancerSummary().getPhenotype().getRegionalLymphNodeClassification();
-	
-		//record.getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_T_CLASSIFICATION, fact);
+	*/
 		
-		/*for(Fact f: pT){
-			f.getType();
-			pT.get(0).getName();
-			List<String> anc = pT.get(0).getAncestors();
-		}*/
 		
-		pT = record.getCancerSummary().getPhenotype().getFacts("hasTClassification");
+		//FactList pT = record.getCancerSummary().getPhenotype().getFacts("hasTClassification");
+		record.getCancerSummary().getPhenotype().addFact("hasTClassification", null);
+		
 		
 		/*DroolsEngine de = new DroolsEngine();
 		StatefulKnowledgeSession droolsSession = de.getSession();
+		
+		droolsSession.addEventListener( new DebugAgendaEventListener() );
+		droolsSession.addEventListener( new DebugWorkingMemoryEventListener() );
+		
 		droolsSession.insert(cancerSummary);
 		droolsSession.fireAllRules();
 		droolsSession.dispose();

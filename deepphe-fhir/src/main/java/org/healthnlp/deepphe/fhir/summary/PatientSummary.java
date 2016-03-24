@@ -27,21 +27,7 @@ public class PatientSummary extends Summary {
 		list.addAll(getPhenotype().getContainedFacts());	
 		return list;
 	}
-	
-	public static class PatientPhenotype extends Summary {
-		public String getDisplayText() {
-			return  getClass().getSimpleName();
-		}
-		public String getResourceIdentifier() {
-			return getClass().getSimpleName()+"_"+Math.abs(hashCode());
-		}
-		public URI getConceptURI() {
-			return FHIRConstants.PATIENT_PHENOTYPE_SUMMARY_URI;
-		}
-		public boolean isAppendable(Summary s) {
-			return s instanceof PatientPhenotype;
-		}
-	}
+
 	
 	public FactList getName() {
 		return getFactsOrInsert(FHIRConstants.HAS_NAME);

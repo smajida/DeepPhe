@@ -28,10 +28,12 @@ import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.fhir.fact.ObservationFact;
 import org.healthnlp.deepphe.fhir.fact.ProcedureFact;
+import org.healthnlp.deepphe.fhir.summary.CancerPhenotype;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
+import org.healthnlp.deepphe.fhir.summary.TumorPhenotype;
 import org.healthnlp.deepphe.fhir.summary.TumorSummary;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
@@ -310,7 +312,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	private CancerSummary createCancerSummary(Report report, Disease diagnosis){
 		CancerSummary cancer = new CancerSummary();
 		loadTemplate(cancer);
-		CancerSummary.CancerPhenotype phenotype = cancer.getPhenotype();
+		CancerPhenotype phenotype = cancer.getPhenotype();
 		loadTemplate(phenotype);
 		//cancer.addPhenotype(phenotype);
 		
@@ -364,7 +366,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	private TumorSummary createTumorSummary(Report report, Condition diagnosis, CancerSummary cancer){
 		TumorSummary tumor = new TumorSummary();
 		loadTemplate(tumor);
-		TumorSummary.TumorPhenotype phenotype = tumor.getPhenotype();
+		TumorPhenotype phenotype = tumor.getPhenotype();
 		loadTemplate(phenotype);
 		
 		if(diagnosis != null){
