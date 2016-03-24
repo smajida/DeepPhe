@@ -1,7 +1,10 @@
 package org.healthnlp.deepphe.uima.pipelines;
 
-import com.lexicalscope.jewel.cli.CliFactory;
-import com.lexicalscope.jewel.cli.Option;
+import java.io.File;
+import java.io.IOException;
+
+import javax.annotation.concurrent.Immutable;
+
 import org.apache.ctakes.cancer.ae.XMIWriter;
 import org.apache.uima.UIMAException;
 import org.apache.uima.analysis_engine.AnalysisEngine;
@@ -15,9 +18,8 @@ import org.healthnlp.deepphe.uima.ae.PhenotypeCancerSummaryAE;
 import org.healthnlp.deepphe.uima.ae.SummaryTextOutput;
 import org.healthnlp.deepphe.uima.cr.FHIRCollectionReader;
 
-import javax.annotation.concurrent.Immutable;
-import java.io.File;
-import java.io.IOException;
+import com.lexicalscope.jewel.cli.CliFactory;
+import com.lexicalscope.jewel.cli.Option;
 
 @Immutable
 final public class PhenotypeSummarizerPipeline {
@@ -50,12 +52,11 @@ final public class PhenotypeSummarizerPipeline {
 		final CollectionReader collectionReader = createCollectionReader(inputDirectory);
 		final AnalysisEngine compositionSummarizerAE = AnalysisEngineFactory.createEngine(
 				CompositionCancerSummaryAE.class, CompositionCancerSummaryAE.PARAM_ONTOLOGY_PATH, ontologyPath);
-		final AnalysisEngine cancerSummarizerAE = AnalysisEngineFactory.createEngine( PhenotypeCancerSummaryAE.class,
-				PhenotypeCancerSummaryAE.PARAM_ONTOLOGY_PATH, ontologyPath );
+		final AnalysisEngine cancerSummarizerAE = AnalysisEngineFactory.createEngine(PhenotypeCancerSummaryAE.class,
+				PhenotypeCancerSummaryAE.PARAM_ONTOLOGY_PATH, ontologyPath);
 		final AnalysisEngine xmiWriter = AnalysisEngineFactory.createEngine(XMIWriter.class, XMIWriter.PARAM_OUTPUTDIR,
 				outputDirectory + File.separator + "TYPE");
-		final AnalysisEngine summaryAE = AnalysisEngineFactory
-				.createEngine( SummaryTextOutput.class, SummaryTextOutput.PARAM_OUTPUTDIR, outputDirectory );
+		final AnalysisEngine summaryAE = AnalysisEngineFactory.createEngine(SummaryTextOutput.class,SummaryTextOutput.PARAM_OUTPUTDIR,outputDirectory); 
 		
 		//final AnalysisEngine graphDBConsumerAE = AnalysisEngineFactory.createEngine(GraphDBPhenotypeConsumerAE.class,
 		//		GraphDBPhenotypeConsumerAE.PARAM_DBPATH, outputDirectory + File.separator + "neo4jdb");
@@ -65,7 +66,7 @@ final public class PhenotypeSummarizerPipeline {
 		
 		// run the damn pipeline
 		//SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE, cancerSummarizerAE, xmiWriter,summaryAE,transmartAE,graphDBConsumerAE);
-		SimplePipeline.runPipeline( collectionReader, compositionSummarizerAE, cancerSummarizerAE, summaryAE, xmiWriter );
+		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE,cancerSummarizerAE,summaryAE,xmiWriter);
 	}
 
 	private static CollectionReader createCollectionReader(String inputDirectory)
@@ -80,4 +81,5 @@ final public class PhenotypeSummarizerPipeline {
 	}
 
 
+	
 }

@@ -1,12 +1,13 @@
 package org.healthnlp.deepphe.fhir.summary;
 
+import java.net.URI;
+import java.util.List;
+
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
 
-import java.net.URI;
-import java.util.List;
 
 
 public class PatientSummary extends Summary {
@@ -27,7 +28,7 @@ public class PatientSummary extends Summary {
 		return list;
 	}
 
-
+	
 	public FactList getName() {
 		return getFactsOrInsert(FHIRConstants.HAS_NAME);
 	}

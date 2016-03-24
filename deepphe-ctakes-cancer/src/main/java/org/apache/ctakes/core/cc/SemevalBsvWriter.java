@@ -43,7 +43,7 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
     */
    public static final String PARAM_OUTPUTDIR = "OutputDirectory";
    @ConfigurationParameter( name = PARAM_OUTPUTDIR,
-         description = "Root output directory to write xmi files",
+         description = "Root output directory to write semeval pipe files",
          mandatory = true )
    private File _outputRootDir;
 
@@ -71,7 +71,7 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       } catch ( CASException casE ) {
          throw new AnalysisEngineProcessException( casE );
       }
-      final String fileName = DocumentIDAnnotationUtil.getDocumentIdForFile( jcas ) + ".system.semeval.pipe.bsv";
+      final String fileName = DocumentIDAnnotationUtil.getDocumentIdForFile( jcas ) + ".pipe";
       try {
          writeFhirLikeBsv( jcas, getOutputDir( "CancerStage" ), fileName, StagePropertyUtil.getParentUri() );
          writeFhirLikeBsv( jcas, getOutputDir( "ReceptorStatus" ), fileName, StatusPropertyUtil.getParentUri() );
@@ -104,7 +104,7 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
     * @throws IOException -
     */
    public static void writeBsv( final Collection<FhirLikeResource> resources, final File bsvFile ) throws IOException {
-      final String sourceFilename = bsvFile.getName().replace( ".system.semeval.pipe.bsv", "" );
+      final String sourceFilename = bsvFile.getName().replace( ".pipe", "" );
       try ( BufferedWriter writer = new BufferedWriter( new FileWriter( bsvFile ) ) ) {
          for ( FhirLikeResource resource : resources ) {
             writer.write( sourceFilename + "|" );
@@ -122,23 +122,23 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       // DocName|Phenotype_Spans|CUI|
       sb.append( getSpannedCuiText( resource.getPhenotypeAnnotations() ) );
       // Neg_value|Neg_span|
-      sb.append( getAttributeText( resource.isNegated() ) );
+      sb.append( getAttributeTextYN( resource.isNegated() ) );
       // Subj_value|Subj_span|
-      sb.append( getAttributeText( resource.getSubject() ) );
+      sb.append( getAttributeText( resource.getSubject(), "*patient" ) );
       // Uncertain_value|Uncertain_span|
-      sb.append( getAttributeText( resource.isUncertain() ) );
+      sb.append( getAttributeTextYN( resource.isUncertain() ) );
       // Course_value|Course_span|
       sb.append( "*unmarked|*NULL|" );
       // Severity_value|Severity_span|
       sb.append( "*unmarked|*NULL|" );
       // Cond_value|Cond_span|
-      sb.append( getAttributeText( resource.isConditional() ) );
+      sb.append( getAttributeTextTF( resource.isConditional() ) );
       // Generic_value|Generic_span|
-      sb.append( getAttributeText( resource.isHypothetical() ) );
+      sb.append( getAttributeTextTF( resource.isHypothetical() ) );
       // Bodyloc_value|Bodyloc_span|
       sb.append( getSpannedCuiText( resource.getLocationAnnotations() ) );
       // DocTimeRel|DocTimeRelSpan|
-      sb.append( getAttributeText( resource.getDocTimeRel() ) );
+      sb.append( getAttributeText( resource.getDocTimeRel(), "*unmarked" ) );
       // Value_Spans|CUI|
       sb.append( getSpannedCuiText( resource.getValueAnnotations() ) );
       // Neoplasm_Spans|CUI|
@@ -166,13 +166,18 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       return sb.toString();
    }
 
-   static private String getAttributeText( final boolean isAttributePositive ) {
+   static private String getAttributeTextYN( final boolean isAttributePositive ) {
       final String value = isAttributePositive ? "yes" : "*no";
       return value + "|*NULL|";
    }
 
-   static private String getAttributeText( final String attributeValue ) {
-      final String value = attributeValue.isEmpty() ? "*unmarked" : attributeValue;
+   static private String getAttributeTextTF( final boolean isAttributePositive ) {
+      final String value = isAttributePositive ? "true" : "*false";
+      return value + "|*NULL|";
+   }
+
+   static private String getAttributeText( final String attributeValue, final String defaultText ) {
+      final String value = attributeValue.isEmpty() ? defaultText : attributeValue;
       return value + "|*NULL|";
    }
 

@@ -1,23 +1,54 @@
 package org.healthnlp.deepphe.uima.ae;
 
-import edu.pitt.dbmi.nlp.noble.ontology.*;
-import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
-import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Set;
+
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.healthnlp.deepphe.fhir.*;
-import org.healthnlp.deepphe.fhir.fact.*;
-import org.healthnlp.deepphe.fhir.summary.*;
+import org.healthnlp.deepphe.fhir.Condition;
+import org.healthnlp.deepphe.fhir.Disease;
+import org.healthnlp.deepphe.fhir.Element;
+import org.healthnlp.deepphe.fhir.Patient;
+import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.Stage;
+import org.healthnlp.deepphe.fhir.fact.BodySiteFact;
+import org.healthnlp.deepphe.fhir.fact.ConditionFact;
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
+import org.healthnlp.deepphe.fhir.fact.FactList;
+import org.healthnlp.deepphe.fhir.fact.ObservationFact;
+import org.healthnlp.deepphe.fhir.fact.ProcedureFact;
+import org.healthnlp.deepphe.fhir.summary.CancerPhenotype;
+import org.healthnlp.deepphe.fhir.summary.CancerSummary;
+import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
+import org.healthnlp.deepphe.fhir.summary.PatientSummary;
+import org.healthnlp.deepphe.fhir.summary.Summary;
+import org.healthnlp.deepphe.fhir.summary.TumorPhenotype;
+import org.healthnlp.deepphe.fhir.summary.TumorSummary;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 
-import java.net.URI;
-import java.util.*;
+import com.clarkparsia.owlapi.explanation.util.OntologyUtils;
+
+import edu.pitt.dbmi.nlp.noble.ontology.IClass;
+import edu.pitt.dbmi.nlp.noble.ontology.ILogicExpression;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
+import edu.pitt.dbmi.nlp.noble.ontology.IRestriction;
+import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
+import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 
 
 /**
@@ -58,16 +89,16 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			
 			report.addCompositionSummaries(summaries);
 			report.addCompositionSummary(patient);
-
-			PhenotypeResourceFactory.saveReport( report, jcas );
+			
+			PhenotypeResourceFactory.saveReport(report,jcas);
 			
 			// print out
 			record.addReport(report);
 			//System.out.println(report.getSummaryText());
 		}
+		
 
-
-		PhenotypeResourceFactory.saveMedicalRecord( record, jcas );
+		PhenotypeResourceFactory.saveMedicalRecord(record, jcas);
 	}
 
 	
@@ -268,7 +299,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	
 	
 	private void addAncestors(Fact fact){
-		new org.healthnlp.deepphe.uima.fhir.OntologyUtils( ontology ).addAncestors( fact );
+		new org.healthnlp.deepphe.uima.fhir.OntologyUtils(ontology).addAncestors(fact);
 	}
 	
 	

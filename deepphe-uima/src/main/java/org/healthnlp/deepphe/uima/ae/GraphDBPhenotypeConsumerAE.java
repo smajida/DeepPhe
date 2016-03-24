@@ -1,26 +1,42 @@
 package org.healthnlp.deepphe.uima.ae;
 
-import org.apache.uima.UimaContext;
-import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
-import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
-import org.apache.uima.jcas.JCas;
-import org.apache.uima.resource.ResourceInitializationException;
-import org.healthnlp.deepphe.fhir.*;
-import org.healthnlp.deepphe.fhir.fact.Fact;
-import org.healthnlp.deepphe.fhir.summary.*;
-import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.neo4j.graphdb.*;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.graphdb.index.UniqueFactory;
-import org.neo4j.graphdb.index.UniqueFactory.UniqueNodeFactory;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.apache.uima.UimaContext;
+import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
+import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
+import org.apache.uima.jcas.JCas;
+import org.apache.uima.resource.ResourceInitializationException;
+import org.healthnlp.deepphe.fhir.Disease;
+import org.healthnlp.deepphe.fhir.Finding;
+import org.healthnlp.deepphe.fhir.Medication;
+import org.healthnlp.deepphe.fhir.Observation;
+import org.healthnlp.deepphe.fhir.Patient;
+import org.healthnlp.deepphe.fhir.Procedure;
+import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.Stage;
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.summary.CancerPhenotype;
+import org.healthnlp.deepphe.fhir.summary.CancerSummary;
+import org.healthnlp.deepphe.fhir.summary.PatientSummary;
+import org.healthnlp.deepphe.fhir.summary.Summary;
+import org.healthnlp.deepphe.fhir.summary.TumorPhenotype;
+import org.healthnlp.deepphe.fhir.summary.TumorSummary;
+import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
+import org.hl7.fhir.instance.model.CodeableConcept;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.index.UniqueFactory;
+import org.neo4j.graphdb.index.UniqueFactory.UniqueNodeFactory;
 
 public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 	// private ResourceFactory resourceFactory;

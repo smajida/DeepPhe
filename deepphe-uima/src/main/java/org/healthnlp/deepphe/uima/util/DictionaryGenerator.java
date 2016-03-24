@@ -1,15 +1,32 @@
 package org.healthnlp.deepphe.uima.util;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
-import edu.pitt.dbmi.nlp.noble.terminology.*;
+import edu.pitt.dbmi.nlp.noble.terminology.Concept;
+import edu.pitt.dbmi.nlp.noble.terminology.SemanticType;
+import edu.pitt.dbmi.nlp.noble.terminology.Source;
+import edu.pitt.dbmi.nlp.noble.terminology.Terminology;
+import edu.pitt.dbmi.nlp.noble.terminology.TerminologyException;
 import edu.pitt.dbmi.nlp.noble.terminology.impl.NobleCoderTerminology;
 import edu.pitt.dbmi.nlp.noble.util.PathHelper;
-
-import java.io.*;
-import java.net.URI;
-import java.util.*;
 
 /**
  * create a custom dictionary that will map a dictionary of intest to our existing ontology
@@ -45,6 +62,8 @@ public class DictionaryGenerator {
 	public void setSemanticTypeFilter(List<SemanticType> semanticTypeFilter) {
 		this.semanticTypeFilter = semanticTypeFilter;
 	}
+
+	
 
 
 	public PathHelper getPathHelper() {
@@ -150,10 +169,10 @@ public class DictionaryGenerator {
 	 * generate dictionary by recursively pulling synonym
 	 * @throws Exception
 	 */
-
-
-	public void generateByHierarchy( List<Concept> roots, File output ) throws Exception {
-		writer = new BufferedWriter( new FileWriter( output ) );
+	
+	
+	public void generateByHierarchy(List<Concept> roots,File output) throws Exception{
+		writer = new BufferedWriter(new FileWriter(output));
 		visited = new HashSet<String>();
 		for(Concept c: roots){
 			exportConcept(c,defaultNOS);
@@ -165,8 +184,8 @@ public class DictionaryGenerator {
 	 * only use 
 	 * @throws Exception
 	 */
-	public void generateBySemanticTypes( File output ) throws Exception {
-		writer = new BufferedWriter( new FileWriter( output ) );
+	public void generateBySemanticTypes(File output) throws Exception {
+		writer = new BufferedWriter(new FileWriter(output));
 		for(String code: terminology.getAllConcepts()){
 			exportConcept(terminology.lookupConcept(code));
 		}
@@ -177,10 +196,10 @@ public class DictionaryGenerator {
 	/**
 	 * export concept information without going through hierarchy
 	 * @param c
-	 * @throws TerminologyException
+	 * @throws TerminologyException 
 	 * @throws IOException 
 	 */
-	private void exportConcept( Concept c ) throws TerminologyException, IOException {
+	private void exportConcept(Concept c) throws TerminologyException, IOException {
 		// first make sure that it fits the filter
 		if(c == null || isFilteredOut(c)){
 			return;
@@ -199,7 +218,7 @@ public class DictionaryGenerator {
 				tui.append(sep+st.getCode());
 				sep = ",";
 			}
-			writer.write( c.getCode() + I + s + I + tui + I + url + "\n" );
+			writer.write(c.getCode()+I+s+I+tui+I+url+"\n");
 		}
 	}
 
@@ -327,39 +346,39 @@ public class DictionaryGenerator {
 		
 		
 		//generate dictionary
-		File dir = new File( "/home/tseytlin/Work/DeepPhe/data/ontology/" );
+		File dir = new File("/home/tseytlin/Work/DeepPhe/data/ontology/");
 		NobleCoderTerminology term = new NobleCoderTerminology("NCI_Metathesaurus");
 		NobleCoderTerminology aterm = new NobleCoderTerminology("NCI_Thesaurus");
-		IOntology ont = OOntology.loadOntology( new File( dir, "nlpBreastCancer.owl" ) );
+		IOntology ont = OOntology.loadOntology(new File(dir,"nlpBreastCancer.owl"));
 		
 		DictionaryGenerator dg = new DictionaryGenerator(term,ont);
-		dg.setAncestryTerminology( aterm );
+		dg.setAncestryTerminology(aterm);
 		
 		// Anatomical Sites 
-		System.out.println( "creating body site dictionary ..." );
+		System.out.println("creating body site dictionary ...");
 		dg.setDefaultNOS(URI.create("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#OtherBodySite"));
 		dg.setSemanticTypeFilter(Arrays.asList(SemanticType.getSemanticTypes(new String [] {"T021","T022","T023","T024","T025","T026","T029","T030"})));
 		dg.setSourceFilter(Arrays.asList(Source.getSources(new String [] {"SNOMEDCT_US"})));
-		dg.generateBySemanticTypes( new File( dir, "bodysite-dictionary.bsv" ) );
+		dg.generateBySemanticTypes(new File(dir,"bodysite-dictionary.bsv"));
 		
 		
 		// Procedures (diagnostic)
-		System.out.println( "creating diagnostic procedure dictionary ..." );
+		System.out.println("creating diagnostic procedure dictionary ...");
 		dg.setDefaultNOS(URI.create("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#OtherDiagnositcProcedure"));
 		dg.setSemanticTypeFilter(Arrays.asList(SemanticType.getSemanticTypes(new String [] {"T060"}))); 
 		dg.setSourceFilter(Arrays.asList(Source.getSources(new String [] {"SNOMEDCT_US"})));
-		dg.generateBySemanticTypes( new File( dir, "dx_procedure-dictionary.bsv" ) );
+		dg.generateBySemanticTypes(new File(dir,"dx_procedure-dictionary.bsv"));
 		
 		// Procedures (theraputic)
-		System.out.println( "creating theraputic procedure dictionary ..." );
+		System.out.println("creating theraputic procedure dictionary ...");
 		dg.setDefaultNOS(URI.create("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#OtherTherapeuticProcedure"));
 		dg.setSemanticTypeFilter(Arrays.asList(SemanticType.getSemanticTypes(new String [] {"T061"}))); 
 		dg.setSourceFilter(Arrays.asList(Source.getSources(new String [] {"SNOMEDCT_US"})));
-		dg.generateBySemanticTypes( new File( dir, "tx_procedure-dictionary.bsv" ) );
+		dg.generateBySemanticTypes(new File(dir,"tx_procedure-dictionary.bsv"));
 		
 		
 		// Drugs
-		System.out.println( "creating medication dictionary ..." );
+		System.out.println("creating medication dictionary ...");
 		dg.setAncestryTerminology(aterm);
 		dg.setDefaultNOS(URI.create("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#OtherMedication"));
 		dg.setSemanticTypeFilter(Arrays.asList(SemanticType.getSemanticTypes(new String [] {"T109", 
@@ -385,8 +404,8 @@ public class DictionaryGenerator {
 				"T200", 
 				"T203"}))); 
 		dg.setSourceFilter(Arrays.asList(Source.getSources(new String [] {"RXNORM"})));
-		dg.generateBySemanticTypes( new File( dir, "medication-dictionary.bsv" ) );
-		System.out.println( "done" );
+		dg.generateBySemanticTypes(new File(dir,"medication-dictionary.bsv"));
+		System.out.println("done");
 	}
 
 }
