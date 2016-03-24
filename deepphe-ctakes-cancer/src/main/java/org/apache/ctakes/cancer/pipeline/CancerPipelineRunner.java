@@ -2,6 +2,7 @@ package org.apache.ctakes.cancer.pipeline;
 
 import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
+import org.apache.ctakes.core.cc.SemevalBsvWriter;
 import org.apache.ctakes.core.cc.pretty.plaintext.PrettyTextWriterFit;
 import org.apache.ctakes.core.cc.property.plaintext.PropertyTextWriterFit;
 import org.apache.uima.UIMAException;
@@ -41,8 +42,9 @@ final public class CancerPipelineRunner {
       final AnalysisEngine xmiWriter = CancerPipelineFactory.createXMIWriter( outputDirectory );
       final AnalysisEngine prettyTextWriter = createPrettyTextWriter( outputDirectory );
       final AnalysisEngine propertyTextWriter = createPropertyTextWriter( outputDirectory );
+      final AnalysisEngine semevalBsvWriter = createSemevalBsvWriter( outputDirectory );
       SimplePipeline
-            .runPipeline( collectionReader, ctakesCancerEngine, prettyTextWriter, propertyTextWriter, xmiWriter );
+            .runPipeline( collectionReader, ctakesCancerEngine, prettyTextWriter, propertyTextWriter, xmiWriter, semevalBsvWriter );
    }
 
 
@@ -54,6 +56,11 @@ final public class CancerPipelineRunner {
    private static AnalysisEngine createPropertyTextWriter( final String outputDirectory )
          throws ResourceInitializationException {
       return AnalysisEngineFactory.createEngine( PropertyTextWriterFit.createAnnotatorDescription( outputDirectory ) );
+   }
+
+   private static AnalysisEngine createSemevalBsvWriter( final String outputDirectory )
+         throws ResourceInitializationException {
+      return AnalysisEngineFactory.createEngine( SemevalBsvWriter.createAnnotatorDescription( outputDirectory ) );
    }
 
 

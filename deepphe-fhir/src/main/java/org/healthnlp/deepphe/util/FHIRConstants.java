@@ -89,7 +89,7 @@ public class FHIRConstants {
 	public static final URI DIAGNOSIS_URI = URI.create(SCHEMA_URL+"#"+DIAGNOSIS);
 	public static final URI PROCEDURE_URI = URI.create(SCHEMA_URL+"#"+PROCEDURE);
 	public static final URI MEDICATION_URI = URI.create(SCHEMA_URL+"#"+MEDICATION);
-	public static final URI BODY_SITE_URI = URI.create(CONTEXT_URL+"#"+BODY_SITE);
+	public static final URI BODY_SITE_URI = URI.create( CONTEXT_URL + "#" + BODY_SITE );
 	public static final URI PATIENT_URI = URI.create(SCHEMA_URL+"#"+PATIENT);
 	public static final URI TREATMENT_URI = URI.create(MODEL_CANCER_URL+"#"+TREATMENT);
 	public static final URI MANIFISTATION_URI = URI.create(MODEL_CANCER_URL+"#"+MANIFISTATION);

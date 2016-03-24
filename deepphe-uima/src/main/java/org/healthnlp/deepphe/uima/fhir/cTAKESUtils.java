@@ -1,22 +1,25 @@
 package org.healthnlp.deepphe.uima.fhir;
 
-import java.net.URI;
-import java.util.*;
-import java.util.regex.Pattern;
-
-import org.apache.ctakes.cancer.instance.InstanceUtil;
-import org.apache.ctakes.cancer.instance.OwlInstance;
-import org.apache.ctakes.cancer.instance.OwlInstanceUtil;
+import edu.pitt.dbmi.nlp.noble.ontology.IClass;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
+import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+import org.apache.ctakes.cancer.concept.instance.ConceptInstance;
+import org.apache.ctakes.cancer.concept.instance.ConceptInstanceUtil;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
-import org.apache.ctakes.cancer.stage.StagePropertyUtil;
-import org.apache.ctakes.cancer.tnm.TnmPropertyUtil;
+import org.apache.ctakes.cancer.phenotype.NeoplasmUtil;
+import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
+import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.core.util.OntologyConceptUtil;
-import org.apache.ctakes.typesystem.type.refsem.*;
-//import org.apache.ctakes.typesystem.type.refsem.Date;
-import org.apache.ctakes.typesystem.type.relation.*;
-import org.apache.ctakes.typesystem.type.textsem.*;
+import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
+import org.apache.ctakes.typesystem.type.refsem.Time;
+import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
+import org.apache.ctakes.typesystem.type.relation.BinaryTextRelation;
+import org.apache.ctakes.typesystem.type.relation.Relation;
+import org.apache.ctakes.typesystem.type.relation.RelationArgument;
+import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
+import org.apache.ctakes.typesystem.type.textsem.TimeMention;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.cas.FeatureStructure;
@@ -26,16 +29,15 @@ import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.cas.TOP;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.jcas.tcas.DocumentAnnotation;
-import org.healthnlp.deepphe.fhir.Disease;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.Extension;
 
-import edu.pitt.dbmi.nlp.noble.ontology.IClass;
-import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
-import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+import java.net.URI;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class cTAKESUtils {
 
@@ -62,14 +64,14 @@ public class cTAKESUtils {
 		
 		return  TextTools.parseDate(dateTime);
 	}
-	
-	
-	public static Extension createMentionExtension(OwlInstance ia){
-		IdentifiedAnnotation mention = ia.getIdentifiedAnnotation();
-		return FHIRUtils.createMentionExtension(mention.getCoveredText(),mention.getBegin(),mention.getEnd());
+
+
+	public static Extension createMentionExtension( final ConceptInstance conceptInstance ) {
+		IdentifiedAnnotation mention = conceptInstance.getIdentifiedAnnotation();
+		return FHIRUtils.createMentionExtension( mention.getCoveredText(), mention.getBegin(), mention.getEnd() );
 	}
-	
-	
+
+
 	/**
 	 * get codeblce concept form OntologyConcept annotation
 	 * @param ia -
@@ -78,18 +80,18 @@ public class cTAKESUtils {
 	public static CodeableConcept getCodeableConcept(IdentifiedAnnotation ia){
 		return setCodeableConcept(new CodeableConcept(),ia);
 	}
-	
-	
+
+
 	/**
 	 * get codeblce concept form OntologyConcept annotation
 	 * @param ia -
 	 * @return -
 	 */
-	public static CodeableConcept getCodeableConcept(OwlInstance ia){
+	public static CodeableConcept getCodeableConcept( ConceptInstance ia ) {
 		//TODO: maybe make better
-		return setCodeableConcept(new CodeableConcept(),ia.getIdentifiedAnnotation());
+		return setCodeableConcept( new CodeableConcept(), ia.getIdentifiedAnnotation() );
 	}
-	
+
 	/**
 	 * get codeblce concept form OntologyConcept annotation
 	 * @param cc -
@@ -269,9 +271,9 @@ public class cTAKESUtils {
 	 * @param type -
 	 * @return -
 	 */
-	public static List<OwlInstance> getAnnotationsByType(JCas cas, URI type){
+	public static List<ConceptInstance> getAnnotationsByType( JCas cas, URI type ) {
 		// TODO is manipulation required?
-		return new ArrayList<>( OwlInstanceUtil.getOwlInstances(cas, type.toString() ) );
+		return new ArrayList<>( ConceptInstanceUtil.getBranchConceptInstances( cas, type.toString() ) );
 //		List<IdentifiedAnnotation> annotations = new ArrayList<IdentifiedAnnotation>();
 //		for(IdentifiedAnnotation a: OwlOntologyConceptUtil.getAnnotationsByUriBranch(cas,type.toString())){
 //			annotations.add(a);
@@ -330,7 +332,7 @@ public class cTAKESUtils {
 	
 	/**
 	 * get anatomic location of an annotation
-	 * @param an -
+	 //	 * @param an -
 	 * @return -
 	 */
 	/*
@@ -378,7 +380,7 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
-		return InstanceUtil.getPropertyValues( jcas, an ).stream().findFirst().get();
+		return NeoplasmUtil.getPropertyValues( jcas, an ).stream().findFirst().get();
 	}
 	
 	
@@ -440,7 +442,7 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
-		return InstanceUtil.getNeoplasmProperties( jcas, neoplasm, TnmPropertyUtil.getParentUri() );
+		return NeoplasmUtil.getNeoplasmProperties( jcas, neoplasm, TnmPropertyUtil.getParentUri() );
 	}
 
 	//	public static CancerStage getCancerStage(IdentifiedAnnotation dm){
@@ -456,7 +458,7 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
-		return InstanceUtil.getNeoplasmProperties( jcas, neoplasm, StagePropertyUtil.getParentUri() );
+		return NeoplasmUtil.getNeoplasmProperties( jcas, neoplasm, StagePropertyUtil.getParentUri() );
 	}
 
 	/**
@@ -473,11 +475,13 @@ public class cTAKESUtils {
 	}
 
 
-	public static void addLanguageContext(OwlInstance dm, DomainResource dx) {
-		if(dm.getDocTimeRel() != null)
-			dx.addExtension(FHIRUtils.createDocTimeRelExtension(dm.getDocTimeRel()));
-		if(dm.getModality() != null)
-			dx.addExtension(FHIRUtils.createModalityExtension(dm.getModality()));
+	public static void addLanguageContext( ConceptInstance conceptInstance, DomainResource dx ) {
+		if ( conceptInstance.getDocTimeRel() != null ) {
+			dx.addExtension( FHIRUtils.createDocTimeRelExtension( conceptInstance.getDocTimeRel() ) );
+		}
+		if ( conceptInstance.getModality() != null ) {
+			dx.addExtension( FHIRUtils.createModalityExtension( conceptInstance.getModality() ) );
+		}
 		//TODO: add more
 		
 	}

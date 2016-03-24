@@ -1,12 +1,13 @@
 package org.healthnlp.deepphe.fhir.summary;
-import java.net.URI;
-import java.util.List;
 
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
+
+import java.net.URI;
+import java.util.List;
 
 
 public class TumorSummary extends Summary {

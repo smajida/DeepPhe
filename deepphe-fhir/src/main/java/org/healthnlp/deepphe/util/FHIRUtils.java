@@ -1,48 +1,28 @@
 package org.healthnlp.deepphe.util;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import org.healthnlp.deepphe.fhir.AnatomicalSite;
-import org.healthnlp.deepphe.fhir.Element;
-import org.healthnlp.deepphe.fhir.fact.Fact;
-import org.hl7.fhir.instance.formats.XmlParser;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Coding;
-import org.hl7.fhir.instance.model.DateType;
-import org.hl7.fhir.instance.model.DomainResource;
-import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.instance.model.Extension;
-import org.hl7.fhir.instance.model.Identifier;
-import org.hl7.fhir.instance.model.Narrative;
-import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.utilities.xhtml.NodeType;
-import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-
-import edu.pitt.dbmi.nlp.noble.coder.model.Document;
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+import org.healthnlp.deepphe.fhir.Element;
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.hl7.fhir.instance.formats.XmlParser;
+import org.hl7.fhir.instance.model.*;
+import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.utilities.xhtml.NodeType;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 
@@ -59,9 +39,9 @@ public class FHIRUtils {
 	public static final String DOCUMENT_HEADER_REPORT_TYPE = "Record Type";
 	public static final String DOCUMENT_HEADER_PRINCIPAL_DATE = "Principal Date";
 	public static final String DOCUMENT_HEADER_PATIENT_NAME = "Patient Name";
-	public static final String MENTION_URL = "http://hl7.org/fhir/mention"; 
-	public static final String STAGE_URL = "http://hl7.org/fhir/stage"; 
-	public static final String MODALITY_URL = "http://hl7.org/fhir/modality"; 
+	public static final String MENTION_URL = "http://hl7.org/fhir/mention";
+	public static final String STAGE_URL = "http://hl7.org/fhir/stage";
+	public static final String MODALITY_URL = "http://hl7.org/fhir/modality";
 	public static final String DOC_TIME_REL_URL = "http://hl7.org/fhir/doc_time_rel"; 
 	public static final String CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl";
 
@@ -727,12 +707,12 @@ public class FHIRUtils {
 		return createExtension(MENTION_URL,text);
 	}
 
-	public static Extension createDocTimeRelExtension(String text){
-		return createExtension(DOC_TIME_REL_URL,text);
+	public static Extension createDocTimeRelExtension( String text ) {
+		return createExtension( DOC_TIME_REL_URL, text );
 	}
 
-	public static Extension createModalityExtension(String text){
-		return createExtension(MODALITY_URL,text);
+	public static Extension createModalityExtension( String text ) {
+		return createExtension( MODALITY_URL, text );
 	}
 	
 	

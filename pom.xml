@@ -30,8 +30,8 @@
       <module>deepphe-i2b2</module>
       <module>deepphe-workbench</module>
       <module>deepphe-distribution</module>
-    
-      <module>deepphe-viz</module>
+
+      <!--<module>deepphe-viz</module>-->
    </modules>
 
    <repositories>
