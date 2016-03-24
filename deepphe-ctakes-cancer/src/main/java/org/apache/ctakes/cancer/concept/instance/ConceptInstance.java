@@ -1,4 +1,4 @@
-package org.apache.ctakes.cancer.fhir.resource;
+package org.apache.ctakes.cancer.concept.instance;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.phenotype.NeoplasmUtil;
@@ -26,18 +26,22 @@ import java.util.stream.Stream;
  * @since 3/17/2016
  */
 @Immutable
-final public class FhirLikeResource {
+final public class ConceptInstance {
 
-   static private final Logger LOGGER = Logger.getLogger( "FhirLikeResource" );
+   static private final Logger LOGGER = Logger.getLogger( "ConceptInstance" );
 
    private final String _uri;
    private final IdentifiedAnnotation _annotation;
 
-   public FhirLikeResource( final String uri, final IdentifiedAnnotation annotation ) {
+   public ConceptInstance( final String uri, final IdentifiedAnnotation annotation ) {
       _uri = uri;
       _annotation = annotation;
    }
 
+   public IdentifiedAnnotation getIdentifiedAnnotation() {
+      return _annotation;
+   }
+   
    /**
     * @return the url of the instance
     */

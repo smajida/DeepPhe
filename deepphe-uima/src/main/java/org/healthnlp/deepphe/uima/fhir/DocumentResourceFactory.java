@@ -3,19 +3,23 @@ package org.healthnlp.deepphe.uima.fhir;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
+import org.apache.ctakes.cancer.concept.instance.ConceptInstance;
+import org.apache.ctakes.cancer.concept.instance.ConceptInstanceUtil;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.phenotype.size.SizePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.core.util.DocumentIDAnnotationUtil;
-import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.jcas.JCas;
 import org.healthnlp.deepphe.fhir.*;
-import org.healthnlp.deepphe.util.*;
+import org.healthnlp.deepphe.util.FHIRConstants;
+import org.healthnlp.deepphe.util.FHIRRegistry;
+import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.TextUtils;
 import org.hl7.fhir.instance.model.BodySite;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Composition;
@@ -32,7 +36,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-//import org.apache.ctakes.cancer.type.textsem.CancerSize;
+
 
 final public class DocumentResourceFactory {
 
@@ -122,42 +126,23 @@ final public class DocumentResourceFactory {
 			r.setPatient(patient);
 		}
 
-		// TODO - swapped iteration loops with foreach calls
 		// now find all anatomical site found in a report
 		getAnatomicalSite( cas ).forEach( r::addReportElement );
-//		for(AnatomicalSite ob: getAnatomicalSite(cas)){
-//			r.addReportElement(ob);
-//		}
-		
+
 		// now find all observations found in a report
 		getObservations( cas ).forEach( r::addReportElement );
-//		for(Observation ob: getObservations(cas)){
-//			r.addReportElement(ob);
-//		}
 		
 		// now find all observations found in a report
 		getFindings( cas ).forEach( r::addReportElement );
-//		for(Finding ob: getFindings(cas)){
-//			r.addReportElement(ob);
-//		}
 		
 		// find all procedures mentioned in each report
 		getProcedures( cas ).forEach( r::addReportElement );
-//		for(Procedure p: getProcedures(cas)){
-//			r.addReportElement(p);
-//		}
 		
 		// now find all observations found in a report
 		getMedications( cas ).forEach( r::addReportElement );
-//		for(Medication ob: getMedications(cas)){
-//			r.addReportElement(ob);
-//		}
 		
 		// now find all primary disease that are found in a report
 		getDiagnoses( cas ).forEach( r::addReportElement );
-//		for(Disease dx: getDiagnoses(cas)){
-//			r.addReportElement(dx);
-//		}
 		
 		
 		return r;
@@ -254,112 +239,53 @@ final public class DocumentResourceFactory {
 	 * @param <T>    some extension of fhir element
 	 * @return list of Elements of type T in the given cas with the given uri
 	 */
-	static private <T extends Element> List<T> getElementList( final JCas jcas,
-																				  final URI uri,
-																				  final Function<IdentifiedAnnotation, ? extends T> mapper ) {
+	static private <T extends Element> List<T> getElementList( final JCas jcas, final URI uri,
+																				  final Function<ConceptInstance, ? extends T> mapper ) {
 		return cTAKESUtils.getAnnotationsByType( jcas, uri ).stream()
+				.filter( t -> (!t.isNegated() && !t.isUncertain()) )
 				.map( mapper )
 				.collect( Collectors.toList() );
 	}
 
 
 	public static List<Procedure> getProcedures( JCas cas ) {
-		// TODO - can use new method
 		return getElementList( cas, FHIRConstants.PROCEDURE_URI, DocumentResourceFactory::createProcedure );
-//		List<Procedure> list = new ArrayList<Procedure>();
-//		for(IdentifiedAnnotation m: cTAKESUtils.getAnnotationsByType(cas, FHIRConstants.PROCEDURE_URI)){
-//			list.add(createProcedure(m));
-//		}
-//		return list;
 	}
-
-	/**
-	 *
-	 */
 	public static List<Disease> getDiagnoses( JCas cas ) {
-		// TODO - can use new method
 		return getElementList( cas, FHIRConstants.DIAGNOSIS_URI, DocumentResourceFactory::createDiagnosis );
-//		List<Disease> list = new ArrayList<Disease>();
-//		for(IdentifiedAnnotation m: cTAKESUtils.getAnnotationsByType(cas, FHIRConstants.DIAGNOSIS_URI)){
-//			list.add(createDiagnosis(m));
-//		}
-//		return list;
 	}
 
 	public static List<Medication> getMedications( JCas cas ) {
-		// TODO - can use new method
 		return getElementList( cas, FHIRConstants.MEDICATION_URI, DocumentResourceFactory::createMedication );
-//		List<Medication> list = new ArrayList<Medication>();
-//		for(IdentifiedAnnotation m: cTAKESUtils.getAnnotationsByType(cas,FHIRConstants.MEDICATION_URI)){
-//			list.add(createMedication(m));
-//		}
-//		return list;
 	}
 
-
 	public static List<Finding> getFindings( JCas cas ) {
-		// TODO - can use new method
 		final List<Finding> list
 				= getElementList( cas, FHIRConstants.FINDING_URI, DocumentResourceFactory::createFinding );
-//		List<Finding> list = new ArrayList<Finding>();
-//		for(IdentifiedAnnotation m: cTAKESUtils.getAnnotationsByType(cas, FHIRConstants.FINDING_URI) ){
-//			list.add(createFinding(m));
-//		}
-		//TODO: add TNM stuff for now
-//		for(Annotation  a: cTAKESUtils.getAnnotationsByType(cas, TnmClassification.type)){
-//			TnmClassification tnm = (TnmClassification) a;
-//			if(tnm.getSize() != null){
-//				list.add(createFinding(tnm.getSize()));
-//			}
-//			if(tnm.getMetastasis() != null){
-//				list.add(createFinding(tnm.getMetastasis()));
-//			}
-//			if(tnm.getNodeSpread() != null){
-//				list.add(createFinding(tnm.getNodeSpread()));
-//			}
-//		}
+
 		// add individual T N M to list
-		OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( cas, TnmPropertyUtil.getParentUri() )
-				.map( DocumentResourceFactory::createFinding ).forEach( list::add );
-//		for(Annotation  a: cTAKESUtils.getAnnotationsByType(cas,DiseaseDisorderMention.type)){
-//			CancerStage st = cTAKESUtils.getCancerStage((IdentifiedAnnotation)a);
-//			if(st != null)
-//				list.add(createFinding(st));
-//		}
+		ConceptInstanceUtil.getBranchConceptInstances( cas, TnmPropertyUtil.getParentUri() ).stream()
+				.map( DocumentResourceFactory::createFinding )
+				.forEach( list::add );
 		// add Stage to list
-		OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( cas, StagePropertyUtil.getParentUri() )
-				.map( DocumentResourceFactory::createFinding ).forEach( list::add );
+		ConceptInstanceUtil.getBranchConceptInstances( cas, StagePropertyUtil.getParentUri() ).stream()
+				.map( DocumentResourceFactory::createFinding )
+				.forEach( list::add );
 		return list;
 	}
 
 
 	public static List<AnatomicalSite> getAnatomicalSite( JCas cas ) {
-		// TODO - can use new method
 		return getElementList( cas, FHIRConstants.BODY_SITE_URI, DocumentResourceFactory::createAnatomicalSite );
-//		List<AnatomicalSite> list = new ArrayList<AnatomicalSite>();
-//		for(IdentifiedAnnotation m: cTAKESUtils.getAnnotationsByType(cas,FHIRConstants.BODY_SITE_URI)){
-//			list.add(createAnatomicalSite(m));
-//		}
-//		return list;
 	}
 
 	public static List<Observation> getObservations( JCas cas ) {
-		// TODO - can use new method
 		final List<Observation> list
 				= getElementList( cas, FHIRConstants.OBSERVATION_URI, DocumentResourceFactory::createObservation );
-//		List<Observation> list = new ArrayList<Observation>();
-//		for(IdentifiedAnnotation m: cTAKESUtils.getAnnotationsByType(cas, FHIRConstants.OBSERVATION_URI) ){
-//			list.add(createObservation(m));
-//		}
-		//TODO: this is a hack that will be removed after CancerSize becomes an obervation in cTAKES API
-//		cTAKESUtils.getAnnotationsByType( cas, CancerSize.type ).stream()
-//				.map( DocumentResourceFactory::createObservation )
-//				.forEach( list::add );
-		OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( cas, SizePropertyUtil.getParentUri() )
-				.map( DocumentResourceFactory::createObservation ).forEach( list::add );
-//		for(IdentifiedAnnotation m: cTAKESUtils.getAnnotationsByType(cas,CancerSize.type)){
-//			list.add(createObservation(m));
-//		}
+		// add cancer size
+		ConceptInstanceUtil.getBranchConceptInstances( cas, SizePropertyUtil.getParentUri() ).stream()
+				.map( DocumentResourceFactory::createObservation )
+				.forEach( list::add );
 		return list;
 	}
 	
@@ -498,28 +424,32 @@ final public class DocumentResourceFactory {
 		return report;
 	}
 
-	
-	public static Disease createDiagnosis(IdentifiedAnnotation dm ) {
-		return load( new Disease(), dm );
+
+	public static Disease createDiagnosis( final ConceptInstance conceptInstance ) {
+		return load( new Disease(), conceptInstance );
 	}
 
 	/**
 	 *
 	 * @param anatomicalSite -
-	 * @param mention -
+	 * @param conceptInstance -
 	 * @return -
 	 */
-	public static AnatomicalSite load(AnatomicalSite anatomicalSite, IdentifiedAnnotation mention) {
-		anatomicalSite.setCode(cTAKESUtils.getCodeableConcept(mention));
+	public static AnatomicalSite load( AnatomicalSite anatomicalSite, final ConceptInstance conceptInstance ) {
+		anatomicalSite.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
+
+		// add language contexts
+		cTAKESUtils.addLanguageContext( conceptInstance, anatomicalSite );
+		
+		
 		// add mention text
-		anatomicalSite.addExtension(FHIRUtils.createMentionExtension(mention.getCoveredText(),mention.getBegin(),mention.getEnd()));
+		anatomicalSite.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
 		
 		// create identifier
 		FHIRUtils.createIdentifier(anatomicalSite.addIdentifier(),anatomicalSite);
-	
 		
 		// register
-		FHIRRegistry.getInstance().addResource(anatomicalSite,mention);
+		FHIRRegistry.getInstance().addResource( anatomicalSite, conceptInstance );
 		
 		return anatomicalSite;
 	}
@@ -527,51 +457,42 @@ final public class DocumentResourceFactory {
 	/**
 	 *
 	 * @param finding -
-	 * @param mention -
+	 * @param conceptInstance -
 	 * @return -
 	 */
-	public static Finding load(Finding finding, IdentifiedAnnotation mention) {
-		finding.setCode(cTAKESUtils.getCodeableConcept(mention));
-		
+	public static Finding load( Finding finding, final ConceptInstance conceptInstance ) {
+		finding.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
+
+		cTAKESUtils.addLanguageContext( conceptInstance, finding );
+
+
 		// see if we have annotations or maybe parent might have them
-		if ( mention.getBegin() == 0 && mention.getEnd() == 0 ) {
-//			TnmClassification tnm = null;
+		IdentifiedAnnotation ia = conceptInstance.getIdentifiedAnnotation();
+		if ( ia.getBegin() == 0 && ia.getEnd() == 0 ) {
 			try {
-//				for(IdentifiedAnnotation t: cTAKESUtils.getAnnotationsByType(mention.getCAS().getJCas(),TnmClassification.type)){
-//					TnmClassification tt = (TnmClassification) t;
-//					if(Arrays.asList(tt.getSize(),tt.getMetastasis(),tt.getNodeSpread()).contains(mention)){
-//						tnm = tt;
-//						break;
-//					}
-//				}
-				// TODO - use OwlOntologyConceptUtil.getAnnotationsByUriBranch  - should this use a coallesced annotation?
 				final IdentifiedAnnotation tnm
-						= OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( mention.getCAS().getJCas(),
+						= OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( ia.getCAS().getJCas(),
 						TnmPropertyUtil.getParentUri() )
-						.filter( mention::equals )
+						.filter( conceptInstance::equals )
 						.findFirst().get();
 				if ( tnm != null ) {
-					mention.setBegin( tnm.getBegin() );
-					mention.setEnd( tnm.getEnd() );
+					ia.setBegin( tnm.getBegin() );
+					ia.setEnd( tnm.getEnd() );
 				}
 			} catch (CASException e) {
 				e.printStackTrace();
 			}
-//			if(tnm != null){
-//				mention.setBegin(tnm.getBegin());
-//				mention.setEnd(tnm.getEnd());
-//			}
 		}
 		
 		// add mention text
-		finding.addExtension(FHIRUtils.createMentionExtension(mention.getCoveredText(),mention.getBegin(),mention.getEnd()));
+		finding.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
 		
 		// create identifier
 		FHIRUtils.createIdentifier(finding.addIdentifier(),finding);
 	
 		
 		// register
-		FHIRRegistry.getInstance().addResource(finding,mention);
+		FHIRRegistry.getInstance().addResource( finding, conceptInstance );
 		
 		return finding;
 	}
@@ -580,92 +501,81 @@ final public class DocumentResourceFactory {
 	/**
 	 * Initialize disease from a DiseaseDisorderMention in cTAKES typesystem
 	 * @param dx -
-	 * @param dm -
+	 * @param conceptInstance -
 	 * @return -
 	 */
-	public static Disease load(Disease dx, IdentifiedAnnotation dm){
+	public static Disease load( Disease dx, final ConceptInstance conceptInstance ) {
 		// set some properties
-		dx.setCode(cTAKESUtils.getCodeableConcept(dm));
-		//setCertainty(); --> dm.getConfidence()
-		//setSeverity(value); -- > dm.getSeverity()???
-		
-		
-		// perhaps have annotation from Document time
-		/*TimeMention tm = dm.getStartTime();
-		if(tm != null){
-			dx.setDateRecorded(cTAKESUtils.getDate(tm));
-		}*/
-			
-		// now lets take a look at the location of this disease
-		AnatomicalSiteMention as =  cTAKESUtils.getAnatimicLocation(dm);
-		if(as != null){
-			CodeableConcept cc = cTAKESUtils.getCodeableConcept(as);
-			// see if there is a registered resource available
-			AnatomicalSite site = (AnatomicalSite) FHIRRegistry.getInstance().getResource(as);
-			if(site != null)
-				FHIRUtils.addResourceReference(cc,site);
-			dx.addBodySite(cc);
-		}
-	
-		// now lets get the location relationships
-//		CancerStage st = cTAKESUtils.getCancerStage(dm);
-//		TnmClassification tnm = cTAKESUtils.getTnmClassification( dm );
-//		if(tnm != null || st != null){
-//			dx.setStage(createStage(st,tnm));
-//		}
+		dx.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
 
-		Collection<IdentifiedAnnotation> stages = cTAKESUtils.getCancerStages( dm );
-		Collection<IdentifiedAnnotation> tnms = cTAKESUtils.getTnmClassifications( dm );
+		cTAKESUtils.addLanguageContext( conceptInstance, dx );
+		
+		// now lets take a look at the location of this disease
+		for ( IdentifiedAnnotation as : conceptInstance.getLocationAnnotations() ) {
+			CodeableConcept location = dx.addBodySite();
+			cTAKESUtils.setCodeableConcept( location, as );
+			AnatomicalSite site = (AnatomicalSite) FHIRRegistry.getInstance().getResource(as);
+			if ( site != null ) {
+				FHIRUtils.addResourceReference( location, site );
+			}
+		}
+
+		Collection<IdentifiedAnnotation> stages = cTAKESUtils
+				.getCancerStages( conceptInstance.getIdentifiedAnnotation() );
+		Collection<IdentifiedAnnotation> tnms = cTAKESUtils
+				.getTnmClassifications( conceptInstance.getIdentifiedAnnotation() );
 		dx.setStage( createStage( stages, tnms ) );
 
 		// add mention text
-		dx.addExtension(FHIRUtils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
+		dx.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
 		
 		// create identifier
 		FHIRUtils.createIdentifier(dx.addIdentifier(),dx);
 		
 		// register
-		FHIRRegistry.getInstance().addResource(dx,dm);
+		FHIRRegistry.getInstance().addResource( dx, conceptInstance );
 		
 		return dx;
 	}
-	
-	public static Medication createMedication(IdentifiedAnnotation dm){
-		return load(new Medication(),dm);
+
+	public static Medication createMedication( final ConceptInstance conceptInstance ) {
+		return load( new Medication(), conceptInstance );
 	}
 	
 	/**
 	 * load medication
 	 * @param md
-	 * @param dm
+	 * @param conceptInstance
 	 * @return
 	 */
-	public static Medication load(Medication md, IdentifiedAnnotation dm){
-		md.setCode(cTAKESUtils.getCodeableConcept(dm));
-		md.addExtension(FHIRUtils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
-		
+	public static Medication load( Medication md, final ConceptInstance conceptInstance ) {
+		md.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
+		md.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
+		cTAKESUtils.addLanguageContext( conceptInstance, md );
 		// register
-		FHIRRegistry.getInstance().addResource(md,dm);
+		FHIRRegistry.getInstance().addResource( md, conceptInstance );
 		return md;
 	}
-	
-	
-	public static Observation createObservation(IdentifiedAnnotation dm){
-		return load(new Observation(),dm);
+
+
+	public static Observation createObservation( final ConceptInstance conceptInstance ) {
+		return load( new Observation(), conceptInstance );
 	}
 	
 	/**
 	 * Initialize disease from a DiseaseDisorderMention in cTAKES typesystem
 	 * @param ob -
-	 * @param dm -
+	 * @param conceptInstance -
 	 * @return -
 	 */
-	public static Observation load(Observation ob,IdentifiedAnnotation dm){
+	public static Observation load( Observation ob, final ConceptInstance conceptInstance ) {
 		// set some properties
-		ob.setCode(cTAKESUtils.getCodeableConcept(dm));
+		ob.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
+
+		cTAKESUtils.addLanguageContext( conceptInstance, ob );
 		
 		// see if there is an ordinal interpretation
-		IdentifiedAnnotation interpretation =  cTAKESUtils.getDegreeOf(dm);
+		IdentifiedAnnotation interpretation = cTAKESUtils.getDegreeOf( conceptInstance.getIdentifiedAnnotation() );
 		if(interpretation != null){
 			ob.setInterpretation(cTAKESUtils.getCodeableConcept(interpretation));
 		}
@@ -673,43 +583,44 @@ final public class DocumentResourceFactory {
 		// TODO - a lot of things got mucked up with the new "stick to ctakes" methods
 		// TODO - what to do with this?  We need measurement and unit.  Can we just split(" ") ?
 		// if cancer size, then use their value
-		SizeMeasurement num = cTAKESUtils.getSizeMeasurement(dm);
+		SizeMeasurement num = cTAKESUtils.getSizeMeasurement( conceptInstance.getIdentifiedAnnotation() );
 		if(num != null){
 			ob.setValue(num.getValue(),num.getUnit());
 		}
 		
 
 		// add mention text
-		ob.addExtension(FHIRUtils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
+		ob.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
 		
 		// add id
 		FHIRUtils.createIdentifier(ob.addIdentifier(),ob);
 		
 		// register
-		FHIRRegistry.getInstance().addResource(ob,dm);
+		FHIRRegistry.getInstance().addResource( ob, conceptInstance );
 		
 		return ob;
 	}
-	
-	
-	public static Procedure createProcedure(IdentifiedAnnotation dm){
-		return load(new Procedure(),dm);
+
+
+	public static Procedure createProcedure( final ConceptInstance conceptInstance ) {
+		return load( new Procedure(), conceptInstance );
 	}
 	
 	/**
 	 * Initialize disease from a DiseaseDisorderMention in cTAKES typesystem
 	 * @param pr -
-	 * @param dm -
+	 * @param conceptInstance -
 	 * @return -
 	 */
-	public static Procedure load(Procedure pr,IdentifiedAnnotation dm){
+	public static Procedure load( Procedure pr, final ConceptInstance conceptInstance ) {
 		// set some properties
-		pr.setCode(cTAKESUtils.getCodeableConcept(dm));
+		pr.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
 		pr.setStatus(ProcedureStatus.COMPLETED);
-				
+
+		cTAKESUtils.addLanguageContext( conceptInstance, pr );
+		
 		// now lets take a look at the location of this disease
-		AnatomicalSiteMention as = cTAKESUtils.getAnatimicLocation(dm);
-		if(as != null){
+		for ( IdentifiedAnnotation as : conceptInstance.getLocationAnnotations() ) {
 			CodeableConcept location = pr.addBodySite();
 			cTAKESUtils.setCodeableConcept(location,as);
 			AnatomicalSite site = (AnatomicalSite) FHIRRegistry.getInstance().getResource(as);
@@ -723,13 +634,13 @@ final public class DocumentResourceFactory {
 		//addRelatedItem();
 
 		// add mention text
-		pr.addExtension(FHIRUtils.createMentionExtension(dm.getCoveredText(),dm.getBegin(),dm.getEnd()));
+		pr.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
 		
 		FHIRUtils.createIdentifier(pr.addIdentifier(),pr);
 
 
 		// register
-		FHIRRegistry.getInstance().addResource(pr, dm );
+		FHIRRegistry.getInstance().addResource( pr, conceptInstance );
 		return pr;
 	}
 
@@ -743,12 +654,12 @@ final public class DocumentResourceFactory {
 	}
 
 
-	public static AnatomicalSite createAnatomicalSite(IdentifiedAnnotation m) {
-		return load(new AnatomicalSite(),m);
+	public static AnatomicalSite createAnatomicalSite( final ConceptInstance conceptInstance ) {
+		return load( new AnatomicalSite(), conceptInstance );
 	}
 
-	public static Finding createFinding(IdentifiedAnnotation m) {
-		return load(new Finding(),m);
+	public static Finding createFinding( final ConceptInstance conceptInstance ) {
+		return load( new Finding(), conceptInstance );
 	}
 	
 	
@@ -864,7 +775,7 @@ final public class DocumentResourceFactory {
 							.createCoallescedProperty( jcas, Collections.singletonList( tnm ) );
 					Finding f = (Finding)FHIRRegistry.getInstance().getResource( indiTnm );
 					if ( f == null ) {
-						f = createFinding( indiTnm );
+						f = createFinding( new ConceptInstance( cTAKESUtils.getConceptURI( indiTnm ), indiTnm ) );
 					}
 					stage.addAssessment( f );
 					//stage.setStringExtension(Stage.TNM_PRIMARY_TUMOR,cTAKESUtils.getConceptURI(st.getSize()));

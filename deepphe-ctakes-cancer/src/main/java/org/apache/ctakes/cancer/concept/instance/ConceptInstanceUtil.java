@@ -1,4 +1,4 @@
-package org.apache.ctakes.cancer.fhir.resource;
+package org.apache.ctakes.cancer.concept.instance;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
  * @version %I%
  * @since 3/17/2016
  */
-final public class FhirLikeUtil {
+final public class ConceptInstanceUtil {
 
-   static private final Logger LOGGER = Logger.getLogger( "FhirLikeUtil" );
+   static private final Logger LOGGER = Logger.getLogger( "ConceptInstanceUtil" );
 
-   private FhirLikeUtil() {
+   private ConceptInstanceUtil() {
    }
 
    /**
@@ -26,8 +26,8 @@ final public class FhirLikeUtil {
     * @param uri  uri for instance of interest
     * @return collection of instances with the given uri
     */
-   static public Collection<FhirLikeResource> getFhirLikeResources( final JCas jCas, final String uri ) {
-      final Function<IdentifiedAnnotation, FhirLikeResource> createInstance = a -> new FhirLikeResource( uri, a );
+   static public Collection<ConceptInstance> getExactConceptInstances( final JCas jCas, final String uri ) {
+      final Function<IdentifiedAnnotation, ConceptInstance> createInstance = a -> new ConceptInstance( uri, a );
       return OwlOntologyConceptUtil.getAnnotationsByUri( jCas, uri )
             .stream()
             .map( createInstance )
@@ -39,9 +39,10 @@ final public class FhirLikeUtil {
     * @param uri  uri for instance of interest
     * @return collection of instances with the given uri
     */
-   static public Collection<FhirLikeResource> getFhirLikeResourceBranch( final JCas jCas, final String uri ) {
-      final Function<IdentifiedAnnotation, FhirLikeResource> createInstance = a -> new FhirLikeResource( uri, a );
-      return OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( jCas, uri ).map( createInstance )
+   static public Collection<ConceptInstance> getBranchConceptInstances( final JCas jCas, final String uri ) {
+      final Function<IdentifiedAnnotation, ConceptInstance> createInstance = a -> new ConceptInstance( uri, a );
+      return OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( jCas, uri )
+            .map( createInstance )
             .collect( Collectors.toList() );
    }
 

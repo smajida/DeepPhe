@@ -1,8 +1,8 @@
 package org.apache.ctakes.core.cc;
 
 
-import org.apache.ctakes.cancer.fhir.resource.FhirLikeResource;
-import org.apache.ctakes.cancer.fhir.resource.FhirLikeUtil;
+import org.apache.ctakes.cancer.concept.instance.ConceptInstance;
+import org.apache.ctakes.cancer.concept.instance.ConceptInstanceUtil;
 import org.apache.ctakes.cancer.phenotype.receptor.StatusPropertyUtil;
 import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
@@ -92,7 +92,7 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
    static private void writeFhirLikeBsv( final JCas jCas, final File outputDir, final String fileName,
                                          final String uri )
          throws IOException {
-      final Collection<FhirLikeResource> resources = FhirLikeUtil.getFhirLikeResourceBranch( jCas, uri );
+      final Collection<ConceptInstance> resources = ConceptInstanceUtil.getBranchConceptInstances( jCas, uri );
       writeBsv( resources, new File( outputDir, fileName ) );
    }
 
@@ -103,10 +103,10 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
     * @param bsvFile   output file
     * @throws IOException -
     */
-   public static void writeBsv( final Collection<FhirLikeResource> resources, final File bsvFile ) throws IOException {
+   public static void writeBsv( final Collection<ConceptInstance> resources, final File bsvFile ) throws IOException {
       final String sourceFilename = bsvFile.getName().replace( ".pipe", "" );
       try ( BufferedWriter writer = new BufferedWriter( new FileWriter( bsvFile ) ) ) {
-         for ( FhirLikeResource resource : resources ) {
+         for ( ConceptInstance resource : resources ) {
             writer.write( sourceFilename + "|" );
             writer.write( createPhenotypeLine( resource ) );
             writer.write( "\n" );
@@ -117,7 +117,7 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
    }
 
 
-   static private String createPhenotypeLine( final FhirLikeResource resource ) {
+   static private String createPhenotypeLine( final ConceptInstance resource ) {
       final StringBuilder sb = new StringBuilder();
       // DocName|Phenotype_Spans|CUI|
       sb.append( getSpannedCuiText( resource.getPhenotypeAnnotations() ) );

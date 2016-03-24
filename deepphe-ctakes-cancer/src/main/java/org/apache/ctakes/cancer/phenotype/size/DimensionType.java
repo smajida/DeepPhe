@@ -41,8 +41,7 @@ enum DimensionType implements Type {
     */
    @Override
    public String getUri() {
-//      return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + _uri;
-      return OwlOntologyConceptUtil.SCHEMA_OWL + "#" + _uri;
+      return OwlOntologyConceptUtil.CONTEXT_OWL + "#" + _uri;
    }
 
    /**
