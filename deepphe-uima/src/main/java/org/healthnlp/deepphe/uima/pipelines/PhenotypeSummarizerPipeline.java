@@ -1,10 +1,7 @@
 package org.healthnlp.deepphe.uima.pipelines;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.annotation.concurrent.Immutable;
-
+import com.lexicalscope.jewel.cli.CliFactory;
+import com.lexicalscope.jewel.cli.Option;
 import org.apache.ctakes.cancer.ae.XMIWriter;
 import org.apache.uima.UIMAException;
 import org.apache.uima.analysis_engine.AnalysisEngine;
@@ -14,16 +11,13 @@ import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.fit.pipeline.SimplePipeline;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.uima.ae.CompositionCancerSummaryAE;
-import org.healthnlp.deepphe.uima.ae.GraphDBPhenotypeConsumerAE;
-import org.healthnlp.deepphe.uima.ae.I2b2WriterAE;
 import org.healthnlp.deepphe.uima.ae.PhenotypeCancerSummaryAE;
-import org.healthnlp.deepphe.uima.ae.PhenotypeSummarizerAE;
 import org.healthnlp.deepphe.uima.ae.SummaryTextOutput;
-import org.healthnlp.deepphe.uima.ae.TranSMART_Output;
 import org.healthnlp.deepphe.uima.cr.FHIRCollectionReader;
 
-import com.lexicalscope.jewel.cli.CliFactory;
-import com.lexicalscope.jewel.cli.Option;
+import javax.annotation.concurrent.Immutable;
+import java.io.File;
+import java.io.IOException;
 
 @Immutable
 final public class PhenotypeSummarizerPipeline {
@@ -56,26 +50,22 @@ final public class PhenotypeSummarizerPipeline {
 		final CollectionReader collectionReader = createCollectionReader(inputDirectory);
 		final AnalysisEngine compositionSummarizerAE = AnalysisEngineFactory.createEngine(
 				CompositionCancerSummaryAE.class, CompositionCancerSummaryAE.PARAM_ONTOLOGY_PATH, ontologyPath);
-		//final AnalysisEngine cancerSummarizerAE = AnalysisEngineFactory.createEngine(PhenotypeCancerSummaryAE.class,
-		//		PhenotypeCancerSummaryAE.PARAM_ONTOLOGY_PATH, ontologyPath);
-		// final AnalysisEngine phenotypeSummarizerAE =
-		// createPhenotypeSummarizerAE(clipsDirectoryPath,ontologyPath);
-		// final AnalysisEngine i2B2OutputAE = createI2B2OutputAE();
+		final AnalysisEngine cancerSummarizerAE = AnalysisEngineFactory.createEngine( PhenotypeCancerSummaryAE.class,
+				PhenotypeCancerSummaryAE.PARAM_ONTOLOGY_PATH, ontologyPath );
 		final AnalysisEngine xmiWriter = AnalysisEngineFactory.createEngine(XMIWriter.class, XMIWriter.PARAM_OUTPUTDIR,
 				outputDirectory + File.separator + "TYPE");
-		// SimplePipeline.runPipeline(collectionReader, phenotypeSummarizerAE,
-		// i2B2OutputAE);
-
+		final AnalysisEngine summaryAE = AnalysisEngineFactory
+				.createEngine( SummaryTextOutput.class, SummaryTextOutput.PARAM_OUTPUTDIR, outputDirectory );
+		
 		//final AnalysisEngine graphDBConsumerAE = AnalysisEngineFactory.createEngine(GraphDBPhenotypeConsumerAE.class,
 		//		GraphDBPhenotypeConsumerAE.PARAM_DBPATH, outputDirectory + File.separator + "neo4jdb");
 
-		final AnalysisEngine summaryAE = AnalysisEngineFactory.createEngine(SummaryTextOutput.class,SummaryTextOutput.PARAM_OUTPUTDIR,outputDirectory); 
 		//final AnalysisEngine transmartAE = AnalysisEngineFactory.createEngine(TranSMART_Output.class,TranSMART_Output.PARAM_OUTPUTDIR,outputDirectory); 
 		
 		
 		// run the damn pipeline
 		//SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE, cancerSummarizerAE, xmiWriter,summaryAE,transmartAE,graphDBConsumerAE);
-		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE,xmiWriter,summaryAE);
+		SimplePipeline.runPipeline( collectionReader, compositionSummarizerAE, cancerSummarizerAE, summaryAE, xmiWriter );
 	}
 
 	private static CollectionReader createCollectionReader(String inputDirectory)
@@ -89,15 +79,5 @@ final public class PhenotypeSummarizerPipeline {
 				inputDirectory);
 	}
 
-	static public AnalysisEngine createPhenotypeSummarizerAE(String clipsDirectoryPath, String ontologyPath)
-			throws ResourceInitializationException {
-		return AnalysisEngineFactory.createEngine(PhenotypeSummarizerAE.class,
-				PhenotypeSummarizerAE.PARAM_CLIPS_DIRECTORY_PATH, clipsDirectoryPath,
-				PhenotypeSummarizerAE.PARAM_ONTOLOGY_PATH, ontologyPath);
-	}
-
-	static private AnalysisEngine createI2B2OutputAE() throws ResourceInitializationException {
-		return AnalysisEngineFactory.createEngine(I2b2WriterAE.class);
-	}
 
 }

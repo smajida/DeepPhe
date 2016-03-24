@@ -1,12 +1,13 @@
 package org.healthnlp.deepphe.fhir.summary;
-import java.net.URI;
-import java.util.List;
 
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
+
+import java.net.URI;
+import java.util.List;
 
 
 public class TumorSummary extends Summary {
@@ -28,37 +29,6 @@ public class TumorSummary extends Summary {
 		List<Fact> list = super.getContainedFacts();
 		list.addAll(getPhenotype().getContainedFacts());	
 		return list;
-	}
-	
-	
-	public static class TumorPhenotype extends Summary{
-		public FactList getManifestations() {
-			return getFactsOrInsert(FHIRConstants.HAS_MANIFESTATION);
-		}
-		
-		public FactList getHistologicTypes() {
-			return getFactsOrInsert(FHIRConstants.HAS_HISTOLOGIC_TYPE);
-		}
-
-	
-		public FactList getTumorExtent() {
-			return getFactsOrInsert(FHIRConstants.HAS_TUMOR_EXTENT);
-		}
-
-	
-		public String getResourceIdentifier() {
-			return getClass().getSimpleName()+"_"+Math.abs(hashCode());
-		}
-		public URI getConceptURI() {
-			return FHIRConstants.TUMOR_PHENOTYPE_SUMMARY_URI;
-		}
-		public String getDisplayText() {
-			return getClass().getSimpleName();
-		}		
-		public boolean isAppendable(Summary s) {
-			return s instanceof TumorPhenotype;
-		}
-				
 	}
 	
 	public FactList getTumorType() {

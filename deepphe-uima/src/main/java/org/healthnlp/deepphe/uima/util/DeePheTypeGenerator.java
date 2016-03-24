@@ -1,21 +1,20 @@
 package org.healthnlp.deepphe.uima.util;
 
+import edu.pitt.dbmi.nlp.noble.ontology.*;
+import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
+import edu.pitt.dbmi.nlp.noble.util.XMLUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import edu.pitt.dbmi.nlp.noble.ontology.*;
-import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
-import edu.pitt.dbmi.nlp.noble.util.XMLUtils;
 
 public class DeePheTypeGenerator {
 	public static final String TYPE_PREFIX = "org.healthnlp.deepphe.uima.types.";
@@ -130,6 +129,8 @@ public class DeePheTypeGenerator {
 		features.appendChild(createFeatureDesciption(doc,"hasType"));
 		features.appendChild(createFeatureDesciption(doc,"hasProvenanceFacts",null,"uima.cas.FSArray",TYPE_PREFIX+"Fact"));
 		features.appendChild(createFeatureDesciption(doc,"hasProvenanceText",null,"uima.cas.StringArray",null));
+		features.appendChild( createFeatureDesciption( doc, "hasDocumentOffset", null, "uima.cas.Integer", null ) );
+		features.appendChild( createFeatureDesciption( doc, "hasAncestors", null, "uima.cas.StringArray", null ) );
 		features.appendChild(createFeatureDesciption(doc,"hasProperties",null,"uima.cas.FSArray",TYPE_PREFIX+"Property"));
 
 		element.appendChild(features);
@@ -280,6 +281,12 @@ public class DeePheTypeGenerator {
 			e.setTextContent(elementType); 
 			element.appendChild(e);
 		}
+
+		// allow multiple references
+		e = doc.createElement( "multipleReferencesAllowed" );
+		e.setTextContent( "true" );
+		element.appendChild( e );
+		
 		return element;
 	}
 	
@@ -348,7 +355,11 @@ public class DeePheTypeGenerator {
 			e.setTextContent(elementType); 
 			element.appendChild(e);
 		}
-		
+
+		// allow multiple references
+		e = doc.createElement( "multipleReferencesAllowed" );
+		e.setTextContent( "true" );
+		element.appendChild( e );
 		
 		return element;
 	}

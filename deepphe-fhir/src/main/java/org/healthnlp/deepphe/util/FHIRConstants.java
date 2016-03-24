@@ -48,6 +48,7 @@ public class FHIRConstants {
 	public static final String RELATED_FACTOR = "RelatedFactor";
 	public static final String TREATMENT = "Treatment";
 	public static final String MANIFISTATION = "ManifestationOfDisease";
+	public static final String MEDICAL_RECORD = "MedicalRecord";
 	
 	public static final String HAS_BODY_SITE = "hasBodySite";
 	public static final String HAS_TREATMENT = "hasTreatment";
@@ -109,8 +110,4 @@ public class FHIRConstants {
 	public static final URI QUANTITY_URI = URI.create("http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity");
 
 
-
-
-
-	
 }

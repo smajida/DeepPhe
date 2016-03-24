@@ -1,60 +1,41 @@
 package org.healthnlp.deepphe.uima.fhir;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import javassist.expr.NewArray;
-
 import org.apache.uima.cas.FeatureStructure;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.cas.StringArray;
 import org.apache.uima.jcas.tcas.Annotation;
-import org.healthnlp.deepphe.fhir.AnatomicalSite;
-import org.healthnlp.deepphe.fhir.Disease;
+import org.healthnlp.deepphe.fhir.*;
 import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Finding;
 import org.healthnlp.deepphe.fhir.Medication;
 import org.healthnlp.deepphe.fhir.Observation;
 import org.healthnlp.deepphe.fhir.Procedure;
-import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.Stage;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.fhir.fact.TextMention;
-import org.healthnlp.deepphe.fhir.summary.CancerSummary;
+import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
-import org.healthnlp.deepphe.fhir.summary.PatientSummary;
-import org.healthnlp.deepphe.fhir.summary.PatientSummary.PatientPhenotype;
-import org.healthnlp.deepphe.fhir.summary.Summary;
-import org.healthnlp.deepphe.fhir.summary.TumorSummary;
-import org.healthnlp.deepphe.fhir.summary.TumorSummary.TumorPhenotype;
-import org.healthnlp.deepphe.uima.types.Attribute;
+import org.healthnlp.deepphe.fhir.summary.PatientPhenotype;
+import org.healthnlp.deepphe.fhir.summary.TumorPhenotype;
+import org.healthnlp.deepphe.uima.types.*;
 import org.healthnlp.deepphe.uima.types.BodySite;
-import org.healthnlp.deepphe.uima.types.Cancer;
 import org.healthnlp.deepphe.uima.types.CancerPhenotype;
 import org.healthnlp.deepphe.uima.types.Composition;
-import org.healthnlp.deepphe.uima.types.DiseaseDisorder;
 import org.healthnlp.deepphe.uima.types.HumanName;
-import org.healthnlp.deepphe.uima.types.Modifier;
 import org.healthnlp.deepphe.uima.types.Patient;
-import org.healthnlp.deepphe.uima.types.Tumor;
 import org.healthnlp.deepphe.util.FHIRConstants;
-import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
-import org.hl7.fhir.instance.model.BooleanType;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Coding;
-import org.hl7.fhir.instance.model.DateTimeType;
-import org.hl7.fhir.instance.model.DomainResource;
+import org.hl7.fhir.instance.model.*;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Quantity;
-import org.hl7.fhir.instance.model.Resource;
+
+import java.net.URI;
+import java.util.*;
+
+import org.apache.uima.jcas.tcas.Annotation;
 
 public class PhenotypeResourceFactory {
 	
@@ -173,6 +154,7 @@ public class PhenotypeResourceFactory {
 		comp.setEnd(r.getOffset()+r.getReportText().length());
 		comp.setHasDateOfComposition(""+r.getDate());
 		comp.setHasTitle(r.getTitle());
+		comp.setHasDocumentOffset( r.getOffset() );
 		
 		// add doc type
 		if(r.getType() != null){
@@ -200,8 +182,14 @@ public class PhenotypeResourceFactory {
 			org.healthnlp.deepphe.uima.types.Fact el = saveElement(e,jcas);
 			if(el != null){
 				// reset offsets
-				el.setBegin(el.getBegin()+r.getOffset());
-				el.setEnd(el.getEnd()+r.getOffset());
+				int[] st = new int[] { el.getBegin(), el.getEnd() };
+				for ( String m : FHIRUtils.getMentionExtensions( (DomainResource)e.getResource() ) ) {
+					st = FHIRUtils.getMentionSpan( m );
+					break;
+				}
+				el.setHasDocumentOffset( r.getOffset() );
+				el.setBegin( st[ 0 ] + r.getOffset() );
+				el.setEnd( st[ 1 ] + r.getOffset() );
 				// ommit non-annotations
 				if(el instanceof org.healthnlp.deepphe.uima.types.Annotation)
 					events.add(el);
@@ -247,6 +235,7 @@ public class PhenotypeResourceFactory {
 			FactList facts = summaryFHIR.getFacts(category);
 			flist.add(saveFactList(facts,jcas));
 		}
+		deleteAnnotations( summaryAnnotation.getHasContent(), jcas );
 		summaryAnnotation.setHasContent(getValues(jcas,flist));
 		summaryAnnotation.setHasURI(""+summaryFHIR.getConceptURI());
 		summaryAnnotation.setHasIdentifier(summaryFHIR.getResourceIdentifier());
@@ -276,8 +265,18 @@ public class PhenotypeResourceFactory {
 		annotation.addToIndexes();
 		return annotation;
 	}
-	
-	
+
+	private static void deleteAnnotations( FSArray arr, JCas jcas ) {
+		List<FeatureStructure> list = new ArrayList<FeatureStructure>();
+		for ( int i = 0; i < getSize( arr ); i++ ) {
+			list.add( arr.get( i ) );
+		}
+		for ( FeatureStructure st : list ) {
+			jcas.removeFsFromIndexes( st );
+		}
+	}
+
+
 	/**
 	 * create saving of fact list
 	 * @param jcas
@@ -327,6 +326,7 @@ public class PhenotypeResourceFactory {
 		
 		return fact;
 	}
+
 	
 	/**
 	 * create saving of fact list
@@ -341,13 +341,18 @@ public class PhenotypeResourceFactory {
 		annotation.setHasLabel(fact.getLabel());
 		annotation.setHasProvenanceText(getStringValues(jcas,fact.getProvenanceMentions()));
 		annotation.setHasType(fact.getType());
-		
-		// set begin end
+
+		// set begin & end if not set prior
 		for(TextMention m: fact.getProvenanceText()){
-			annotation.setBegin(m.getStart());
-			annotation.setEnd(m.getEnd());
+			annotation.setBegin( m.getStart() + annotation.getHasDocumentOffset() );
+			annotation.setEnd( m.getEnd() + annotation.getHasDocumentOffset() );
 			break;
 		}
+
+		if ( !fact.getAncestors().isEmpty() ) {
+			annotation.setHasAncestors( getStringValues( jcas, fact.getAncestors() ) );
+		}
+		
 	
 		annotation.addToIndexes();
 		return annotation;
@@ -394,6 +399,7 @@ public class PhenotypeResourceFactory {
 			FactList facts = phenotype.getFacts(category);
 			flist.add(saveFactList(facts,jcas));
 		}
+		deleteAnnotations( summaryAnnotation.getHasContent(), jcas );
 		summaryAnnotation.setHasContent(getValues(jcas,flist));
 		summaryAnnotation.setHasURI(""+phenotype.getConceptURI());
 		summaryAnnotation.setHasIdentifier(phenotype.getResourceIdentifier());
@@ -422,6 +428,7 @@ public class PhenotypeResourceFactory {
 			FactList facts = summaryFHIR.getFacts(category);
 			flist.add(saveFactList(facts,jcas));
 		}
+		deleteAnnotations( summaryAnnotation.getHasContent(), jcas );
 		summaryAnnotation.setHasContent(getValues(jcas,flist));
 		// add tumor
 		if(!summaryFHIR.getTumors().isEmpty()){
@@ -449,7 +456,8 @@ public class PhenotypeResourceFactory {
 	 * @return
 	 */
 
-	private static CancerPhenotype saveCancerPhenotype(org.healthnlp.deepphe.fhir.summary.CancerSummary.CancerPhenotype phenotype, JCas jcas) {
+	private static CancerPhenotype saveCancerPhenotype( org.healthnlp.deepphe.fhir.summary.CancerPhenotype phenotype,
+																		 JCas jcas ) {
 		Annotation a = getAnnotationByIdentifer(jcas,phenotype.getResourceIdentifier());
 		CancerPhenotype summaryAnnotation = (a == null)?new CancerPhenotype(jcas):(CancerPhenotype)a;
 		
@@ -459,6 +467,7 @@ public class PhenotypeResourceFactory {
 			FactList facts = phenotype.getFacts(category);
 			flist.add(saveFactList(facts,jcas));
 		}
+		deleteAnnotations( summaryAnnotation.getHasContent(), jcas );
 		summaryAnnotation.setHasContent(getValues(jcas,flist));
 		
 		// regurlar fluf
@@ -479,6 +488,7 @@ public class PhenotypeResourceFactory {
 			if(!facts.isEmpty())
 				flist.add(saveFactList(facts,jcas));
 		}
+		deleteAnnotations( summaryAnnotation.getHasContent(), jcas );
 		summaryAnnotation.setHasContent(getValues(jcas,flist));
 		// add phenotype
 		summaryAnnotation.setHasPhenotype(getValue(jcas,savePatientPhenotype(summaryFHIR.getPhenotype(),jcas)));
@@ -504,6 +514,7 @@ public class PhenotypeResourceFactory {
 			if(!facts.isEmpty())
 				flist.add(saveFactList(facts,jcas));
 		}
+		deleteAnnotations( summaryAnnotation.getHasContent(), jcas );
 		summaryAnnotation.setHasContent(getValues(jcas,flist));
 		// regurlar fluf
 		summaryAnnotation.setHasURI(""+phenotype.getConceptURI());
@@ -675,6 +686,8 @@ public class PhenotypeResourceFactory {
 		HumanName hn = (HumanName) getAnnotationByName(jcas,HumanName.type,e.getDisplayText()); 
 		if(hn == null)		
 			hn = new HumanName(jcas);
+		hn.setBegin( p.getBegin() );
+		hn.setEnd( p.getEnd() );
 		hn.setHasPreferredName(e.getDisplayText());
 		hn.setHasFullName(e.getDisplayText());
 		hn.addToIndexes(); 
@@ -768,15 +781,16 @@ public class PhenotypeResourceFactory {
 		
 			if(e.getValue() instanceof Quantity){
 				Quantity q = (Quantity) e.getValue();
-				
-				org.healthnlp.deepphe.uima.types.Quantity nm = getQuantity(jcas, q.getValue().doubleValue(),q.getUnit()); 
+				/*org.healthnlp.deepphe.uima.types.Quantity nm = getQuantity(jcas, q.getValue().doubleValue(),q.getUnit()); 
 				if(nm == null)
-					nm = new org.healthnlp.deepphe.uima.types.Quantity(jcas);
-	
+					nm = new org.healthnlp.deepphe.uima.types.Quantity(jcas);*/
+				deleteAnnotations( ob.getHasNumValue(), jcas );
+				org.healthnlp.deepphe.uima.types.Quantity nm = new org.healthnlp.deepphe.uima.types.Quantity( jcas );
 				nm.setHasQuantityValue((float)(q.getValue().doubleValue()));
 				Fact u = new Fact();
 				u.setName(q.getUnit());
 				u.setLabel(q.getUnit());
+				u.setIdentifier( q.getUnit() );
 				nm.setHasUnit(getValue(jcas,saveFact(u,jcas)));
 				
 				nm.addToIndexes();
@@ -821,6 +835,8 @@ public class PhenotypeResourceFactory {
 			// save stage
 			Stage stage = e.getStage();
 			if(stage != null){
+				deleteAnnotations( dd.getHasStage(), jcas );
+				
 				org.healthnlp.deepphe.uima.types.Stage st =  new  org.healthnlp.deepphe.uima.types.Stage(jcas);
 				/*URI uri = FHIRUtils.getConceptURI(stage.getSummary());
 				if(uri != null){
@@ -1174,7 +1190,7 @@ public class PhenotypeResourceFactory {
 		// add phenotypes
 		for(int i=0;i<getSize(summaryAnnotation.getHasPhenotype());i++){
 			org.healthnlp.deepphe.uima.types.PatientPhenotype pheneAnnotation = summaryAnnotation.getHasPhenotype(i);
-			PatientSummary.PatientPhenotype phenotype = new PatientSummary.PatientPhenotype();
+			PatientPhenotype phenotype = new PatientPhenotype();
 			
 			// add generic values
 			for(int j=0;j<getSize(pheneAnnotation.getHasContent());j++){
@@ -1208,7 +1224,8 @@ public class PhenotypeResourceFactory {
 		// add phenotypes
 		for(int i=0;i<getSize(summaryAnnotation.getHasPhenotype());i++){
 			CancerPhenotype pheneAnnotation = summaryAnnotation.getHasPhenotype(i);
-			CancerSummary.CancerPhenotype phenotype = new CancerSummary.CancerPhenotype();
+			org.healthnlp.deepphe.fhir.summary.CancerPhenotype phenotype
+					= new org.healthnlp.deepphe.fhir.summary.CancerPhenotype();
 			
 			// add generic values
 			for(int j=0;j<getSize(pheneAnnotation.getHasContent());j++){
@@ -1241,7 +1258,7 @@ public class PhenotypeResourceFactory {
 		// add phenotypes
 		for(int i=0;i<getSize(summaryAnnotation.getHasPhenotype());i++){
 			org.healthnlp.deepphe.uima.types.TumorPhenotype pheneAnnotation = summaryAnnotation.getHasPhenotype(i);
-			TumorSummary.TumorPhenotype phenotype = new TumorSummary.TumorPhenotype();
+			TumorPhenotype phenotype = new TumorPhenotype();
 			// add generic values
 			for(int j=0;j<getSize(pheneAnnotation.getHasContent());j++){
 				FactList flist = loadFactList(pheneAnnotation.getHasContent(j));
@@ -1294,15 +1311,29 @@ public class PhenotypeResourceFactory {
 	public static org.healthnlp.deepphe.uima.types.MedicalRecord saveMedicalRecord(MedicalRecord record, JCas jcas) {
 		Annotation a = getAnnotationByIdentifer(jcas,record.getResourceIdentifier());
 		org.healthnlp.deepphe.uima.types.MedicalRecord summaryAnnotation = (a == null)?new org.healthnlp.deepphe.uima.types.MedicalRecord(jcas):(org.healthnlp.deepphe.uima.types.MedicalRecord)a;
-		
+
+		summaryAnnotation.setBegin( 0 );
+		summaryAnnotation.setEnd( jcas.getDocumentText().length() );
 		summaryAnnotation.setHasURI(""+record.getConceptURI());
 		summaryAnnotation.setHasIdentifier(record.getResourceIdentifier());
-		
-		org.healthnlp.deepphe.uima.types.PatientSummary patientAnnotation = savePatientSummary(record.getPatientSummary(), jcas);
-		Cancer cancerAnnoation = saveCancerSummary(record.getCancerSummary(), jcas);
-		
-		summaryAnnotation.setHasMedicalRecordSummaryCancer(getValue(jcas,cancerAnnoation));
-		summaryAnnotation.setHasMedicalRecordSummaryPatient(getValue(jcas,patientAnnotation));
+		summaryAnnotation.setHasPreferredName( record.getDisplayText() );
+		summaryAnnotation.setHasType( FHIRConstants.MEDICAL_RECORD );
+
+		if ( record.getPatient() != null ) {
+			org.healthnlp.deepphe.uima.types.Patient patientAnnotation = savePatient( record.getPatient(), jcas );
+			summaryAnnotation.setHasPatient( getValue( jcas, patientAnnotation ) );
+		}
+
+		if ( record.getPatientSummary() != null ) {
+			org.healthnlp.deepphe.uima.types.PatientSummary patientAnnotation = savePatientSummary( record
+					.getPatientSummary(), jcas );
+			summaryAnnotation.setHasMedicalRecordSummaryPatient( getValue( jcas, patientAnnotation ) );
+		}
+
+		if ( record.getCancerSummary() != null ) {
+			Cancer cancerAnnoation = saveCancerSummary( record.getCancerSummary(), jcas );
+			summaryAnnotation.setHasMedicalRecordSummaryCancer( getValue( jcas, cancerAnnoation ) );
+		}
 		
 		List<FeatureStructure> list = new ArrayList<FeatureStructure>();
 		for(Report r:  record.getReports()){

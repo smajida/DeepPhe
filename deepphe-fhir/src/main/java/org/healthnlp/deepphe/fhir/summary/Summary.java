@@ -1,24 +1,18 @@
 package org.healthnlp.deepphe.fhir.summary;
 
-import java.io.File;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
-import org.healthnlp.deepphe.fhir.summary.CancerSummary.CancerPhenotype;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
-import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.List_;
 import org.hl7.fhir.instance.model.Resource;
+
+import java.io.File;
+import java.net.URI;
+import java.util.*;
 
 
 public abstract class Summary extends List_  implements Element {
