@@ -10,6 +10,7 @@ public class FHIRConstants {
 	
 	public static final String NLP_CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl";
 	public static final String SCHEMA_URL = "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl";
+	public static final String CONTEXT_URL = "http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl";
 	public static final String MODEL_CANCER_URL = NLP_CANCER_URL;
 	//public static final String MODEL_CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/modelCancer.owl";
 	
@@ -88,7 +89,7 @@ public class FHIRConstants {
 	public static final URI DIAGNOSIS_URI = URI.create(SCHEMA_URL+"#"+DIAGNOSIS);
 	public static final URI PROCEDURE_URI = URI.create(SCHEMA_URL+"#"+PROCEDURE);
 	public static final URI MEDICATION_URI = URI.create(SCHEMA_URL+"#"+MEDICATION);
-	public static final URI BODY_SITE_URI = URI.create(SCHEMA_URL+"#"+BODY_SITE);
+	public static final URI BODY_SITE_URI = URI.create(CONTEXT_URL+"#"+BODY_SITE);
 	public static final URI PATIENT_URI = URI.create(SCHEMA_URL+"#"+PATIENT);
 	public static final URI TREATMENT_URI = URI.create(MODEL_CANCER_URL+"#"+TREATMENT);
 	public static final URI MANIFISTATION_URI = URI.create(MODEL_CANCER_URL+"#"+MANIFISTATION);

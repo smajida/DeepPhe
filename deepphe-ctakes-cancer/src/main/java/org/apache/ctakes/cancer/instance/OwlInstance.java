@@ -31,6 +31,10 @@ final public class OwlInstance {
       _annotation = annotation;
    }
 
+   public IdentifiedAnnotation getIdentifiedAnnotation(){
+	   return _annotation;
+   }
+   
    /**
     * @return the url of the instance
     */

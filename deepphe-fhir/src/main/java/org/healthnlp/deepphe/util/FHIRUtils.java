@@ -61,6 +61,8 @@ public class FHIRUtils {
 	public static final String DOCUMENT_HEADER_PATIENT_NAME = "Patient Name";
 	public static final String MENTION_URL = "http://hl7.org/fhir/mention"; 
 	public static final String STAGE_URL = "http://hl7.org/fhir/stage"; 
+	public static final String MODALITY_URL = "http://hl7.org/fhir/modality"; 
+	public static final String DOC_TIME_REL_URL = "http://hl7.org/fhir/doc_time_rel"; 
 	public static final String CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl";
 
 	public static final String INTERPRETATION_POSITIVE = "Positive";
@@ -725,6 +727,15 @@ public class FHIRUtils {
 		return createExtension(MENTION_URL,text);
 	}
 
+	public static Extension createDocTimeRelExtension(String text){
+		return createExtension(DOC_TIME_REL_URL,text);
+	}
+
+	public static Extension createModalityExtension(String text){
+		return createExtension(MODALITY_URL,text);
+	}
+	
+	
 	
 	public static List<String> getMentionExtensions(DomainResource r){
 		List<String> mentions = new ArrayList<String>();

@@ -18,7 +18,7 @@ final class Stage extends DefaultProperty<StageType, StageValue> {
 
    static private final Logger LOGGER = Logger.getLogger( "Stage" );
 
-   static final String STAGE_URI = OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Cancer_Stage";
+   static final String STAGE_URI = OwlOntologyConceptUtil.CANCER_OWL + "#Cancer_Stage";
 
    Stage( final SpannedType<StageType> stageType, final SpannedValue<StageValue> stageValue ) {
       super( stageType, stageValue );
