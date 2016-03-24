@@ -3,10 +3,10 @@ package org.healthnlp.deepphe.uima.fhir;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
-import org.apache.ctakes.cancer.fhir.resource.InstanceUtil;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
-import org.apache.ctakes.cancer.stage.StagePropertyUtil;
-import org.apache.ctakes.cancer.tnm.TnmPropertyUtil;
+import org.apache.ctakes.cancer.phenotype.NeoplasmUtil;
+import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
+import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.core.util.OntologyConceptUtil;
@@ -335,7 +335,7 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
-		return (AnatomicalSiteMention)InstanceUtil.getLocations( jcas, an ).stream()
+		return (AnatomicalSiteMention)NeoplasmUtil.getLocations( jcas, an ).stream()
 				.filter( AnatomicalSiteMention.class::isInstance )
 				.findFirst().get();
 	}
@@ -373,7 +373,7 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
-		return InstanceUtil.getPropertyValues( jcas, an ).stream().findFirst().get();
+		return NeoplasmUtil.getPropertyValues( jcas, an ).stream().findFirst().get();
 	}
 	
 	
@@ -435,7 +435,7 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
-		return InstanceUtil.getNeoplasmProperties( jcas, neoplasm, TnmPropertyUtil.getParentUri() );
+		return NeoplasmUtil.getNeoplasmProperties( jcas, neoplasm, TnmPropertyUtil.getParentUri() );
 	}
 
 	//	public static CancerStage getCancerStage(IdentifiedAnnotation dm){
@@ -451,7 +451,7 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
-		return InstanceUtil.getNeoplasmProperties( jcas, neoplasm, StagePropertyUtil.getParentUri() );
+		return NeoplasmUtil.getNeoplasmProperties( jcas, neoplasm, StagePropertyUtil.getParentUri() );
 	}
 
 	/**

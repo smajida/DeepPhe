@@ -91,16 +91,22 @@ public class OwlConceptFactory implements ConceptFactory {
    static private Map<Long, Concept> parseOwlFile( final String owlFilePath ) {
       try {
          final IOntology ontology = OwlConnectionFactory.getInstance().getOntology( owlFilePath );
-         final Map<Long, Concept> conceptMap = new HashMap<>();
-         final IClass root = ontology.getClass( ROOT_ELEMENT_NAME );
-         for ( IClass childClass : root.getSubClasses() ) {
-            conceptMap.putAll( createOwlConcepts( childClass ) );
+         LOGGER.info( "Creating Concepts from Ontology Owl:" );
+         try ( DotLogger dotter = new DotLogger() ) {
+            final Map<Long, Concept> conceptMap = new HashMap<>();
+            final IClass root = ontology.getClass( ROOT_ELEMENT_NAME );
+            for ( IClass childClass : root.getSubClasses() ) {
+               conceptMap.putAll( createOwlConcepts( childClass ) );
+            }
+            final IClass root2 = ontology.getClass( MODIFIER_ELEMENT_NAME );
+            for ( IClass childClass : root2.getSubClasses() ) {
+               conceptMap.putAll( createOwlConcepts( childClass ) );
+            }
+            LOGGER.info( "Concepts created from Ontology Owl" );
+            return conceptMap;
+         } catch ( IOException ioE ) {
+            LOGGER.error( "Could not create concepts from Ontology Owl" );
          }
-         final IClass root2 = ontology.getClass( MODIFIER_ELEMENT_NAME );
-         for ( IClass childClass : root2.getSubClasses() ) {
-            conceptMap.putAll( createOwlConcepts( childClass ) );
-         }
-         return conceptMap;
       } catch ( IOntologyException | FileNotFoundException ontE ) {
          LOGGER.error( ontE.getMessage() );
       }
@@ -134,25 +140,32 @@ public class OwlConceptFactory implements ConceptFactory {
          for ( File bsvFile : bsvFiles ) {
             bsvConcepts.putAll( createBsvConcepts( bsvFile.getPath() ) );
          }
+         LOGGER.info( "Concept BSV Files loaded" );
       } catch ( IOException ioE ) {
          LOGGER.error( "Could not load Concept BSV Files in " + owlDir.getPath() );
       }
-      LOGGER.info( "Concept BSV Files loaded" );
       return bsvConcepts;
    }
 
    static private Map<Long, Concept> createBsvConcepts( final String bsvFilePath ) {
       final Collection<CuiTuiUriTerm> cuiTuiTerms = parseBsvFile( bsvFilePath );
-      final Map<Long, Concept> conceptMap = new HashMap<>( cuiTuiTerms.size() );
-      for ( CuiTuiUriTerm cuiTuiTerm : cuiTuiTerms ) {
-         final CollectionMap<String, String, ? extends Collection<String>> codes
-               = new HashSetMap<>();
-         codes.placeValue( Concept.TUI, TuiCodeUtil.getAsTui( cuiTuiTerm.getTui() ) );
-         codes.placeValue( OwlConcept.URI_CODING_SCHEME, cuiTuiTerm.getUri() );
-         conceptMap.put( CuiCodeUtil.getInstance().getCuiCode( cuiTuiTerm.getCui() ),
-               new DefaultConcept( cuiTuiTerm.getCui(), Concept.PREFERRED_TERM_UNKNOWN, codes ) );
+      LOGGER.info( "Creating Concepts from BSV Files:" );
+      try ( DotLogger dotter = new DotLogger() ) {
+         final Map<Long, Concept> conceptMap = new HashMap<>( cuiTuiTerms.size() );
+         for ( CuiTuiUriTerm cuiTuiTerm : cuiTuiTerms ) {
+            final CollectionMap<String, String, ? extends Collection<String>> codes
+                  = new HashSetMap<>();
+            codes.placeValue( Concept.TUI, TuiCodeUtil.getAsTui( cuiTuiTerm.getTui() ) );
+            codes.placeValue( OwlConcept.URI_CODING_SCHEME, cuiTuiTerm.getUri() );
+            conceptMap.put( CuiCodeUtil.getInstance().getCuiCode( cuiTuiTerm.getCui() ),
+                  new DefaultConcept( cuiTuiTerm.getCui(), Concept.PREFERRED_TERM_UNKNOWN, codes ) );
+         }
+         LOGGER.info( "Concepts created from BSV Files" );
+         return conceptMap;
+      } catch ( IOException ioE ) {
+         LOGGER.error( "Could not create concepts from BSV Files" );
       }
-      return conceptMap;
+      return Collections.emptyMap();
    }
 
 

@@ -1,16 +1,12 @@
 package org.healthnlp.deepphe.uima.fhir;
 
-import java.io.File;
-import java.net.URI;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
+import edu.pitt.dbmi.nlp.noble.ontology.IClass;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
+import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
-import org.apache.ctakes.cancer.size.SizePropertyUtil;
-import org.apache.ctakes.cancer.stage.StagePropertyUtil;
-import org.apache.ctakes.cancer.tnm.TnmPropertyUtil;
-//import org.apache.ctakes.cancer.type.textsem.CancerSize;
+import org.apache.ctakes.cancer.phenotype.size.SizePropertyUtil;
+import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
+import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.core.util.DocumentIDAnnotationUtil;
 import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
@@ -18,21 +14,8 @@ import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.jcas.JCas;
-import org.healthnlp.deepphe.fhir.AnatomicalSite;
-import org.healthnlp.deepphe.fhir.Disease;
-import org.healthnlp.deepphe.fhir.Element;
-import org.healthnlp.deepphe.fhir.Finding;
-import org.healthnlp.deepphe.fhir.Medication;
-import org.healthnlp.deepphe.fhir.Observation;
-import org.healthnlp.deepphe.fhir.Patient;
-import org.healthnlp.deepphe.fhir.Procedure;
-import org.healthnlp.deepphe.fhir.Report;
-import org.healthnlp.deepphe.fhir.Stage;
-import org.healthnlp.deepphe.util.FHIRConstants;
-import org.healthnlp.deepphe.util.FHIRRegistry;
-import org.healthnlp.deepphe.util.OntologyUtils;
-import org.healthnlp.deepphe.util.FHIRUtils;
-import org.healthnlp.deepphe.util.TextUtils;
+import org.healthnlp.deepphe.fhir.*;
+import org.healthnlp.deepphe.util.*;
 import org.hl7.fhir.instance.model.BodySite;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Composition;
@@ -40,9 +23,16 @@ import org.hl7.fhir.instance.model.Condition;
 import org.hl7.fhir.instance.model.Condition.ConditionStageComponent;
 import org.hl7.fhir.instance.model.Procedure.ProcedureStatus;
 
-import edu.pitt.dbmi.nlp.noble.ontology.IClass;
-import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
-import edu.pitt.dbmi.nlp.noble.terminology.Concept;
+import java.io.File;
+import java.net.URI;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+//import org.apache.ctakes.cancer.type.textsem.CancerSize;
 
 final public class DocumentResourceFactory {
 

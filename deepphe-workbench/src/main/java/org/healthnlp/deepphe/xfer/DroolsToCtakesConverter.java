@@ -1,37 +1,29 @@
 package org.healthnlp.deepphe.xfer;
 
-import static org.apache.ctakes.typesystem.type.constants.CONST.NE_TYPE_ID_FINDING;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.ctakes.cancer.receptor.StatusInstanceFactory;
-import org.apache.ctakes.cancer.receptor.StatusPropertyUtil;
-import org.apache.ctakes.cancer.size.SizeInstanceFactory;
-import org.apache.ctakes.cancer.tnm.TnmInstanceFactory;
-import org.apache.ctakes.cancer.tnm.TnmPropertyUtil;
-//import org.apache.ctakes.cancer.type.textsem.CancerSize;
-//import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
-//import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
-//import org.apache.ctakes.cancer.type.textsem.TnmClassification;
-//import org.apache.ctakes.cancer.type.textsem.TnmFeature;
-//import org.apache.ctakes.cancer.type.textsem.TnmPrefix;
+import org.apache.ctakes.cancer.phenotype.receptor.StatusPhenotypeFactory;
+import org.apache.ctakes.cancer.phenotype.receptor.StatusPropertyUtil;
+import org.apache.ctakes.cancer.phenotype.size.SizePhenotypeFactory;
+import org.apache.ctakes.cancer.phenotype.tnm.TnmPhenotypeFactory;
+import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.typesystem.type.constants.CONST;
 import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.SignSymptomMention;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
-import org.healthnlp.deepphe.summarization.drools.kb.ClinicalRegionalLymphNodeClassification;
-import org.healthnlp.deepphe.summarization.drools.kb.DistantMetastasisClassification;
-import org.healthnlp.deepphe.summarization.drools.kb.HasInterpretation;
-import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
-import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
-import org.healthnlp.deepphe.summarization.drools.kb.PrimaryTumorClassification;
-import org.healthnlp.deepphe.summarization.drools.kb.Tumor;
-import org.healthnlp.deepphe.summarization.drools.kb.TumorSize;
+import org.healthnlp.deepphe.summarization.drools.kb.*;
 import org.healthnlp.deepphe.summarization.drools.kb.impl.HasInterpretationImpl;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+//import org.apache.ctakes.cancer.type.textsem.CancerSize;
+//import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
+//import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
+//import org.apache.ctakes.cancer.type.textsem.TnmClassification;
+//import org.apache.ctakes.cancer.type.textsem.TnmFeature;
+//import org.apache.ctakes.cancer.type.textsem.TnmPrefix;
 
 public class DroolsToCtakesConverter {
 
@@ -97,7 +89,7 @@ public class DroolsToCtakesConverter {
 		// TODO - replace with Identified Annotations with proper value URIs
 		final String typeUri = StatusPropertyUtil.getInstance().getTypeUri( summary.getBaseCode() );
 		final String valueUri = StatusPropertyUtil.getInstance().getValueUri( summary.getValue() );
-		StatusInstanceFactory.getInstance().createInstance( patientJCas,
+		StatusPhenotypeFactory.getInstance().createPhenotype( patientJCas,
 				typeUri, 0, 0,
 				valueUri, 0, 0,
 				Collections.emptyList(), Collections.emptyList() );
@@ -144,7 +136,7 @@ public class DroolsToCtakesConverter {
 				// TODO - what are the possible summary basecodes wrt size?
 //			final String typeUri = SizePropertyUtil.getInstance().getTypeUri( summary.getBaseCode() );
 //			final String valueUri = SizePropertyUtil.getInstance().getValueUri( summary.getValue() );
-				SizeInstanceFactory.getInstance().createInstance( patientJCas, 0, 0, 0, 0, dimension+" cm" );
+				SizePhenotypeFactory.getInstance().createInstance( patientJCas, 0, 0, 0, 0, dimension + " cm" );
 			}
 //			cancerSize.setMeasurements(measurementFeatures);
 		}
@@ -186,7 +178,7 @@ public class DroolsToCtakesConverter {
 		// TODO - replace with Identified Annotations with proper value URIs
 		final String typeUri = TnmPropertyUtil.getInstance().getTypeUri( summary.getBaseCode() );
 		final String valueUri = TnmPropertyUtil.getInstance().getValueUri( summary.getValue() );
-		return TnmInstanceFactory.getInstance().createInstance( jcas,
+		return TnmPhenotypeFactory.getInstance().createPhenotype( jcas,
 				typeUri, 0, 0,
 				valueUri, 0, 0,
 				Collections.emptyList(), Collections.emptyList() );

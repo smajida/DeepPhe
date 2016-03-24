@@ -1,7 +1,7 @@
 package org.apache.ctakes.cancer.relation;
 
 
-import org.apache.ctakes.cancer.fhir.resource.AbstractResourceFactory;
+import org.apache.ctakes.cancer.phenotype.AbstractPhenotypeFactory;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
@@ -13,7 +13,7 @@ import javax.annotation.concurrent.Immutable;
 /**
  * A Neoplasm Relation is a special relation that links a neoplasm annotation with a property annotation.
  * Though useful, neoplasm relations should normally be created using subclasses of
- * {@link AbstractResourceFactory}
+ * {@link AbstractPhenotypeFactory}
  * @author SPF , chip-nlp
  * @version %I%
  * @since 12/5/2015
