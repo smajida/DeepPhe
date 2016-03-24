@@ -19,6 +19,7 @@ import org.healthnlp.deepphe.fhir.fact.TextMention;
 import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.PatientPhenotype;
+import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.TumorPhenotype;
 import org.healthnlp.deepphe.uima.types.*;
 import org.healthnlp.deepphe.uima.types.BodySite;
