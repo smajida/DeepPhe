@@ -38,7 +38,7 @@ public class ValueFact extends Fact {
 		b.append("type: "+getType()+"|");
 		b.append("id: "+getIdentifier()+"|");
 		b.append("patient id: "+getPatientIdentifier()+"|");
-		b.append("document id: "+getDocumentIdentifer()+"|");
+		b.append("document id: "+getDocumentIdentifier()+"|");
 		b.append("document tyoe: "+getDocumentType()+"|");
 		b.append("container ids: "+getContainerIdentifier()+"|");
 		b.append("ancestors: "+getAncestors()+"\n");

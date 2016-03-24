@@ -16,9 +16,11 @@ public class Fact {
 	private Set<String> ancestors;
 	private List<Fact> provenanceFacts;
 	private List<TextMention> provenanceText;
-	
+
 	private transient String documentIdentifier, patientIdentifier, documentType;
 	private transient Set<String> containerIdentifier;
+
+	
 	
 	public String getName() {
 		return name;
@@ -106,6 +108,7 @@ public class Fact {
 		}
 		return null;
 	}
+	
 	public void setDocumentType(String docType){
 		documentType = docType;
 		for(TextMention t: getProvenanceText()){
@@ -124,7 +127,7 @@ public class Fact {
 	public void setCategory(String category) {
 		this.category = category;
 	}
-	public String getDocumentIdentifer() {
+	public String getDocumentIdentifier() {
 		return documentIdentifier;
 	}
 	public String getPatientIdentifier() {
@@ -150,7 +153,7 @@ public class Fact {
 		b.append("type: "+getType()+"|");
 		b.append("id: "+getIdentifier()+"|");
 		b.append("patient id: "+getPatientIdentifier()+"|");
-		b.append("document id: "+getDocumentIdentifer()+"|");
+		b.append("document id: "+getDocumentIdentifier()+"|");
 		b.append("document tyoe: "+getDocumentType()+"|");
 		b.append("container ids: "+getContainerIdentifier()+"|");
 		b.append("ancestors: "+getAncestors()+"\n");
