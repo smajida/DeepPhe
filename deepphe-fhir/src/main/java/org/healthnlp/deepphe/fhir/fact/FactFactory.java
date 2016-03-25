@@ -227,6 +227,15 @@ public class FactFactory {
 		return fact;
 	}
 	
+	/**
+	 * create empty fact of a given type
+	 * @param type
+	 * @return
+	 */
+	public static Fact createFact(String type, String uri){
+		return createFact(FHIRUtils.getCodeableConcept(URI.create(uri)),createFact(type));
+	}
+	
 	public static String createIdentifier(Fact fact){
 		return fact.getType()+"_"+fact.getName().replaceAll("\\W+","_")+"_"+Math.abs(fact.getProvenanceMentions().hashCode());
 	}

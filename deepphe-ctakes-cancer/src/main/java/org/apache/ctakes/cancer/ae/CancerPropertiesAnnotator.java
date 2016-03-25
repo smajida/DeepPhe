@@ -1,10 +1,10 @@
 package org.apache.ctakes.cancer.ae;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
-import org.apache.ctakes.cancer.receptor.StatusFinder;
-import org.apache.ctakes.cancer.size.SizeFinder;
-import org.apache.ctakes.cancer.stage.StageFinder;
-import org.apache.ctakes.cancer.tnm.TnmFinder;
+import org.apache.ctakes.cancer.phenotype.receptor.StatusFinder;
+import org.apache.ctakes.cancer.phenotype.size.SizeFinder;
+import org.apache.ctakes.cancer.phenotype.stage.StageFinder;
+import org.apache.ctakes.cancer.phenotype.tnm.TnmFinder;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textspan.Segment;
 import org.apache.log4j.Logger;
