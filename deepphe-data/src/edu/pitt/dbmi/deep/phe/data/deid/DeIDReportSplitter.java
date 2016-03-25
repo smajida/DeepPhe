@@ -107,19 +107,9 @@ public class DeIDReportSplitter {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		String type = "Breast";
-		String ver = "scrubbed";
-		//File fs = new File("/home/tseytlin/Data/DeepPhe/"+type+"/"+type.toLowerCase()+"_patient_sample.scrubbed");
-		//File fd = new File("/home/tseytlin/Data/DeepPhe/"+type+"/"+type.toLowerCase()+"_patient_sample_scrubbed");
-		
-//		File fs = new File("/home/tseytlin/Data/DeepPhe/"+type+"/sample/"+type.toLowerCase()+"_12doc_sample."+ver);
-//		File fd = new File("/home/tseytlin/Data/DeepPhe/"+type+"/sample/"+type.toLowerCase()+"_12doc_sample_"+ver);
-		
-/*		File fs = new File("/home/tseytlin/Data/DeepPhe/"+type+"/"+type.toLowerCase()+"_new_sample.bar");
-		File fd = new File("/home/tseytlin/Data/DeepPhe/"+type+"/"+type.toLowerCase()+"_new_sample_id");*/
-		
-		File fs = new File("/home/tseytlin/Data/DeepPhe/Samples/CARe_Sample_Apr-2015/"+type+"/"+type.toLowerCase()+"_sample_filtered_addendum."+ver);
-		File fd = new File("/home/tseytlin/Data/DeepPhe/Samples/CARe_Sample_Apr-2015/"+type+"/"+type.toLowerCase()+"_sample_filtered_addendum_"+ver);
+		File dir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/");
+		File fs = new File(dir,"TCGA_data_filtered.scrubbed");
+		File fd = new File(dir,"TCGA_data_filtered_scrubbed");
 		
 		DeIDReportSplitter splitter = new DeIDReportSplitter();
 		splitter.split(fs,fd);

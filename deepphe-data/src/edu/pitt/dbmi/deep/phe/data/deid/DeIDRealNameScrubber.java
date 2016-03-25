@@ -123,7 +123,7 @@ public class DeIDRealNameScrubber {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		String type = "Melanoma";
+		//String type = "Melanoma";
 		File dir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/");
 		File fd = new File(dir,"TCGA_data_filtered.deid");
 		File fr = new File(dir,"TCGA_data_filtered.bar");
