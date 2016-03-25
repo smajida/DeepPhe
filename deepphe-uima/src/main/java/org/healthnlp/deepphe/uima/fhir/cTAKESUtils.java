@@ -442,7 +442,7 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
-		return NeoplasmUtil.getNeoplasmProperties( jcas, neoplasm, TnmPropertyUtil.getParentUri() );
+		return NeoplasmUtil.getNeoplasmPropertiesBranch( jcas, neoplasm, TnmPropertyUtil.getParentUri() );
 	}
 
 	//	public static CancerStage getCancerStage(IdentifiedAnnotation dm){
@@ -458,7 +458,7 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
-		return NeoplasmUtil.getNeoplasmProperties( jcas, neoplasm, StagePropertyUtil.getParentUri() );
+		return NeoplasmUtil.getNeoplasmPropertiesBranch(jcas, neoplasm, StagePropertyUtil.getParentUri() );
 	}
 
 	/**
@@ -474,16 +474,37 @@ public class cTAKESUtils {
 		return null;
 	}
 
-
+	private static boolean isEmpty(String s){
+		return s == null || s.trim().length() == 0;
+	}
+	
 	public static void addLanguageContext( ConceptInstance conceptInstance, DomainResource dx ) {
-		if ( conceptInstance.getDocTimeRel() != null ) {
+		if (!isEmpty(conceptInstance.getDocTimeRel())) {
 			dx.addExtension( FHIRUtils.createDocTimeRelExtension( conceptInstance.getDocTimeRel() ) );
 		}
-		if ( conceptInstance.getModality() != null ) {
+		if (!isEmpty(conceptInstance.getModality())) {
 			dx.addExtension( FHIRUtils.createModalityExtension( conceptInstance.getModality() ) );
 		}
-		//TODO: add more
-		
+		if(conceptInstance.isNegated()){
+			dx.addExtension( FHIRUtils.createExtension(FHIRUtils.LANGUAGE_ASPECT_NEGATED_URL,""+conceptInstance.isNegated() ) );
+		}
+		if(conceptInstance.isUncertain()){
+			dx.addExtension( FHIRUtils.createExtension(FHIRUtils.LANGUAGE_ASPECT_UNCERTAIN_URL,""+conceptInstance.isUncertain() ) );
+		}
+		if(conceptInstance.isConditional()){
+			dx.addExtension( FHIRUtils.createExtension(FHIRUtils.LANGUAGE_ASPECT_CONDITIONAL_URL,""+conceptInstance.isConditional() ) );
+		}
+		if(conceptInstance.isIntermittent()){
+			dx.addExtension( FHIRUtils.createExtension(FHIRUtils.LANGUAGE_ASPECT_INTERMITTENT_URL,""+conceptInstance.isIntermittent() ) );
+		}
+		if(conceptInstance.isHypothetical()){
+			dx.addExtension( FHIRUtils.createExtension(FHIRUtils.LANGUAGE_ASPECT_HYPOTHETICAL_URL,""+conceptInstance.isHypothetical() ) );
+		}
+		if(conceptInstance.isPermanent()){
+			dx.addExtension( FHIRUtils.createExtension(FHIRUtils.LANGUAGE_ASPECT_PERMENENT_URL,""+conceptInstance.isPermanent() ) );
+		}
+		if(conceptInstance.inPatientHistory()){
+			dx.addExtension( FHIRUtils.createExtension(FHIRUtils.LANGUAGE_ASPECT_HISTORICAL_URL,""+conceptInstance.inPatientHistory() ) );
+		}
 	}
-
 }

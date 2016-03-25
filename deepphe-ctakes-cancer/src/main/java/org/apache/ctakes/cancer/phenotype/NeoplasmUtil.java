@@ -72,7 +72,7 @@ final public class NeoplasmUtil {
       if ( relations == null || relations.isEmpty() ) {
          return Collections.emptyList();
       }
-      final Collection<IdentifiedAnnotation> uriAnnotations = OwlOntologyConceptUtil.getAnnotationsByUri( jcas, uri );
+      final Collection<IdentifiedAnnotation> uriAnnotations = OwlOntologyConceptUtil.getAnnotationsByUri(jcas, uri );
       if ( uriAnnotations == null || uriAnnotations.isEmpty() ) {
          return Collections.emptyList();
       }

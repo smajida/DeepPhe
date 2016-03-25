@@ -6,6 +6,7 @@ import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+
 import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.hl7.fhir.instance.formats.XmlParser;
@@ -41,8 +42,18 @@ public class FHIRUtils {
 	public static final String DOCUMENT_HEADER_PATIENT_NAME = "Patient Name";
 	public static final String MENTION_URL = "http://hl7.org/fhir/mention";
 	public static final String STAGE_URL = "http://hl7.org/fhir/stage";
-	public static final String MODALITY_URL = "http://hl7.org/fhir/modality";
-	public static final String DOC_TIME_REL_URL = "http://hl7.org/fhir/doc_time_rel"; 
+	
+	public static final String LANGUAGE_ASPECT_MODALITY_URL = "http://hl7.org/fhir/modality";
+	public static final String LANGUAGE_ASPECT_DOC_TIME_REL_URL = "http://hl7.org/fhir/doc_time_rel"; 
+	public static final String LANGUAGE_ASPECT_NEGATED_URL = "http://hl7.org/fhir/negation";
+	public static final String LANGUAGE_ASPECT_UNCERTAIN_URL = "http://hl7.org/fhir/uncertainty";
+	public static final String LANGUAGE_ASPECT_CONDITIONAL_URL = "http://hl7.org/fhir/conditionality";
+	public static final String LANGUAGE_ASPECT_INTERMITTENT_URL = "http://hl7.org/fhir/intermittency";
+	public static final String LANGUAGE_ASPECT_HYPOTHETICAL_URL = "http://hl7.org/fhir/hypothetical";
+	public static final String LANGUAGE_ASPECT_PERMENENT_URL = "http://hl7.org/fhir/permanency";
+	public static final String LANGUAGE_ASPECT_HISTORICAL_URL = "http://hl7.org/fhir/historical";
+	
+	
 	public static final String CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl";
 
 	public static final String INTERPRETATION_POSITIVE = "Positive";
@@ -74,7 +85,8 @@ public class FHIRUtils {
 	public static final String STAGE_REGEX = "p?(T[X0-4a-z]{1,4})(N[X0-4a-z]{1,4})(M[X0-4a-z]{1,4})";
 	
 	public static final long MILLISECONDS_IN_YEAR = (long) 1000 * 60 * 60 * 24 * 365;
-	
+
+
 	private static Map<String,CodeableConcept> reportTypes;
 	
 	/**
@@ -708,11 +720,11 @@ public class FHIRUtils {
 	}
 
 	public static Extension createDocTimeRelExtension( String text ) {
-		return createExtension( DOC_TIME_REL_URL, text );
+		return createExtension( LANGUAGE_ASPECT_DOC_TIME_REL_URL, text );
 	}
 
 	public static Extension createModalityExtension( String text ) {
-		return createExtension( MODALITY_URL, text );
+		return createExtension( LANGUAGE_ASPECT_MODALITY_URL, text );
 	}
 	
 	

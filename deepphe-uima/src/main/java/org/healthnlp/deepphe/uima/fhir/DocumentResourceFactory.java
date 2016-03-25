@@ -507,7 +507,7 @@ final public class DocumentResourceFactory {
 	public static Disease load( Disease dx, final ConceptInstance conceptInstance ) {
 		// set some properties
 		dx.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
-
+		
 		cTAKESUtils.addLanguageContext( conceptInstance, dx );
 		
 		// now lets take a look at the location of this disease
