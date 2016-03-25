@@ -57,6 +57,10 @@ public class Fact {
 	public void addProvenanceFact(Fact fact) {
 		getProvenanceFacts().add(fact);
 	}
+	public void addProvenanceFacts(List<Fact> facts) {
+		getProvenanceFacts().addAll(facts);
+	}
+	
 	public List<TextMention> getProvenanceText() {
 		if(provenanceText == null)
 			provenanceText = new ArrayList<TextMention>();
