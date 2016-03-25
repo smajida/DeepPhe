@@ -1,47 +1,27 @@
 package org.healthnlp.deepphe.uima.drools;
 
 
-import java.io.File;
-import java.net.URL;
-
-import org.drools.KnowledgeBase;
-import org.drools.KnowledgeBaseFactory;
-import org.drools.builder.KnowledgeBuilder;
-import org.drools.builder.KnowledgeBuilderFactory;
-import org.drools.builder.ResourceType;
-import org.drools.io.Resource;
-import org.drools.io.ResourceFactory;
-import org.drools.runtime.StatefulKnowledgeSession;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.kie.api.KieServices;
+import org.kie.api.event.rule.DebugAgendaEventListener;
+import org.kie.api.runtime.KieContainer;
+import org.kie.api.runtime.KieSession;
+
 
 public class TestSampleRules {
-	private StatefulKnowledgeSession session = null;
+	private KieSession session = null;
 
 	@Before
 	public void setUp() {
 		try {
-
-			KnowledgeBuilder builder = KnowledgeBuilderFactory
-					.newKnowledgeBuilder();
-			URL autoloadUrl = getClass().getResource("rules");
-			File autoloadDirectory = new File(autoloadUrl.getPath());
-			if (autoloadDirectory.exists() && autoloadDirectory.isDirectory()) {
-				File[] autoloadFiles = autoloadDirectory.listFiles();
-				for (File autoloadFile : autoloadFiles) {
-					Resource rulesResource = ResourceFactory
-							.newFileResource(autoloadFile);
-					builder.add(rulesResource, ResourceType.DRL);
-				}
-			}
-			if (builder.hasErrors()) {
-				throw new RuntimeException(builder.getErrors().toString());
-			}
-			KnowledgeBase knowledgeBase = KnowledgeBaseFactory
-					.newKnowledgeBase();
-			knowledgeBase.addKnowledgePackages(builder.getKnowledgePackages());
-			session = knowledgeBase.newStatefulKnowledgeSession();
+			
+			KieServices ks = KieServices.Factory.get();
+    	    KieContainer kContainer = ks.getKieClasspathContainer();
+        	KieSession session = kContainer.newKieSession("ksession-rules");
+			
+			session.addEventListener( new DebugAgendaEventListener() );
 
 		} catch (Throwable t) {
 			t.printStackTrace();
