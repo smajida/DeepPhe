@@ -6,7 +6,6 @@ import org.apache.ctakes.cancer.phenotype.property.AbstractPropertyUtil;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.jcas.JCas;
-import org.apache.uima.jcas.tcas.Annotation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -118,12 +117,16 @@ final public class TnmPropertyUtil extends AbstractPropertyUtil<TnmType, TnmValu
       final Collection<IdentifiedAnnotation> fullTnms = new ArrayList<>( tnmAnnotations );
       fullTnms.addAll( values );
       fullTnms.addAll( prefixes );
-      final int begin = fullTnms.stream()
-            .map( Annotation::getBegin )
-            .min( Integer::min ).get();
-      final int end = fullTnms.stream()
-            .map( NeoplasmUtil::getNeoplasmProperties ).flatMap( Collection::stream )
-            .map( Annotation::getEnd ).max( Integer::max ).get();
+      int begin = Integer.MAX_VALUE;
+      int end = Integer.MIN_VALUE;
+      for ( IdentifiedAnnotation tnm : fullTnms ) {
+         begin = Math.min( begin, tnm.getBegin() );
+         end = Math.max( end, tnm.getEnd() );
+         final Iterable<IdentifiedAnnotation> properties = NeoplasmUtil.getNeoplasmProperties( tnm );
+         for ( IdentifiedAnnotation property : properties ) {
+            end = Math.max( end, property.getEnd() );
+         }
+      }
       return UriAnnotationFactory.createIdentifiedAnnotation( jcas, begin, end, TnmPropertyUtil.getParentUri() );
    }
 

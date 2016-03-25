@@ -115,11 +115,11 @@ final public class SizePropertyUtil extends AbstractPropertyUtil<DimensionType, 
       final Collection<IdentifiedAnnotation> fullSize = new ArrayList<>( sizeAnnotations );
       fullSize.addAll( values );
       final int begin = fullSize.stream()
-            .map( Annotation::getBegin )
-            .min( Integer::min ).get();
+            .mapToInt( Annotation::getBegin )
+            .min().getAsInt();
       final int end = fullSize.stream()
-            .map( Annotation::getEnd )
-            .max( Integer::max ).get();
+            .mapToInt( Annotation::getEnd )
+            .max().getAsInt();
       return UriAnnotationFactory.createIdentifiedAnnotation( jcas, begin, end, SizePropertyUtil.getParentUri() );
    }
 

@@ -6,7 +6,6 @@ import org.apache.ctakes.cancer.phenotype.property.AbstractPropertyUtil;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.jcas.JCas;
-import org.apache.uima.jcas.tcas.Annotation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -115,12 +114,19 @@ final public class StagePropertyUtil extends AbstractPropertyUtil<StageType, Sta
             .collect( Collectors.toList() );
       final Collection<IdentifiedAnnotation> fullStages = new ArrayList<>( stageAnnotations );
       fullStages.addAll( values );
-      final int begin = fullStages.stream()
-            .map( Annotation::getBegin )
-            .min( Integer::min ).get();
-      final int end = fullStages.stream()
-            .map( NeoplasmUtil::getNeoplasmProperties ).flatMap( Collection::stream )
-            .map( Annotation::getEnd ).max( Integer::max ).get();
+      if ( fullStages.isEmpty() ) {
+         return null;
+      }
+      int begin = Integer.MAX_VALUE;
+      int end = Integer.MIN_VALUE;
+      for ( IdentifiedAnnotation stage : fullStages ) {
+         begin = Math.min( begin, stage.getBegin() );
+         end = Math.max( end, stage.getEnd() );
+         final Iterable<IdentifiedAnnotation> properties = NeoplasmUtil.getNeoplasmProperties( stage );
+         for ( IdentifiedAnnotation property : properties ) {
+            end = Math.max( end, property.getEnd() );
+         }
+      }
       return UriAnnotationFactory.createIdentifiedAnnotation( jcas, begin, end, StagePropertyUtil.getParentUri() );
    }
 

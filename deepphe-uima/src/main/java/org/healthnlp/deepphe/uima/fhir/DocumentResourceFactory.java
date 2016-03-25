@@ -730,7 +730,7 @@ final public class DocumentResourceFactory {
 									  final Collection<IdentifiedAnnotation> tnmAnnotations ) {
 		// set cancer stage, if available
 		if ( stageAnnotations != null && !stageAnnotations.isEmpty() ) {
-			final JCas jcas = stageAnnotations.stream().map( cTAKESUtils::getJcas ).findFirst().get();
+			final JCas jcas = stageAnnotations.stream().map( cTAKESUtils::getJcas ).findFirst().orElse( null );
 			if ( jcas == null ) {
 				LOGGER.error( "No Cas exists for Stage annotations" );
 			} else {
