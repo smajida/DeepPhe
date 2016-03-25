@@ -9,9 +9,11 @@ import java.net.URI;
 
 import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
 
 
 import org.healthnlp.deepphe.fhir.summary.*;
+import org.healthnlp.deepphe.uima.drools.Summarizer;
 //import org.healthnlp.deepphe.fhir.summary.CancerPhenotype;  // can't import this class
 
 import java.util.Set;
@@ -22,25 +24,19 @@ import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.List;
 
-declare CountOccurences
-   numDocuments : 		Integer
-   tClassificationMap : Map
-   numNClassification : Integer
-   numMClassification:  Integer
-   numCancerType : 		Integer
-end
-
-
-rule "initOccurences"
-  salience 999999999
+rule "insertSummarizer"
+	salience 999999999
+	no-loop true
 	when
-	then    
-	  insert( new CountOccurences(0,new HashMap(),0,0,0));
-	  System.out.println("DONE init_Session");
+		not ( Summarizer())
+	then
+		insert( new Summarizer ());
+	System.out.println("insertSummarizer DONE");
 end
+	
 		
 
-rule "countOccurences"
+rule "initSummarizer"
 	salience 10000
 	no-loop true
 	when 
@@ -63,11 +59,13 @@ rule "countOccurences"
 		$cancerTypeSet: Set()
 			from accumulate (Fact(category == "hasCancerType", $name : name), collectSet ( $name))	
 			
-		$oFact : CountOccurences()
+		$oFact : Summarizer()
 		
 	then
-	modify ( $oFact ) {setNumDocuments( $docSet.size()), setTClassificationMap( $tClassMap),  setNumNClassification( $nClassifSet.size()),
-		setNumMClassification( $mClassifSet.size()), setNumCancerType( $cancerTypeSet.size())};
+	$oFact.setTClassificationMap($tClassMap);
+	
+	//modify ( $oFact ) {setNumDocuments( $docSet.size()), setTClassificationMap( $tClassMap),  setNumNClassification( $nClassifSet.size()),
+	//	setNumMClassification( $mClassifSet.size()), setNumCancerType( $cancerTypeSet.size())};
 		
 	//modify ( $oFact ) {setNumDocuments( $docSet.size()), new HashMap(),  setNumNClassification( $nClassifSet.size()),
 	//	setNumMClassification( $mClassifSet.size()), setNumCancerType( $cancerTypeSet.size())};
@@ -77,30 +75,30 @@ rule "countOccurences"
 	System.out.println("TClassification set for patinet: "+$nClassifSet);
 	System.out.println("TClassification set for patinet: "+$mClassifSet);
 	System.out.println("cancerTypeSet set for patinet: "+$cancerTypeSet);
+	
+	System.out.println("TClassification type: "+$oFact.getType($tClassMap));
+	System.out.println("TClassification uris: "+$oFact.getURIs($tClassMap));
+
 end  
 
 
 rule "setTClassification"
 	no-loop true
 	when
-		//$record : MedicalRecord()
+		$record : MedicalRecord()		
+		$summarizer : Summarizer(tClassificationMap.size() == 1)
 		
-		$record : MedicalRecord($cancerSummmary : cancerSummary)
-		$phenotype : CancerPhenotype() from $cancerSummmary.phenotype
-		
-		//$tClassificationMap : CountOccurences(tClassificationMap.size() == 1)
-		CountOccurences($tClassificationMap :tClassificationMap, $tClassificationMap.size() == 1)
-		//($tClassificationMap.size() == 1)
-		//$fact : Fact(category == "hasTClassification")
 	then
-		$record.getCancerSummary().getPhenotype().addFact("hasTClassification", ((Fact)((new ArrayList)$tClassificationMap.values()).get(0)));
-		
-		//String value = (new ArrayList<String>(linkedHashMap.values())).get(pos);
-		
-		System.out.println("setTClassification to ");
+	Map<String, List<Fact>> tMap = $summarizer.getTClassificationMap();
+		String uri =  $summarizer.getURIs(tMap).get(0);
+		Fact f = $summarizer.createSummaryFact(uri, tMap);	
+		// make sure, it will not fire again
+		//$summarizer.setTClassificationMap(new HashMap<String, List<Fact>>());	
+		$record.getCancerSummary().getPhenotype().addFact(f.getCategory(), f);		
+		System.out.println("*** setTClassification for MR");
 end
 
-
+/*
 rule "setMClassification"
 	no-loop true
 	when
@@ -123,7 +121,7 @@ rule "setNClassification"
 		System.out.println("setNClassification to "+ $fact.getName());
 end
 		
-		
+	*/	
 
     
 
