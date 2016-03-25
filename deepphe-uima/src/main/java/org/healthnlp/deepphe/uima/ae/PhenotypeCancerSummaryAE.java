@@ -10,9 +10,6 @@ import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.drools.event.rule.DebugAgendaEventListener;
-import org.drools.event.rule.DebugWorkingMemoryEventListener;
-import org.drools.runtime.StatefulKnowledgeSession;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
@@ -26,6 +23,8 @@ import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
+import org.kie.api.event.rule.DebugAgendaEventListener;
+import org.kie.api.runtime.KieSession;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
@@ -98,11 +97,10 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		//insert record into drools
 		long stT = System.currentTimeMillis();	
 		DroolsEngine de = new DroolsEngine();
-		StatefulKnowledgeSession droolsSession = null;
+		KieSession droolsSession = null;
 		try {
 			droolsSession = de.getSession();
 			droolsSession.addEventListener( new DebugAgendaEventListener() );
-			droolsSession.addEventListener( new DebugWorkingMemoryEventListener() );
 			
 			droolsSession.insert(record);
 					

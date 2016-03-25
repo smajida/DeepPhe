@@ -28,7 +28,7 @@ public class Fact {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getURI() {
+	public String getUri() {
 		return uri;
 	}
 	
@@ -38,7 +38,7 @@ public class Fact {
 	public void setType(String type) {
 		this.type = type;
 	}
-	public void setURI(String uri) {
+	public void setUri(String uri) {
 		this.uri = uri;
 	}
 	public String getIdentifier() {
@@ -148,7 +148,7 @@ public class Fact {
 	public String getInfo(){
 		StringBuffer b = new StringBuffer();
 		b.append("name: "+getName()+"|");
-		b.append("uri: "+getURI()+"|");
+		b.append("uri: "+getUri()+"|");
 		b.append("category: "+getCategory()+"|");
 		b.append("type: "+getType()+"|");
 		b.append("id: "+getIdentifier()+"|");

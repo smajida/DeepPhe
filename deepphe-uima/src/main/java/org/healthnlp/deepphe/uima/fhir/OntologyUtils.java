@@ -25,7 +25,7 @@ public class OntologyUtils {
 	}
 	
 	public void addAncestors(Fact fact){
-		IClass cls = ontology.getClass(fact.getURI());
+		IClass cls = ontology.getClass(fact.getUri());
 		if(cls != null){
 			Queue<IClass> parents = new LinkedList<IClass>(); 
 			parents.add(cls);

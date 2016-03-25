@@ -779,7 +779,7 @@ public class FHIRUtils {
 			return false;
 		
 		for(Fact c: list){
-			if(cc.getURI().equals(c.getURI()))
+			if(cc.getUri().equals(c.getUri()))
 				return true;
 		}
 		return false;

@@ -20,6 +20,7 @@ import org.hl7.fhir.instance.model.Resource;
  *
  */
 public class MedicalRecord implements Element {
+	private String patientIdentifier;
 	private Patient patient;
 	private PatientSummary patientSummary;
 	private CancerSummary cancerSummary;
@@ -41,6 +42,15 @@ public class MedicalRecord implements Element {
 			b.append(cancerSummary.getSummaryText());
 		}
 		return b.toString();
+	}
+	
+	public String getPatientIdentifier() {
+		if(patientIdentifier == null && patient != null)
+			patientIdentifier = getPatient().getResourceIdentifier();
+		return patientIdentifier;
+	}
+	public void setPatientIdentifier(String patientIdentifier) {
+		this.patientIdentifier = patientIdentifier;
 	}
 	public Resource getResource() {
 		return null;

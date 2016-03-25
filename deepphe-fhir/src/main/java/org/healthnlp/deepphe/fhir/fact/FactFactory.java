@@ -32,7 +32,7 @@ public class FactFactory {
 	 * @return
 	 */
 	public static CodeableConcept createCodeableConcept(Fact fact){
-		CodeableConcept c = FHIRUtils.getCodeableConcept(fact.getLabel(),fact.getURI(),FHIRUtils.SCHEMA_OWL);
+		CodeableConcept c = FHIRUtils.getCodeableConcept(fact.getLabel(),fact.getUri(),FHIRUtils.SCHEMA_OWL);
 		if(fact.getIdentifier() != null){
 			Coding coding = c.addCoding();
 			coding.setCode(fact.getIdentifier());
@@ -55,7 +55,7 @@ public class FactFactory {
 	public static Fact createFact(CodeableConcept cc, Fact fact){
 		URI uri = FHIRUtils.getConceptURI(cc);
 		String id = FHIRUtils.getResourceIdentifer(cc);
-		fact.setURI(""+uri);
+		fact.setUri(""+uri);
 		fact.setLabel(cc.getText());
 		
 		if(uri != null){
@@ -133,7 +133,7 @@ public class FactFactory {
 		ValueFact fact = new ValueFact();
 		fact.setName(name);
 		fact.setLabel(name);
-		fact.setURI(""+uri);
+		fact.setUri(""+uri);
 		fact.setType(name);
 		fact.setIdentifier((name.toUpperCase()+"_"+value+" "+units).trim());
 		

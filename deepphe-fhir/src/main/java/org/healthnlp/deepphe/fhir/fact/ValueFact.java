@@ -33,7 +33,7 @@ public class ValueFact extends Fact {
 		b.append("name: "+getName()+"|");
 		b.append("value: "+getValue()+"|");
 		b.append("unit: "+getUnit()+"|");
-		b.append("uri: "+getURI()+"|");
+		b.append("uri: "+getUri()+"|");
 		b.append("category: "+getCategory()+"|");
 		b.append("type: "+getType()+"|");
 		b.append("id: "+getIdentifier()+"|");

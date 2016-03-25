@@ -326,7 +326,7 @@ public class PhenotypeResourceFactory {
 		// create a generic fact if possible		
 		Fact fact = FactFactory.createFact(annotation.getHasType());
 		fact.setName(annotation.getHasPreferredName());
-		fact.setURI(annotation.getHasURI());
+		fact.setUri(annotation.getHasURI());
 		fact.setIdentifier(annotation.getHasIdentifier());
 		fact.setLabel(annotation.getHasLabel());
 		fact.setType(annotation.getHasType());
@@ -348,7 +348,7 @@ public class PhenotypeResourceFactory {
 	 * @return
 	 */
 	private static org.healthnlp.deepphe.uima.types.Fact saveFact(Fact fact, org.healthnlp.deepphe.uima.types.Fact annotation, JCas jcas) {
-		annotation.setHasURI(fact.getURI());
+		annotation.setHasURI(fact.getUri());
 		annotation.setHasIdentifier(fact.getIdentifier());
 		annotation.setHasPreferredName(fact.getName());
 		annotation.setHasLabel(fact.getLabel());
