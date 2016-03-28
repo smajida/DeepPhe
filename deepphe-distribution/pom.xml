@@ -13,6 +13,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.healthnlp</groupId>
+			<artifactId>deepphe-ctakes-cancer</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.healthnlp</groupId>
 			<artifactId>deepphe-fhir</artifactId>
 			<version>${project.version}</version>
 		</dependency>
