@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <group id="Folder Repository, directory=, recursive=true, Auto-Update=true, version=2" prefer="public" xml:base="">
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="http://blulab.chpc.utah.edu/ontologies/TermMapping.owl" uri="TermMapping.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl" uri="ConText.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl" uri="Schema.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="http://ontologies.dbmi.pitt.edu/deepphe/modelBreastCancer.owl" uri="Sprint-8/modelBreastCancer.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="http://ontologies.dbmi.pitt.edu/deepphe/modelCancer.owl" uri="Sprint-8/modelCancer.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl" uri="nlpBreastCancer.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl" uri="nlpCancer.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="shadowed:http://blulab.chpc.utah.edu/ontologies/TermMapping.owl" uri="Sprint-8/TermMapping.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="shadowed:http://blulab.chpc.utah.edu/ontologies/TermMapping.owl" uri="backup/TermMapping.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="shadowed:http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl" uri="Sprint-8/ConText.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="shadowed:http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl" uri="backup/ConText.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="shadowed:http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl" uri="Sprint-8/Schema.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="shadowed:http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl" uri="backup/Schema.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="shadowed:http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl" uri="Sprint-8/nlpBreastCancer.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="shadowed:http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl" uri="backup/nlpBreastCancer.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="shadowed:http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl" uri="Sprint-8/nlpCancer.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1457386379136" name="shadowed:http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl" uri="backup/nlpCancer.owl"/>
+    </group>
+</catalog>

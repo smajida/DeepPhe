@@ -6,23 +6,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.drools.KnowledgeBase;
-import org.drools.KnowledgeBaseFactory;
-import org.drools.builder.KnowledgeBuilder;
-import org.drools.builder.KnowledgeBuilderFactory;
-import org.drools.builder.ResourceType;
-import org.drools.definition.KnowledgePackage;
-import org.drools.event.rule.ObjectInsertedEvent;
-import org.drools.event.rule.ObjectRetractedEvent;
-import org.drools.event.rule.ObjectUpdatedEvent;
-import org.drools.event.rule.WorkingMemoryEventListener;
-import org.drools.io.Resource;
-import org.drools.io.ResourceFactory;
-import org.drools.runtime.StatefulKnowledgeSession;
-import org.drools.runtime.rule.FactHandle;
 import org.healthnlp.deepphe.summarization.drools.kb.KbIdentified;
 
-public class DroolsKnowledgeBaseAndSession implements WorkingMemoryEventListener {
+public class DroolsKnowledgeBaseAndSession {
+// Olga commented out the guts - doesn't work with a new drools engine
+	/*
+implements WorkingMemoryEventListener {
 
 	private static DroolsKnowledgeBaseAndSession singleton = null;
 	
@@ -145,7 +134,7 @@ public class DroolsKnowledgeBaseAndSession implements WorkingMemoryEventListener
 	public StatefulKnowledgeSession getSession() {
 		return session;
 	}
-
+*/
 
 }
 

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,13 +18,6 @@
  */
 
 package org.apache.ctakes.cancer.ae;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 import org.apache.ctakes.core.util.DocumentIDAnnotationUtil;
 import org.apache.uima.UIMAFramework;
@@ -44,6 +37,14 @@ import org.apache.uima.util.UriUtils;
 import org.apache.uima.util.XMLInputSource;
 import org.xml.sax.SAXException;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 /**
  * A simple CAS consumer that writes the CAS to XMI format.
  * <p/>
@@ -58,7 +59,7 @@ public class XMIWriter extends CasConsumer_ImplBase {
     * output files will be written.
     */
    public static final String PARAM_OUTPUTDIR = "OutputDirectory";
-   @ConfigurationParameter(name = PARAM_OUTPUTDIR, description = "Output directory to write xmi files", mandatory = true)
+   @ConfigurationParameter( name = PARAM_OUTPUTDIR, description = "Output directory to write xmi files", mandatory = true )
    private File mOutputDir;
 
    private int mDocNum;

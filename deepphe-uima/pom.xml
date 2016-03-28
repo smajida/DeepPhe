@@ -61,11 +61,6 @@
          <version>${project.version}</version>
       </dependency>
 
-      <dependency>
-         <groupId>org.healthnlp</groupId>
-         <artifactId>deepphe-i2b2</artifactId>
-         <version>${project.version}</version>
-      </dependency>
 
       <!-- Dependencies that still need to be uploaded to Maven Central; when
    done, the dependency versions should be moved into the parent pom -->

@@ -4,15 +4,13 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 
+import org.apache.ctakes.cancer.owl.UriAnnotationFactory;
+import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
-import org.apache.ctakes.cancer.type.textsem.TnmClassification;
-import org.apache.ctakes.typesystem.type.refsem.DiseaseDisorder;
 import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.relation.LocationOfTextRelation;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
 import org.apache.ctakes.typesystem.type.structured.DocumentID;
-import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
-import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.uima.analysis_engine.*;
 import org.apache.uima.cas.CASException;
@@ -88,16 +86,22 @@ public class DiagnosisTest {
 			DocumentID id = new DocumentID(jcas);
 			id.setDocumentID("dx_doc");
 			id.addToIndexes();
-			
-			
-			DiseaseDisorderMention dd =  (DiseaseDisorderMention) createMention(new DiseaseDisorderMention(jcas),23,36,"http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl#Malignant_Breast_Neoplasm");
-			AnatomicalSiteMention am = (AnatomicalSiteMention) createMention(new AnatomicalSiteMention(jcas),18,9, "http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl#Left_Breast");
-			TnmClassification tc = (TnmClassification) createMention(new TnmClassification(jcas),11,19, "http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl#Left_Breast");
-			NeoplasmRelation nr = new NeoplasmRelation(jcas);
-			nr.setCategory("TNM_of");
-			nr.setArg1(createArgument(tc));
-			nr.setArg2(createArgument(dd));
-			nr.addToIndexes();
+//			DiseaseDisorderMention dd =  (DiseaseDisorderMention) createMention(new DiseaseDisorderMention(jcas),23,36,"http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl#Malignant_Breast_Neoplasm");
+//			AnatomicalSiteMention am = (AnatomicalSiteMention) createMention(new AnatomicalSiteMention(jcas),18,9, "http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl#Left_Breast");
+//			TnmClassification tc = (TnmClassification) createMention(new TnmClassification(jcas),11,19, "http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl#Left_Breast");
+			IdentifiedAnnotation dd = UriAnnotationFactory
+					.createIdentifiedAnnotation( jcas, 23, 36, "http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl#Malignant_Breast_Neoplasm" );
+			IdentifiedAnnotation am = UriAnnotationFactory
+					.createIdentifiedAnnotation( jcas, 18, 9, "http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl#Left_Breast" );
+			// TODO -- tnm classification with an anatomical site uri?   After the tnm in model issue is fixed, change to #TNMClassification
+			IdentifiedAnnotation tc = UriAnnotationFactory
+					.createIdentifiedAnnotation( jcas, 11, 19, "http://ontologies.dbmi.pitt.edu/deepphe/breastCancer.owl#Left_Breast" );
+//			NeoplasmRelation nr = new NeoplasmRelation(jcas);
+//			nr.setCategory("TNM_of");
+//			nr.setArg1(createArgument(tc));
+//			nr.setArg2(createArgument(dd));
+//			nr.addToIndexes();
+			NeoplasmRelation nr = NeoplasmRelationFactory.createNeoplasmRelation( jcas, tc, dd, "TNM_of" );
 			LocationOfTextRelation lt = new LocationOfTextRelation(jcas);
 			lt.setArg1(createArgument(dd));
 			lt.setArg2(createArgument(am));

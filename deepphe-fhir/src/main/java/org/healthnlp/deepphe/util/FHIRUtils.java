@@ -1,45 +1,29 @@
 package org.healthnlp.deepphe.util;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.healthnlp.deepphe.fhir.AnatomicalSite;
-import org.healthnlp.deepphe.fhir.Element;
-import org.hl7.fhir.instance.formats.XmlParser;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Coding;
-import org.hl7.fhir.instance.model.DateType;
-import org.hl7.fhir.instance.model.DomainResource;
-import org.hl7.fhir.instance.model.Extension;
-import org.hl7.fhir.instance.model.Identifier;
-import org.hl7.fhir.instance.model.Narrative;
-import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.utilities.xhtml.NodeType;
-import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-
-import edu.pitt.dbmi.nlp.noble.coder.model.Document;
 import edu.pitt.dbmi.nlp.noble.coder.model.Mention;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+
+import org.healthnlp.deepphe.fhir.Element;
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.hl7.fhir.instance.formats.XmlParser;
+import org.hl7.fhir.instance.model.*;
+import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.utilities.xhtml.NodeType;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 
@@ -56,8 +40,20 @@ public class FHIRUtils {
 	public static final String DOCUMENT_HEADER_REPORT_TYPE = "Record Type";
 	public static final String DOCUMENT_HEADER_PRINCIPAL_DATE = "Principal Date";
 	public static final String DOCUMENT_HEADER_PATIENT_NAME = "Patient Name";
-	public static final String MENTION_URL = "http://hl7.org/fhir/mention"; 
-	public static final String STAGE_URL = "http://hl7.org/fhir/stage"; 
+	public static final String MENTION_URL = "http://hl7.org/fhir/mention";
+	public static final String STAGE_URL = "http://hl7.org/fhir/stage";
+	
+	public static final String LANGUAGE_ASPECT_MODALITY_URL = "http://hl7.org/fhir/modality";
+	public static final String LANGUAGE_ASPECT_DOC_TIME_REL_URL = "http://hl7.org/fhir/doc_time_rel"; 
+	public static final String LANGUAGE_ASPECT_NEGATED_URL = "http://hl7.org/fhir/negation";
+	public static final String LANGUAGE_ASPECT_UNCERTAIN_URL = "http://hl7.org/fhir/uncertainty";
+	public static final String LANGUAGE_ASPECT_CONDITIONAL_URL = "http://hl7.org/fhir/conditionality";
+	public static final String LANGUAGE_ASPECT_INTERMITTENT_URL = "http://hl7.org/fhir/intermittency";
+	public static final String LANGUAGE_ASPECT_HYPOTHETICAL_URL = "http://hl7.org/fhir/hypothetical";
+	public static final String LANGUAGE_ASPECT_PERMENENT_URL = "http://hl7.org/fhir/permanency";
+	public static final String LANGUAGE_ASPECT_HISTORICAL_URL = "http://hl7.org/fhir/historical";
+	
+	
 	public static final String CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl";
 
 	public static final String INTERPRETATION_POSITIVE = "Positive";
@@ -82,20 +78,21 @@ public class FHIRUtils {
 	public static final String RELATED_FACTOR = "RelatedFactor";
 	
 	
-	public static final String T_STAGE = "Generic_Primary_Tumor_TNM_Finding";
+	/*public static final String T_STAGE = "Generic_Primary_Tumor_TNM_Finding";
 	public static final String M_STAGE = "Generic_Distant_Metastasis_TNM_Finding";
-	public static final String N_STAGE = "Generic_Regional_Lymph_Nodes_TNM_Finding";
+	public static final String N_STAGE = "Generic_Regional_Lymph_Nodes_TNM_Finding";*/
 	
 	public static final String STAGE_REGEX = "p?(T[X0-4a-z]{1,4})(N[X0-4a-z]{1,4})(M[X0-4a-z]{1,4})";
 	
 	public static final long MILLISECONDS_IN_YEAR = (long) 1000 * 60 * 60 * 24 * 365;
-	
+
+
 	private static Map<String,CodeableConcept> reportTypes;
 	
 	/**
 	 * get document type
-	 * @param type
-	 * @return
+	 * @param type -
+	 * @return -
 	 */
 	public static CodeableConcept getDocumentType(String type){
 		if(reportTypes == null){
@@ -105,6 +102,14 @@ public class FHIRUtils {
 			reportTypes.put("DS",getCodeableConcept("Discharge Summary","C0743221",SCHEMA_UMLS));
 			reportTypes.put("PGN",getCodeableConcept("Progress Note","C0747978",SCHEMA_UMLS));
 			reportTypes.put("NOTE",getCodeableConcept("Progress Note","C0747978",SCHEMA_UMLS));
+			
+			/*
+			reportTypes.put("SP",getCodeableConcept("Pathology Report",""+FHIRConstants.PATHOLOGY_REPORT_URI,SCHEMA_OWL)); //"C0807321",SCHEMA_UMLS
+			reportTypes.put("RAD",getCodeableConcept("Radiology Report",""+FHIRConstants.RADIOLOGY_REPORT_URI,SCHEMA_OWL)); //"C1299496",SCHEMA_UMLS
+			reportTypes.put("DS",getCodeableConcept("Discharge Summary",""+FHIRConstants.DISCHARGE_SUMMARY_URI,SCHEMA_OWL)); //"C0743221",SCHEMA_UMLS
+			reportTypes.put("PGN",getCodeableConcept("Progress Note",""+FHIRConstants.PROGRESS_NOTE_URI,SCHEMA_OWL)); //"C0747978",SCHEMA_UMLS
+			reportTypes.put("NOTE",getCodeableConcept("Progress Note",""+FHIRConstants.PROGRESS_NOTE_URI,SCHEMA_OWL)); //"C0747978",SCHEMA_UMLS
+			*/
 			
 			reportTypes.put("Pathology Report",reportTypes.get("SP"));
 			reportTypes.put("Radiology Report",reportTypes.get("RAD"));
@@ -117,9 +122,9 @@ public class FHIRUtils {
 	
 	/**
 	 * get codable concept that has a name and code from UMLS
-	 * @param cui
-	 * @param name
-	 * @return
+	 * @param cui -
+	 * @param name -
+	 * @return -
 	 */
 	public static CodeableConcept getCodeableConcept(String name,String cui,String scheme){
 		CodeableConcept c = new CodeableConcept();
@@ -135,12 +140,20 @@ public class FHIRUtils {
 		return getCodeableConcept(getConceptName(uri),uri.toString(),SCHEMA_OWL);
 	}
 	
+	
+	public static CodeableConcept getCodeableConcept(AdministrativeGender gender){
+		if(AdministrativeGender.MALE.equals(gender))
+			return getCodeableConcept(FHIRConstants.MALE_URI);
+		else if(AdministrativeGender.FEMALE.equals(gender))
+			return getCodeableConcept(FHIRConstants.FEMALE_URI);
+		return null;
+	}
 
 	
 	/**
 	 * parse date from string
-	 * @param text
-	 * @return
+	 * @param text -
+	 * @return -
 	 */
 	public static Date getDate(String text){
 		return TextTools.parseDate(text);
@@ -149,12 +162,15 @@ public class FHIRUtils {
 	
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param u -
+	 * @return -
 	 */
 	public static String getConceptName(URI u){
+		if(u == null)
+			return null;
+		
 		try {
-			return u.toURL().getRef().replaceAll("_"," ");
+			return u.toURL().getRef(); //.replaceAll("_"," ")
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -162,8 +178,8 @@ public class FHIRUtils {
 	}
 	/**
 	 * get preferred concept code for a given codable concept
-	 * @param c
-	 * @return
+	 * @param c -
+	 * @return -
 	 */
 	public static String getConceptCode(CodeableConcept c){
 		for(Coding cc: c.getCoding()){
@@ -177,8 +193,8 @@ public class FHIRUtils {
 	
 	/**
 	 * get preferred concept code for a given codable concept
-	 * @param c
-	 * @return
+	 * @param c -
+	 * @return -
 	 */
 	public static String getConceptName(CodeableConcept c){
 		String name = c.getText();
@@ -195,8 +211,8 @@ public class FHIRUtils {
 	
 	/**
 	 * get codeblce concept form OntologyConcept annotation
-	 * @param c
-	 * @return
+	 * @param c -
+	 * @return -
 	 *
 	public static CodeableConcept getCodeableConcept(Mention c){
 		CodeableConcept cc = new CodeableConcept();
@@ -206,8 +222,8 @@ public class FHIRUtils {
 	*/
 	/**
 	 * get codeblce concept form OntologyConcept annotation
-	 * @param c
-	 * @return
+	 * @param c -
+	 * @return -
 	 */
 	public static CodeableConcept getCodeableConcept(IClass c){
 		CodeableConcept cc = new CodeableConcept();
@@ -255,8 +271,9 @@ public class FHIRUtils {
 	*/
 	/**
 	 * get codeblce concept form OntologyConcept annotation
-	 * @param c
-	 * @return
+	 * @param cc -
+	 * @param cls -
+	 * @return -
 	 */
 	public static CodeableConcept setCodeableConcept(CodeableConcept cc,IClass cls){
 		Concept c = cls.getConcept();
@@ -295,8 +312,8 @@ public class FHIRUtils {
 
 	/**
 	 * create a narrative from the text
-	 * @param coveredText
-	 * @return
+	 * @param text -
+	 * @return -
 	 */
 	public static Narrative getNarrative(String text) {
 		Narrative n = new Narrative();
@@ -310,8 +327,8 @@ public class FHIRUtils {
 	
 	/**
 	 * parse specially formatted document to extract header information
-	 * @param text
-	 * @return
+	 * @param text -
+	 * @return -
 	 */
 	public static Map<String,String> getHeaderValues(String text){
 		Map<String,String> map = new java.util.LinkedHashMap<String,String>();
@@ -358,7 +375,7 @@ public class FHIRUtils {
 	/**
 	 * create a string resource identifier for a given element
 	 * @param e - element
-	 * @return
+	 * @return -
 	 */
 	public static String createResourceIdentifier(Element e){
 		int hash = FHIRUtils.getMentionExtensions((DomainResource)e.getResource()).hashCode();  
@@ -468,8 +485,9 @@ public class FHIRUtils {
 	
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param ontology -
+	 * @param c -
+	 * @return -
 	 */
 	public static IClass getConceptClass(IOntology ontology,  Concept c){
 		String code = c.getCode();
@@ -480,8 +498,9 @@ public class FHIRUtils {
 	
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param ontology -
+	 * @param c -
+	 * @return -
 	 */
 	public static IClass getConceptClass(IOntology ontology, CodeableConcept c){
 		for(Coding coding : c.getCoding()){
@@ -493,6 +512,8 @@ public class FHIRUtils {
 	}
 	
 	public static URI getConceptURI(CodeableConcept c){
+		if(c == null)
+			return null;
 		for(Coding coding : c.getCoding()){
 			if(coding.getCode() != null && coding.getCode().startsWith("http://")){
 				return URI.create(coding.getCode());
@@ -502,9 +523,11 @@ public class FHIRUtils {
 	}
 	
 	public static String getResourceIdentifer(CodeableConcept c){
-		for(Coding coding : c.getCoding()){
-			if(coding.getCode() != null && SCHEMA_REFERENCE.equals(coding.getSystem())){
-				return coding.getCode();
+		if(c != null){
+			for(Coding coding : c.getCoding()){
+				if(coding.getCode() != null && SCHEMA_REFERENCE.equals(coding.getSystem())){
+					return coding.getCode();
+				}
 			}
 		}
 		return null;
@@ -513,8 +536,9 @@ public class FHIRUtils {
 	
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param ontology -
+	 * @param m -
+	 * @return -
 	 */
 	public static IClass getConceptClass(IOntology ontology,  Mention m){
 		return getConceptClass(ontology, m.getConcept());
@@ -522,8 +546,8 @@ public class FHIRUtils {
 	
 	/**
 	 * get concept class from a default ontology based on Concept
-	 * @param c
-	 * @return
+	 * @param c -
+	 * @return -
 	 */
 	public static String getConceptCode(Concept c){
 		String cui = null;
@@ -549,9 +573,17 @@ public class FHIRUtils {
 	
 	/**
 	 * get report elements
-	 * @return
+	 * @param entireList -
+	 * @param cls -
+	 * @return -
 	 */
 	public static List getSubList(Collection entireList, Class cls) {
+		// TODO can use stream
+//	public static <T extends TT, TT extends Object> List<T> getSubList(Collection<TT> entireList, Class<T> cls) {
+//		return entireList.stream()
+// 			.filter( cls::isInstance )
+// 			.map( cls::cast )
+// 			.collect( Collectors.toList() );
 		List list = new ArrayList();
 		for(Object e: entireList){
 			if(cls.isInstance(e))
@@ -630,10 +662,10 @@ public class FHIRUtils {
 
 	/**
 	 * get nearest mention to a target mention 
-	 * @param m
-	 * @param doc
-	 * @param type
-	 * @return
+	 //	 * @param target -
+	 //	 * @param doc -
+	 //	 * @param type -
+	 * @return -
 	 *
 	public static Mention getNearestMention(Mention target, Document doc, String type){
 		List<Mention> mentions = getMentionsByType(doc, type);
@@ -660,9 +692,9 @@ public class FHIRUtils {
 	
 	/**
 	 * does this mention has another mention that is more specific?
-	 * @param m
-	 * @param list
-	 * @return
+	 //	 * @param mm -
+	 //	 * @param list -
+	 * @return -
 	 
 	
 	private static boolean hasMoreSpecific(IdentifiedAnnotation mm, List<IdentifiedAnnotation> list) {
@@ -687,6 +719,15 @@ public class FHIRUtils {
 		return createExtension(MENTION_URL,text);
 	}
 
+	public static Extension createDocTimeRelExtension( String text ) {
+		return createExtension( LANGUAGE_ASPECT_DOC_TIME_REL_URL, text );
+	}
+
+	public static Extension createModalityExtension( String text ) {
+		return createExtension( LANGUAGE_ASPECT_MODALITY_URL, text );
+	}
+	
+	
 	
 	public static List<String> getMentionExtensions(DomainResource r){
 		List<String> mentions = new ArrayList<String>();
@@ -706,7 +747,13 @@ public class FHIRUtils {
 		}
 		return s;
 	}
-	
+	public static String getMentionText(String text){
+		Matcher m = Pattern.compile("(.*) \\[(\\d+):(\\d+)\\]").matcher(text);
+		if(m.matches()){
+			return m.group(1);
+		}
+		return text;
+	}
 	
 	public static String getOntologyURL(String uri){
 		int x = uri.lastIndexOf("#");
@@ -729,6 +776,22 @@ public class FHIRUtils {
 		}
 		return false;
 	}
+
+	public static boolean contains(List<Fact> list, Fact cc){
+		if(list == null)
+			return false;
+		
+		for(Fact c: list){
+			if(cc.getUri().equals(c.getUri()))
+				return true;
+		}
+		return false;
+	}
+	
+	public static boolean hasConceptURI(CodeableConcept cc){
+		return getConceptURI(cc) != null;
+		
+	}
 	
 	
 	public static void main(String [] args) throws Exception{
@@ -736,6 +799,14 @@ public class FHIRUtils {
 		//System.out.println(getOntologyURL("http://ontologies.dbmi.pitt.edu/deepphe/cancer.owl#ClinicalPhenotypicComponent"));
 	}
 
-
+	public static String getPropertyDisplayLabel(String str) {
+		if(str == null)
+			return "Unknown";
+		
+		if(str.startsWith("has"))
+			str = str.substring(3);
+		// insert space into camel back
+		return str.replaceAll("([a-z])([A-Z])","$1 $2");
+	}
 	
 }

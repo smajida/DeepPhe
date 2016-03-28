@@ -1,0 +1,85 @@
+
+
+http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl
+
+    #Estrogen_Receptor_Status
+
+    #Progesterone_Receptor_Status
+
+    #HER2_Neu_Status
+
+        #Positive
+
+        #Negative
+
+        #Unknown
+
+http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl
+
+    #Cancer_Stage
+
+        #In_Situ_Lesion
+
+        #Stage_I
+
+        #Stage_IA
+
+        #Stage_IB
+
+        #Stage_II
+
+        #Stage_IIA
+
+        #Stage_IIB
+
+        #Stage_III
+
+        #Stage_IIIA
+
+        #Stage_IIIB
+
+        #Stage_IIIC
+
+        #Stage_IV
+
+        #Recurrence
+
+        #Stage_Unspecified
+
+http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl
+
+    #Generic_Primary_Tumor_TNM_Finding
+
+        #TX_Stage_Finding
+
+        #TIS_Stage_Finding
+
+        #TA_Stage_Finding
+
+        #T0_Stage_Finding
+
+        --- #T[1-4]_Stage_Finding
+
+        --- #T[1-4][a-z]_Stage_Finding
+
+    #Generic_Regional_Lymph_Nodes_TNM_Finding
+
+        #NX_Stage_Finding
+
+        #N0_Stage_Finding
+
+        --- #N[1-3]_Stage_Finding
+
+        --- #N[1-3][a-z]_Stage_Finding
+
+    #Generic_Distant_Metastasis_TNM_Finding
+
+        #MX_Stage_Finding
+
+        #M0_Stage_Finding
+
+        #M1_Stage_Finding
+
+        --- #M1[a-z]_Stage_Finding
+
+

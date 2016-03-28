@@ -1,17 +1,10 @@
 package org.healthnlp.deepphe.uima.ae;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.ctakes.cancer.type.textsem.CancerSize;
-import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
-import org.apache.ctakes.cancer.type.textsem.TnmClassification;
-import org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention;
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.phenotype.receptor.StatusPropertyUtil;
+import org.apache.ctakes.cancer.phenotype.size.SizePropertyUtil;
+import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
-import org.apache.ctakes.typesystem.type.textsem.MedicationMention;
-import org.apache.ctakes.typesystem.type.textsem.ProcedureMention;
 import org.apache.log4j.Logger;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
@@ -28,6 +21,20 @@ import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.util.CasCopier;
 import org.apache.uima.util.InvalidXMLException;
 import org.healthnlp.deepphe.uima.pipelines.CtakesCancerEncounterPipeBuilder;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil.*;
+
+//import org.apache.ctakes.cancer.type.textsem.CancerSize;
+//import org.apache.ctakes.cancer.type.textsem.ReceptorStatus;
+//import org.apache.ctakes.cancer.type.textsem.TnmClassification;
+
 
 public class CasPreLoadedEncounterAE extends JCasAnnotator_ImplBase {
 	
@@ -92,30 +99,61 @@ public class CasPreLoadedEncounterAE extends JCasAnnotator_ImplBase {
 	}
 
 	private void displayAnnotations(JCas ctakesJCas) {
-		List<IdentifiedAnnotation> cTakesIdentifieds = 
-				new ArrayList<IdentifiedAnnotation>();
-		cTakesIdentifieds.addAll(JCasUtil.select(ctakesJCas,
-				IdentifiedAnnotation.class));
-		List<IdentifiedAnnotation> identifiedAnnotations = new ArrayList<IdentifiedAnnotation>();
-		
-		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
-				DiseaseDisorderMention.type));
-		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
-				MedicationMention.type));
-		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
-				ProcedureMention.type));
-		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
-				TnmClassification.type));
-		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
-				CancerSize.type));
-		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
-				ReceptorStatus.type));
+		// Not used
+//		List<IdentifiedAnnotation> cTakesIdentifieds =
+//				new ArrayList<IdentifiedAnnotation>();
+//		cTakesIdentifieds.addAll(JCasUtil.select(ctakesJCas,
+//				IdentifiedAnnotation.class));
 
-		for (IdentifiedAnnotation idAnnot : identifiedAnnotations) {
-			logger.debug(getClass().getSimpleName() + " found a "
-					+ idAnnot.getClass().getSimpleName() + "("
-					+ idAnnot.getBegin() + "," + idAnnot.getEnd() + ")");
-		}
+		List<IdentifiedAnnotation> identifiedAnnotations = new ArrayList<>();
+//		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
+//				DiseaseDisorderMention.type));
+//		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
+//				MedicationMention.type));
+//		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
+//				ProcedureMention.type));
+//		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
+//				TnmClassification.type));
+//		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
+//				CancerSize.type));
+//		identifiedAnnotations.addAll(getAnnotationsByType(ctakesJCas,
+//				ReceptorStatus.type));
+		// TODO use OwlOntologyConceptUtil
+		final String classFound = getClass().getSimpleName() + " found a ";
+		final Function<IdentifiedAnnotation, String> toFoundIt
+				= ia -> classFound + ia.getClass().getSimpleName() + "(" + ia.getBegin() + "," + ia.getEnd() + ")";
+
+		identifiedAnnotations.addAll(
+				OwlOntologyConceptUtil.getAnnotationsByUriBranch( ctakesJCas, DISEASE_DISORDER_URI ) );
+		identifiedAnnotations.addAll(
+				OwlOntologyConceptUtil.getAnnotationsByUriBranch( ctakesJCas, MEDICATION_URI ) );
+		identifiedAnnotations.addAll(
+				OwlOntologyConceptUtil.getAnnotationsByUriBranch( ctakesJCas, PROCEDURE_URI ) );
+		identifiedAnnotations.addAll(
+				OwlOntologyConceptUtil.getAnnotationsByUriBranch( ctakesJCas, SizePropertyUtil.getParentUri() ) );
+		identifiedAnnotations.addAll(
+				OwlOntologyConceptUtil.getAnnotationsByUriBranch( ctakesJCas, StatusPropertyUtil.getParentUri() ) );
+		identifiedAnnotations.addAll(
+				OwlOntologyConceptUtil.getAnnotationsByUriBranch( ctakesJCas, TnmPropertyUtil.getParentUri() ) );
+
+		identifiedAnnotations.stream().map( toFoundIt ).forEach( logger::debug );
+
+		// TODO another possibility using only streams
+		Stream.concat( getAnnotationStreamByUriBranch( ctakesJCas, DISEASE_DISORDER_URI ),
+				Stream.concat( getAnnotationStreamByUriBranch( ctakesJCas, MEDICATION_URI ),
+						Stream.concat( getAnnotationStreamByUriBranch( ctakesJCas, PROCEDURE_URI ),
+								Stream.concat( getAnnotationStreamByUriBranch( ctakesJCas, SizePropertyUtil.getParentUri() ),
+										Stream.concat( getAnnotationStreamByUriBranch( ctakesJCas, StatusPropertyUtil
+												.getParentUri() ),
+												getAnnotationStreamByUriBranch( ctakesJCas, TnmPropertyUtil
+														.getParentUri() ) ) ) ) ) )
+				.map( toFoundIt ).forEach( logger::debug );
+
+//		for (IdentifiedAnnotation idAnnot : identifiedAnnotations) {
+//			logger.debug(getClass().getSimpleName() + " found a "
+//					+ idAnnot.getClass().getSimpleName() + "("
+//					+ idAnnot.getBegin() + "," + idAnnot.getEnd() + ")");
+//		}
 	}
 
 	private List<IdentifiedAnnotation> getAnnotationsByType(JCas cas, int type) {

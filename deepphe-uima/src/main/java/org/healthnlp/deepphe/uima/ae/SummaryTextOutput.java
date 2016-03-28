@@ -13,6 +13,7 @@ import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
+import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 
@@ -38,10 +39,13 @@ public class SummaryTextOutput extends JCasAnnotator_ImplBase {
 		}
 		
 		StringBuffer summary = new StringBuffer();
-		PatientSummary patientSummary = PhenotypeResourceFactory.loadMedicalRecordPatientSummary(jcas);
+		
+		MedicalRecord record = PhenotypeResourceFactory.loadMedicalRecord(jcas);
+		
+		PatientSummary patientSummary = record.getPatientSummary();
 		if(patientSummary != null)
 			summary.append(patientSummary.getSummaryText()+"\n-------------\n");
-		CancerSummary cancerSummary = PhenotypeResourceFactory.loadMedicalRecordCancerSummary(jcas);
+		CancerSummary cancerSummary = record.getCancerSummary();
 		if(cancerSummary != null)
 			summary.append(cancerSummary.getSummaryText()+"\n-------------\n");
 		

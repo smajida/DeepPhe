@@ -1,3 +1,9 @@
+<<<<<<< HEAD
 #Server Startup at 2016-02-08T20:49+0000
 #Mon Feb 08 15:49:59 EST 2016
 server.uri=http\://0.0.0.0\:61758
+=======
+#Server Startup at 2016-02-22T03:17+0000
+#Sun Feb 21 22:17:43 EST 2016
+server.uri=http\://0.0.0.0\:57101
+>>>>>>> branch 'master' of https://github.com/DeepPhe/DeepPhe.git

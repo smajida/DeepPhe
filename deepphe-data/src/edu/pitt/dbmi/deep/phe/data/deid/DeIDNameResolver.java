@@ -228,13 +228,14 @@ public class DeIDNameResolver {
 	
 	
 	public static void main(String[] args) throws Exception{
-		String type = "Melanoma";
-		String sample = "CARe_Sample_Apr-2015";//"Report_Filter_Sample (Dec 2014)"; //"Sample-Jan-2015"; //"CARe_Sample_Apr-2015";
-		File fr = new File("/home/tseytlin/Data/DeepPhe/Samples/"+sample+"/"+type+"/"+type.toLowerCase()+"_sample_filtered_addendum.bar");
-		File ff = new File("/home/tseytlin/Data/DeepPhe/Samples/"+sample+"/"+type+"/"+type.toLowerCase()+"_sample_filtered_addendum.scrubbed");
-		File fd = new File("/home/tseytlin/Data/DeepPhe/Samples/"+sample+"/"+type+"/"+type.toLowerCase()+"_sample_filtered_addendum_scrubbed");
-		File fo = new File("/home/tseytlin/Data/DeepPhe/Samples/"+sample+"/"+type+"/"+type.toLowerCase()+"_sample_filtered_addendum.link");
-
+		File dir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/");
+		File fr = new File(dir,"TCGA_data_filtered.bar");
+		File ff = new File(dir,"TCGA_data_filtered.scrubbed");
+		File fd = new File(dir,"TCGA_data_filtered_scrubbed");
+		File fo = new File(dir,"TCGA_data_filtered.link");
+		
+		
+		
 		DeIDNameResolver resolver = new DeIDNameResolver();
 		System.out.println("reading in data files .. ");
 		List<Map<String,String>> result = resolver.resolve(fr, ff);

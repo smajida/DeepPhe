@@ -293,10 +293,12 @@ public class DeIDTagScrubber {
 	 */
 	public static void main(String[] args) throws Exception {
 		String type = "Ovarian";
-		File fd = new File("/home/tseytlin/Data/DeepPhe/Samples/CARe_Sample_Apr-2015/"+type+"/"+type.toLowerCase()+"_sample_filtered_addendum.deid.fixed");
-		File fs = new File("/home/tseytlin/Data/DeepPhe/Samples/CARe_Sample_Apr-2015/"+type+"/"+type.toLowerCase()+"_sample_filtered_addendum.scrubbed");
-		/*File fd = new File("/home/tseytlin/Data/DeepPhe/"+type+"/"+type.toLowerCase()+"_patient_sample.deid.fixed");
-		File fs = new File("/home/tseytlin/Data/DeepPhe/"+type+"/"+type.toLowerCase()+"_patient_sample.scrubbed");*/
+	
+		File dir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/");
+		File fd = new File(dir,"TCGA_data_filtered.deid.fixed");
+		File fs = new File(dir,"TCGA_data_filtered.scrubbed");
+				
+		
 		
 		DeIDTagScrubber scrubber = new DeIDTagScrubber();
 		//scrubber.loadRealNames(fn);

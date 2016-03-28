@@ -1,124 +1,38 @@
 package org.healthnlp.deepphe.fhir.summary;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
-import org.hl7.fhir.instance.model.BackboneElement;
-import org.hl7.fhir.instance.model.CodeableConcept;
+
+import java.net.URI;
+import java.util.List;
 
 
 public class TumorSummary extends Summary {
-	private CodeableConcept tumorType;
 	private TumorPhenotype phenotype;
-	private List<CodeableConcept> treatment, tumorSequenceVarient, outcome, bodySite;
-	
-	
 	public TumorSummary(){
 		phenotype = new TumorPhenotype();
 	}
-	
-	
-	public static class TumorPhenotype extends BackboneElement{
-		private List<CodeableConcept> manifestation, histologicType, tumorExtent;
 
-		public List<CodeableConcept> getManifestations() {
-			if(manifestation == null)
-				manifestation = new ArrayList<CodeableConcept>();
-			return manifestation;
-		}
-
-		public void addManifestation(CodeableConcept m) {
-			getManifestations().add(m);
-		}
-
-		public List<CodeableConcept> getHistologicTypes() {
-			if(histologicType == null)
-				histologicType = new ArrayList<CodeableConcept>();
-			return histologicType;
-		}
-
-		public void addHistologicType(CodeableConcept ht) {
-			getHistologicTypes().add(ht);
-		}
-
-		public List<CodeableConcept> getTumorExtent() {
-			if(tumorExtent == null){
-				tumorExtent = new ArrayList<CodeableConcept>();
-			}
-			return tumorExtent;
-		}
-
-		public void addTumorExtent(CodeableConcept te) {
-			getTumorExtent().add(te);
-		}
-
-		public String getResourceIdentifier() {
-			return getClass().getSimpleName()+"_"+Math.abs(hashCode());
-		}
-		public URI getConceptURI() {
-			return FHIRConstants.TUMOR_PHENOTYPE_SUMMARY_URI;
-		}
-		public String getDisplayText() {
-			return getClass().getSimpleName();
-		}		
-		public String getSummaryText() {
-			StringBuffer st = new StringBuffer();
-			st.append(getDisplayText()+":\n");
-			st.append("\tHistological Type:\t");
-			for(CodeableConcept c: getHistologicTypes()){
-				st.append(c.getText()+"  ");
-			}
-			st.append("\n");
-			st.append("\tTumor Extent:\t");
-			for(CodeableConcept c: getTumorExtent()){
-				st.append(c.getText()+"  ");
-			}
-			st.append("\n");
-			if(!getManifestations().isEmpty()){
-				st.append("\tManifistations:\n");
-				for(CodeableConcept c: getManifestations()){
-					st.append("\t\t"+c.getText()+"\n");
-				}
-			}
-			
-			return st.toString();
-		}
-		public BackboneElement copy() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		/**
-		 * do a very simple append of data
-		 * @param ph
-		 */
-		public void append(TumorPhenotype ph) {
-			for(CodeableConcept c: ph.getHistologicTypes()){
-				if(!FHIRUtils.contains(getHistologicTypes(), c)){
-					addHistologicType(c);
-				}
-			}
-			for(CodeableConcept c: ph.getTumorExtent()){
-				if(!FHIRUtils.contains(getTumorExtent(), c)){
-					addTumorExtent(c);
-				}
-			}
-			for(CodeableConcept c: ph.getManifestations()){
-				if(!FHIRUtils.contains(getManifestations(), c)){
-					addManifestation(c);
-				}
-			}
-		}
-
-		
+	public void setReport(Report r){
+		super.setReport(r);
+		getPhenotype().setReport(r);
 	}
 	
-	public CodeableConcept getTumorType() {
-		return tumorType;
+	/**
+	 * return all facts that are contained within this fact
+	 * @return
+	 */
+	public List<Fact> getContainedFacts(){
+		List<Fact> list = super.getContainedFacts();
+		list.addAll(getPhenotype().getContainedFacts());	
+		return list;
 	}
-	public void setTumorType(CodeableConcept tumorType) {
-		this.tumorType = tumorType;
+	
+	public FactList getTumorType() {
+		return getFacts(FHIRConstants.HAS_TUMOR_TYPE);
 	}
 	public TumorPhenotype getPhenotype() {
 		return phenotype;
@@ -126,37 +40,17 @@ public class TumorSummary extends Summary {
 	public void setPhenotype(TumorPhenotype phenotype) {
 		this.phenotype = phenotype;
 	}
-	public List<CodeableConcept> getTreatments() {
-		if(treatment == null)
-			treatment = new ArrayList<CodeableConcept>();
-		return treatment;
+	public FactList getTreatment() {
+		return getFactsOrInsert(FHIRConstants.HAS_TREATMENT);
 	}
-	public void addTreatment(CodeableConcept t) {
-		getTreatments().add(t);
+	public FactList getSequenceVarients() {
+		return getFactsOrInsert(FHIRConstants.HAS_SEQUENCE_VARIENT);
 	}
-	public List<CodeableConcept> getTumorSequenceVarients() {
-		if(tumorSequenceVarient == null)
-			tumorSequenceVarient = new ArrayList<CodeableConcept>();
-		return tumorSequenceVarient;
+	public FactList getOutcome() {
+		return getFactsOrInsert(FHIRConstants.HAS_OUTCOME);
 	}
-	public void addTumorSequenceVarient(CodeableConcept ts) {
-		getTumorSequenceVarients().add(ts);
-	}
-	public List<CodeableConcept> getOutcomes() {
-		if(outcome == null)
-			outcome = new ArrayList<CodeableConcept>();
-		return outcome;
-	}
-	public void addOutcome(CodeableConcept o) {
-		getOutcomes().add(o);
-	}
-	public List<CodeableConcept> getBodySites() {
-		if(bodySite == null)
-			bodySite = new ArrayList<CodeableConcept>();
-		return bodySite;
-	}
-	public void addBodySite(CodeableConcept b) {
-		getBodySites().add(b);
+	public FactList getBodySite() {
+		return getFactsOrInsert(FHIRConstants.HAS_BODY_SITE);
 	}
 	public String getDisplayText() {
 		return  getClass().getSimpleName();
@@ -165,39 +59,11 @@ public class TumorSummary extends Summary {
 		return getClass().getSimpleName()+"_"+Math.abs(hashCode());
 	}
 	public String getSummaryText() {
-		StringBuffer st = new StringBuffer();
-		st.append(getDisplayText()+":\n");
-		
-		String s = getTumorType() != null?getTumorType().getText():"";
-		st.append("\tType:\t"+s+"\n");
-		st.append("\tBody Sites:\t");
-		for(CodeableConcept c: getBodySites()){
-			st.append(c.getText()+"  ");
-		}
-		st.append("\n");
-	
-		// look at treatment
-		st.append("\tTreatments:\n");
-		for(CodeableConcept c: getTreatments()){
-			st.append("\t\t"+c.getText()+"\n");
-		}
-		// look at outcomes
-		st.append("\tSequence Varients:\n");
-		for(CodeableConcept c: getTumorSequenceVarients()){
-			st.append("\t\t"+c.getText()+"\n");
-		}
-		// look at outcomes
-		st.append("\tOutcomes:\n");
-		for(CodeableConcept c: getOutcomes()){
-			st.append("\t\t"+c.getText()+"\n");
-		}
-		
+		StringBuffer st = new StringBuffer(super.getSummaryText());
 		// add phenotype
 		if(getPhenotype() != null){
 			st.append(getPhenotype().getSummaryText()+"\n");
 		}
-		
-	
 		return st.toString();
 	}
 	public URI getConceptURI() {
@@ -208,12 +74,12 @@ public class TumorSummary extends Summary {
 	public boolean isAppendable(Summary s) {
 		if(s instanceof TumorSummary){
 			// if no body site defined, assume they are the same
-			if(getBodySites().isEmpty())
+			if(getBodySite().isEmpty())
 				return true;
 			// else see if the body sites intersect
 			TumorSummary ts = (TumorSummary) s;
-			for(CodeableConcept c: ts.getBodySites()){
-				if(FHIRUtils.contains(getBodySites(),c))
+			for(Fact c: ts.getBodySite()){
+				if(FHIRUtils.contains(getBodySite(),c))
 					return true;
 			}
 			
@@ -225,33 +91,17 @@ public class TumorSummary extends Summary {
 		TumorSummary summary = (TumorSummary) s;
 		
 		// add body site
-		for(CodeableConcept c: summary.getBodySites()){
-			if(!FHIRUtils.contains(getBodySites(),c))
-				addBodySite(c);
+		for(String cat : summary.getFactCategories()){
+			for(Fact c: summary.getFacts(cat)){
+				if(!FHIRUtils.contains(getFacts(cat),c)){
+					addFact(cat,c);
+				}
+			}
 		}
-		// add treatment
-		for(CodeableConcept c: summary.getTreatments()){
-			if(!FHIRUtils.contains(getTreatments(),c))
-				addTreatment(c);
-		}
-		// add tumor type
-		if(getTumorType() == null && summary.getTumorType() != null)
-			setTumorType(summary.getTumorType());
-		
-		// add sequence
-		for(CodeableConcept c: summary.getTumorSequenceVarients()){
-			if(!FHIRUtils.contains(getTumorSequenceVarients(),c))
-				addTumorSequenceVarient(c);
-		}
-		
-		// add outcome
-		for(CodeableConcept c: summary.getOutcomes()){
-			if(!FHIRUtils.contains(getOutcomes(),c))
-				addOutcome(c);
-		}
-		
+	
 		// add phenotypes (worry about 1 for now)
 		getPhenotype().append(summary.getPhenotype());
 			
 	}
+	
 }

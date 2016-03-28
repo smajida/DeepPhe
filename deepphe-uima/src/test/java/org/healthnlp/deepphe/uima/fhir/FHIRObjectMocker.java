@@ -1,6 +1,5 @@
 package org.healthnlp.deepphe.uima.fhir;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -12,12 +11,13 @@ import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Procedure;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.Stage;
+import org.healthnlp.deepphe.fhir.summary.CancerPhenotype;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
-import org.healthnlp.deepphe.fhir.summary.CancerSummary.CancerPhenotype;
+import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
+import org.healthnlp.deepphe.fhir.summary.TumorPhenotype;
 import org.healthnlp.deepphe.fhir.summary.TumorSummary;
-import org.healthnlp.deepphe.fhir.summary.TumorSummary.TumorPhenotype;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.jmock.Expectations;
@@ -41,7 +41,7 @@ public class FHIRObjectMocker {
 	final PatientSummary patientSummary = context.mock(PatientSummary.class);
 	final CancerPhenotype cancerPhenotype = context.mock(CancerPhenotype.class);
 	final TumorPhenotype tumorPhenotype = context.mock(TumorPhenotype.class);
-	
+	final MedicalRecord medicalRecord = context.mock(MedicalRecord.class);
 	
 	public FHIRObjectMocker() {
 		super();
@@ -188,7 +188,7 @@ public class FHIRObjectMocker {
 				allowing(cancerSummary).getConceptURI();
 				will(returnValue(FHIRConstants.CANCER_SUMMARY_URI));
 				
-				allowing(cancerSummary).getBodySites();
+				allowing(cancerSummary).getBodySite();
 				will(returnValue(Collections.singletonList(bodySiteCC)));
 
 				allowing(cancerSummary).getOutcomes();
@@ -223,8 +223,8 @@ public class FHIRObjectMocker {
 				allowing(cancerPhenotype).getDistantMetastasisClassification();
 				will(returnValue(distantMetastasisClassificationCC));
 				
-				allowing(cancerPhenotype).getManifestations();
-				will(returnValue(Collections.singletonList(manifestationsCC)));
+				/*allowing(cancerPhenotype).getManifestations();
+				will(returnValue(Collections.singletonList(manifestationsCC)));*/
 				
 				allowing(cancerPhenotype).getPrimaryTumorClassification();
 				will(returnValue(primaryTumorClassificationCC));
@@ -252,17 +252,17 @@ public class FHIRObjectMocker {
 				allowing(tumorSummary).getConceptURI();
 				will(returnValue(FHIRConstants.TUMOR_SUMMARY_URI));
 								
-				allowing(tumorSummary).getBodySites();
+				allowing(tumorSummary).getBodySite();
 				will(returnValue(Collections.singletonList(bodySiteCC)));
 
-				allowing(tumorSummary).getOutcomes();
+				/*allowing(tumorSummary).getOutcomes();
 				will(returnValue(Collections.singletonList(outcomesCC)));
 
 				allowing(tumorSummary).getTreatments();
 				will(returnValue(Collections.singletonList(treatmentCC)));
 				
 				allowing(tumorSummary).getTumorSequenceVarients();
-				will(returnValue(Collections.singletonList(tumorSequenceVariantsCC)));
+				will(returnValue(Collections.singletonList(tumorSequenceVariantsCC)));*/
 				
 				allowing(tumorSummary).getTumorType();
 				will(returnValue(tumorTypeCC));
@@ -306,11 +306,11 @@ public class FHIRObjectMocker {
 				allowing(patientSummary).getConceptURI();
 				will(returnValue(FHIRConstants.PATIENT_SUMMARY_URI));
 				
-				allowing(patientSummary).getExposure();
+				/*allowing(patientSummary).getExposure();
 				will(returnValue(Collections.singletonList(exposureCC)));
 				
 				allowing(patientSummary).getGermlineSequenceVariant();
-				will(returnValue(Collections.singletonList(germlineSequenceVariantCC)));
+				will(returnValue(Collections.singletonList(germlineSequenceVariantCC)));*/
 				
 				allowing(patientSummary).getOutcomes();
 				will(returnValue(Collections.singletonList(outcomesCC)));
@@ -358,6 +358,12 @@ public class FHIRObjectMocker {
 
 	public Medication getMedication() {
 		return medication;
+	}
+
+
+
+	public MedicalRecord getMedicalRecord() {
+		return medicalRecord;
 	}
 	
 	

@@ -2,6 +2,7 @@ package org.apache.ctakes.cancer.pipeline;
 
 import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
+import org.apache.ctakes.core.cc.SemevalBsvWriter;
 import org.apache.ctakes.core.cc.pretty.plaintext.PrettyTextWriterFit;
 import org.apache.ctakes.core.cc.property.plaintext.PropertyTextWriterFit;
 import org.apache.uima.UIMAException;
@@ -23,12 +24,12 @@ final public class CancerPipelineRunner {
    interface Options extends CancerPipelineOptions {
       @Option(
             shortName = "i",
-            description = "specify the path to the directory containing the clinical notes to be processed")
+            description = "specify the path to the directory containing the clinical notes to be processed" )
       String getInputDirectory();
 
       @Option(
             shortName = "o",
-            description = "specify the path to the directory where the output xmi files are to be saved")
+            description = "specify the path to the directory where the output xmi files are to be saved" )
       String getOutputDirectory();
    }
 
@@ -41,8 +42,9 @@ final public class CancerPipelineRunner {
       final AnalysisEngine xmiWriter = CancerPipelineFactory.createXMIWriter( outputDirectory );
       final AnalysisEngine prettyTextWriter = createPrettyTextWriter( outputDirectory );
       final AnalysisEngine propertyTextWriter = createPropertyTextWriter( outputDirectory );
+      final AnalysisEngine semevalBsvWriter = createSemevalBsvWriter( outputDirectory );
       SimplePipeline
-            .runPipeline( collectionReader, ctakesCancerEngine, prettyTextWriter, propertyTextWriter, xmiWriter );
+            .runPipeline( collectionReader, ctakesCancerEngine, prettyTextWriter, propertyTextWriter, xmiWriter, semevalBsvWriter );
    }
 
 
@@ -54,6 +56,11 @@ final public class CancerPipelineRunner {
    private static AnalysisEngine createPropertyTextWriter( final String outputDirectory )
          throws ResourceInitializationException {
       return AnalysisEngineFactory.createEngine( PropertyTextWriterFit.createAnnotatorDescription( outputDirectory ) );
+   }
+
+   private static AnalysisEngine createSemevalBsvWriter( final String outputDirectory )
+         throws ResourceInitializationException {
+      return AnalysisEngineFactory.createEngine( SemevalBsvWriter.createAnnotatorDescription( outputDirectory ) );
    }
 
 

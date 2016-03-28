@@ -9,14 +9,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.uima.fhir.FHIRObjectMocker;
 import org.junit.BeforeClass;
@@ -70,13 +69,9 @@ public class GraphDBPhenotypeConsumerAETest {
 	   GraphDBPhenotypeConsumerAE ae = new GraphDBPhenotypeConsumerAE();
 	   
 	   FHIRObjectMocker mocker = new FHIRObjectMocker();
-	   
-	   
-	   Patient patient = mocker.getPatient();
-	   Report report = mocker.getReport();
-	   
-	   //TODO need to add cancer summary mock
-	   ae.processPatient(db, null,  patient, Arrays.asList(new Report[]{report}));
+	   MedicalRecord mr = mocker.getMedicalRecord();
+	   Report report = mr.getReports().get(0);
+	   ae.processPatient(db, mr);
 	   
 	   try ( Transaction ignored = db.beginTx();
 			 Result reportResult = db.execute( "match (n {name: '" + report.getTitle() + "'}) return n" ))

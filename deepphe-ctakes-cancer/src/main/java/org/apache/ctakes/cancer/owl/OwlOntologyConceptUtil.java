@@ -13,7 +13,10 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
 
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -21,6 +24,7 @@ import java.util.stream.Stream;
 
 
 /**
+ * Utility used to obtain annotations in a cas using owl uris
  * @author SPF , chip-nlp
  * @version %I%
  * @since 11/24/2015
@@ -32,8 +36,15 @@ final public class OwlOntologyConceptUtil {
    private OwlOntologyConceptUtil() {
    }
 
-   static public final String CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#";
-   static public final String BREAST_CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#";
+   static public final String CONTEXT_OWL = "http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl";
+   static public final String SCHEMA_OWL = "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl";
+   static public final String CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl";
+   static public final String BREAST_CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl";
+
+   static public final String DISEASE_DISORDER_URI = SCHEMA_OWL + "#DiseaseDisorder";
+   static public final String SIGN_SYMPTOM_URI = SCHEMA_OWL + "#SignSymptom";
+   static public final String PROCEDURE_URI = SCHEMA_OWL + "#Procedure";
+   static public final String MEDICATION_URI = SCHEMA_OWL + "#MedicationStatement";
 
 //   static private final Function<String, String> asSelf = self -> self;
 
@@ -55,10 +66,9 @@ final public class OwlOntologyConceptUtil {
    }
 
    /**
-    *
-    * @param jcas -
+    * @param jcas         -
     * @param lookupWindow -
-    * @param <T> type for lookup window
+    * @param <T>          type for lookup window
     * @return all owl URIs that exist for the given window
     */
    static public <T extends Annotation> Collection<String> getUris( final JCas jcas, final T lookupWindow ) {
@@ -115,9 +125,9 @@ final public class OwlOntologyConceptUtil {
    }
 
    /**
-    * @param jcas -
+    * @param jcas         -
     * @param lookupWindow -
-    * @param <T> type for lookup window
+    * @param <T>          type for lookup window
     * @return all iClasses within the lookup window
     */
    static public <T extends Annotation> Collection<IClass> getIClasses( final JCas jcas, final T lookupWindow ) {
@@ -133,10 +143,10 @@ final public class OwlOntologyConceptUtil {
    }
 
    /**
-    * @param jcas -
+    * @param jcas         -
     * @param lookupWindow -
-    * @param uri  uri of interest
-    * @param <T> type for lookup window
+    * @param uri          uri of interest
+    * @param <T>          type for lookup window
     * @return all IdentifiedAnnotations within the given window that have the given uri
     */
    static public <T extends Annotation> Collection<IdentifiedAnnotation> getAnnotationsByUri( final JCas jcas,
@@ -174,16 +184,25 @@ final public class OwlOntologyConceptUtil {
    }
 
    /**
-    * @param jcas -
-    * @param rootUri  uri of interest
+    * @param jcas    -
+    * @param rootUri uri of interest
     * @return all IdentifiedAnnotations for the given uri and its children
     */
    static public Collection<IdentifiedAnnotation> getAnnotationsByUriBranch( final JCas jcas,
                                                                              final String rootUri ) {
+      return getAnnotationStreamByUriBranch( jcas, rootUri ).collect( Collectors.toSet() );
+   }
+
+   /**
+    * @param jcas    -
+    * @param rootUri uri of interest
+    * @return all IdentifiedAnnotations for the given uri and its children
+    */
+   static public Stream<IdentifiedAnnotation> getAnnotationStreamByUriBranch( final JCas jcas,
+                                                                              final String rootUri ) {
       return getUriBranchStream( rootUri )
             .map( uri -> getAnnotationsByUri( jcas, uri ) )
-            .flatMap( Collection::stream )
-            .collect( Collectors.toSet() );
+            .flatMap( Collection::stream );
    }
 
    /**

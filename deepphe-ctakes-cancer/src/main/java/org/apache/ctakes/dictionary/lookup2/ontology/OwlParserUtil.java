@@ -4,8 +4,6 @@ package org.apache.ctakes.dictionary.lookup2.ontology;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 import edu.pitt.dbmi.nlp.noble.terminology.SemanticType;
-import org.apache.ctakes.dictionary.lookup2.util.CuiCodeUtil;
-import org.apache.ctakes.dictionary.lookup2.util.TuiCodeUtil;
 import org.apache.log4j.Logger;
 
 import java.net.URI;
@@ -16,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Utility class used to obtain information relevant to a ctakes UmlsConcept from an owl iClass or Concept
  * @author SPF , chip-nlp
  * @version %I%
  * @since 9/23/2015
@@ -48,11 +47,19 @@ final public class OwlParserUtil {
 //      return null;
 //   }
 
+   /**
+    * @param iClass -
+    * @return cui from iclass or null if none exists
+    */
    static public String getCui( final IClass iClass ) {
       return getCui( iClass.getConcept() );
    }
 
 
+   /**
+    * @param concept -
+    * @return cui from concept or null if none exists
+    */
    static public String getCui( final Concept concept ) {
       final Collection<Object> allCodes = concept.getCodes().values();
       if ( allCodes.isEmpty() ) {
@@ -67,11 +74,18 @@ final public class OwlParserUtil {
       return null;
    }
 
+   /**
+    * @param iClass -
+    * @return tui from iclass or null if none exists
+    */
    static public String getTui( final IClass iClass ) {
       return getTui( iClass.getConcept() );
    }
 
-
+   /**
+    * @param concept -
+    * @return tui from concept or null if none exists
+    */
    static public String getTui( final Concept concept ) {
       final SemanticType[] semanticTypes = concept.getSemanticTypes();
       if ( semanticTypes.length > 0 ) {
@@ -88,31 +102,75 @@ final public class OwlParserUtil {
 //      return null;
 //   }
 
+   /**
+    * @param iClass -
+    * @return uri from iClass as an ascii string
+    */
    static public String getUriString( final IClass iClass ) {
       return getUri( iClass ).toASCIIString();
    }
 
+   /**
+    * @param iClass -
+    * @return uri from iClass
+    */
    static public URI getUri( final IClass iClass ) {
       return iClass.getURI();
    }
 
+   /**
+    * @param concept -
+    * @return any existing snomedct codes from a concept
+    */
    static public Collection<String> getSnomedCt( final Concept concept ) {
       return getConceptCodes( concept, SNOMED_PATTERN );
    }
 
+   /**
+    * @param concept -
+    * @return any existing rxnorm codes from a concept
+    */
    static public Collection<String> getRxNorm( final Concept concept ) {
       return getConceptCodes( concept, RXNORM_PATTERN );
    }
 
+   /**
+    * @param concept -
+    * @return any existing icd9 codes from a concept
+    */
    static public Collection<String> getIcd9( final Concept concept ) {
       return getConceptCodes( concept, ICD9CM_PATTERN );
    }
 
+   /**
+    * @param concept -
+    * @return any existing icd10 codes from a concept
+    */
    static public Collection<String> getIcd10( final Concept concept ) {
       return getConceptCodes( concept, ICD10CM_PATTERN );
    }
 
+   /**
+    * @param iClass -
+    * @return preferred text for the given iClass
+    */
+   static public String getPreferredText( final IClass iClass ) {
+      return getPreferredText( iClass.getConcept() );
+   }
 
+   /**
+    * @param concept -
+    * @return preferred text for the given Concept
+    */
+   static public String getPreferredText( final Concept concept ) {
+      return concept.getPreferredTerm().getText();
+   }
+
+   /**
+    * @param concept -
+    * @param pattern regex pattern
+    * @return any existing codes from a concept with the given Pattern
+    */
    static private Collection<String> getConceptCodes( final Concept concept, final Pattern pattern ) {
       final Collection<Object> allCodes = concept.getCodes().values();
       if ( allCodes.isEmpty() ) {
@@ -121,6 +179,11 @@ final public class OwlParserUtil {
       return getConceptCodes( allCodes, pattern );
    }
 
+   /**
+    * @param allCodes -
+    * @param pattern  regex pattern
+    * @return any codes in the list with the given Pattern
+    */
    static private Collection<String> getConceptCodes( final Iterable<Object> allCodes, final Pattern pattern ) {
       final Collection<String> conceptCodes = new ArrayList<>();
       for ( Object code : allCodes ) {
