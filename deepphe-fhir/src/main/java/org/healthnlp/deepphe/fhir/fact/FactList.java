@@ -1,40 +1,21 @@
 package org.healthnlp.deepphe.fhir.fact;
 
-import java.util.*;
+import java.util.List;
+
 /**
  * represents a list of facts with several niceties for convinience
  * @author tseytlin
  */
-public class FactList extends ArrayList<Fact> {
-	private List<String> types;
-	private String category;
+public interface FactList extends List<Fact> {
 
-	public List<String> getTypes() {
-		if(types == null)
-			types = new ArrayList<String>();
-		return types;
-	}
+	List<String> getTypes();
 
-	public void setTypes(List<String> type) {
-		this.types = type;
-	}
-	public void addType(String type) {
-		getTypes().add(type);
-	}
+	void setTypes( List<String> type );
 
-	public String getCategory() {
-		return category;
-	}
+	void addType( String type );
 
-	public void setCategory(String category) {
-		this.category = category;
-	}
+	String getCategory();
 
-	public boolean add(Fact e) {
-		if(e != null)
-			return super.add(e);
-		return false;
-	}
-	
-	
+	void setCategory( String category );
+
 }

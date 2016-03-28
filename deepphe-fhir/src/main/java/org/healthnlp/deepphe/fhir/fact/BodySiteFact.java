@@ -1,9 +1,9 @@
 package org.healthnlp.deepphe.fhir.fact;
 
+import org.healthnlp.deepphe.util.FHIRConstants;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.healthnlp.deepphe.util.FHIRConstants;
 
 public class BodySiteFact extends Fact {
 	private FactList modifiers;
@@ -13,8 +13,9 @@ public class BodySiteFact extends Fact {
 	}
 	
 	public FactList getModifiers() {
-		if(modifiers == null)
-			modifiers = new FactList();
+		if ( modifiers == null ) {
+			modifiers = new DefaultFactList();
+		}
 		return modifiers;
 	}
 	public void setModifiers(FactList modifiers) {

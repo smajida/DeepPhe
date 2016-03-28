@@ -6,7 +6,7 @@ import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 import org.apache.ctakes.cancer.concept.instance.ConceptInstance;
 import org.apache.ctakes.cancer.concept.instance.ConceptInstanceUtil;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
-import org.apache.ctakes.cancer.phenotype.NeoplasmUtil;
+import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
 import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
@@ -173,7 +173,7 @@ public class cTAKESUtils {
 	 */
 	public static String getConceptURI(IdentifiedAnnotation ia){
 		// TODO - can use OwlOntologyConceptUtil.getUris( ia );
-		return OwlOntologyConceptUtil.getUris( ia ).stream().findFirst().get();
+		return OwlOntologyConceptUtil.getUris( ia ).stream().findFirst().orElse( OwlOntologyConceptUtil.UNKNOWN_URI );
 //		String cui = null;
 //		for(int i=0;i<ia.getOntologyConceptArr().size();i++){
 //			OntologyConcept c = ia.getOntologyConceptArr(i);
@@ -380,7 +380,7 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
-		return NeoplasmUtil.getPropertyValues( jcas, an ).stream().findFirst().get();
+		return PhenotypeAnnotationUtil.getPropertyValues( jcas, an ).stream().findFirst().get();
 	}
 	
 	
@@ -442,7 +442,7 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
-		return NeoplasmUtil.getNeoplasmPropertiesBranch( jcas, neoplasm, TnmPropertyUtil.getParentUri() );
+		return PhenotypeAnnotationUtil.getNeoplasmPropertiesBranch( jcas, neoplasm, TnmPropertyUtil.getParentUri() );
 	}
 
 	//	public static CancerStage getCancerStage(IdentifiedAnnotation dm){
@@ -458,7 +458,7 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
-		return NeoplasmUtil.getNeoplasmPropertiesBranch(jcas, neoplasm, StagePropertyUtil.getParentUri() );
+		return PhenotypeAnnotationUtil.getNeoplasmPropertiesBranch( jcas, neoplasm, StagePropertyUtil.getParentUri() );
 	}
 
 	/**
@@ -501,10 +501,12 @@ public class cTAKESUtils {
 			dx.addExtension( FHIRUtils.createExtension(FHIRUtils.LANGUAGE_ASPECT_HYPOTHETICAL_URL,""+conceptInstance.isHypothetical() ) );
 		}
 		if(conceptInstance.isPermanent()){
-			dx.addExtension( FHIRUtils.createExtension(FHIRUtils.LANGUAGE_ASPECT_PERMENENT_URL,""+conceptInstance.isPermanent() ) );
+			dx.addExtension( FHIRUtils.createExtension( FHIRUtils.LANGUAGE_ASPECT_PERMENENT_URL,
+					"" + conceptInstance.isPermanent() ) );
 		}
 		if(conceptInstance.inPatientHistory()){
-			dx.addExtension( FHIRUtils.createExtension(FHIRUtils.LANGUAGE_ASPECT_HISTORICAL_URL,""+conceptInstance.inPatientHistory() ) );
+			dx.addExtension( FHIRUtils.createExtension( FHIRUtils.LANGUAGE_ASPECT_HISTORICAL_URL,
+					"" + conceptInstance.inPatientHistory() ) );
 		}
 	}
 }

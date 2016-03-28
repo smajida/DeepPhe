@@ -1,9 +1,9 @@
 package org.healthnlp.deepphe.fhir.fact;
 
+import org.healthnlp.deepphe.util.FHIRConstants;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.healthnlp.deepphe.util.FHIRConstants;
 
 public class ObservationFact extends Fact {
 	private Fact interpretation, method, value;
@@ -13,7 +13,7 @@ public class ObservationFact extends Fact {
 	}
 	public FactList getBodySite() {
 		if(bodySite == null){
-			bodySite = new FactList();
+			bodySite = new DefaultFactList();
 			bodySite.addType(FHIRConstants.BODY_SITE);
 		}
 		return bodySite;

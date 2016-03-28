@@ -1,9 +1,9 @@
 package org.healthnlp.deepphe.fhir.fact;
 
+import org.healthnlp.deepphe.util.FHIRConstants;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.healthnlp.deepphe.util.FHIRConstants;
 
 public class StageFact extends Fact {
 	private Fact summary;
@@ -19,7 +19,7 @@ public class StageFact extends Fact {
 	}
 	public FactList getAssessment() {
 		if(assessment == null){
-			assessment = new FactList();
+			assessment = new DefaultFactList();
 			assessment.addType(FHIRConstants.FINDING);
 		}
 		return assessment;
