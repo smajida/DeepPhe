@@ -39,9 +39,6 @@ import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
-
-import com.clarkparsia.owlapi.explanation.util.OntologyUtils;
-
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.ILogicExpression;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;

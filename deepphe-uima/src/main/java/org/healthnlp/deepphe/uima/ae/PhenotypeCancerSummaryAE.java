@@ -69,7 +69,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		for(Report report: PhenotypeResourceFactory.loadReports(jcas)){
 			record.addReport(report);
 			
-			/*// append patient summary
+			// append patient summary
 			PatientSummary p = report.getPatientSummary();
 			if(p != null && patientSummary.isAppendable(p)){
 				patientSummary.append(p);
@@ -88,14 +88,10 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			for(TumorSummary ts: report.getTumorSummaries()){
 				cancerSummary.append(ts);
 			}
-			
-			//TODO: this is where you can start with RULES
-			// this is a temporary merge of all summaries together without
-			// much thought until we have something better
-*/		}
+		}
 
 		//insert record into drools
-		long stT = System.currentTimeMillis();	
+		/*long stT = System.currentTimeMillis();	
 		DroolsEngine de = new DroolsEngine();
 		KieSession droolsSession = null;
 		try {
@@ -112,47 +108,14 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			droolsSession.fireAllRules();
 			droolsSession.dispose();
 			System.out.println("DROOLS TIME: "+(System.currentTimeMillis() - stT)/1000+"  sec");
-System.out.println("Patient from MR: "+record.getPatient());
+			System.out.println("Patient from MR: "+record.getPatient());
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
-		
-		
-		//TODO: rules, extract data
-		
-		
-		/*FactList pT = record.getCancerSummary().getPhenotype().getPrimaryTumorClassification();
-		FactList pM = record.getCancerSummary().getPhenotype().getDistantMetastasisClassification();
-		FactList pN = record.getCancerSummary().getPhenotype().getRegionalLymphNodeClassification();
-	*/
-		
-		
-		//FactList pT = record.getCancerSummary().getPhenotype().getFacts("hasTClassification");
-		record.getCancerSummary().getPhenotype().addFact("hasTClassification", null);
-		
-		
-		/*DroolsEngine de = new DroolsEngine();
-		StatefulKnowledgeSession droolsSession = de.getSession();
-		
-		droolsSession.addEventListener( new DebugAgendaEventListener() );
-		droolsSession.addEventListener( new DebugWorkingMemoryEventListener() );
-		
-		droolsSession.insert(cancerSummary);
-		droolsSession.fireAllRules();
-		droolsSession.dispose();
-		System.out.println("DROOLS TIME: "+(System.currentTimeMillis() - stT)/1000+"  sec");*/
-		
-		/*String tCls = FHIRUtils.getConceptName(cancerSummary.getPhenotype().getPrimaryTumorClassification());
-		String nCls = FHIRUtils.getConceptName(cancerSummary.getPhenotype().getRegionalLymphNodeClassification());
-		String mCls = FHIRUtils.getConceptName(cancerSummary.getPhenotype().getDistantMetastasisClassification());*/
-		
-		
+		}*/
+	
 		//this is where you save your work back to CAS
-	
-	
 		PhenotypeResourceFactory.saveMedicalRecord(record, jcas);
 		
 	}
