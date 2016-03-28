@@ -1,39 +1,19 @@
 package org.healthnlp.deepphe.workbench;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeSet;
+import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-
-import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
-import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
-import org.healthnlp.deepphe.ontology.I2b2OntologyBuilder;
-import org.healthnlp.deepphe.ontology.PartialPath;
-import org.healthnlp.deepphe.ontology.Utilities;
-import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
-import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
-import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.util.List;
 
 public class PipeDialogPatientLoader extends JDialog implements Runnable,
 		ActionListener {
@@ -89,24 +69,26 @@ public class PipeDialogPatientLoader extends JDialog implements Runnable,
 		confirmationButton.setEnabled(true);
 	}
 
+	// TODO only ever called if isSlicingOntology == true.  At this time (3/28/2016) isSlicingOntology is always false
 	private void replaceI2b2Data() {
-		try {
-			final I2b2DemoDataSourceManager i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
-			setMessage("Initialized a connecton to I2B2");
-			final I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
-			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
-			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE2");
-			setMessage("Clean out old data.");
-			i2b2DataDataWriter.cleanOldRecords();
-			i2b2DataDataWriter.setPatients(patients);
-			setMessage("Push new Patient and Encounter data to i2b2.");
-			i2b2DataDataWriter.execute();
-			i2b2DataDataSourceManager.destroy();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+		throw new UnsupportedOperationException( "I2B2DataDataWriter no longer exists, so replaceI2b2Data is not implementd" );
+//		try {
+//			final I2b2DemoDataSourceManager i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
+//			setMessage("Initialized a connecton to I2B2");
+//			final I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
+//			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
+//			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE2");
+//			setMessage("Clean out old data.");
+//			i2b2DataDataWriter.cleanOldRecords();
+//			i2b2DataDataWriter.setPatients(patients);
+//			setMessage("Push new Patient and Encounter data to i2b2.");
+//			i2b2DataDataWriter.execute();
+//			i2b2DataDataSourceManager.destroy();
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		} catch (ClassNotFoundException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 

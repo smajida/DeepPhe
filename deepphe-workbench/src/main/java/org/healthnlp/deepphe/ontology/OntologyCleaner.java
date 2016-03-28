@@ -1,8 +1,10 @@
 package org.healthnlp.deepphe.ontology;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Frame;
+import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+
+import javax.swing.*;
+import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
@@ -12,13 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
-import javax.swing.JDialog;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-
-import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
-import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+//import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
 
 public class OntologyCleaner extends JDialog implements Runnable {
 
@@ -30,7 +26,7 @@ public class OntologyCleaner extends JDialog implements Runnable {
 	
 	private I2b2DemoDataSourceManager i2b2DataDataSourceManager;
 	private I2b2OntologyBuilder i2b2OntologyBuilder;
-	private I2B2DataDataWriter i2b2DataDataWriter;
+	//	private I2B2DataDataWriter i2b2DataDataWriter;
 	private MetaDataDbManager metaDataDbManager;
 
 	private JTextPane messageText;
@@ -134,12 +130,16 @@ public class OntologyCleaner extends JDialog implements Runnable {
 		this.i2b2OntologyBuilder = i2b2OntologyBuilder;
 	}
 
-	public I2B2DataDataWriter getI2b2DataDataWriter() {
-		return i2b2DataDataWriter;
+	//	public I2B2DataDataWriter getI2b2DataDataWriter() {
+//		return i2b2DataDataWriter;
+	public Object getI2b2DataDataWriter() {
+		throw new UnsupportedOperationException( "I2b2DataDataWriter removed with https://github.com/DeepPhe/DeepPhe/commit/a81d967949a27ae13ec496f1128be8d758667d51" );
 	}
 
-	public void setI2b2DataDataWriter(I2B2DataDataWriter i2b2DataDataWriter) {
-		this.i2b2DataDataWriter = i2b2DataDataWriter;
+	//	public void setI2b2DataDataWriter(I2B2DataDataWriter i2b2DataDataWriter) {
+//		this.i2b2DataDataWriter = i2b2DataDataWriter;
+	public void setI2b2DataDataWriter( Object i2b2DataDataWriter ) {
+		throw new UnsupportedOperationException( "I2b2DataDataWriter removed with https://github.com/DeepPhe/DeepPhe/commit/a81d967949a27ae13ec496f1128be8d758667d51" );
 	}
 
 	public MetaDataDbManager getMetaDataDbManager() {
