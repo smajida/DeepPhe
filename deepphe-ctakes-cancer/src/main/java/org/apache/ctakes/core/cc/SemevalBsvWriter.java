@@ -3,6 +3,7 @@ package org.apache.ctakes.core.cc;
 
 import org.apache.ctakes.cancer.concept.instance.ConceptInstance;
 import org.apache.ctakes.cancer.concept.instance.ConceptInstanceUtil;
+import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
 import org.apache.ctakes.cancer.phenotype.receptor.StatusPropertyUtil;
 import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
@@ -120,65 +121,85 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
    static private String createPhenotypeLine( final ConceptInstance resource ) {
       final StringBuilder sb = new StringBuilder();
       // DocName|Phenotype_Spans|CUI|
-      sb.append( getSpannedCuiText( resource.getPhenotypeAnnotations() ) );
+      sb.append( getSpannedCuiText( resource.getIdentifiedAnnotation(), "unmarked" ) );
       // Neg_value|Neg_span|
       sb.append( getAttributeTextYN( resource.isNegated() ) );
       // Subj_value|Subj_span|
-      sb.append( getAttributeText( resource.getSubject(), "*patient" ) );
+      sb.append( getAttributeText( resource.getSubject(), "patient" ) );
       // Uncertain_value|Uncertain_span|
       sb.append( getAttributeTextYN( resource.isUncertain() ) );
       // Course_value|Course_span|
-      sb.append( "*unmarked|*NULL|" );
+      sb.append( "unmarked|NULL|" );
       // Severity_value|Severity_span|
-      sb.append( "*unmarked|*NULL|" );
+      sb.append( "unmarked|NULL|" );
       // Cond_value|Cond_span|
       sb.append( getAttributeTextTF( resource.isConditional() ) );
       // Generic_value|Generic_span|
       sb.append( getAttributeTextTF( resource.isHypothetical() ) );
       // Bodyloc_value|Bodyloc_span|
-      sb.append( getSpannedCuiText( resource.getLocationAnnotations() ) );
+      sb.append( getCuiSpannedText( PhenotypeAnnotationUtil
+            .getLocations( resource.getIdentifiedAnnotation() ), "unmarked" ) );
       // DocTimeRel|DocTimeRelSpan|
-      sb.append( getAttributeText( resource.getDocTimeRel(), "*unmarked" ) );
+      sb.append( getAttributeText( resource.getDocTimeRel(), "unmarked" ) );
       // Value_Spans|CUI|
-      sb.append( getSpannedCuiText( resource.getValueAnnotations() ) );
+      sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
+            .getPhenotypeValues( resource.getIdentifiedAnnotation() ), "unmarked" ) );
       // Neoplasm_Spans|CUI|
-      sb.append( getSpannedCuiText( resource.getNeoplasmAnnotations() ) );
+      sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
+            .getPhenotypeNeoplasms( resource.getIdentifiedAnnotation() ), "unmarked" ) );
       // AssociatedTest_Spans|CUI|
-      sb.append( getSpannedCuiText( resource.getDiagnosticTestAnnotations() ) );
+      sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
+            .getDiagnosticTests( resource.getIdentifiedAnnotation() ), "unmarked" ) );
       return sb.toString();
    }
 
 
-   static private String getSpannedCuiText( final Collection<IdentifiedAnnotation> annotations ) {
-      return getSpannedCuiText( annotations.stream().findFirst().orElse( null ) );
+   static private String getSpannedCuiText( final Collection<IdentifiedAnnotation> annotations,
+                                            final String defaultText ) {
+      return getSpannedCuiText( annotations.stream().findFirst().orElse( null ), defaultText );
    }
 
-   static private String getSpannedCuiText( final IdentifiedAnnotation annotation ) {
+   static private String getSpannedCuiText( final IdentifiedAnnotation annotation, final String defaultText ) {
       if ( annotation == null ) {
-         return "*unmarked|*NULL|";
+         return defaultText + "|NULL|";
       }
       final StringBuilder sb = new StringBuilder();
       sb.append( annotation.getBegin() ).append( '-' ).append( annotation.getEnd() ).append( '|' );
       final Collection<String> cuis = OntologyConceptUtil.getCuis( annotation );
-      final String cui = cuis == null ? "*NULL"
-                                      : cuis.stream().filter( c -> !c.isEmpty() ).findFirst().orElse( "*NULL" );
+      final String cui = cuis == null ? "NULL"
+                                      : cuis.stream().filter( c -> !c.isEmpty() ).findFirst().orElse( "NULL" );
       sb.append( cui ).append( '|' );
       return sb.toString();
    }
 
+   static private String getCuiSpannedText( final Collection<IdentifiedAnnotation> annotations,
+                                            final String defaultText ) {
+      if ( annotations == null || annotations.isEmpty() ) {
+         return "NULL|" + defaultText + "|";
+      }
+      final IdentifiedAnnotation annotation = annotations.stream().findFirst().get();
+      final StringBuilder sb = new StringBuilder();
+      final Collection<String> cuis = OntologyConceptUtil.getCuis( annotation );
+      final String cui = cuis == null ? "NULL"
+                                      : cuis.stream().filter( c -> !c.isEmpty() ).findFirst().orElse( "NULL" );
+      sb.append( cui ).append( '|' );
+      sb.append( annotation.getBegin() ).append( '-' ).append( annotation.getEnd() ).append( '|' );
+      return sb.toString();
+   }
+
    static private String getAttributeTextYN( final boolean isAttributePositive ) {
-      final String value = isAttributePositive ? "yes" : "*no";
-      return value + "|*NULL|";
+      final String value = isAttributePositive ? "yes" : "no";
+      return value + "|NULL|";
    }
 
    static private String getAttributeTextTF( final boolean isAttributePositive ) {
-      final String value = isAttributePositive ? "true" : "*false";
-      return value + "|*NULL|";
+      final String value = isAttributePositive ? "true" : "false";
+      return value + "|NULL|";
    }
 
    static private String getAttributeText( final String attributeValue, final String defaultText ) {
       final String value = attributeValue.isEmpty() ? defaultText : attributeValue;
-      return value + "|*NULL|";
+      return value + "|NULL|";
    }
 
    public static AnalysisEngineDescription createAnnotatorDescription() throws ResourceInitializationException {

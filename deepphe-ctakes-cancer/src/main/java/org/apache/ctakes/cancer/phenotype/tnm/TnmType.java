@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 // http://www.cancer.gov/cancertopics/diagnosis-staging/staging/staging-fact-sheet
 // http://cancerstaging.blogspot.it
 // I think that the specifications are case-sensitive ...
-enum TnmType implements Type {
+public enum TnmType implements Type {
    T( "Size or direct extent of the primary tumor",
          "Generic_Primary_Tumor_TNM_Finding",
          "T" ),
