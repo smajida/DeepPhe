@@ -18,17 +18,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.healthnlp</groupId>
-			<artifactId>deepphe-i2b2</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.healthnlp</groupId>
 			<artifactId>deepphe-uima</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.healthnlp</groupId>
-			<artifactId>deepphe-workbench</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
