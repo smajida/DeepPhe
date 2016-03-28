@@ -71,10 +71,12 @@ public class GraphDBPhenotypeConsumerAETest {
 	   
 	   FHIRObjectMocker mocker = new FHIRObjectMocker();
 	   
+	   
 	   Patient patient = mocker.getPatient();
 	   Report report = mocker.getReport();
 	   
-	   ae.processPatient(db, patient, Arrays.asList(new Report[]{report}));
+	   //TODO need to add cancer summary mock
+	   ae.processPatient(db, null,  patient, Arrays.asList(new Report[]{report}));
 	   
 	   try ( Transaction ignored = db.beginTx();
 			 Result reportResult = db.execute( "match (n {name: '" + report.getTitle() + "'}) return n" ))

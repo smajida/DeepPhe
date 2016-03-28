@@ -78,22 +78,30 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 
 	@Override
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
-		processPatient(graph,PhenotypeResourceFactory.loadPatient(jcas),PhenotypeResourceFactory.loadReports(jcas));
+		processPatient(graph,PhenotypeResourceFactory.loadMedicalRecordCancerSummary(jcas), PhenotypeResourceFactory.loadPatient(jcas),PhenotypeResourceFactory.loadReports(jcas));
 	}
 
-	public void processPatient(GraphDatabaseService graphDb, Patient patient, List<Report> reports) {
+	public void processPatient(GraphDatabaseService graphDb, CancerSummary summary, Patient patient, List<Report> reports) {
 		try (Transaction tx = graphDb.beginTx()) {
 
+			/////////////Create Patient
 			String namedID = patient.getPatientName();
 			Node patientN = getPatientFactory(graphDb).getOrCreate("name", namedID);
+	
+			////////////Create Cancer Summary
+			Node pcsn = graphDb.createNode(GraphDBConstants.Nodes.CancerSummary);
+			saveCancerSummary(graphDb, summary, pcsn);
+			patientN.createRelationshipTo(pcsn, GraphDBConstants.Relationships.hasCancerSummary);
 			
-			
+			////////////Create Reports
 			for(Report report:reports){
+				System.out.println("" + namedID + report.getTitle());
 				Node documentN = getDocumentFromDB(graphDb, namedID, report.getTitle());
 	
 				// clean out old document from DB
 				if (documentN != null) {
-					deleteDocument(documentN);
+//					deleteDocument(documentN);
+					continue;
 				}
 	
 				// create new doc node.
@@ -102,7 +110,7 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 				documentN.setProperty("text", report.getReportText());
 				// relate doc to patient
 				documentN.createRelationshipTo(patientN, GraphDBConstants.Relationships.hasSubject);
-	
+				
 				for (Summary s : report.getCompositionSummaries()) {
 					if(s instanceof CancerSummary){						
 						Node csn = graphDb.createNode(GraphDBConstants.Nodes.CancerSummary);

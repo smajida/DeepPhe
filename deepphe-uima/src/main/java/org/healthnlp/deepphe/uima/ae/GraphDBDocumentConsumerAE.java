@@ -101,7 +101,7 @@ public class GraphDBDocumentConsumerAE extends JCasAnnotator_ImplBase {
 			documentN.setProperty("text", report.getReportText());
 			// relate doc to patient
 			documentN.createRelationshipTo(patientN, GraphDBConstants.Relationships.hasSubject);
-
+			
 			for (Disease dx : report.getDiagnoses()) {
 
 				Node n = graphDb.createNode(GraphDBConstants.Nodes.Diagnosis);
