@@ -1,54 +1,41 @@
 package org.healthnlp.deepphe.uima.fhir;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import javassist.expr.NewArray;
-
 import org.apache.uima.cas.FeatureStructure;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.cas.StringArray;
 import org.apache.uima.jcas.tcas.Annotation;
-import org.healthnlp.deepphe.fhir.AnatomicalSite;
-import org.healthnlp.deepphe.fhir.Disease;
+import org.healthnlp.deepphe.fhir.*;
 import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Finding;
 import org.healthnlp.deepphe.fhir.Medication;
 import org.healthnlp.deepphe.fhir.Observation;
 import org.healthnlp.deepphe.fhir.Procedure;
-import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.Stage;
+import org.healthnlp.deepphe.fhir.fact.*;
 import org.healthnlp.deepphe.fhir.fact.Fact;
-import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.fact.FactList;
-import org.healthnlp.deepphe.fhir.fact.TextMention;
 import org.healthnlp.deepphe.fhir.summary.*;
-import org.healthnlp.deepphe.uima.types.Attribute;
+import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
+import org.healthnlp.deepphe.fhir.summary.PatientPhenotype;
+import org.healthnlp.deepphe.fhir.summary.PatientSummary;
+import org.healthnlp.deepphe.fhir.summary.TumorPhenotype;
+import org.healthnlp.deepphe.uima.types.*;
 import org.healthnlp.deepphe.uima.types.BodySite;
-import org.healthnlp.deepphe.uima.types.Cancer;
 import org.healthnlp.deepphe.uima.types.CancerPhenotype;
 import org.healthnlp.deepphe.uima.types.Composition;
-import org.healthnlp.deepphe.uima.types.DiseaseDisorder;
 import org.healthnlp.deepphe.uima.types.HumanName;
-import org.healthnlp.deepphe.uima.types.Modifier;
 import org.healthnlp.deepphe.uima.types.Patient;
-import org.healthnlp.deepphe.uima.types.Tumor;
 import org.healthnlp.deepphe.util.FHIRConstants;
-import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
-import org.hl7.fhir.instance.model.BooleanType;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Coding;
-import org.hl7.fhir.instance.model.DateTimeType;
-import org.hl7.fhir.instance.model.DomainResource;
+import org.hl7.fhir.instance.model.*;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Quantity;
-import org.hl7.fhir.instance.model.Resource;
+
+import java.net.URI;
+import java.util.*;
+
+import org.apache.uima.jcas.tcas.Annotation;
 
 public class PhenotypeResourceFactory {
 	
@@ -298,7 +285,7 @@ public class PhenotypeResourceFactory {
 	 */
 	
 	private static FactList loadFactList(org.healthnlp.deepphe.uima.types.FactList annotation) {
-		FactList facts = new FactList();
+		FactList facts = new DefaultFactList();
 		facts.setCategory(annotation.getHasCategory());
 		for(int i=0;i<getSize(annotation.getHasTypes());i++){
 			facts.getTypes().add(annotation.getHasTypes(i));

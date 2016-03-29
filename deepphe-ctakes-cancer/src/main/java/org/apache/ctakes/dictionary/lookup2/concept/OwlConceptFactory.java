@@ -102,7 +102,6 @@ public class OwlConceptFactory implements ConceptFactory {
             for ( IClass childClass : root2.getSubClasses() ) {
                conceptMap.putAll( createOwlConcepts( childClass ) );
             }
-            LOGGER.info( "Concepts created from Ontology Owl" );
             return conceptMap;
          } catch ( IOException ioE ) {
             LOGGER.error( "Could not create concepts from Ontology Owl" );
@@ -140,7 +139,6 @@ public class OwlConceptFactory implements ConceptFactory {
          for ( File bsvFile : bsvFiles ) {
             bsvConcepts.putAll( createBsvConcepts( bsvFile.getPath() ) );
          }
-         LOGGER.info( "Concept BSV Files loaded" );
       } catch ( IOException ioE ) {
          LOGGER.error( "Could not load Concept BSV Files in " + owlDir.getPath() );
       }
@@ -160,7 +158,6 @@ public class OwlConceptFactory implements ConceptFactory {
             conceptMap.put( CuiCodeUtil.getInstance().getCuiCode( cuiTuiTerm.getCui() ),
                   new DefaultConcept( cuiTuiTerm.getCui(), Concept.PREFERRED_TERM_UNKNOWN, codes ) );
          }
-         LOGGER.info( "Concepts created from BSV Files" );
          return conceptMap;
       } catch ( IOException ioE ) {
          LOGGER.error( "Could not create concepts from BSV Files" );

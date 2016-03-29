@@ -15,8 +15,8 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 final class Dimension extends DefaultProperty<DimensionType, DimensionValue> {
 
-   //   static final String DIMENSION_URI = OwlOntologyConceptUtil.SCHEMA_OWL + "#DimensionalMeasurement";
-   static final String DIMENSION_URI = OwlOntologyConceptUtil.CONTEXT_OWL + "#DimensionalMeasurement";
+   //   static final String DIMENSION_URI = OwlOntologyConceptUtil.CONTEXT_OWL + "#DimensionalMeasurement";
+   static final String DIMENSION_URI = OwlOntologyConceptUtil.CONTEXT_OWL + "#Quantity";
 
    Dimension( final SpannedType<DimensionType> dimensionType, final SpannedValue<DimensionValue> dimensionValue ) {
       super( dimensionType, dimensionValue );

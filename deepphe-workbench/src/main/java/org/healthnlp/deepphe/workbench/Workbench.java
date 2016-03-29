@@ -1,44 +1,35 @@
 package org.healthnlp.deepphe.workbench;
 
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-//import java.io.File;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeSet;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-
-import org.apache.ctakes.cancer.pipeline.CancerPipelineFactory;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
-import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.metadata.TypeSystemDescription;
-import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
 import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
 import org.healthnlp.deepphe.ontology.I2b2OntologyBuilder;
 import org.healthnlp.deepphe.ontology.MetaDataDbManager;
 import org.healthnlp.deepphe.ontology.OntologyCleaner;
 import org.healthnlp.deepphe.ontology.PartialPath;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
-//import org.healthnlp.deepphe.uima.cr.PatientListReader;
 import org.healthnlp.deepphe.workbench.controller.Controller;
 import org.healthnlp.deepphe.workbench.form.FormDataBean;
 import org.healthnlp.deepphe.workbench.form.FormPanel;
 import org.healthnlp.deepphe.workbench.treeview.artifact.AnnotationsTree;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeSet;
+
+//import java.io.File;
+//import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
+//import org.healthnlp.deepphe.uima.cr.PatientListReader;
 
 public class Workbench extends JFrame implements ActionListener,
 		PropertyChangeListener {
@@ -63,7 +54,7 @@ public class Workbench extends JFrame implements ActionListener,
 
 	private final I2b2DemoDataSourceManager i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
 	private final I2b2OntologyBuilder i2b2OntologyBuilder = new I2b2OntologyBuilder();
-	private final I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
+	//	private final I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
 	private final MetaDataDbManager metaDataDbManager = new MetaDataDbManager();
 	private final List<String> topLevelClses = new ArrayList<String>();
 	
@@ -286,7 +277,7 @@ public class Workbench extends JFrame implements ActionListener,
 		patientExtractor = new PipeDialogPatientExtraction(this);
 		patientExtractor
 				.setI2b2DataDataSourceManager(i2b2DataDataSourceManager);
-		patientExtractor.setI2b2DataDataWriter(i2b2DataDataWriter);
+//		patientExtractor.setI2b2DataDataWriter(i2b2DataDataWriter);
 		patientExtractor.setI2b2OntologyBuilder(i2b2OntologyBuilder);
 		patientExtractor.setAnnotationTabPanel(annotationTabPanel);
 		patientExtractor.setKnowledgeExtractor(patientKnowledgeExtractor);
@@ -315,18 +306,19 @@ public class Workbench extends JFrame implements ActionListener,
 	}
 
 	private void processPatientClean() {
-		try {
-			final I2b2DemoDataSourceManager i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
-			final I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
-			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
-			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE2");
-			i2b2DataDataWriter.execute();
-			i2b2DataDataSourceManager.destroy();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		throw new UnsupportedOperationException( "I2b2DataDataWriter removed with https://github.com/DeepPhe/DeepPhe/commit/a81d967949a27ae13ec496f1128be8d758667d51" );
+//		try {
+//			final I2b2DemoDataSourceManager i2b2DataDataSourceManager = new I2b2DemoDataSourceManager();
+//			final I2B2DataDataWriter i2b2DataDataWriter = new I2B2DataDataWriter();
+//			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
+//			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE2");
+//			i2b2DataDataWriter.execute();
+//			i2b2DataDataSourceManager.destroy();
+//		} catch (ClassNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	private void processOntologyClean() {
@@ -334,7 +326,7 @@ public class Workbench extends JFrame implements ActionListener,
 		partialPathMap.clear();
 		ontologyCleaner = new OntologyCleaner(this);
 		ontologyCleaner.setI2b2DataDataSourceManager(i2b2DataDataSourceManager);
-		ontologyCleaner.setI2b2DataDataWriter(i2b2DataDataWriter);
+//		ontologyCleaner.setI2b2DataDataWriter(i2b2DataDataWriter);
 		ontologyCleaner.setI2b2OntologyBuilder(i2b2OntologyBuilder);
 		ontologyCleaner.setMetaDataDbManager(metaDataDbManager);
 		ontologyCleaner.setPartialPathTreeSet(partialPathTreeSet);

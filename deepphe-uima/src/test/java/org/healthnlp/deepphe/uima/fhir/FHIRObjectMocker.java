@@ -1,27 +1,16 @@
 package org.healthnlp.deepphe.uima.fhir;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-
-import org.healthnlp.deepphe.fhir.Disease;
-import org.healthnlp.deepphe.fhir.Finding;
-import org.healthnlp.deepphe.fhir.Medication;
-import org.healthnlp.deepphe.fhir.Observation;
-import org.healthnlp.deepphe.fhir.Patient;
-import org.healthnlp.deepphe.fhir.Procedure;
-import org.healthnlp.deepphe.fhir.Report;
-import org.healthnlp.deepphe.fhir.Stage;
-import org.healthnlp.deepphe.fhir.summary.CancerSummary;
-import org.healthnlp.deepphe.fhir.summary.PatientSummary;
-import org.healthnlp.deepphe.fhir.summary.Summary;
-import org.healthnlp.deepphe.fhir.summary.TumorSummary;
+import org.healthnlp.deepphe.fhir.*;
+import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnit4Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 public class FHIRObjectMocker {
 	private Mockery context = new JUnit4Mockery() {{
@@ -37,9 +26,9 @@ public class FHIRObjectMocker {
 	final CancerSummary cancerSummary = context.mock(CancerSummary.class);
 	final TumorSummary tumorSummary = context.mock(TumorSummary.class);
 	final PatientSummary patientSummary = context.mock(PatientSummary.class);
-	final org.healthnlp.deepphe.fhir.summary.CancerPhenotype cancerPhenotype = context.mock(org.healthnlp.deepphe.fhir.summary.CancerPhenotype.class);
-	final org.healthnlp.deepphe.fhir.summary.TumorPhenotype tumorPhenotype = context.mock(org.healthnlp.deepphe.fhir.summary.TumorPhenotype.class);
-	
+	final CancerPhenotype cancerPhenotype = context.mock(CancerPhenotype.class);
+	final TumorPhenotype tumorPhenotype = context.mock(TumorPhenotype.class);
+	final MedicalRecord medicalRecord = context.mock(MedicalRecord.class);
 	
 	public FHIRObjectMocker() {
 		super();
@@ -84,6 +73,8 @@ public class FHIRObjectMocker {
 						+ "PR-neg, HER2+, now undergoing neoadjuvant chemo with taxotere, carboplatin, Herceptin, and pertuzumab."));
 				
 				allowing(report).getCompositionSummaries();
+				// TODO - this is illegal.  None of the elements (**summary) implement Fact,
+				// TODO - so GraphDBPhenotypeConsumerAETest fails
 				will(returnValue(Arrays.asList(new Summary[]{cancerSummary,tumorSummary,patientSummary})));
 				
 				allowing(report).getDiagnoses();
@@ -356,6 +347,12 @@ public class FHIRObjectMocker {
 
 	public Medication getMedication() {
 		return medication;
+	}
+
+
+
+	public MedicalRecord getMedicalRecord() {
+		return medicalRecord;
 	}
 	
 	

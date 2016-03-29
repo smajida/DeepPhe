@@ -30,7 +30,6 @@ import org.hl7.fhir.instance.model.Procedure.ProcedureStatus;
 import java.io.File;
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -511,7 +510,8 @@ final public class DocumentResourceFactory {
 		cTAKESUtils.addLanguageContext( conceptInstance, dx );
 		
 		// now lets take a look at the location of this disease
-		for ( IdentifiedAnnotation as : conceptInstance.getLocationAnnotations() ) {
+		for ( ConceptInstance ci : ConceptInstanceUtil.getLocations( conceptInstance ) ) {
+			final IdentifiedAnnotation as = ci.getIdentifiedAnnotation();
 			CodeableConcept location = dx.addBodySite();
 			cTAKESUtils.setCodeableConcept( location, as );
 			AnatomicalSite site = (AnatomicalSite) FHIRRegistry.getInstance().getResource(as);
@@ -620,7 +620,8 @@ final public class DocumentResourceFactory {
 		cTAKESUtils.addLanguageContext( conceptInstance, pr );
 		
 		// now lets take a look at the location of this disease
-		for ( IdentifiedAnnotation as : conceptInstance.getLocationAnnotations() ) {
+		for ( ConceptInstance ci : ConceptInstanceUtil.getLocations( conceptInstance ) ) {
+			final IdentifiedAnnotation as = ci.getIdentifiedAnnotation();
 			CodeableConcept location = pr.addBodySite();
 			cTAKESUtils.setCodeableConcept(location,as);
 			AnatomicalSite site = (AnatomicalSite) FHIRRegistry.getInstance().getResource(as);
@@ -734,57 +735,52 @@ final public class DocumentResourceFactory {
 			if ( jcas == null ) {
 				LOGGER.error( "No Cas exists for Stage annotations" );
 			} else {
-				final IdentifiedAnnotation fullStageAnnotation = StagePropertyUtil
-						.createCoallescedProperty( jcas, stageAnnotations );
-				CodeableConcept c = cTAKESUtils.getCodeableConcept( fullStageAnnotation );
-				c.setText( fullStageAnnotation.getCoveredText() );
+				final IdentifiedAnnotation firstStageAnnotation = stageAnnotations.stream().findFirst().get();
+				CodeableConcept c = cTAKESUtils.getCodeableConcept( firstStageAnnotation );
+				c.setText( firstStageAnnotation.getCoveredText() );
 				stage.setSummary( c );
 				// add id to cancer stage
-				Finding f = (Finding)FHIRRegistry.getInstance().getResource( fullStageAnnotation );
+				Finding f = (Finding)FHIRRegistry.getInstance().getResource( firstStageAnnotation );
 				if ( f != null ) {
 					FHIRUtils.addResourceReference( c, f );
 				}
 				// add extension
 				stage.addExtension(
-						FHIRUtils.createMentionExtension( fullStageAnnotation.getCoveredText(),
-								fullStageAnnotation.getBegin(), fullStageAnnotation.getEnd() ) );
+						FHIRUtils.createMentionExtension( firstStageAnnotation.getCoveredText(),
+								firstStageAnnotation.getBegin(), firstStageAnnotation.getEnd() ) );
 			}
 		} else {
 			// for now just add a generic TNM
 			if ( tnmAnnotations != null && !tnmAnnotations.isEmpty() ) {
-				final JCas jcas = tnmAnnotations.stream().map( cTAKESUtils::getJcas ).findFirst().get();
+				final JCas jcas = tnmAnnotations.stream().map( cTAKESUtils::getJcas ).findFirst().orElse( null );
 				if ( jcas == null ) {
 					LOGGER.error( "No Cas exists for TNM annotations" );
 				} else {
-					final IdentifiedAnnotation fullTnmAnnotation = TnmPropertyUtil
-							.createCoallescedProperty( jcas, tnmAnnotations );
-					CodeableConcept c = cTAKESUtils.getCodeableConcept( fullTnmAnnotation );
-					c.setText( fullTnmAnnotation.getCoveredText() );
+					final IdentifiedAnnotation firstTnmAnnotation = tnmAnnotations.stream().findFirst().get();
+					CodeableConcept c = cTAKESUtils.getCodeableConcept( firstTnmAnnotation );
+					c.setText( firstTnmAnnotation.getCoveredText() );
 					stage.setSummary( c );
 				}
 			}
 		}
 		// extract individual Stage levels if values are conflated
 		if ( tnmAnnotations != null && !tnmAnnotations.isEmpty() ) {
-			final JCas jcas = tnmAnnotations.stream().map( cTAKESUtils::getJcas ).findFirst().get();
+			final JCas jcas = tnmAnnotations.stream().map( cTAKESUtils::getJcas ).findFirst().orElse( null );
 			if ( jcas == null ) {
 				LOGGER.error( "No Cas exists for TNM annotations" );
 			} else {
 				for ( IdentifiedAnnotation tnm : tnmAnnotations ) {
-					final IdentifiedAnnotation indiTnm = TnmPropertyUtil
-							.createCoallescedProperty( jcas, Collections.singletonList( tnm ) );
-					Finding f = (Finding)FHIRRegistry.getInstance().getResource( indiTnm );
+					Finding f = (Finding)FHIRRegistry.getInstance().getResource( tnm );
 					if ( f == null ) {
-						f = createFinding( new ConceptInstance( cTAKESUtils.getConceptURI( indiTnm ), indiTnm ) );
+						f = createFinding( new ConceptInstance( tnm ) );
 					}
 					stage.addAssessment( f );
 					//stage.setStringExtension(Stage.TNM_PRIMARY_TUMOR,cTAKESUtils.getConceptURI(st.getSize()));
 				}
 			}
-			final IdentifiedAnnotation fullTnmAnnotation = TnmPropertyUtil
-					.createCoallescedProperty( jcas, tnmAnnotations );
-			stage.addExtension( FHIRUtils.createMentionExtension( fullTnmAnnotation.getCoveredText(),
-					fullTnmAnnotation.getBegin(), fullTnmAnnotation.getEnd() ) );
+			final IdentifiedAnnotation firstTnmAnnotation = tnmAnnotations.stream().findFirst().get();
+			stage.addExtension( FHIRUtils.createMentionExtension( firstTnmAnnotation.getCoveredText(),
+					firstTnmAnnotation.getBegin(), firstTnmAnnotation.getEnd() ) );
 		}
 		// register
 		//FHIRRegistry.getInstance().addResource(stage,st);

@@ -1,40 +1,16 @@
 package org.healthnlp.deepphe.uima.ae;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
-
+import edu.pitt.dbmi.nlp.noble.ontology.*;
+import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
+import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.healthnlp.deepphe.fhir.Condition;
-import org.healthnlp.deepphe.fhir.Disease;
-import org.healthnlp.deepphe.fhir.Element;
-import org.healthnlp.deepphe.fhir.Patient;
-import org.healthnlp.deepphe.fhir.Report;
-import org.healthnlp.deepphe.fhir.Stage;
-import org.healthnlp.deepphe.fhir.fact.BodySiteFact;
-import org.healthnlp.deepphe.fhir.fact.ConditionFact;
-import org.healthnlp.deepphe.fhir.fact.Fact;
-import org.healthnlp.deepphe.fhir.fact.FactFactory;
-import org.healthnlp.deepphe.fhir.fact.FactList;
-import org.healthnlp.deepphe.fhir.fact.ObservationFact;
-import org.healthnlp.deepphe.fhir.fact.ProcedureFact;
-import org.healthnlp.deepphe.fhir.summary.CancerPhenotype;
-import org.healthnlp.deepphe.fhir.summary.CancerSummary;
-import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
-import org.healthnlp.deepphe.fhir.summary.PatientSummary;
-import org.healthnlp.deepphe.fhir.summary.Summary;
-import org.healthnlp.deepphe.fhir.summary.TumorPhenotype;
-import org.healthnlp.deepphe.fhir.summary.TumorSummary;
+import org.healthnlp.deepphe.fhir.*;
+import org.healthnlp.deepphe.fhir.fact.*;
+import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
@@ -46,7 +22,8 @@ import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import edu.pitt.dbmi.nlp.noble.ontology.IRestriction;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
-
+import java.net.URI;
+import java.util.*;
 
 /**
  * create composition cancer and tumor suammries on document level
@@ -119,7 +96,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 					IRestriction r = (IRestriction) o;
 					if(isSummarizableRestriction(r)){
 						if(!summary.getContent().containsKey(r.getProperty().getName())){
-							FactList facts = new FactList();
+							FactList facts = new DefaultFactList();
 							facts.setCategory(r.getProperty().getName());
 							facts.setTypes(getClassNames(r.getParameter()));
 							summary.getContent().put(r.getProperty().getName(),facts);

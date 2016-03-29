@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.fhir.summary;
 import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.fact.DefaultFactList;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
@@ -21,8 +22,9 @@ public abstract class Summary extends List_  implements Element {
 	private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
 	protected Map<String,FactList> content;
 	public Map<String, FactList> getContent() {
-		if(content == null)
-			content = new LinkedHashMap<String, FactList>();
+		if ( content == null ) {
+			content = new LinkedHashMap<>();
+		}
 		return content;
 	}
 
@@ -43,8 +45,8 @@ public abstract class Summary extends List_  implements Element {
 	protected FactList getFactsOrInsert(String category){
 		FactList list = getContent().get(category);
 		if(list == null){
-			list = new FactList();
-			list.setCategory(category);
+			list = new DefaultFactList( category );
+//			list.setCategory(category);
 			getContent().put(category,list);
 		}
 		return list;
@@ -61,8 +63,8 @@ public abstract class Summary extends List_  implements Element {
 	public void addFact(String category, Fact fact){
 		FactList list =  getContent().get(category);
 		if(list == null){
-			list = new FactList();
-			list.setCategory(category);
+			list = new DefaultFactList( category );
+//			list.setCategory(category);
 			getContent().put(category,list);
 		}
 		list.add(fact);

@@ -8,6 +8,8 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import db.CancerSummary.CancerPhenotype;
+
 public class DatamodelUtility extends Neo4JRESTCaller{
 
 	public DatamodelUtility(String serverRootURI, String username, String password) {
@@ -24,7 +26,50 @@ public class DatamodelUtility extends Neo4JRESTCaller{
 			patientList.add(p);
 			p.setId((int) datamap.get("id"));
 			p.setName((String) datamap.get("name"));
+			p.setSummaries(new ArrayList<Summary>());
 			p.setDocuments(new ArrayList<Document>());
+			/////////////////////// Summaries
+
+			List<LinkedHashMap<String,Object>> srows = getOutgoingNodesWithRelationshipType(p.getId()+"", "hasCancerSummary");
+			
+			for(LinkedHashMap<String,Object> sdatamap:srows){
+				CancerSummary cs = new CancerSummary();
+				cs.setId((int) sdatamap.get("id"));
+				cs.setName((String) sdatamap.get("name"));
+				p.getSummaries().add(cs);
+				
+				List<LinkedHashMap<String,Object>> cprows = getOutgoingNodesWithRelationshipType(cs.getId()+"", "hasCancerPhenotype");
+				
+				for(LinkedHashMap<String,Object> cpdatamap:cprows){
+					CancerPhenotype cp = new CancerSummary.CancerPhenotype();
+					cp.setId((int) cpdatamap.get("id"));
+					cp.setName((String) cpdatamap.get("name"));
+					cs.addPhenotype(cp);
+				}
+				
+				List<LinkedHashMap<String,Object>> trows = getOutgoingNodesWithRelationshipType(cs.getId()+"", "hasTumorSummary");
+				
+				for(LinkedHashMap<String,Object> tsdatamap:trows){
+					TumorSummary ts = new TumorSummary();
+					ts.setId((int) tsdatamap.get("id"));
+					ts.setName((String) tsdatamap.get("name"));
+					cs.addTumor(ts);
+				}
+			}
+			
+			List<LinkedHashMap<String,Object>> psrows = getOutgoingNodesWithRelationshipType(p.getId()+"", "hasPatientSummary");
+			
+			for(LinkedHashMap<String,Object> psdatamap:psrows){
+				PatientSummary ps = new PatientSummary();
+				ps.setId((int) psdatamap.get("id"));
+				ps.setName((String) psdatamap.get("name"));
+				p.getSummaries().add(ps);
+				
+				
+			}
+			
+			/////////////////////// Documents
+			
 			List<LinkedHashMap<String,Object>> docrows = getIncomingNodesWithRelationshipType(p.getId()+"", "hasSubject");
 			
 			for(LinkedHashMap<String,Object> docdatamap:docrows){

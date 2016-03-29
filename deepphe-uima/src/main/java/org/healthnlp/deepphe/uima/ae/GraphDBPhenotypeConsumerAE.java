@@ -23,6 +23,7 @@ import org.healthnlp.deepphe.fhir.Stage;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.summary.CancerPhenotype;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
+import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.fhir.summary.TumorPhenotype;
@@ -79,22 +80,33 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 
 	@Override
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
-		processPatient(graph,PhenotypeResourceFactory.loadPatient(jcas),PhenotypeResourceFactory.loadReports(jcas));
+		processPatient(graph,PhenotypeResourceFactory.loadMedicalRecord(jcas));
 	}
 
-	public void processPatient(GraphDatabaseService graphDb, Patient patient, List<Report> reports) {
+	public void processPatient(GraphDatabaseService graphDb, MedicalRecord mr) {
+		Patient patient = mr.getPatient();
+		CancerSummary summary = mr.getCancerSummary();
+		List<Report> reports = mr.getReports();
 		try (Transaction tx = graphDb.beginTx()) {
 
+			/////////////Create Patient
 			String namedID = patient.getPatientName();
 			Node patientN = getPatientFactory(graphDb).getOrCreate("name", namedID);
+	
+			////////////Create Cancer Summary
+			Node pcsn = graphDb.createNode(GraphDBConstants.Nodes.CancerSummary);
+			saveCancerSummary(graphDb, summary, pcsn);
+			patientN.createRelationshipTo(pcsn, GraphDBConstants.Relationships.hasCancerSummary);
 			
-			
+			////////////Create Reports
 			for(Report report:reports){
+				System.out.println("" + namedID + report.getTitle());
 				Node documentN = getDocumentFromDB(graphDb, namedID, report.getTitle());
 	
 				// clean out old document from DB
 				if (documentN != null) {
-					deleteDocument(documentN);
+//					deleteDocument(documentN);
+					continue;
 				}
 	
 				// create new doc node.
@@ -103,7 +115,7 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 				documentN.setProperty("text", report.getReportText());
 				// relate doc to patient
 				documentN.createRelationshipTo(patientN, GraphDBConstants.Relationships.hasSubject);
-	
+				
 				for (Summary s : report.getCompositionSummaries()) {
 					if(s instanceof CancerSummary){						
 						Node csn = graphDb.createNode(GraphDBConstants.Nodes.CancerSummary);
@@ -170,7 +182,11 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 					documentN.createRelationshipTo(n, GraphDBConstants.Relationships.hasFinding);
 				}
 				for (Observation p : report.getObservations()) {
+					if(p.getObservationValue()==null)
+						continue;
+					
 					Node n = graphDb.createNode(GraphDBConstants.Nodes.Observation);
+
 					if(p.getDisplayText() != null)
 						n.setProperty("name", p.getDisplayText());
 					n.setProperty("value", p.getObservationValue());

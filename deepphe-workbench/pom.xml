@@ -14,6 +14,11 @@
         <artifactId>deepphe-ctakes-cancer</artifactId>
         <version>${project.version}</version>
      </dependency>
+     <dependency>
+        <groupId>org.healthnlp</groupId>
+        <artifactId>deepphe-i2b2</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+     </dependency>
   	<dependency>
   		<groupId>org.healthnlp</groupId>
   		<artifactId>deepphe-uima</artifactId>

@@ -11,6 +11,8 @@ public class Document extends Node {
 	List<Observation> observations;
 	List<Medication> medications;
 	List<Diagnosis> diagnoses;
+	
+	
 	public String getText() {
 		return text;
 	}
