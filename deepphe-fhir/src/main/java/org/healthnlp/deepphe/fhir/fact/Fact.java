@@ -4,14 +4,31 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.hl7.fhir.instance.model.CodeableConcept;
+import org.neo4j.ogm.annotation.GraphId;
+import org.neo4j.ogm.annotation.NodeEntity;
 
 /**
  * Fact representing a piece of information in Ontology
  * @author tseytlin
  *
  */
+
+@NodeEntity
 public class Fact {
+	
+	@GraphId
+	Long objectId;
+	
+	public Long getObjectId() {
+		 return objectId;
+	}
+	
+	public void setObjectId(Long id){
+		this.objectId = id;
+	}
+	
 	private String name,uri,identifier,label,category,type = getClass().getSimpleName();
 	private Set<String> ancestors;
 	private List<Fact> provenanceFacts;

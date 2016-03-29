@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.neo4j.ogm.annotation.GraphId;
+
 /**
  * Provides convenient varargs constructor.  Originally created because FHIRObjectMocker is creating SingletonLists
  * while FactList extended ArrayList, which caused a classtype exception.
@@ -19,7 +21,17 @@ public class DefaultFactList extends ArrayList<Fact> implements FactList {
 
    static private final Logger LOGGER = Logger.getLogger( "DefaultFactList" );
 
-
+   @GraphId
+	Long objectId;
+	
+	public Long getObjectId() {
+		 return objectId;
+	}
+	
+	public void setObjectId(Long id){
+		this.objectId = id;
+	}
+	
    private List<String> types;
    private String category;
 

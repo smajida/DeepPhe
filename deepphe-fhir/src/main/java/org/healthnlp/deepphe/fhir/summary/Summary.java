@@ -1,5 +1,13 @@
 package org.healthnlp.deepphe.fhir.summary;
 
+import java.io.File;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
@@ -10,13 +18,23 @@ import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.List_;
 import org.hl7.fhir.instance.model.Resource;
+import org.neo4j.ogm.annotation.GraphId;
+import org.neo4j.ogm.annotation.NodeEntity;
 
-import java.io.File;
-import java.net.URI;
-import java.util.*;
-
-
+@NodeEntity
 public abstract class Summary extends List_  implements Element {
+	
+	@GraphId
+	Long objectId;
+	
+	public Long getObjectId() {
+		 return objectId;
+	}
+	
+	public void setObjectId(Long id){
+		this.objectId = id;
+	}
+	
 	protected Report report;
 	protected Patient patient;
 	private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;

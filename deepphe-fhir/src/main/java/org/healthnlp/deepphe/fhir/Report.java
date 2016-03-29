@@ -15,13 +15,14 @@ import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.fhir.summary.TumorSummary;
 import org.healthnlp.deepphe.util.FHIRConstants;
-import org.healthnlp.deepphe.util.FHIRRegistry;
-import org.healthnlp.deepphe.util.TextUtils;
 import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.TextUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Composition;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
+import org.neo4j.ogm.annotation.GraphId;
+import org.neo4j.ogm.annotation.NodeEntity;
 
 
 /**
@@ -30,11 +31,25 @@ import org.hl7.fhir.instance.model.Resource;
  * @author tseytlin
  *
  */
+
+@NodeEntity
 public class Report extends Composition implements Element, Comparable<Report>{
 	private int offset;
 	//private CompositionEventComponent event;
 	private Map<String,Element> reportElements;
 	private Map<String,Summary> compositionSummary;
+	
+	
+	@GraphId
+	Long objectId;
+	
+	public Long getObjectId() {
+		 return objectId;
+	}
+	
+	public void setObjectId(Long id){
+		this.objectId = id;
+	}
 	
 	/**
 	 * create a default report object

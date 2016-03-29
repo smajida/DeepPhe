@@ -13,18 +13,35 @@ import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Resource;
+import org.neo4j.ogm.annotation.GraphId;
+import org.neo4j.ogm.annotation.NodeEntity;
 
 /**
  * medical record for a given patient
  * @author tseytlin
  *
  */
+
+@NodeEntity
 public class MedicalRecord implements Element {
 	private String patientIdentifier;
 	private Patient patient;
 	private PatientSummary patientSummary;
 	private CancerSummary cancerSummary;
 	private List<Report> reports;
+	
+	
+	@GraphId
+	Long objectId;
+	
+	public Long getObjectId() {
+		 return objectId;
+	}
+	
+	public void setObjectId(Long id){
+		this.objectId = id;
+	}
+	
 	
 	public String getDisplayText() {
 		return (patient != null? patient.getPatientName():"Generic")+" Medical Record";

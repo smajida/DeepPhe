@@ -19,11 +19,24 @@ import org.hl7.fhir.instance.model.HumanName;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
+import org.neo4j.ogm.annotation.GraphId;
+import org.neo4j.ogm.annotation.NodeEntity;
 
-
+@NodeEntity
 public class Patient extends org.hl7.fhir.instance.model.Patient implements Element{
 	private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
 	private int yearsOld;
+	
+	@GraphId
+	Long objectId;
+	
+	public Long getObjectId() {
+		 return objectId;
+	}
+	
+	public void setObjectId(Long id){
+		this.objectId = id;
+	}
 	
 	public Patient(){
 		setActive(true);

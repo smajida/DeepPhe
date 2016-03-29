@@ -1,6 +1,20 @@
 package org.healthnlp.deepphe.fhir.fact;
 
+import org.neo4j.ogm.annotation.GraphId;
+
 public class TextMention {
+	
+	@GraphId
+	Long objectId;
+	
+	public Long getObjectId() {
+		 return objectId;
+	}
+	
+	public void setObjectId(Long id){
+		this.objectId = id;
+	}
+	
 	private String text,documentIdentifier,documentType;
 	private int start, end;
 	public String getText() {
