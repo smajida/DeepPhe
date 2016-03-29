@@ -1,9 +1,12 @@
 package org.apache.ctakes.cancer.pipeline;
 
 
+import javax.annotation.concurrent.Immutable;
+
 import org.apache.ctakes.assertion.medfacts.cleartk.PolarityCleartkAnalysisEngine;
 import org.apache.ctakes.assertion.medfacts.cleartk.UncertaintyCleartkAnalysisEngine;
 import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
+import org.apache.ctakes.cancer.ae.IdentifiedAnnotationMarkableAnnotator;
 import org.apache.ctakes.cancer.ae.PittHeaderAnnotator;
 import org.apache.ctakes.cancer.ae.PittHeaderCleaner;
 import org.apache.ctakes.cancer.ae.PropertyToEventCopier;
@@ -17,17 +20,19 @@ import org.apache.ctakes.core.ae.TokenizerAnnotatorPTB;
 import org.apache.ctakes.core.cc.FileTreeXmiWriter;
 import org.apache.ctakes.core.cr.FileTreeReader;
 import org.apache.ctakes.core.cr.FilesInDirectoryCollectionReader;
-import org.apache.ctakes.coreference.ae.DeterministicMarkableAnnotator;
 import org.apache.ctakes.coreference.ae.MarkableSalienceAnnotator;
 import org.apache.ctakes.coreference.ae.MentionClusterCoreferenceAnnotator;
-import org.apache.ctakes.coreference.eval.EvaluationOfEventCoreference.RemovePersonMarkables;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.JCasTermAnnotator;
 import org.apache.ctakes.postagger.POSTagger;
 import org.apache.ctakes.relationextractor.ae.LocationOfRelationExtractorAnnotator;
 import org.apache.ctakes.relationextractor.ae.ModifierExtractorAnnotator;
-import org.apache.ctakes.temporal.ae.*;
+import org.apache.ctakes.temporal.ae.BackwardsTimeAnnotator;
+import org.apache.ctakes.temporal.ae.DocTimeRelAnnotator;
+import org.apache.ctakes.temporal.ae.EventAnnotator;
+import org.apache.ctakes.temporal.ae.EventEventRelationAnnotator;
+import org.apache.ctakes.temporal.ae.EventTimeRelationAnnotator;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReader;
@@ -36,8 +41,6 @@ import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.cleartk.ml.jar.GenericJarClassifierFactory;
-
-import javax.annotation.concurrent.Immutable;
 
 
 @Immutable
@@ -187,8 +190,7 @@ final public class CancerPipelineFactory {
 
    private static void addCorefEngines( final AggregateBuilder aggregateBuilder )
          throws ResourceInitializationException {
-      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( DeterministicMarkableAnnotator.class ) );
-      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( RemovePersonMarkables.class ) );
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( IdentifiedAnnotationMarkableAnnotator.class ) );
       aggregateBuilder.add( MarkableSalienceAnnotator
             .createAnnotatorDescription( "/org/apache/ctakes/temporal/ae/salience/model.jar" ) );
       aggregateBuilder.add( MentionClusterCoreferenceAnnotator
