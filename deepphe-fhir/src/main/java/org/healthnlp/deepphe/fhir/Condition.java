@@ -13,7 +13,7 @@ import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Resource;
 
-public class Condition extends org.hl7.fhir.instance.model.Condition {
+public class Condition extends org.hl7.fhir.instance.model.Condition implements Element  {
 	private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
 	public void copy(Resource r){
 		org.hl7.fhir.instance.model.Condition c = (org.hl7.fhir.instance.model.Condition)r;

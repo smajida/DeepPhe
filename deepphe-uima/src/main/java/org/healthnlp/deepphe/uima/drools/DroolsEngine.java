@@ -1,53 +1,41 @@
 package org.healthnlp.deepphe.uima.drools;
 
-import java.io.File;
-import java.net.URL;
+import org.kie.api.KieServices;
+import org.kie.api.runtime.KieContainer;
+import org.kie.api.runtime.KieSession;
 
-import org.drools.KnowledgeBase;
-import org.drools.KnowledgeBaseFactory;
-import org.drools.builder.KnowledgeBuilder;
-import org.drools.builder.KnowledgeBuilderFactory;
-import org.drools.builder.ResourceType;
-import org.drools.io.Resource;
-import org.drools.io.ResourceFactory;
-import org.drools.runtime.StatefulKnowledgeSession;
+/**
+ * Drools Engine for AE
+ * @author opm1
+ *
+ */
 
 public class DroolsEngine {
-	public  StatefulKnowledgeSession session = null;
-	
-	
-	public DroolsEngine(){	}
-	
-	public StatefulKnowledgeSession getSession() {
-		if(session != null)
-			return session;
-		try {
+	public static KieContainer kContainer = null;
 
-			KnowledgeBuilder builder = KnowledgeBuilderFactory
-					.newKnowledgeBuilder();
-			URL autoloadUrl = getClass().getResource("rules");
-			File autoloadDirectory = new File(autoloadUrl.getPath());
-			if (autoloadDirectory.exists() && autoloadDirectory.isDirectory()) {
-				File[] autoloadFiles = autoloadDirectory.listFiles();
-				for (File autoloadFile : autoloadFiles) {
-					Resource rulesResource = ResourceFactory
-							.newFileResource(autoloadFile);
-					builder.add(rulesResource, ResourceType.DRL);
-				}
-			}
-			if (builder.hasErrors()) {
-				throw new RuntimeException(builder.getErrors().toString());
-			}
-			KnowledgeBase knowledgeBase = KnowledgeBaseFactory
-					.newKnowledgeBase();
-			knowledgeBase.addKnowledgePackages(builder.getKnowledgePackages());
-			session = knowledgeBase.newStatefulKnowledgeSession();
-			
+	
+	 public static KieContainer getKieContainer() throws Exception {
+		 
+		if(kContainer != null)  return kContainer;
+		  
+		KieServices ks = KieServices.Factory.get();
+  	    kContainer = ks.getKieClasspathContainer();
+  	    
+	    return kContainer;
+   
+	 }
 
-		} catch (Throwable t) {
-			t.printStackTrace();
+	 public KieSession getSession() {
+		 KieSession session = null; 
+		 try {
+			 getKieContainer();
+			 session = kContainer.newKieSession();
+		 } catch (Throwable t) {
+				t.printStackTrace();
 		}
+		 
 		return session;
-	}
+		 
+	 }
 
 }

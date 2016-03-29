@@ -7,43 +7,147 @@ import org.healthnlp.deepphe.util.FHIRConstants;
 
 import java.net.URI;
 
+import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
 
-//declare any global variables here
 
+import org.healthnlp.deepphe.fhir.summary.*;
+import org.healthnlp.deepphe.uima.drools.Summarizer;
+//import org.healthnlp.deepphe.fhir.summary.CancerPhenotype;  // can't import this class
 
-//tCls: http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#T2_Stage_Finding  
-//FHIRUtils.getConceptURI(cancerSummary.getPhenotype().getPrimaryTumorClassification());
+import java.util.Set;
+import java.lang.Integer;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
-//nCls: http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#T2_Stage_Finding 
-//FHIRUtils.getConceptURI(cancerSummary.getPhenotype().getRegionalLymphNodeClassification());  
-
-//mCls: http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#M0_Stage_Finding 
-//FHIRUtils.getConceptURI(cancerSummary.getPhenotype().getDistantMetastasisClassification());
-   
-//URI stage = URI.create(FHIRConstants.MODEL_CANCER_URL+"#StageIIA");
-//cancerSummary.getPhenotype().setCancerStage(FHIRUtils.getCodeableConcept(stage));
-
-/**
-Tclass = T2 and Mclass= MX and Nclass=NS THEN Stage = IIA
-*/
-rule "addStage"
-
-    when
-        CancerSummary ($phenotype : phenotype )
-        //eval(FHIRUtils.getConceptName($phenotype.getPrimaryTumorClassification()).equals("T2 Stage Finding"))
-        eval(
-        FHIRUtils.getConceptURI($phenotype.getPrimaryTumorClassification()).toString().equals("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#T2_Stage_Finding") 
-        && 
-        FHIRUtils.getConceptURI($phenotype.getRegionalLymphNodeClassification()).toString().equals("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#T2_Stage_Finding") 
-        && 
-        FHIRUtils.getConceptURI($phenotype.getDistantMetastasisClassification()).toString().equals("http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#M0_Stage_Finding") 
-        )
-    then
-         URI stage = URI.create(FHIRConstants.MODEL_CANCER_URL+"#StageIIA");
-         $phenotype.setCancerStage(FHIRUtils.getCodeableConcept(stage));
-        System.out.println(" \n*************** DROOLS addStage fired *************** ");
-        System.out.println("DROOLS about to set stage: "+stage);
-         
+rule "insertSummarizer"
+	salience 999999999
+	no-loop true
+	when
+		not ( Summarizer())
+	then
+		insert( new Summarizer ());
+	System.out.println("insertSummarizer DONE");
 end
-      
+	
+		
+
+rule "initSummarizer"
+	salience 10000
+	no-loop true
+	when 
+		$record : MedicalRecord()
+		$docSet : Set( )
+			from accumulate (Fact($docID : documentIdentifier), collectSet ( $docID))
+		
+		$tClassMap : Map()
+		from accumulate ( $fact : Fact(category == "hasTClassification", $uri : uri),
+			init( HashMap m = new HashMap(); ),
+			action( if(m.get($uri) == null) m.put($uri, new ArrayList());
+			((List)m.get($uri)).add($fact); ),
+            reverse ( ((List)m.get($uri)).remove($fact); ), 
+        	result( m ) )
+					
+		$nClassifSet: Set()
+			from accumulate (Fact(category == "hasNClassification", $name : name), collectSet ( $name))	
+		$mClassifSet: Set()
+			from accumulate (Fact(category == "hasMClassification", $name : name), collectSet ( $name))
+		$cancerTypeSet: Set()
+			from accumulate (Fact(category == "hasCancerType", $name : name), collectSet ( $name))	
+			
+		$oFact : Summarizer()
+		
+	then
+	$oFact.setTClassificationMap($tClassMap);
+	
+	//modify ( $oFact ) {setNumDocuments( $docSet.size()), setTClassificationMap( $tClassMap),  setNumNClassification( $nClassifSet.size()),
+	//	setNumMClassification( $mClassifSet.size()), setNumCancerType( $cancerTypeSet.size())};
+		
+	//modify ( $oFact ) {setNumDocuments( $docSet.size()), new HashMap(),  setNumNClassification( $nClassifSet.size()),
+	//	setNumMClassification( $mClassifSet.size()), setNumCancerType( $cancerTypeSet.size())};
+		
+	System.out.println("Number of documents for patinet: "+$docSet.size());
+	System.out.println("TClassification set for patinet: "+$tClassMap);
+	System.out.println("TClassification set for patinet: "+$nClassifSet);
+	System.out.println("TClassification set for patinet: "+$mClassifSet);
+	System.out.println("cancerTypeSet set for patinet: "+$cancerTypeSet);
+	
+	System.out.println("TClassification type: "+$oFact.getType($tClassMap));
+	System.out.println("TClassification uris: "+$oFact.getURIs($tClassMap));
+
+end  
+
+
+rule "setTClassification"
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$summarizer : Summarizer(tClassificationMap.size() == 1)
+		
+	then
+	Map<String, List<Fact>> tMap = $summarizer.getTClassificationMap();
+		String uri =  $summarizer.getURIs(tMap).get(0);
+		Fact f = $summarizer.createSummaryFact(uri, tMap);	
+		// make sure, it will not fire again
+		//$summarizer.setTClassificationMap(new HashMap<String, List<Fact>>());	
+		$record.getCancerSummary().getPhenotype().addFact(f.getCategory(), f);		
+		System.out.println("*** setTClassification for MR");
+end
+
+/*
+rule "setMClassification"
+	no-loop true
+	when
+		$record : MedicalRecord()
+		CountOccurences(numMClassification == 1)
+		$fact : Fact(category == "hasMClassification")
+	then
+		$record.getCancerSummary().getPhenotype().addFact("hasMClassification", $fact);
+		System.out.println("setMClassification to "+ $fact.getName());
+end
+
+rule "setNClassification"
+	no-loop true
+	when
+		$record : MedicalRecord()
+		CountOccurences(numNClassification == 1)
+		$fact : Fact(category == "hasNClassification")
+	then
+		$record.getCancerSummary().getPhenotype().addFact("hasNClassification", $fact);
+		System.out.println("setNClassification to "+ $fact.getName());
+end
+		
+	*/	
+
+    
+
+/*rule "TEST_NumDocumentsReset"
+	when 
+		CountOccurences( $pat: numDocuments > 1 )
+	then
+		System.out.println("reset");
+end
+
+rule coll
+when
+  $map: Map()
+    from accumulate( $o: Order( $t: type ),
+         init( Map m = new HashMap();
+               m.put( "A", new HashSet() );
+               m.put( "B", new HashSet() ); ),
+         action( ((Set)m.get( $t )).add( $o ); ),
+         reverse( ((Set)m.get( $t )).remove( $o ); ),
+         result( m ) )
+then
+  System.out.println( $map.get( "A" ) );
+  System.out.println( $map.get( "B" ) );
+end
+*/
+
+
+
 

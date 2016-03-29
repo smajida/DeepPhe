@@ -1,32 +1,69 @@
 package org.healthnlp.deepphe.fhir.summary;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
+import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
-import org.hl7.fhir.instance.model.CodeableConcept;
+
 
 
 public class PatientSummary extends Summary {
-	private List<CodeableConcept> exposure, outcome, germlineSequenceVariant;
+	private PatientPhenotype phenotype;
 
-	public List<CodeableConcept> getExposure() {
-		if(exposure == null)
-			exposure = new ArrayList<CodeableConcept>();
-		return exposure;
+	public void setReport(Report r){
+		super.setReport(r);
+		getPhenotype().setReport(r);
 	}
 
-	public List<CodeableConcept> getOutcomes() {
-		if(outcome == null)
-			outcome = new ArrayList<CodeableConcept>();
-		return outcome;
+	/**
+	 * return all facts that are contained within this fact
+	 * @return
+	 */
+	public List<Fact> getContainedFacts(){
+		List<Fact> list = super.getContainedFacts();
+		list.addAll(getPhenotype().getContainedFacts());	
+		return list;
 	}
 
-	public List<CodeableConcept> getGermlineSequenceVariant() {
-		if(germlineSequenceVariant == null)
-			germlineSequenceVariant = new ArrayList<CodeableConcept>();
-		return germlineSequenceVariant;
+	
+	public FactList getName() {
+		return getFactsOrInsert(FHIRConstants.HAS_NAME);
+	}
+	
+	public FactList getGender() {
+		return getFactsOrInsert(FHIRConstants.HAS_GENDER);
+	}
+
+	public FactList getBirthDate() {
+		return getFactsOrInsert(FHIRConstants.HAS_BIRTH_DATE);
+	}
+
+	public FactList getDeathDate() {
+		return getFactsOrInsert(FHIRConstants.HAS_DEATH_DATE);
+	}
+
+
+	public PatientPhenotype getPhenotype(){
+		if(phenotype == null)
+			phenotype = new PatientPhenotype();
+		return phenotype;
+	}
+	
+	
+	public void setPhenotype(PatientPhenotype phenotype) {
+		this.phenotype = phenotype;
+	}
+
+
+	public FactList getOutcomes() {
+		return getFacts(FHIRConstants.HAS_OUTCOME);
+	}
+
+	public FactList getSequenceVariant() {
+		return getFacts(FHIRConstants.HAS_SEQUENCE_VARIENT);
 	}
 
 	public String getDisplayText() {
@@ -38,8 +75,9 @@ public class PatientSummary extends Summary {
 	}
 
 	public String getSummaryText() {
-		// TODO Auto-generated method stub
-		return getDisplayText();
+		StringBuffer st = new StringBuffer(super.getSummaryText());
+		st.append(getPhenotype().getSummaryText()+"\n");
+		return st.toString();
 	}
 
 	public URI getConceptURI() {
@@ -47,12 +85,13 @@ public class PatientSummary extends Summary {
 	}
 
 	public boolean isAppendable(Summary s) {
-		//TODO: nothing to do here for now
 		return s instanceof PatientSummary;
 	}
 
 	public void append(Summary s) {
-		// TODO: nothing to do here for now
+		super.append(s);
+		PatientSummary summary = (PatientSummary) s;
+		getPhenotype().append(summary.getPhenotype());
 		
 	}
 }

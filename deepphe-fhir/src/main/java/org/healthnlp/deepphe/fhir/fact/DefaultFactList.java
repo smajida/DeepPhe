@@ -1,0 +1,97 @@
+package org.healthnlp.deepphe.fhir.fact;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Logger;
+
+/**
+ * Provides convenient varargs constructor.  Originally created because FHIRObjectMocker is creating SingletonLists
+ * while FactList extended ArrayList, which caused a classtype exception.
+ * <p>
+ * However, FHIRObjectMocker still needs to be fixed as the return lists do not contain Fact objects ...
+ *
+ * @author SPF , chip-nlp
+ * @version %I%
+ * @since 3/25/2016
+ */
+public class DefaultFactList extends ArrayList<Fact> implements FactList {
+
+   static private final Logger LOGGER = Logger.getLogger( "DefaultFactList" );
+
+
+   private List<String> types;
+   private String category;
+
+   /**
+    * Facility constructor
+    *
+    * @param facts one or more facts
+    */
+   public DefaultFactList( final Fact... facts ) {
+      super( Arrays.asList( facts ) );
+   }
+
+   /**
+    * Facility constructor
+    *
+    * @param category the category for this FactList.  Should this be immutable??
+    * @param facts    one or more facts
+    */
+   public DefaultFactList( final String category, final Fact... facts ) {
+      super( Arrays.asList( facts ) );
+      this.category = category;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public List<String> getTypes() {
+      if ( types == null ) {
+         types = new ArrayList<>();
+      }
+      return types;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public void setTypes( List<String> type ) {
+      this.types = type;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public void addType( String type ) {
+      getTypes().add( type );
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public String getCategory() {
+      return category;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public void setCategory( String category ) {
+      this.category = category;
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public boolean add( Fact e ) {
+      return e != null && super.add( e );
+   }
+
+}

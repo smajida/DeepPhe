@@ -331,6 +331,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	
 	
 	public void addCompositionSummary(Summary s){
+		s.setReport(this);
 		getCompositionSummaryMap().put(s.getResourceIdentifier(),s);
 	}
 	public void addCompositionSummaries(List<? extends Summary> s){

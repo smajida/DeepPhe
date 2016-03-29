@@ -4,3 +4,9 @@
 /.project
 /src/main/java/org/healthnlp/deepphe/uima/types/*.java
 /neo4jtestdb/
+<<<<<<< HEAD
+/testdb/
+/metadata/
+=======
+/bin/
+>>>>>>> branch 'master' of https://github.com/DeepPhe/DeepPhe.git

@@ -56,8 +56,8 @@ final public class OwlConcept implements Concept {
     */
    @Override
    public String getPreferredText() {
-      final String preferredTerm = _iClass.getConcept().getPreferredTerm().getText();
-      return (preferredTerm != null && !preferredTerm.isEmpty()) ? preferredTerm : PREFERRED_TERM_UNKNOWN;
+      final String preferredText = OwlParserUtil.getPreferredText( _iClass );
+      return (preferredText != null && !preferredText.isEmpty()) ? preferredText : PREFERRED_TERM_UNKNOWN;
    }
 
    /**

@@ -1,9 +1,20 @@
 package org.healthnlp.deepphe.workbench;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Frame;
+import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
+import org.healthnlp.deepphe.ontology.I2b2OntologyBuilder;
+import org.healthnlp.deepphe.ontology.PartialPath;
+import org.healthnlp.deepphe.ontology.Utilities;
+import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
+import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
+import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+
+import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
@@ -15,25 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
-
-import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
-import org.healthnlp.deepphe.i2b2.orm.i2b2data.I2b2DemoDataSourceManager;
-import org.healthnlp.deepphe.ontology.I2b2OntologyBuilder;
-import org.healthnlp.deepphe.ontology.PartialPath;
-import org.healthnlp.deepphe.ontology.Utilities;
-import org.healthnlp.deepphe.summarization.drools.kb.KbEncounter;
-import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
-import org.healthnlp.deepphe.summarization.drools.kb.KbSummary;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+//import org.healthnlp.deepphe.i2b2.I2B2DataDataWriter;
 
 public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 		ActionListener {
@@ -53,7 +46,7 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 
 	private I2b2DemoDataSourceManager i2b2DataDataSourceManager;
 	private I2b2OntologyBuilder i2b2OntologyBuilder;
-	private I2B2DataDataWriter i2b2DataDataWriter;
+//	private I2B2DataDataWriter i2b2DataDataWriter;
 
 	private AnnotationTabPanel annotationTabPanel;
 
@@ -99,21 +92,22 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 	}
 
 	private void replaceI2b2Data() {
-		try {
-			setMessage("Initialized a connecton to I2B2");			
-			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
-			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE2");
-			setMessage("Clean out old data.");
-			i2b2DataDataWriter.cleanOldRecords();
-			i2b2DataDataWriter.setPatients(patients);
-			setMessage("Push new Patient and Encounter data to i2b2.");
-			i2b2DataDataWriter.execute();
-			i2b2DataDataSourceManager.destroy();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+		throw new UnsupportedOperationException( "I2b2DataDataWriter removed with https://github.com/DeepPhe/DeepPhe/commit/a81d967949a27ae13ec496f1128be8d758667d51" );
+//		try {
+//			setMessage("Initialized a connecton to I2B2");
+//			i2b2DataDataWriter.setDataSourceMgr(i2b2DataDataSourceManager);
+//			i2b2DataDataWriter.setSourceSystemCd("DEEPPHE2");
+//			setMessage("Clean out old data.");
+//			i2b2DataDataWriter.cleanOldRecords();
+//			i2b2DataDataWriter.setPatients(patients);
+//			setMessage("Push new Patient and Encounter data to i2b2.");
+//			i2b2DataDataWriter.execute();
+//			i2b2DataDataSourceManager.destroy();
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		} catch (ClassNotFoundException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	private void ontologizeAndActiveSummaries() {
@@ -308,8 +302,10 @@ public class PipeDialogPatientExtraction extends JDialog implements Runnable,
 		this.i2b2OntologyBuilder = i2b2OntologyBuilder;
 	}
 
-	public void setI2b2DataDataWriter(I2B2DataDataWriter i2b2DataDataWriter) {
-		this.i2b2DataDataWriter = i2b2DataDataWriter;
+	//	public void setI2b2DataDataWriter(I2B2DataDataWriter i2b2DataDataWriter) {
+//		this.i2b2DataDataWriter = i2b2DataDataWriter;
+	public void setI2b2DataDataWriter( Object i2b2DataDataWriter ) {
+		throw new UnsupportedOperationException( "I2b2DataDataWriter removed with https://github.com/DeepPhe/DeepPhe/commit/a81d967949a27ae13ec496f1128be8d758667d51" );
 	}
 
 }

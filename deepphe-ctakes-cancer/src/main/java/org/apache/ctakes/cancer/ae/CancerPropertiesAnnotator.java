@@ -1,11 +1,10 @@
 package org.apache.ctakes.cancer.ae;
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
-import org.apache.ctakes.cancer.receptor.StatusFinder;
-import org.apache.ctakes.cancer.size.SizeFinder;
-import org.apache.ctakes.cancer.stage.StageFinder;
-import org.apache.ctakes.cancer.tnm.TnmFinder;
-import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
+import org.apache.ctakes.cancer.phenotype.receptor.StatusFinder;
+import org.apache.ctakes.cancer.phenotype.size.SizeFinder;
+import org.apache.ctakes.cancer.phenotype.stage.StageFinder;
+import org.apache.ctakes.cancer.phenotype.tnm.TnmFinder;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textspan.Segment;
 import org.apache.log4j.Logger;
@@ -35,8 +34,6 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
    public static final String PARAM_WINDOW_ANNOT_PRP = "cancerWindowAnnotations";
    static private final Logger LOGGER = Logger.getLogger( "CancerPropertiesAnnotator" );
    @ConfigurationParameter( name = PARAM_WINDOW_ANNOT_PRP, mandatory = false )
-//   private Class<? extends Annotation> _lookupWindowType = Sentence.class;
-//   private Class<? extends Annotation> _lookupWindowType = Paragraph.class;
    private Class<? extends Annotation> _lookupWindowType = Segment.class;
 
 
@@ -63,10 +60,11 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
 
          final Collection<IdentifiedAnnotation> masses
                = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, "Metastasis" );
-         SizeFinder.addSizes( jcas, lookupWindow, breastNeoplasms, masses );
-//         if ( LOGGER.isDebugEnabled() ) {
-//         printCancerFindings( jcas );
-//         }
+         // Metastasis does not have all metastases as children
+         masses.addAll( OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, "Metastatic_Neoplasm" ) );
+
+         masses.addAll( breastNeoplasms );
+         SizeFinder.addSizes( jcas, lookupWindow, masses );
       }
 
 //      OwlOntologyConceptUtil.getUris( jcas ).stream().forEach( System.out::println );
@@ -79,28 +77,6 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
       LOGGER.info( "Finished processing" );
    }
 
-   /**
-    * Only run for debug
-    *
-    * @param jcas -
-    */
-   static private void printCancerFindings( final JCas jcas ) {
-      final Collection<NeoplasmRelation> neoplasmRelations = JCasUtil.select( jcas, NeoplasmRelation.class );
-      for ( NeoplasmRelation relation : neoplasmRelations ) {
-         LOGGER.info( "DISCOVERY! \t" + relation.getCategory().replace( '_', ' ' )
-                      + " " + relation.getArg2().getArgument().getCoveredText()
-                      + "\t is: \t" + relation.getArg1().getArgument().getCoveredText() );
-      }
-//      final Collection<BinaryTextRelation> binaryRelations = JCasUtil.select( jcas, BinaryTextRelation.class );
-//      for ( BinaryTextRelation relation : binaryRelations ) {
-//         if ( relation instanceof NeoplasmRelation ) {
-//            continue;
-//         }
-//         LOGGER.info( "RELATION! \t" + relation.getCategory().replace( '_', ' ' )
-//                      + " " + relation.getArg2().getArgument().getCoveredText()
-//                      + "\t is: \t" + relation.getArg1().getArgument().getCoveredText() );
-//      }
-   }
 
    public static AnalysisEngineDescription createAnnotatorDescription() throws ResourceInitializationException {
       return AnalysisEngineFactory.createEngineDescription( CancerPropertiesAnnotator.class );

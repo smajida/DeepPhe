@@ -1,7 +1,8 @@
 package org.healthnlp.deepphe.summarization;
 
-import org.drools.runtime.ObjectFilter;
+
 import org.healthnlp.deepphe.summarization.drools.kb.KbIdentified;
+import org.kie.api.runtime.ObjectFilter;
 
 public class IdentifiedObjectFilter implements ObjectFilter {
 

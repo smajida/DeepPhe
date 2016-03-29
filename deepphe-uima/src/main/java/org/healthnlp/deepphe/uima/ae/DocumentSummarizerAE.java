@@ -55,6 +55,7 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 
 		try {
 
+			
 			//for (DocumentID docID : JCasUtil.select(jcas, DocumentID.class)) {
 			Patient patient = DocumentResourceFactory.getPatient(jcas);
 

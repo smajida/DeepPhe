@@ -117,7 +117,7 @@ public class I2b2OntologyBuilder {
 	}
 	
 	private OWLOntology loadDeepPheOntologyFromUrl(OWLOntologyManager manager) {
-		IRI ontologyIRI;
+		/*IRI ontologyIRI;
 		OWLOntology o = null;
 		try {
 			ontologyIRI = IRI.create(new URL(ontologyPath) );
@@ -129,7 +129,8 @@ public class I2b2OntologyBuilder {
 		} catch(URISyntaxException e) {
 			e.printStackTrace();
 		}
-		return o;
+		return o;*/
+		return null;
 	}
 
 	private void displayPaths(TreeSet<PartialPath> paths) {

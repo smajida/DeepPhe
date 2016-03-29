@@ -7,7 +7,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.drools.KnowledgeBase;
+/*import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
 import org.drools.builder.KnowledgeBuilder;
 import org.drools.builder.KnowledgeBuilderFactory;
@@ -15,7 +15,7 @@ import org.drools.builder.ResourceType;
 import org.drools.io.Resource;
 import org.drools.io.ResourceFactory;
 import org.drools.runtime.StatefulKnowledgeSession;
-import org.drools.runtime.rule.FactHandle;
+import org.drools.runtime.rule.FactHandle;*/
 import org.healthnlp.deepphe.summarization.drools.kb.KbGoal;
 import org.healthnlp.deepphe.summarization.drools.kb.KbPatient;
 import org.healthnlp.deepphe.summarization.drools.kb.M1;
@@ -27,7 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TesterBrcaTnm {
-
+/*
 	private StatefulKnowledgeSession session = null;
 
 	@Before
@@ -242,6 +242,6 @@ public class TesterBrcaTnm {
 		assertEquals(numberOfFactsInSession, 9);
 	}
 
-	
+*/	
 
 }
