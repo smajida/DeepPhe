@@ -380,6 +380,8 @@ public class cTAKESUtils {
 		if ( jcas == null ) {
 			return null;
 		}
+		if(PhenotypeAnnotationUtil.getPropertyValues( jcas, an ).isEmpty())
+			return null;
 		return PhenotypeAnnotationUtil.getPropertyValues( jcas, an ).stream().findFirst().get();
 	}
 	
@@ -443,6 +445,12 @@ public class cTAKESUtils {
 			return null;
 		}
 		return PhenotypeAnnotationUtil.getNeoplasmPropertiesBranch( jcas, neoplasm, TnmPropertyUtil.getParentUri() );
+		
+		
+		
+	//	return ConceptInstanceUtil.getBranchConceptInstances(jcas, TnmPropertyUtil.getParentUri()).stream().map(ConceptInstanceUtil::getPropertyValues);
+		
+		
 	}
 
 	//	public static CancerStage getCancerStage(IdentifiedAnnotation dm){
