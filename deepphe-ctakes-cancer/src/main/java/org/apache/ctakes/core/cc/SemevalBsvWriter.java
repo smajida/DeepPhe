@@ -3,6 +3,7 @@ package org.apache.ctakes.core.cc;
 
 import org.apache.ctakes.cancer.concept.instance.ConceptInstance;
 import org.apache.ctakes.cancer.concept.instance.ConceptInstanceUtil;
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
 import org.apache.ctakes.cancer.phenotype.receptor.StatusPropertyUtil;
 import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
@@ -26,7 +27,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * @author SPF , chip-nlp
@@ -78,7 +81,9 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
          writeFhirLikeBsv( jcas, getOutputDir( "ReceptorStatus" ), fileName, StatusPropertyUtil.getParentUri() );
          writeFhirLikeBsv( jcas, getOutputDir( "TnmClassification" ), fileName, TnmPropertyUtil.getParentUri() );
          writeFhirLikeBsv( jcas, getOutputDir( "Disorder" ), fileName,
-               "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl#DiseaseDisorder" );
+               OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Neoplasm",
+               OwlOntologyConceptUtil.CANCER_OWL + "#Cancer",
+               OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Metastasis" );
       } catch ( IOException ioE ) {
          throw new AnalysisEngineProcessException( ioE );
       }
@@ -91,23 +96,27 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
    }
 
    static private void writeFhirLikeBsv( final JCas jCas, final File outputDir, final String fileName,
-                                         final String uri )
+                                         final String... uris )
          throws IOException {
-      final Collection<ConceptInstance> resources = ConceptInstanceUtil.getBranchConceptInstances( jCas, uri );
-      writeBsv( resources, new File( outputDir, fileName ) );
+      final Collection<ConceptInstance> conceptInstances = Arrays.stream( uris )
+            .map( uri -> ConceptInstanceUtil.getBranchConceptInstances( jCas, uri ) )
+            .flatMap( Collection::stream )
+            .collect( Collectors.toList() );
+      writeBsv( conceptInstances, new File( outputDir, fileName ) );
    }
 
    /**
     * Serialize a CAS to a file in semeval BSV format
     *
-    * @param resources fhirlike resources
+    * @param conceptInstances fhirlike resources
     * @param bsvFile   output file
     * @throws IOException -
     */
-   public static void writeBsv( final Collection<ConceptInstance> resources, final File bsvFile ) throws IOException {
+   public static void writeBsv( final Collection<ConceptInstance> conceptInstances, final File bsvFile )
+         throws IOException {
       final String sourceFilename = bsvFile.getName().replace( ".pipe", "" );
       try ( BufferedWriter writer = new BufferedWriter( new FileWriter( bsvFile ) ) ) {
-         for ( ConceptInstance resource : resources ) {
+         for ( ConceptInstance resource : conceptInstances ) {
             writer.write( sourceFilename + "|" );
             writer.write( createPhenotypeLine( resource ) );
             writer.write( "\n" );
@@ -118,38 +127,38 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
    }
 
 
-   static private String createPhenotypeLine( final ConceptInstance resource ) {
+   static private String createPhenotypeLine( final ConceptInstance conceptInstance ) {
       final StringBuilder sb = new StringBuilder();
       // DocName|Phenotype_Spans|CUI|
-      sb.append( getSpannedCuiText( resource.getIdentifiedAnnotation(), "unmarked" ) );
+      sb.append( getSpannedCuiText( conceptInstance.getIdentifiedAnnotation(), "unmarked" ) );
       // Neg_value|Neg_span|
-      sb.append( getAttributeTextYN( resource.isNegated() ) );
+      sb.append( getAttributeTextYN( conceptInstance.isNegated() ) );
       // Subj_value|Subj_span|
-      sb.append( getAttributeText( resource.getSubject(), "patient" ) );
+      sb.append( getAttributeText( conceptInstance.getSubject(), "patient" ) );
       // Uncertain_value|Uncertain_span|
-      sb.append( getAttributeTextYN( resource.isUncertain() ) );
+      sb.append( getAttributeTextYN( conceptInstance.isUncertain() ) );
       // Course_value|Course_span|
       sb.append( "unmarked|NULL|" );
       // Severity_value|Severity_span|
       sb.append( "unmarked|NULL|" );
       // Cond_value|Cond_span|
-      sb.append( getAttributeTextTF( resource.isConditional() ) );
+      sb.append( getAttributeTextTF( conceptInstance.isConditional() ) );
       // Generic_value|Generic_span|
-      sb.append( getAttributeTextTF( resource.isHypothetical() ) );
+      sb.append( getAttributeTextTF( conceptInstance.isHypothetical() ) );
       // Bodyloc_value|Bodyloc_span|
       sb.append( getCuiSpannedText( PhenotypeAnnotationUtil
-            .getLocations( resource.getIdentifiedAnnotation() ), "unmarked" ) );
+            .getLocations( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
       // DocTimeRel|DocTimeRelSpan|
-      sb.append( getAttributeText( resource.getDocTimeRel(), "unmarked" ) );
+      sb.append( getAttributeText( conceptInstance.getDocTimeRel(), "unmarked" ) );
       // Value_Spans|CUI|
       sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
-            .getPhenotypeValues( resource.getIdentifiedAnnotation() ), "unmarked" ) );
+            .getPhenotypeValues( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
       // Neoplasm_Spans|CUI|
       sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
-            .getPhenotypeNeoplasms( resource.getIdentifiedAnnotation() ), "unmarked" ) );
+            .getPhenotypeNeoplasms( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
       // AssociatedTest_Spans|CUI|
       sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
-            .getDiagnosticTests( resource.getIdentifiedAnnotation() ), "unmarked" ) );
+            .getDiagnosticTests( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
       return sb.toString();
    }
 
