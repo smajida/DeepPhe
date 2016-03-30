@@ -147,22 +147,16 @@ public class OwlConceptFactory implements ConceptFactory {
 
    static private Map<Long, Concept> createBsvConcepts( final String bsvFilePath ) {
       final Collection<CuiTuiUriTerm> cuiTuiTerms = parseBsvFile( bsvFilePath );
-      LOGGER.info( "Creating Concepts from BSV Files:" );
-      try ( DotLogger dotter = new DotLogger() ) {
-         final Map<Long, Concept> conceptMap = new HashMap<>( cuiTuiTerms.size() );
-         for ( CuiTuiUriTerm cuiTuiTerm : cuiTuiTerms ) {
-            final CollectionMap<String, String, ? extends Collection<String>> codes
-                  = new HashSetMap<>();
-            codes.placeValue( Concept.TUI, TuiCodeUtil.getAsTui( cuiTuiTerm.getTui() ) );
-            codes.placeValue( OwlConcept.URI_CODING_SCHEME, cuiTuiTerm.getUri() );
-            conceptMap.put( CuiCodeUtil.getInstance().getCuiCode( cuiTuiTerm.getCui() ),
-                  new DefaultConcept( cuiTuiTerm.getCui(), Concept.PREFERRED_TERM_UNKNOWN, codes ) );
-         }
-         return conceptMap;
-      } catch ( IOException ioE ) {
-         LOGGER.error( "Could not create concepts from BSV Files" );
+      final Map<Long, Concept> conceptMap = new HashMap<>( cuiTuiTerms.size() );
+      for ( CuiTuiUriTerm cuiTuiTerm : cuiTuiTerms ) {
+         final CollectionMap<String, String, ? extends Collection<String>> codes
+               = new HashSetMap<>();
+         codes.placeValue( Concept.TUI, TuiCodeUtil.getAsTui( cuiTuiTerm.getTui() ) );
+         codes.placeValue( OwlConcept.URI_CODING_SCHEME, cuiTuiTerm.getUri() );
+         conceptMap.put( CuiCodeUtil.getInstance().getCuiCode( cuiTuiTerm.getCui() ),
+               new DefaultConcept( cuiTuiTerm.getCui(), Concept.PREFERRED_TERM_UNKNOWN, codes ) );
       }
-      return Collections.emptyMap();
+      return conceptMap;
    }
 
 

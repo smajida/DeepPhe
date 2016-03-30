@@ -47,21 +47,24 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
       final Collection<? extends Annotation> lookupWindows = JCasUtil.select( jcas, _lookupWindowType );
       for ( Annotation lookupWindow : lookupWindows ) {
          final Collection<IdentifiedAnnotation> breastNeoplasms
-               = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, "Breast_Neoplasm" );
+               = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow,
+               OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Neoplasm" );
+         breastNeoplasms.addAll( OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow,
+               OwlOntologyConceptUtil.CANCER_OWL + "#Cancer" ) );
 
          if ( !breastNeoplasms.isEmpty() ) {
             TnmFinder.addTnms( jcas, lookupWindow, breastNeoplasms );
             StageFinder.addStages( jcas, lookupWindow, breastNeoplasms );
 
             final Collection<IdentifiedAnnotation> diagnosticProcedures
-                  = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, "DiagnosticProcedure" );
+                  = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow,
+                  OwlOntologyConceptUtil.SCHEMA_OWL + "#DiagnosticProcedure" );
             StatusFinder.addReceptorStatuses( jcas, lookupWindow, breastNeoplasms, diagnosticProcedures );
          }
 
          final Collection<IdentifiedAnnotation> masses
-               = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, "Metastasis" );
-         // Metastasis does not have all metastases as children
-         masses.addAll( OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, "Metastatic_Neoplasm" ) );
+               = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow,
+               OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Metastasis" );
 
          masses.addAll( breastNeoplasms );
          SizeFinder.addSizes( jcas, lookupWindow, masses );
