@@ -10,4 +10,5 @@ after_success:
 notifications:
   email:
     recipients:
-      - chenpei@apache.org
+      - sean.finan@tch.harvard.edu
+      - chavang@upmc.edu
