@@ -36,6 +36,8 @@ final public class DeepPhePipelineRunner {
       
 	  @Option(shortName = "c", description = "specify the path to the jess clips files to be used.")
 		public String getClipsDirectoryPath();
+	  @Option(shortName = "t", description = "transmart mapping file")
+		public String getTransmartMappingFile();
    }
 
    public static void main( final String... args ) throws UIMAException, IOException {
@@ -48,7 +50,7 @@ final public class DeepPhePipelineRunner {
 	      final Options options = CliFactory.parseArguments( Options.class, args );
 	      //CancerPipelineRunner.runCancerPipeline( options.getInputDirectory(), options.getOutputDirectory() );
 	      DocumentSummarizerPipeline.runDocumentSummarizerPipeline( options.getInputDirectory(), options.getOutputDirectory(), options.getOntologyPath());
-	      PhenotypeSummarizerPipeline.runPhenotypeSummarizerPipeline(options.getOutputDirectory(), options.getOntologyPath(), options.getClipsDirectoryPath());
+	      PhenotypeSummarizerPipeline.runPhenotypeSummarizerPipeline(options.getInputDirectory(), options.getOntologyPath(), options.getOutputDirectory(),options.getTransmartMappingFile());
 	      
 	   }
 }

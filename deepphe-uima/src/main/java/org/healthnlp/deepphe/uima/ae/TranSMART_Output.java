@@ -77,12 +77,15 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 		//	category: + separated category code
 		//	col #:	column number in data
 		//	data label: leaf column name
+		int n = 1;
 		StringBuffer buffer = new StringBuffer();
 		for(Map<String,String> map: mapping){
 			buffer.append(dataFile.getName()+T);
 			buffer.append(map.get(CATEGORY_CODE)+T);
-			buffer.append(map.get(CATEGORY_NUM)+T);
+			//buffer.append(map.get(CATEGORY_NUM)+T);
+			buffer.append(n+T);
 			buffer.append(map.get(DATA_LABEL)+"\n");
+			n++;
 		}
 		// save meta file
 		try {
@@ -96,9 +99,9 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 		// has actual columns described above
 		buffer  = new StringBuffer();
 		
-		int lastColumn = 1;
+		//int lastColumn = 1;
 		for(Map<String,String> map: mapping){
-			int column = Integer.parseInt(map.get(CATEGORY_NUM));
+			//int column = Integer.parseInt(map.get(CATEGORY_NUM));
 			String dataLabel = map.get(DATA_LABEL);
 			String category = map.get(CATEGORY_CODE);
 			String entryClass = map.get(ENTRY_CLASS);
@@ -106,10 +109,10 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 			String entryProperty = map.get(ENTRY_PROPERTY);
 			
 			// pad columns based on a count
-			for(int i=lastColumn;i<column;i++){
+			/*for(int i=lastColumn;i<column;i++){
 				buffer.append(T);
 			}
-			lastColumn = column;
+			lastColumn = column;*/
 			
 			// special case for some data labels
 			String value = "";
@@ -123,7 +126,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 				Summary summary = getSummary(record,category,entryRestriction);
 				value = getSummaryFactValue(summary, entryClass, entryRestriction,entryProperty);
 			}
-			buffer.append(value+"T");
+			buffer.append(value+T);
 		}
 		buffer.append("\n");
 		

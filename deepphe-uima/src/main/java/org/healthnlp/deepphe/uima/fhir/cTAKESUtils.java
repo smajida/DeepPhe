@@ -38,6 +38,7 @@ import org.hl7.fhir.instance.model.Extension;
 import java.net.URI;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class cTAKESUtils {
 
@@ -447,10 +448,11 @@ public class cTAKESUtils {
 		return PhenotypeAnnotationUtil.getNeoplasmPropertiesBranch( jcas, neoplasm, TnmPropertyUtil.getParentUri() );
 		
 		
+		/*
+		return ConceptInstanceUtil.getBranchConceptInstances(jcas, TnmPropertyUtil.getParentUri()).stream().
+				map(ConceptInstanceUtil::getPropertyValues).collect(Collectors.toList());;
 		
-	//	return ConceptInstanceUtil.getBranchConceptInstances(jcas, TnmPropertyUtil.getParentUri()).stream().map(ConceptInstanceUtil::getPropertyValues);
-		
-		
+		*/
 	}
 
 	//	public static CancerStage getCancerStage(IdentifiedAnnotation dm){

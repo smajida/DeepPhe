@@ -16,6 +16,7 @@ import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.uima.ae.CompositionCancerSummaryAE;
 import org.healthnlp.deepphe.uima.ae.PhenotypeCancerSummaryAE;
 import org.healthnlp.deepphe.uima.ae.SummaryTextOutput;
+import org.healthnlp.deepphe.uima.ae.TranSMART_Output;
 import org.healthnlp.deepphe.uima.cr.FHIRCollectionReader;
 
 import com.lexicalscope.jewel.cli.CliFactory;
@@ -40,15 +41,17 @@ final public class PhenotypeSummarizerPipeline {
 
 		@Option(shortName = "o", description = "specify the path to the directory where the output xmi files are to be saved")
 		public String getOutputDirectory();
+		
+		@Option(shortName = "t", description = "transmart mapping file")
+		public String getTransmartMappingFile();
 	}
 
 	public static void main(final String... args) throws UIMAException, IOException {
 		final Options options = CliFactory.parseArguments(Options.class, args);
-		runPhenotypeSummarizerPipeline(options.getInputDirectory(), options.getOntologyPath(),
-				options.getOutputDirectory());
+		runPhenotypeSummarizerPipeline(options.getInputDirectory(), options.getOntologyPath(),options.getOutputDirectory(),options.getTransmartMappingFile());
 	}
 
-	public static void runPhenotypeSummarizerPipeline(final String inputDirectory, final String ontologyPath, final String outputDirectory) throws UIMAException, IOException {
+	public static void runPhenotypeSummarizerPipeline(final String inputDirectory, final String ontologyPath, final String outputDirectory, final String mappingFile) throws UIMAException, IOException {
 		final CollectionReader collectionReader = createCollectionReader(inputDirectory);
 		final AnalysisEngine compositionSummarizerAE = AnalysisEngineFactory.createEngine(
 				CompositionCancerSummaryAE.class, CompositionCancerSummaryAE.PARAM_ONTOLOGY_PATH, ontologyPath);
@@ -61,12 +64,12 @@ final public class PhenotypeSummarizerPipeline {
 		//final AnalysisEngine graphDBConsumerAE = AnalysisEngineFactory.createEngine(GraphDBPhenotypeConsumerAE.class,
 		//		GraphDBPhenotypeConsumerAE.PARAM_DBPATH, outputDirectory + File.separator + "neo4jdb");
 
-		//final AnalysisEngine transmartAE = AnalysisEngineFactory.createEngine(TranSMART_Output.class,TranSMART_Output.PARAM_OUTPUTDIR,outputDirectory); 
+		final AnalysisEngine transmartAE = AnalysisEngineFactory.createEngine(TranSMART_Output.class,TranSMART_Output.PARAM_TRANSMART_MAP_FILE,mappingFile,TranSMART_Output.PARAM_OUTPUTDIR,outputDirectory); 
 		
 		
 		// run the damn pipeline
 		//SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE, cancerSummarizerAE, xmiWriter,summaryAE,transmartAE,graphDBConsumerAE);
-		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE,cancerSummarizerAE,summaryAE,xmiWriter);
+		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE,cancerSummarizerAE,summaryAE,transmartAE,xmiWriter);
 	}
 
 	private static CollectionReader createCollectionReader(String inputDirectory)
