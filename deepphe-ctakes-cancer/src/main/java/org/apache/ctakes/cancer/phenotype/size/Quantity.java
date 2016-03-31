@@ -13,18 +13,18 @@ import javax.annotation.concurrent.Immutable;
  * @since 8/20/2015
  */
 @Immutable
-final class Dimension extends DefaultProperty<DimensionType, DimensionValue> {
+final class Quantity extends DefaultProperty<QuantityUnit, QuantityValue> {
 
-   //   static final String DIMENSION_URI = OwlOntologyConceptUtil.CONTEXT_OWL + "#DimensionalMeasurement";
-   static final String DIMENSION_URI = OwlOntologyConceptUtil.CONTEXT_OWL + "#Quantity";
+   //   static final String QUANTITY_URI = OwlOntologyConceptUtil.CONTEXT_OWL + "#DimensionalMeasurement";
+   static final String QUANTITY_URI = OwlOntologyConceptUtil.CONTEXT_OWL + "#Quantity";
 
-   Dimension( final SpannedType<DimensionType> dimensionType, final SpannedValue<DimensionValue> dimensionValue ) {
+   Quantity( final SpannedType<QuantityUnit> dimensionType, final SpannedValue<QuantityValue> dimensionValue ) {
       super( dimensionType, dimensionValue );
    }
 
    @Override
    public String toString() {
-      return getSpannedValue().getValue() + " " + getSpannedType().getType().getTitle() + " measurement";
+      return getSpannedValue().getValue() + " " + getSpannedType().getType().getTitle() + " quantity";
    }
 
 

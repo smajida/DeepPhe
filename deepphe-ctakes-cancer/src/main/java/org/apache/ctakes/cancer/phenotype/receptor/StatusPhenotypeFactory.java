@@ -54,7 +54,7 @@ final public class StatusPhenotypeFactory
                                               final SpannedProperty<StatusType, StatusValue> status,
                                               final Iterable<IdentifiedAnnotation> neoplasms,
                                               final Iterable<IdentifiedAnnotation> diagnosticTests ) {
-      final SignSymptomMention eventMention = createEventMention( jcas, windowStartOffset, status );
+      final SignSymptomMention eventMention = createTypeEventMention( jcas, windowStartOffset, status );
       final Modifier valueModifier = createValueModifier( jcas, windowStartOffset, status );
       createEventMentionDegree( jcas, eventMention, valueModifier );
       createEventMentionNeoplasm( jcas, windowStartOffset, status, eventMention, neoplasms );
@@ -66,7 +66,7 @@ final public class StatusPhenotypeFactory
     * {@inheritDoc}
     */
    @Override
-   protected SignSymptomMention createEventMention( final JCas jcas, final int startOffset, final int endOffset ) {
+   protected SignSymptomMention createSpanEventMention( final JCas jcas, final int startOffset, final int endOffset ) {
       final SignSymptomMention disorder = new SignSymptomMention( jcas, startOffset, endOffset );
       disorder.setTypeID( NE_TYPE_ID_FINDING );
       return disorder;

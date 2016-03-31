@@ -11,11 +11,11 @@ import javax.annotation.concurrent.Immutable;
  * @since 2/8/2016
  */
 @Immutable
-final class SpannedDimensionType extends SpannedType<DimensionType> {
+final class SpannedQuantityUnit extends SpannedType<QuantityUnit> {
 
-   static private final Logger LOGGER = Logger.getLogger( "SpannedDimensionType" );
+   static private final Logger LOGGER = Logger.getLogger( "SpannedQuantityUnit" );
 
-   SpannedDimensionType( final DimensionType type, final int startOffset, final int endOffset ) {
+   SpannedQuantityUnit( final QuantityUnit type, final int startOffset, final int endOffset ) {
       super( type, startOffset, endOffset );
    }
 

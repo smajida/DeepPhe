@@ -50,47 +50,46 @@ final public class SizeFinder {
 
    static public void addSizes( final JCas jcas, final AnnotationFS lookupWindow,
                                 final Iterable<IdentifiedAnnotation> masses ) {
-      final Collection<Dimension> dimensions = getDimensions( lookupWindow.getCoveredText() );
-      if ( dimensions.isEmpty() ) {
+      final Collection<Quantity> quantities = getDimensions( lookupWindow.getCoveredText() );
+      if ( quantities.isEmpty() ) {
          return;
       }
       final int windowStartOffset = lookupWindow.getBegin();
-      for ( Dimension dimension : dimensions ) {
-         SizePhenotypeFactory.getInstance().createPhenotype( jcas, windowStartOffset, dimension, masses );
+      for ( Quantity quantity : quantities ) {
+         SizePhenotypeFactory.getInstance().createPhenotype( jcas, windowStartOffset, quantity, masses );
       }
    }
 
-   static List<Dimension> getDimensions( final String lookupWindow ) {
+   static List<Quantity> getDimensions( final String lookupWindow ) {
       if ( lookupWindow.length() < 3 ) {
          return Collections.emptyList();
       }
-      final List<Dimension> dimensions = new ArrayList<>();
+      final List<Quantity> quantities = new ArrayList<>();
       final Matcher fullMatcher = FULL_PATTERN.matcher( lookupWindow );
       while ( fullMatcher.find() ) {
          final String matchWindow = lookupWindow.substring( fullMatcher.start(), fullMatcher.end() );
-         for ( DimensionType type : DimensionType.values() ) {
-            final Matcher typeMatcher = type.getMatcher( matchWindow );
-            if ( typeMatcher.find() ) {
-               final int typeStart = fullMatcher.start() + typeMatcher.start();
-               final int typeEnd = fullMatcher.start() + typeMatcher.end();
-               final String unit = matchWindow.substring( typeMatcher.start(), typeMatcher.end() );
-               final SpannedDimensionType spannedType = new SpannedDimensionType( type, typeStart, typeEnd );
+         for ( QuantityUnit unitType : QuantityUnit.values() ) {
+            final Matcher unitMatcher = unitType.getMatcher( matchWindow );
+            if ( unitMatcher.find() ) {
+               final int unitStart = fullMatcher.start() + unitMatcher.start();
+               final int unitEnd = fullMatcher.start() + unitMatcher.end();
+//               final String unit = matchWindow.substring( unitMatcher.start(), unitMatcher.end() );
+               final SpannedQuantityUnit spannedUnit = new SpannedQuantityUnit( unitType, unitStart, unitEnd );
                final Matcher valueMatcher = VALUE_PATTERN.matcher( matchWindow );
                while ( valueMatcher.find() ) {
                   final int valueStart = fullMatcher.start() + valueMatcher.start();
                   final int valueEnd = fullMatcher.start() + valueMatcher.end();
-                  final DimensionValue value
-                        = new DimensionValue(
-                        lookupWindow.substring( valueStart, valueEnd ) + " " + unit.toLowerCase() );
-                  final Dimension dimension
-                        = new Dimension( spannedType, new SpannedDimensionValue( value, valueStart, valueEnd ) );
-                  dimensions.add( dimension );
+                  final QuantityValue value
+                        = new QuantityValue( lookupWindow.substring( valueStart, valueEnd ) );
+                  final Quantity quantity
+                        = new Quantity( spannedUnit, new SpannedQuantityValue( value, valueStart, valueEnd ) );
+                  quantities.add( quantity );
                }
             }
          }
       }
-      Collections.sort( dimensions, SpanOffsetComparator.getInstance() );
-      return dimensions;
+      Collections.sort( quantities, SpanOffsetComparator.getInstance() );
+      return quantities;
    }
 
 //   static private Collection<Measurement> getMeasurements( final String text, final DimensionUnit dimensionUnit,

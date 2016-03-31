@@ -52,7 +52,7 @@ final public class StagePhenotypeFactory
                                                   final SpannedProperty<StageType, StageValue> stage,
                                                   final Iterable<IdentifiedAnnotation> neoplasms,
                                                   final Iterable<IdentifiedAnnotation> diagnosticTests ) {
-      final DiseaseDisorderMention eventMention = createEventMention( jcas, windowStartOffset, stage );
+      final DiseaseDisorderMention eventMention = createTypeEventMention( jcas, windowStartOffset, stage );
       final Modifier valueModifier = createValueModifier( jcas, windowStartOffset, stage );
       createEventMentionDegree( jcas, eventMention, valueModifier );
       createEventMentionNeoplasm( jcas, windowStartOffset, stage, eventMention, neoplasms );
@@ -64,7 +64,8 @@ final public class StagePhenotypeFactory
     * {@inheritDoc}
     */
    @Override
-   protected DiseaseDisorderMention createEventMention( final JCas jcas, final int startOffset, final int endOffset ) {
+   protected DiseaseDisorderMention createSpanEventMention( final JCas jcas, final int startOffset,
+                                                            final int endOffset ) {
       final DiseaseDisorderMention disorder = new DiseaseDisorderMention( jcas, startOffset, endOffset );
       disorder.setTypeID( NE_TYPE_ID_DISORDER );
       return disorder;
