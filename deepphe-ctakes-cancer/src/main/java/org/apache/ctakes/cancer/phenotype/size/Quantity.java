@@ -18,13 +18,21 @@ final class Quantity extends DefaultProperty<QuantityUnit, QuantityValue> {
    //   static final String QUANTITY_URI = OwlOntologyConceptUtil.CONTEXT_OWL + "#DimensionalMeasurement";
    static final String QUANTITY_URI = OwlOntologyConceptUtil.CONTEXT_OWL + "#Quantity";
 
-   Quantity( final SpannedType<QuantityUnit> dimensionType, final SpannedValue<QuantityValue> dimensionValue ) {
+   private final String _unitText;
+
+   Quantity( final SpannedType<QuantityUnit> dimensionType, final SpannedValue<QuantityValue> dimensionValue,
+             final String unitText ) {
       super( dimensionType, dimensionValue );
+      _unitText = unitText.toLowerCase();
+   }
+
+   public String getUnitText() {
+      return _unitText;
    }
 
    @Override
    public String toString() {
-      return getSpannedValue().getValue() + " " + getSpannedType().getType().getTitle() + " quantity";
+      return getSpannedValue().getValue() + " " + getUnitText() + " quantity";
    }
 
 

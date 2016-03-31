@@ -50,7 +50,7 @@ final public class SizeFinder {
 
    static public void addSizes( final JCas jcas, final AnnotationFS lookupWindow,
                                 final Iterable<IdentifiedAnnotation> masses ) {
-      final Collection<Quantity> quantities = getDimensions( lookupWindow.getCoveredText() );
+      final Collection<Quantity> quantities = getQuantities( lookupWindow.getCoveredText() );
       if ( quantities.isEmpty() ) {
          return;
       }
@@ -60,7 +60,7 @@ final public class SizeFinder {
       }
    }
 
-   static List<Quantity> getDimensions( final String lookupWindow ) {
+   static List<Quantity> getQuantities( final String lookupWindow ) {
       if ( lookupWindow.length() < 3 ) {
          return Collections.emptyList();
       }
@@ -73,7 +73,7 @@ final public class SizeFinder {
             if ( unitMatcher.find() ) {
                final int unitStart = fullMatcher.start() + unitMatcher.start();
                final int unitEnd = fullMatcher.start() + unitMatcher.end();
-//               final String unit = matchWindow.substring( unitMatcher.start(), unitMatcher.end() );
+               final String unit = matchWindow.substring( unitMatcher.start(), unitMatcher.end() );
                final SpannedQuantityUnit spannedUnit = new SpannedQuantityUnit( unitType, unitStart, unitEnd );
                final Matcher valueMatcher = VALUE_PATTERN.matcher( matchWindow );
                while ( valueMatcher.find() ) {
@@ -82,7 +82,7 @@ final public class SizeFinder {
                   final QuantityValue value
                         = new QuantityValue( lookupWindow.substring( valueStart, valueEnd ) );
                   final Quantity quantity
-                        = new Quantity( spannedUnit, new SpannedQuantityValue( value, valueStart, valueEnd ) );
+                        = new Quantity( spannedUnit, new SpannedQuantityValue( value, valueStart, valueEnd ), unit );
                   quantities.add( quantity );
                }
             }
