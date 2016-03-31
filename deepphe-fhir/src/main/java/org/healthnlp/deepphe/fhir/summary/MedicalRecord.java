@@ -1,5 +1,7 @@
 package org.healthnlp.deepphe.fhir.summary;
 
+import org.neo4j.ogm.annotation.Relationship;
+import org.neo4j.ogm.annotation.Transient;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ import org.hl7.fhir.instance.model.Resource;
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
 
+
 /**
  * medical record for a given patient
  * @author tseytlin
@@ -25,9 +28,18 @@ import org.neo4j.ogm.annotation.NodeEntity;
 @NodeEntity
 public class MedicalRecord implements Element {
 	private String patientIdentifier;
+	
+	
 	private Patient patient;
+	
+	@Relationship(type="hasPatientSummary", direction = Relationship.OUTGOING)
 	private PatientSummary patientSummary;
-	private CancerSummary cancerSummary;
+
+//	@Relationship(type="hasCancerSummary", direction = Relationship.OUTGOING)
+	@Transient
+	private	CancerSummary cancerSummary;
+
+	@Relationship(type="partOf", direction = Relationship.INCOMING)
 	private List<Report> reports;
 	
 	
@@ -46,6 +58,8 @@ public class MedicalRecord implements Element {
 	public String getDisplayText() {
 		return (patient != null? patient.getPatientName():"Generic")+" Medical Record";
 	}
+	
+	@org.neo4j.ogm.annotation.Transient
 	public String getResourceIdentifier() {
 		return getDisplayText();
 	}
@@ -72,6 +86,8 @@ public class MedicalRecord implements Element {
 	public Resource getResource() {
 		return null;
 	}
+	
+	
 	public CodeableConcept getCode() {
 		return FHIRUtils.getCodeableConcept(getConceptURI());
 	}
@@ -87,24 +103,31 @@ public class MedicalRecord implements Element {
 	public String getAnnotationType() {
 		return FHIRConstants.ANNOTATION_TYPE_RECORD;
 	}
+	
 	public Patient getPatient() {
 		return patient;
 	}
 	public void setPatient(Patient patient) {
 		this.patient = patient;
 	}
+	
+	@org.neo4j.ogm.annotation.Transient
 	public PatientSummary getPatientSummary() {
 		return patientSummary;
 	}
 	public void setPatientSummary(PatientSummary patientSummary) {
 		this.patientSummary = patientSummary;
 	}
+	
+	@org.neo4j.ogm.annotation.Transient
 	public CancerSummary getCancerSummary() {
 		return cancerSummary;
 	}
 	public void setCancerSummary(CancerSummary cancerSummary) {
 		this.cancerSummary = cancerSummary;
 	}
+	
+	
 	public List<Report> getReports() {
 		if(reports == null)
 			reports = new ArrayList<Report>();
@@ -121,6 +144,7 @@ public class MedicalRecord implements Element {
 	 *  return all facts that are contained within report level summaries
 	 * @return
 	 */
+	@org.neo4j.ogm.annotation.Transient
 	public List<Fact> getReportLevelFacts(){
 		List<Fact> list =  new ArrayList<Fact>();
 		for(Report r: getReports()){
@@ -135,6 +159,7 @@ public class MedicalRecord implements Element {
 	 *  return all facts that are contained within phenotype level summaries
 	 * @return
 	 */
+	@org.neo4j.ogm.annotation.Transient
 	public List<Fact> getRecordLevelFacts(){
 		List<Fact> list =  new ArrayList<Fact>();
 		if(cancerSummary != null)

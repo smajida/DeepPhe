@@ -14,6 +14,7 @@ import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.fit.pipeline.SimplePipeline;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.uima.ae.CompositionCancerSummaryAE;
+import org.healthnlp.deepphe.uima.ae.GraphDBPhenotypeConsumerAE;
 import org.healthnlp.deepphe.uima.ae.PhenotypeCancerSummaryAE;
 import org.healthnlp.deepphe.uima.ae.SummaryTextOutput;
 import org.healthnlp.deepphe.uima.cr.FHIRCollectionReader;
@@ -58,15 +59,15 @@ final public class PhenotypeSummarizerPipeline {
 				outputDirectory + File.separator + "TYPE");
 		final AnalysisEngine summaryAE = AnalysisEngineFactory.createEngine(SummaryTextOutput.class,SummaryTextOutput.PARAM_OUTPUTDIR,outputDirectory); 
 		
-		//final AnalysisEngine graphDBConsumerAE = AnalysisEngineFactory.createEngine(GraphDBPhenotypeConsumerAE.class,
-		//		GraphDBPhenotypeConsumerAE.PARAM_DBPATH, outputDirectory + File.separator + "neo4jdb");
+		final AnalysisEngine graphDBConsumerAE = AnalysisEngineFactory.createEngine(GraphDBPhenotypeConsumerAE.class,
+				GraphDBPhenotypeConsumerAE.PARAM_DBPATH, outputDirectory + File.separator + "neo4jogmdb2");
 
 		//final AnalysisEngine transmartAE = AnalysisEngineFactory.createEngine(TranSMART_Output.class,TranSMART_Output.PARAM_OUTPUTDIR,outputDirectory); 
 		
 		
 		// run the damn pipeline
 		//SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE, cancerSummarizerAE, xmiWriter,summaryAE,transmartAE,graphDBConsumerAE);
-		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE,cancerSummarizerAE,summaryAE,xmiWriter);
+		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE,cancerSummarizerAE,summaryAE,xmiWriter,graphDBConsumerAE);
 	}
 
 	private static CollectionReader createCollectionReader(String inputDirectory)

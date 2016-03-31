@@ -94,10 +94,11 @@ public class Patient extends org.hl7.fhir.instance.model.Patient implements Elem
 		return "";
 	}
 	
-	
+	@org.neo4j.ogm.annotation.Transient
 	public Reference getReference(){
 		return getReference(new Reference());
 	}
+	
 	public Reference getReference(Reference r){
 		r.setDisplay(getPatientName());
 		r.setReference(getResourceIdentifier());

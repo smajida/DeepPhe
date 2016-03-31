@@ -23,6 +23,7 @@ import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
 
 
 /**
@@ -36,7 +37,11 @@ import org.neo4j.ogm.annotation.NodeEntity;
 public class Report extends Composition implements Element, Comparable<Report>{
 	private int offset;
 	//private CompositionEventComponent event;
+	
+	@org.neo4j.ogm.annotation.Transient
 	private Map<String,Element> reportElements;
+	
+	@org.neo4j.ogm.annotation.Transient
 	private Map<String,Summary> compositionSummary;
 	
 	
@@ -95,6 +100,8 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	/**
 	 * set patient that this document is describing
 	 */
+
+	@Relationship(type="hasPatient", direction = Relationship.INCOMING)
 	public void setPatient(Patient p){
 		setSubject(p.getReference());
 		setSubjectTarget(p);
@@ -108,6 +115,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		//addReportElement(p);
 	}
 	
+
 	public Patient getPatient(){
 		Resource r = getSubjectTarget();
 		if(r == null)
@@ -136,15 +144,17 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * get report elements
 	 * @return
 	 */
+	@org.neo4j.ogm.annotation.Transient
 	public Collection<Element> getReportElements() {
 		return getReportElementMap().values();
 	}
-
+	@org.neo4j.ogm.annotation.Transient
 	public Map<String,Element> getReportElementMap(){
 		if(reportElements == null)
 			reportElements = new LinkedHashMap<String,Element>();
 		return reportElements;
 	}
+	
 	
 	public Element getReportElement(String id){
 		return getReportElementMap().get(id);
@@ -154,6 +164,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * get procedures
 	 * @return
 	 */
+	
 	public List<Procedure> getProcedures() {
 		return (List<Procedure>) FHIRUtils.getSubList(getReportElements(),Procedure.class);
 	}
@@ -162,6 +173,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * get a set of defined diagnoses for this report
 	 * @return
 	 */
+	
 	public List<Disease> getDiagnoses(){
 		return (List<Disease>) FHIRUtils.getSubList(getReportElements(),Disease.class);
 	}
@@ -170,6 +182,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * get a set of defined diagnoses for this report
 	 * @return
 	 */
+	
 	public List<Observation> getObservations(){
 		return (List<Observation>) FHIRUtils.getSubList(getReportElements(),Observation.class);
 	}
@@ -178,6 +191,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * get a set of defined diagnoses for this report
 	 * @return
 	 */
+	
 	public List<Finding> getFindings(){
 		return (List<Finding>) FHIRUtils.getSubList(getReportElements(),Finding.class);
 	}
@@ -186,6 +200,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	 * get a set of defined diagnoses for this report
 	 * @return
 	 */
+	
 	public List<Medication> getMedications(){
 		return (List<Medication>) FHIRUtils.getSubList(getReportElements(),Medication.class);
 	}
@@ -254,7 +269,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		return st.toString();
 	}
 
-
+	@org.neo4j.ogm.annotation.Transient
 	public Resource getResource() {
 		return this;
 	}
@@ -333,11 +348,12 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	public CodeableConcept getCode() {
 		return FHIRUtils.getCodeableConcept(getConceptURI());
 	}
-	
+
 	public Collection<Summary> getCompositionSummaries(){
 		return getCompositionSummaryMap().values();
 	}
 	
+	@org.neo4j.ogm.annotation.Transient
 	public Map<String,Summary> getCompositionSummaryMap(){
 		if(compositionSummary == null)
 			compositionSummary = new LinkedHashMap<String,Summary>();
@@ -355,7 +371,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		}
 	}
 	
-	
+
 	public List<CancerSummary> getCancerSummaries(){
 		List<CancerSummary> list = new ArrayList<CancerSummary>();
 		for(Summary s: getCompositionSummaries()){
@@ -365,6 +381,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		return list;
 	}
 	
+
 	public List<TumorSummary> getTumorSummaries(){
 		List<TumorSummary> list = new ArrayList<TumorSummary>();
 		for(Summary s: getCompositionSummaries()){
@@ -374,6 +391,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		return list;
 	}
 	
+
 	public PatientSummary getPatientSummary(){
 		for(Summary s: getCompositionSummaries()){
 			if(s instanceof PatientSummary)

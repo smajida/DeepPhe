@@ -35,8 +35,13 @@ public abstract class Summary extends List_  implements Element {
 		this.objectId = id;
 	}
 	
+	@org.neo4j.ogm.annotation.Transient
 	protected Report report;
+	
+	@org.neo4j.ogm.annotation.Transient
 	protected Patient patient;
+	
+	
 	private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
 	protected Map<String,FactList> content;
 	public Map<String, FactList> getContent() {
@@ -121,7 +126,7 @@ public abstract class Summary extends List_  implements Element {
 			f.setDocumentType(tp);
 		}
 	}
-
+	@org.neo4j.ogm.annotation.Transient
 	public Patient getPatient() {
 		return patient;
 	}
@@ -129,7 +134,7 @@ public abstract class Summary extends List_  implements Element {
 	public void setPatient(Patient patient) {
 		this.patient = patient;
 	}
-
+	@org.neo4j.ogm.annotation.Transient
 	public Report getReport() {
 		return report;
 	}

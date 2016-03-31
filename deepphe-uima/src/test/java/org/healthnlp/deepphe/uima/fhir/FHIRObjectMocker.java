@@ -165,6 +165,9 @@ public class FHIRObjectMocker {
 				will(returnValue("Taxotere"));
 				
 				//CancerSummary
+				allowing(cancerSummary).getObjectId();
+				will(returnValue(null));
+				
 				allowing(cancerSummary).getDisplayText();
 				will(returnValue("Cancer Summary"));
 				
@@ -190,6 +193,8 @@ public class FHIRObjectMocker {
 				will(returnValue(Collections.singletonList(cancerPhenotype)));
 				
 				//Cancer Phenotype
+				allowing(cancerPhenotype).getObjectId();
+				will(returnValue(null));
 				
 				allowing(cancerPhenotype).getDisplayText();
 				will(returnValue("Phenotype Summary"));
@@ -228,6 +233,8 @@ public class FHIRObjectMocker {
 				will(returnValue(Collections.singletonList(tumorSummary)));
 				
 				//Tumor Summary
+				allowing(tumorSummary).getObjectId();
+				will(returnValue(null));
 				
 				allowing(tumorSummary).getDisplayText();
 				will(returnValue("Tumor Summary"));
@@ -260,6 +267,8 @@ public class FHIRObjectMocker {
 				will(returnValue(tumorPhenotype));
 				
 				//Tumor Phenotype
+				allowing(tumorPhenotype).getObjectId();
+				will(returnValue(null));
 				
 				allowing(tumorPhenotype).getDisplayText();
 				will(returnValue("Tumor Phenotype"));
@@ -283,6 +292,10 @@ public class FHIRObjectMocker {
 				will(returnValue(Collections.singletonList(tumorExtentCC)));
 				
 				//Patient Summary
+				allowing(patientSummary).getObjectId();
+				will(returnValue(null));
+				
+				
 				allowing(patientSummary).getDisplayText();
 				will(returnValue("Patient Summary"));
 				
@@ -295,14 +308,22 @@ public class FHIRObjectMocker {
 				allowing(patientSummary).getConceptURI();
 				will(returnValue(FHIRConstants.PATIENT_SUMMARY_URI));
 				
-				/*allowing(patientSummary).getExposure();
-				will(returnValue(Collections.singletonList(exposureCC)));
-				
-				allowing(patientSummary).getGermlineSequenceVariant();
-				will(returnValue(Collections.singletonList(germlineSequenceVariantCC)));*/
-				
 				allowing(patientSummary).getOutcomes();
 				will(returnValue(Collections.singletonList(outcomesCC)));
+				
+				
+				//Medical Record
+				allowing(medicalRecord).getObjectId();
+				will(returnValue(null));
+				
+				allowing(medicalRecord).getPatientSummary();
+				will(returnValue(patientSummary));
+				
+				allowing(medicalRecord).getCancerSummary();
+				will(returnValue(cancerSummary));
+				
+				allowing(medicalRecord).getPatient();
+				will(returnValue(patient));
 			}
 		});
 	}

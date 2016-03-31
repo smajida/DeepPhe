@@ -69,7 +69,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		for(Report report: PhenotypeResourceFactory.loadReports(jcas)){
 			record.addReport(report);
 			
-			/*// append patient summary
+			// append patient summary
 			PatientSummary p = report.getPatientSummary();
 			if(p != null && patientSummary.isAppendable(p)){
 				patientSummary.append(p);
@@ -92,10 +92,10 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			//TODO: this is where you can start with RULES
 			// this is a temporary merge of all summaries together without
 			// much thought until we have something better
-*/		}
+		}
 
 		//insert record into drools
-		long stT = System.currentTimeMillis();	
+		/*long stT = System.currentTimeMillis();	
 		DroolsEngine de = new DroolsEngine();
 		KieSession droolsSession = null;
 		try {
@@ -117,7 +117,7 @@ System.out.println("Patient from MR: "+record.getPatient());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		
 		
 		
@@ -131,7 +131,7 @@ System.out.println("Patient from MR: "+record.getPatient());
 		
 		
 		//FactList pT = record.getCancerSummary().getPhenotype().getFacts("hasTClassification");
-		record.getCancerSummary().getPhenotype().addFact("hasTClassification", null);
+		//record.getCancerSummary().getPhenotype().addFact("hasTClassification", null);
 		
 		
 		/*DroolsEngine de = new DroolsEngine();
