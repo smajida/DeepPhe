@@ -32,51 +32,63 @@ public class SizeTester {
 
    @Test
    public void testCapUnitMention() {
-      final List<Dimension> cancerSizes = SizeFinder.getDimensions( MULTIPLE_MENTION_SENTENCE_1 );
+      final List<Quantity> cancerSizes = SizeFinder.getQuantities( MULTIPLE_MENTION_SENTENCE_1 );
       assertEquals( "Expect one Cancer Size in " + MULTIPLE_MENTION_SENTENCE_1, 1, cancerSizes.size() );
-      testMeasurement( MULTIPLE_MENTION_SENTENCE_1, cancerSizes.get( 0 ).getSpannedValue(), "2.1 cm" );
+      testMeasurement( MULTIPLE_MENTION_SENTENCE_1, cancerSizes.get( 0 ).getSpannedValue(), "2.1" );
+      testUnit( MULTIPLE_MENTION_SENTENCE_1, cancerSizes.get( 0 ), "cm" );
    }
 
    @Test
    public void testNoTimeMention() {
-      final List<Dimension> cancerSizes = SizeFinder.getDimensions( MULTIPLE_MENTION_SENTENCE_2 );
+      final List<Quantity> cancerSizes = SizeFinder.getQuantities( MULTIPLE_MENTION_SENTENCE_2 );
       assertEquals( "Expect one Cancer Size in " + MULTIPLE_MENTION_SENTENCE_2, 1, cancerSizes.size() );
-      testMeasurement( MULTIPLE_MENTION_SENTENCE_2, cancerSizes.get( 0 ).getSpannedValue(), "900 mm" );
+      testMeasurement( MULTIPLE_MENTION_SENTENCE_2, cancerSizes.get( 0 ).getSpannedValue(), "900" );
+      testUnit( MULTIPLE_MENTION_SENTENCE_2, cancerSizes.get( 0 ), "mm" );
    }
 
 
    @Test
    public void testSingleMention() {
-      final List<Dimension> cancerSizes = SizeFinder.getDimensions( SENTENCE_4 );
+      final List<Quantity> cancerSizes = SizeFinder.getQuantities( SENTENCE_4 );
       assertEquals( "Expect one Cancer Size in " + SENTENCE_4, 1, cancerSizes.size() );
-      testMeasurement( SENTENCE_4, cancerSizes.get( 0 ).getSpannedValue(), "0.9 cm" );
+      testMeasurement( SENTENCE_4, cancerSizes.get( 0 ).getSpannedValue(), "0.9" );
+      testUnit( SENTENCE_4, cancerSizes.get( 0 ), "cm" );
    }
 
    @Test
    public void testDoubleMention() {
-      final List<Dimension> cancerSizes = SizeFinder.getDimensions( MULTIPLE_MENTION_SENTENCE_3 );
+      final List<Quantity> cancerSizes = SizeFinder.getQuantities( MULTIPLE_MENTION_SENTENCE_3 );
       assertEquals( "Expect two Cancer Sizes in " + MULTIPLE_MENTION_SENTENCE_3, 2, cancerSizes.size() );
-      testMeasurement( MULTIPLE_MENTION_SENTENCE_3, cancerSizes.get( 0 ).getSpannedValue(), "1.4 cm" );
-      testMeasurement( MULTIPLE_MENTION_SENTENCE_3, cancerSizes.get( 1 ).getSpannedValue(), "1.9 cm" );
+      testMeasurement( MULTIPLE_MENTION_SENTENCE_3, cancerSizes.get( 0 ).getSpannedValue(), "1.4" );
+      testUnit( MULTIPLE_MENTION_SENTENCE_3, cancerSizes.get( 0 ), "cm" );
+      testMeasurement( MULTIPLE_MENTION_SENTENCE_3, cancerSizes.get( 1 ).getSpannedValue(), "1.9" );
+      testUnit( MULTIPLE_MENTION_SENTENCE_3, cancerSizes.get( 1 ), "cm" );
    }
 
    @Test
    public void testTripleMention() {
-      final List<Dimension> cancerSizes = SizeFinder.getDimensions( MULTIPLE_MENTION_SENTENCE_4 );
+      final List<Quantity> cancerSizes = SizeFinder.getQuantities( MULTIPLE_MENTION_SENTENCE_4 );
       assertEquals( "Expect three Cancer Sizes in " + MULTIPLE_MENTION_SENTENCE_4, 3, cancerSizes.size() );
-      testMeasurement( MULTIPLE_MENTION_SENTENCE_4, cancerSizes.get( 0 ).getSpannedValue(), "2.8 mm" );
-      testMeasurement( MULTIPLE_MENTION_SENTENCE_4, cancerSizes.get( 1 ).getSpannedValue(), "1.4 mm" );
-      testMeasurement( MULTIPLE_MENTION_SENTENCE_4, cancerSizes.get( 2 ).getSpannedValue(), "1.9 mm" );
+      testMeasurement( MULTIPLE_MENTION_SENTENCE_4, cancerSizes.get( 0 ).getSpannedValue(), "2.8" );
+      testUnit( MULTIPLE_MENTION_SENTENCE_4, cancerSizes.get( 0 ), "mm" );
+      testMeasurement( MULTIPLE_MENTION_SENTENCE_4, cancerSizes.get( 1 ).getSpannedValue(), "1.4" );
+      testUnit( MULTIPLE_MENTION_SENTENCE_4, cancerSizes.get( 1 ), "mm" );
+      testMeasurement( MULTIPLE_MENTION_SENTENCE_4, cancerSizes.get( 2 ).getSpannedValue(), "1.9" );
+      testUnit( MULTIPLE_MENTION_SENTENCE_4, cancerSizes.get( 2 ), "mm" );
    }
 
    @Test
    public void testTripleAndMention() {
-      final List<Dimension> cancerSizes = SizeFinder.getDimensions( MULTIPLE_MENTION_SENTENCE_5 );
+      final List<Quantity> cancerSizes = SizeFinder.getQuantities( MULTIPLE_MENTION_SENTENCE_5 );
       assertEquals( "Expect four Cancer Sizes in " + MULTIPLE_MENTION_SENTENCE_5, 4, cancerSizes.size() );
-      testMeasurement( MULTIPLE_MENTION_SENTENCE_5, cancerSizes.get( 0 ).getSpannedValue(), "2.8 mm" );
-      testMeasurement( MULTIPLE_MENTION_SENTENCE_5, cancerSizes.get( 1 ).getSpannedValue(), "1.4 mm" );
-      testMeasurement( MULTIPLE_MENTION_SENTENCE_5, cancerSizes.get( 2 ).getSpannedValue(), "1.9 mm" );
-      testMeasurement( MULTIPLE_MENTION_SENTENCE_5, cancerSizes.get( 3 ).getSpannedValue(), "2 cm" );
+      testMeasurement( MULTIPLE_MENTION_SENTENCE_5, cancerSizes.get( 0 ).getSpannedValue(), "2.8" );
+      testUnit( MULTIPLE_MENTION_SENTENCE_5, cancerSizes.get( 0 ), "mm" );
+      testMeasurement( MULTIPLE_MENTION_SENTENCE_5, cancerSizes.get( 1 ).getSpannedValue(), "1.4" );
+      testUnit( MULTIPLE_MENTION_SENTENCE_5, cancerSizes.get( 1 ), "mm" );
+      testMeasurement( MULTIPLE_MENTION_SENTENCE_5, cancerSizes.get( 2 ).getSpannedValue(), "1.9" );
+      testUnit( MULTIPLE_MENTION_SENTENCE_5, cancerSizes.get( 2 ), "mm" );
+      testMeasurement( MULTIPLE_MENTION_SENTENCE_5, cancerSizes.get( 3 ).getSpannedValue(), "2" );
+      testUnit( MULTIPLE_MENTION_SENTENCE_5, cancerSizes.get( 3 ), "cm" );
    }
 
    static private void testMeasurement( final String sentence,
@@ -84,6 +96,13 @@ public class SizeTester {
                                         final String expectedValue ) {
       assertEquals(
             "Expected " + expectedValue + " in " + sentence, expectedValue, spannedValue.getValue().getTitle() );
+   }
+
+   static private void testUnit( final String sentence,
+                                 final Quantity quantity,
+                                 final String expectedType ) {
+      assertEquals(
+            "Expected " + expectedType + " in " + sentence, expectedType, quantity.getUnitText() );
    }
 
 }

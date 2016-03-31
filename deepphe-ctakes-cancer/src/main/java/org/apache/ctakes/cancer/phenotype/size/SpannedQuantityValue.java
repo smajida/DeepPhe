@@ -11,12 +11,12 @@ import javax.annotation.concurrent.Immutable;
  * @since 2/8/2016
  */
 @Immutable
-final class SpannedDimensionValue extends SpannedValue<DimensionValue> {
+final class SpannedQuantityValue extends SpannedValue<QuantityValue> {
 
-   static private final Logger LOGGER = Logger.getLogger( "SpannedDimensionValue" );
+   static private final Logger LOGGER = Logger.getLogger( "SpannedQuantityValue" );
 
 
-   SpannedDimensionValue( final DimensionValue sizeValue, final int startOffset, final int endOffset ) {
+   SpannedQuantityValue( final QuantityValue sizeValue, final int startOffset, final int endOffset ) {
       super( sizeValue, startOffset, endOffset );
    }
 
