@@ -43,7 +43,12 @@ public class MedicalRecord implements Element {
 		}
 		return b.toString();
 	}
-	
+
+	@Override
+	public void setReport(Report r) {
+		
+	}
+
 	public String getPatientIdentifier() {
 		if(patientIdentifier == null && patient != null)
 			patientIdentifier = getPatient().getResourceIdentifier();
