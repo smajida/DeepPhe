@@ -6,7 +6,6 @@ import org.apache.ctakes.cancer.phenotype.size.SizeFinder;
 import org.apache.ctakes.cancer.phenotype.stage.StageFinder;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmFinder;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
-import org.apache.ctakes.typesystem.type.textspan.Segment;
 import org.apache.log4j.Logger;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
@@ -16,6 +15,7 @@ import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.tcas.Annotation;
+import org.apache.uima.jcas.tcas.DocumentAnnotation;
 import org.apache.uima.resource.ResourceInitializationException;
 
 import java.util.Collection;
@@ -34,7 +34,8 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
    public static final String PARAM_WINDOW_ANNOT_PRP = "cancerWindowAnnotations";
    static private final Logger LOGGER = Logger.getLogger( "CancerPropertiesAnnotator" );
    @ConfigurationParameter( name = PARAM_WINDOW_ANNOT_PRP, mandatory = false )
-   private Class<? extends Annotation> _lookupWindowType = Segment.class;
+//   private Class<? extends Annotation> _lookupWindowType = Segment.class;
+   private Class<? extends Annotation> _lookupWindowType = DocumentAnnotation.class;
 
 
    /**
@@ -67,7 +68,9 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
                OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Metastasis" );
 
          masses.addAll( breastNeoplasms );
-         SizeFinder.addSizes( jcas, lookupWindow, masses );
+         if ( !masses.isEmpty() ) {
+            SizeFinder.addSizes( jcas, lookupWindow, masses );
+         }
       }
 
 //      OwlOntologyConceptUtil.getUris( jcas ).stream().forEach( System.out::println );

@@ -76,7 +76,7 @@ final public class SizePropertyUtil extends AbstractPropertyUtil<QuantityUnit, Q
     */
    @Override
    public String getValueUri( final String valueText ) {
-      return QuantityValue.QUANTITY_URI;
+      return QuantityValue.NUMERIC_VALUE_URI;
    }
 
    /**

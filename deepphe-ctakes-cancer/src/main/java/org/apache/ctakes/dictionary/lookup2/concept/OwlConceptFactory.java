@@ -72,8 +72,17 @@ public class OwlConceptFactory implements ConceptFactory {
 
 
    static private Map<Long, Concept> createOwlConcepts( final IClass iClass ) {
-      final String cui = OwlParserUtil.getCui( iClass );
+      final edu.pitt.dbmi.nlp.noble.terminology.Concept concept = iClass.getConcept();
+      final String cui = OwlParserUtil.getCui( concept );
       if ( cui == null ) {
+         return Collections.emptyMap();
+      }
+      final String tui = OwlParserUtil.getTui( concept );
+      if ( tui == null ) {
+         return Collections.emptyMap();
+      }
+      final String[] synonyms = concept.getSynonyms();
+      if ( synonyms == null || synonyms.length == 0 ) {
          return Collections.emptyMap();
       }
       final Long cuiCode = CuiCodeUtil.getInstance().getCuiCode( cui );

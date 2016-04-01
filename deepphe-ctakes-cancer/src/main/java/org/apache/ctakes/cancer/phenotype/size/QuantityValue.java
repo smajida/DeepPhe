@@ -36,7 +36,7 @@ public class QuantityValue implements Value {
 
    static private final String DIMENSION_REGEX = "\\d+(\\.\\d+)?";
 
-   static final String QUANTITY_URI = "Quantity";
+   static final String NUMERIC_VALUE_URI = "NumericModifier";
    static private final Pattern PATTERN = Pattern.compile( DIMENSION_REGEX, Pattern.CASE_INSENSITIVE );
    private final String _value;
 
@@ -58,7 +58,7 @@ public class QuantityValue implements Value {
     */
    @Override
    public String getUri() {
-      return OwlOntologyConceptUtil.CONTEXT_OWL + "#" + QUANTITY_URI;
+      return OwlOntologyConceptUtil.CONTEXT_OWL + "#" + NUMERIC_VALUE_URI;
    }
 
    /**
