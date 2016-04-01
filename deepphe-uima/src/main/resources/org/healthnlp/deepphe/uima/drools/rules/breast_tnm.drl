@@ -1,0 +1,85 @@
+import org.healthnlp.deepphe.fhir.fact.Fact;
+
+import java.util.Set;
+import java.lang.Integer;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
+
+
+/*
+* If there is an instance of M1, then create instance of tumor with tumor type = "metastasis". 
+* ==
+*M1(?m1), Tumor(?tumor), DistantRecurrence(?met), swrlx:makeOWLThing(?m1, ?tumor, ?met) -> hasTumorType(?tumor, ?met) 
+*/
+rule "TNM_M1-1"
+	when
+	
+		//$fact : Fact(category == "hasMClassification", name matches ".*M1.*")
+		
+		$mMap : Map()
+		from accumulate ( $fact : Fact(category == "hasMClassification", $uri : uri, name matches ".*M1.*"),
+			init( HashMap m = new HashMap(); ),
+			action( if(m.get($uri) == null) m.put($uri, new ArrayList());
+			((List)m.get($uri)).add($fact); ),
+            reverse ( ((List)m.get($uri)).remove($fact); ), 
+        	result( m ) )
+		
+	then 
+		System.out.println(" ***** FOUND METASTASIS facts "+$mMap);
+		//System.out.println(" ***** FOUND METASTASIS facts "+$fact);
+ end
+ 
+
+
+/*
+* If there is an instance of pN1, then create an instance of positive lymph node. 
+* ==
+* pN1(?pn1), Positive(?pos), LymphNodeInvolvement(?lni), Tumor(?tumor), LocalRecurrence(?locrec), 
+* TumorPhenotype(?tumphen), swrlx:makeOWLThing(?pn1, ?lni, ?tumor, ?tumphen) -> 
+* hasInterpretation(?lni, ?pos), hasTumorType(?tumor, ?locrec), hasPhenotype(?tumor, ?tumphen), hasManifestation(?tumphen, ?lni) 
+*/
+rule "TNM_pN1-1"
+	when
+		$fact : Fact(category == "hasNClassification", name matches ".*pN1.*")
+	then 
+		System.out.println(" ***** FOUND positive lymph node "+$fact);
+ end 
+ 
+	
+/*
+* If there is an instance of Tis, then create an instance of tumor with tumor type="primary" 
+* that has a tumor phenotype with tumor extent="in-situ". 
+* ==
+* Tis(?tis), Tumor(?tumor), TumorPhenotype(?tumphen), PrimaryTumor(?primary), In-Situ(?insitu), 
+* swrlx:makeOWLThing(?tis, ?tumor, ?tumorphen, ?insitu) -> hasTumorType(?tumor, ?primary), 
+* hasPhenotype(?tumor, ?tumorphen), hasTumorExtent(?tumorphen, ?insitu) 
+*/
+rule "TNM_Tis-1 - not working " 
+	when
+		$fact : Fact(category == "hasTClassification", name matches ".*Tis.*")
+		
+	then 
+		System.out.println(" ***** FOUND Tis-1 "+$fact);
+ end 
+ 
+ 
+/*
+* If there is an instance of pN1mi, then create an instance of tumors with 
+* tumor type ="distant recurrence" and body site = "lymph node" 
+* ==
+* pN1mi(?pn), Tumor(?tumor), DistantRecurrence(?distant), 'Lymph Node'(?ln), BreastCancerTumorPhenotype(?tumorphen), 
+* Micrometastasis(?micromet) -> hasTumorType(?tumor, ?distant), 
+* hasPhenotype(?tumor, ?tumorphen), hasManifestation(?tumorphen, ?micromet) 
+*/
+rule "TNM_pN1m1-1"
+	when
+		$fact : Fact(category == "hasNClassification", name matches ".*pN1m1.*")
+	then 
+		System.out.println(" ***** FOUND positive lymph node "+$fact);
+ end  
+
+
+    
