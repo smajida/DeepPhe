@@ -4,8 +4,6 @@ import java.net.URI;
 
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
-import org.neo4j.ogm.annotation.NodeEntity;
-
 
 public class CancerPhenotype extends Summary{
 	public FactList getCancerStage() {

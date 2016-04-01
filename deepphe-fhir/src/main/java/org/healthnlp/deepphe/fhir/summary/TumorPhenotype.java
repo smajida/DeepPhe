@@ -1,9 +1,9 @@
 package org.healthnlp.deepphe.fhir.summary;
 
+import java.net.URI;
+
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
-
-import java.net.URI;
 
 public class TumorPhenotype extends Summary{
 	public FactList getManifestations() {

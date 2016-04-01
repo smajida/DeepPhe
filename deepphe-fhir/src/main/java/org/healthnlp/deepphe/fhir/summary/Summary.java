@@ -1,13 +1,5 @@
 package org.healthnlp.deepphe.fhir.summary;
 
-import java.io.File;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
@@ -18,30 +10,15 @@ import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.List_;
 import org.hl7.fhir.instance.model.Resource;
-import org.neo4j.ogm.annotation.GraphId;
-import org.neo4j.ogm.annotation.NodeEntity;
+
+import java.io.File;
+import java.net.URI;
+import java.util.*;
 
 
 public abstract class Summary extends List_  implements Element {
-	
-	@GraphId
-	Long objectId;
-	
-	public Long getObjectId() {
-		 return objectId;
-	}
-	
-	public void setObjectId(Long id){
-		this.objectId = id;
-	}
-	
-	@org.neo4j.ogm.annotation.Transient
 	protected Report report;
-	
-	@org.neo4j.ogm.annotation.Transient
 	protected Patient patient;
-	
-	
 	private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
 	protected Map<String,FactList> content;
 	public Map<String, FactList> getContent() {
@@ -126,7 +103,7 @@ public abstract class Summary extends List_  implements Element {
 			f.setDocumentType(tp);
 		}
 	}
-	@org.neo4j.ogm.annotation.Transient
+
 	public Patient getPatient() {
 		return patient;
 	}
@@ -134,7 +111,7 @@ public abstract class Summary extends List_  implements Element {
 	public void setPatient(Patient patient) {
 		this.patient = patient;
 	}
-	@org.neo4j.ogm.annotation.Transient
+
 	public Report getReport() {
 		return report;
 	}
