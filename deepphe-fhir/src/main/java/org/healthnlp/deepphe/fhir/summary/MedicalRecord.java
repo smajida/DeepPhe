@@ -61,8 +61,6 @@ public class MedicalRecord implements Element {
 	public URI getConceptURI() {
 		return FHIRConstants.MEDICAL_RECORD_URI;
 	}
-	public void setReport(Report r) {
-	}
 	public void save(File e) throws Exception {
 	}
 	public void copy(Resource r) {
