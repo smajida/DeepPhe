@@ -1,0 +1,86 @@
+package org.healthnlp.deepphe.neo4j.summary;
+
+import org.healthnlp.deepphe.fhir.Patient;
+import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.util.FHIRConstants;
+import org.healthnlp.deepphe.util.FHIRUtils;
+import org.hl7.fhir.instance.model.CodeableConcept;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+
+
+/**
+ * medical record for a given patient
+ * @author tseytlin
+ *
+ */
+public class MedicalRecord {
+	private String patientIdentifier;
+	private Patient patient;
+	private PatientSummary patientSummary;
+	private CancerSummary cancerSummary;
+	private List<Report> reports;
+
+	public String getDisplayText() {
+		return (patient != null? patient.getPatientName():"Generic")+" Medical Record";
+	}
+	public String getSummaryText() {
+		StringBuffer b = new StringBuffer(getDisplayText());
+		b.append("\n==========================\n");
+		if(patientSummary != null){
+			b.append(patientSummary.getSummaryText()+"\n");
+		}
+		if(cancerSummary != null){
+			b.append(cancerSummary.getSummaryText());
+		}
+		return b.toString();
+	}
+
+	public String getPatientIdentifier() {
+		if(patientIdentifier == null && patient != null)
+			patientIdentifier = getPatient().getResourceIdentifier();
+		return patientIdentifier;
+	}
+	public void setPatientIdentifier(String patientIdentifier) {
+		this.patientIdentifier = patientIdentifier;
+	}
+
+	public CodeableConcept getCode() {
+		return FHIRUtils.getCodeableConcept(getConceptURI());
+	}
+	public URI getConceptURI() {
+		return FHIRConstants.MEDICAL_RECORD_URI;
+	}
+	public String getAnnotationType() {
+		return FHIRConstants.ANNOTATION_TYPE_RECORD;
+	}
+	public Patient getPatient() {
+		return patient;
+	}
+	public void setPatient(Patient patient) {
+		this.patient = patient;
+	}
+	public PatientSummary getPatientSummary() {
+		return patientSummary;
+	}
+	public void setPatientSummary(PatientSummary patientSummary) {
+		this.patientSummary = patientSummary;
+	}
+	public CancerSummary getCancerSummary() {
+		return cancerSummary;
+	}
+	public void setCancerSummary(CancerSummary cancerSummary) {
+		this.cancerSummary = cancerSummary;
+	}
+	public List<Report> getReports() {
+		if(reports == null)
+			reports = new ArrayList<Report>();
+		return reports;
+	}
+	public void setReports(List<Report> reports) {
+		this.reports = reports;
+	}
+
+}

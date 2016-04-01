@@ -43,7 +43,7 @@ public class TumorSummary extends Summary {
 	public FactList getTreatment() {
 		return getFactsOrInsert(FHIRConstants.HAS_TREATMENT);
 	}
-	public FactList getSequenceVarients() {
+	public FactList getSequenceVariants() {
 		return getFactsOrInsert(FHIRConstants.HAS_SEQUENCE_VARIENT);
 	}
 	public FactList getOutcome() {
@@ -62,7 +62,8 @@ public class TumorSummary extends Summary {
 		StringBuffer st = new StringBuffer(super.getSummaryText());
 		// add phenotype
 		if(getPhenotype() != null){
-			st.append(getPhenotype().getSummaryText()+"\n");
+			st.append(getPhenotype().getSummaryText());
+			st.append("\n");
 		}
 		return st.toString();
 	}
