@@ -21,7 +21,7 @@ import org.hl7.fhir.instance.model.Resource;
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
 
-@NodeEntity
+
 public abstract class Summary extends List_  implements Element {
 	
 	@GraphId

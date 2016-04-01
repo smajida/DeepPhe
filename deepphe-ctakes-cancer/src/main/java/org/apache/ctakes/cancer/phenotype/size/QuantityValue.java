@@ -1,5 +1,6 @@
 package org.apache.ctakes.cancer.phenotype.size;
 
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.phenotype.property.Value;
 
 import java.util.logging.Logger;
@@ -11,11 +12,11 @@ import java.util.regex.Pattern;
  * @version %I%
  * @since 2/29/2016
  */
-public class DimensionValue implements Value {
+public class QuantityValue implements Value {
 
-   static private final Logger LOGGER = Logger.getLogger( "DimensionValue" );
+   static private final Logger LOGGER = Logger.getLogger( "QuantityValue" );
 
-   static DimensionValue UNKNOWN = new DimensionValue( "" ) {
+   static QuantityValue UNKNOWN = new QuantityValue( "" ) {
       public String getTitle() {
          return "Unknown";
       }
@@ -35,12 +36,12 @@ public class DimensionValue implements Value {
 
    static private final String DIMENSION_REGEX = "\\d+(\\.\\d+)?";
 
-   static final String QUANTITY_URI = "http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity";
+   static final String QUANTITY_URI = "Quantity";
    static private final Pattern PATTERN = Pattern.compile( DIMENSION_REGEX, Pattern.CASE_INSENSITIVE );
    private final String _value;
 
 
-   DimensionValue( final String value ) {
+   QuantityValue( final String value ) {
       _value = value;
    }
 
@@ -57,7 +58,7 @@ public class DimensionValue implements Value {
     */
    @Override
    public String getUri() {
-      return QUANTITY_URI;
+      return OwlOntologyConceptUtil.CONTEXT_OWL + "#" + QUANTITY_URI;
    }
 
    /**

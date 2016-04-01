@@ -23,7 +23,7 @@ import org.apache.log4j.Logger;
  * @version %I%
  * @since 2/8/2016
  */
-final public class SizePropertyUtil extends AbstractPropertyUtil<DimensionType, DimensionValue> {
+final public class SizePropertyUtil extends AbstractPropertyUtil<QuantityUnit, QuantityValue> {
 
    static private final Logger LOGGER = Logger.getLogger( "SizePropertyUtil" );
 
@@ -44,23 +44,23 @@ final public class SizePropertyUtil extends AbstractPropertyUtil<DimensionType, 
     */
    @Override
    public boolean isCorrectProperty( final IdentifiedAnnotation annotation ) {
-      return isCorrectProperty( annotation, DimensionType.values() );
+      return isCorrectProperty( annotation, QuantityUnit.values() );
    }
 
    /**
     * {@inheritDoc}
     */
    @Override
-   protected DimensionValue getUriValue( final String uri ) {
-      return DimensionValue.UNKNOWN;
+   protected QuantityValue getUriValue( final String uri ) {
+      return QuantityValue.UNKNOWN;
    }
 
    /**
     * {@inheritDoc}
     */
    @Override
-   protected DimensionValue getUnknownValue() {
-      return DimensionValue.UNKNOWN;
+   protected QuantityValue getUnknownValue() {
+      return QuantityValue.UNKNOWN;
    }
 
    /**
@@ -68,7 +68,7 @@ final public class SizePropertyUtil extends AbstractPropertyUtil<DimensionType, 
     */
    @Override
    public String getTypeUri( final String typeText ) {
-      return getTypeUri( typeText, DimensionType.values() );
+      return getTypeUri( typeText, QuantityUnit.values() );
    }
 
    /**
@@ -76,14 +76,14 @@ final public class SizePropertyUtil extends AbstractPropertyUtil<DimensionType, 
     */
    @Override
    public String getValueUri( final String valueText ) {
-      return DimensionValue.QUANTITY_URI;
+      return QuantityValue.QUANTITY_URI;
    }
 
    /**
     * @return the uri acting as parent to all individual tnm property uris
     */
    static public String getParentUri() {
-      return Dimension.DIMENSION_URI;
+      return Quantity.QUANTITY_URI;
    }
 
 

@@ -141,7 +141,7 @@ abstract public class AbstractPhenotypeFactory<T extends Type, V extends Value, 
                                    final String valueUri, final int valueBegin, final int valueEnd,
                                    final Iterable<IdentifiedAnnotation> neoplasms,
                                    final Iterable<IdentifiedAnnotation> diagnosticTests ) {
-      final E eventMention = createEventMention( jcas, typeBegin, typeEnd );
+      final E eventMention = createSpanEventMention( jcas, typeBegin, typeEnd );
       final UmlsConcept umlsConcept = UriAnnotationFactory.createUmlsConcept( jcas, typeUri );
       final FSArray conceptArray = new FSArray( jcas, 1 );
       conceptArray.set( 0, umlsConcept );
@@ -154,18 +154,18 @@ abstract public class AbstractPhenotypeFactory<T extends Type, V extends Value, 
    }
 
    /**
-    * Create a sign/symptom and add it to the cas
+    * Create an event mention based upon spanned property type and add it to the cas
     *
     * @param jcas              -
     * @param windowStartOffset character offset of window containing the property
     * @param spannedProperty   -
     * @return the property as a event mention
     */
-   final protected E createEventMention( final JCas jcas,
-                                         final int windowStartOffset,
-                                         final SpannedProperty<T, V> spannedProperty ) {
+   final protected E createTypeEventMention( final JCas jcas,
+                                             final int windowStartOffset,
+                                             final SpannedProperty<T, V> spannedProperty ) {
       final SpannedType<T> spannedType = spannedProperty.getSpannedType();
-      final E typeMention = createEventMention( jcas,
+      final E typeMention = createSpanEventMention( jcas,
             windowStartOffset + spannedType.getStartOffset(),
             windowStartOffset + spannedType.getEndOffset() );
       final SpannedValue<V> spannedValue = spannedProperty.getSpannedValue();
@@ -189,12 +189,37 @@ abstract public class AbstractPhenotypeFactory<T extends Type, V extends Value, 
    }
 
    /**
+    * Create a sign/symptom and add it to the cas
+    *
+    * @param jcas              -
+    * @param eventUri -
+    * @param windowStartOffset -
+    * @param spannedProperty   -
+    * @return the property as a event mention
+    */
+   final protected E createPropertyEventMention( final JCas jcas, final String eventUri,
+                                                 final int windowStartOffset,
+                                                 final SpannedProperty<T, V> spannedProperty ) {
+
+      final E eventMention = createSpanEventMention( jcas,
+            windowStartOffset + spannedProperty.getStartOffset(),
+            windowStartOffset + spannedProperty.getEndOffset() );
+      // Main Umls Concept
+      final UmlsConcept umlsConcept = UriAnnotationFactory.createUmlsConcept( jcas, eventUri );
+      final FSArray ontologyConcepts = new FSArray( jcas, 1 );
+      ontologyConcepts.set( 0, umlsConcept );
+      eventMention.setOntologyConceptArr( ontologyConcepts );
+      eventMention.addToIndexes();
+      return eventMention;
+   }
+
+   /**
     * @param jcas        -
     * @param startOffset -
     * @param endOffset   -
     * @return EventMention of the proper type at the given text span
     */
-   abstract protected E createEventMention( final JCas jcas, final int startOffset, final int endOffset );
+   abstract protected E createSpanEventMention( final JCas jcas, final int startOffset, final int endOffset );
 
    /**
     * Create a modifier and add it to the cas
@@ -234,7 +259,7 @@ abstract public class AbstractPhenotypeFactory<T extends Type, V extends Value, 
     * Create a modifier and add it to the cas
     *
     * @param jcas        -
-    * @param valueUri    uri for the value modifier
+    * @param valueUri    uri for the value modifier.  Cui, Tui and Preferred text will be based upon uri iclass
     * @param beginOffset -
     * @param endOffset   -
     * @return the modifier representing the value of the property

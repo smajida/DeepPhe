@@ -74,4 +74,19 @@ public class ObservationFact extends Fact {
 		}
 		return facts;
 	}
+	
+	/**
+	 * get a value for this fact for a given property
+	 * @param property
+	 * @return
+	 */
+	public Fact getValue(String property){
+		if(FHIRConstants.HAS_INTERPRETATION.equals(property))
+			return getInterpretation();
+		if(FHIRConstants.HAS_NUM_VALUE.equals(property))
+			return getValue();
+		if(FHIRConstants.HAS_METHOD.equals(property))
+			return getMethod();
+		return this;
+	}
 }

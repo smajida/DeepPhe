@@ -201,4 +201,14 @@ public class Fact {
 		facts.addAll(fact.getContainedFacts());
 		return facts;
 	}
+	
+	/**
+	 * get a value for this fact for a given property
+	 * @param property
+	 * @return
+	 */
+	public Fact getValue(String property){
+		return this;
+	}
+	
 }

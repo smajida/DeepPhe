@@ -68,6 +68,10 @@ public class FHIRConstants {
 	public static final String HAS_GENDER = "hasGender";
 	public static final String HAS_BIRTH_DATE = "hasBirthDate";
 	public static final String HAS_DEATH_DATE = "hasDeathDate";
+	public static final String HAS_INTERPRETATION = "hasInterpretation";
+	public static final String HAS_NUM_VALUE = "hasNumValue";
+	public static final String HAS_METHOD = "hasMethod";
+	
 	
 	public static final String T_STAGE = "T_Stage";
 	public static final String M_STAGE = "M_Stage";
@@ -109,6 +113,7 @@ public class FHIRConstants {
 	public static final String DISCHARGE_SUMMARY_URI = null;
 	public static final String PROGRESS_NOTE_URI = null;*/
 	public static final URI QUANTITY_URI = URI.create("http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity");
+
 
 
 

@@ -12,17 +12,17 @@ import java.util.regex.Pattern;
  * @version %I%
  * @since 2/29/2016
  */
-enum DimensionType implements Type {
+enum QuantityUnit implements Type {
    //   CENTIMETER( "centimeter", "Centimeter", "cm" ),
 //   MILLIMETER( "millimeter", "Unit_of_Length", "mm" );
-   MEASUREMENT( "Size", "DimensionalMeasurement", "(cm|mm)" );
+   MEASUREMENT( "Unit", "Unit_of_Length", "(cm|mm)" ); // or OwlOntologyConceptUtil.CONTEXT_OWL + "#" + "Unit"
 
 
    final private String _title;
    final private String _uri;
    final private Pattern _pattern;
 
-   DimensionType( final String title, final String uri, final String regex ) {
+   QuantityUnit( final String title, final String uri, final String regex ) {
       _title = title;
       _uri = uri;
       _pattern = Pattern.compile( regex, Pattern.CASE_INSENSITIVE );
@@ -41,7 +41,7 @@ enum DimensionType implements Type {
     */
    @Override
    public String getUri() {
-      return OwlOntologyConceptUtil.CONTEXT_OWL + "#" + _uri;
+      return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + _uri;
    }
 
    /**

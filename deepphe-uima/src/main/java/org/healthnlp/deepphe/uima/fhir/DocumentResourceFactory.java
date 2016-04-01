@@ -2,7 +2,10 @@ package org.healthnlp.deepphe.uima.fhir;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
+import edu.pitt.dbmi.nlp.noble.ontology.IResource;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
+
 import org.apache.ctakes.cancer.concept.instance.ConceptInstance;
 import org.apache.ctakes.cancer.concept.instance.ConceptInstanceUtil;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
@@ -11,6 +14,7 @@ import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.core.util.DocumentIDAnnotationUtil;
+import org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.CASException;
@@ -28,6 +32,7 @@ import org.hl7.fhir.instance.model.Condition.ConditionStageComponent;
 import org.hl7.fhir.instance.model.Procedure.ProcedureStatus;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -241,7 +246,7 @@ final public class DocumentResourceFactory {
 	static private <T extends Element> List<T> getElementList( final JCas jcas, final URI uri,
 																				  final Function<ConceptInstance, ? extends T> mapper ) {
 		return cTAKESUtils.getAnnotationsByType( jcas, uri ).stream()
-				.filter( t -> (!t.isNegated() && !t.isUncertain()) )
+				.filter( t -> (!t.isNegated()) )
 				.map( mapper )
 				.collect( Collectors.toList() );
 	}
@@ -520,10 +525,8 @@ final public class DocumentResourceFactory {
 			}
 		}
 
-		Collection<IdentifiedAnnotation> stages = cTAKESUtils
-				.getCancerStages( conceptInstance.getIdentifiedAnnotation() );
-		Collection<IdentifiedAnnotation> tnms = cTAKESUtils
-				.getTnmClassifications( conceptInstance.getIdentifiedAnnotation() );
+		Collection<IdentifiedAnnotation> stages = cTAKESUtils.getCancerStages( conceptInstance.getIdentifiedAnnotation() );
+		Collection<IdentifiedAnnotation> tnms = cTAKESUtils.getTnmClassifications( conceptInstance.getIdentifiedAnnotation());
 		dx.setStage( createStage( stages, tnms ) );
 
 		// add mention text
@@ -562,6 +565,24 @@ final public class DocumentResourceFactory {
 		return load( new Observation(), conceptInstance );
 	}
 	
+	
+	private static URI getResolvedURL(String name){
+		try {
+			IOntology ont = OwlConnectionFactory.getInstance().getDefaultOntology();
+			if(ont != null){
+				IResource r = ont.getResource(name);
+				return r != null?r.getURI():URI.create(ont.getURI()+"#"+name);
+			}
+		} catch (FileNotFoundException e) {
+			new Error(e);
+		} catch (IOntologyException e) {
+			new Error(e);
+		}
+		
+		return URI.create(FHIRConstants.MODEL_CANCER_URL+"#"+name);
+	}
+	
+	
 	/**
 	 * Initialize disease from a DiseaseDisorderMention in cTAKES typesystem
 	 * @param ob -
@@ -583,8 +604,12 @@ final public class DocumentResourceFactory {
 		// TODO - a lot of things got mucked up with the new "stick to ctakes" methods
 		// TODO - what to do with this?  We need measurement and unit.  Can we just split(" ") ?
 		// if cancer size, then use their value
+		//conceptInstance.get
+		
+		//ConceptInstanceUtil.get(phenotype)
 		SizeMeasurement num = cTAKESUtils.getSizeMeasurement( conceptInstance.getIdentifiedAnnotation() );
 		if(num != null){
+			ob.setCode( FHIRUtils.getCodeableConcept(getResolvedURL(FHIRConstants.TUMOR_SIZE)));
 			ob.setValue(num.getValue(),num.getUnit());
 		}
 		

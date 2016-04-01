@@ -1,12 +1,8 @@
 package org.apache.ctakes.cancer.pipeline;
 
 
-import org.apache.ctakes.assertion.medfacts.cleartk.PolarityCleartkAnalysisEngine;
 import org.apache.ctakes.assertion.medfacts.cleartk.UncertaintyCleartkAnalysisEngine;
-import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
-import org.apache.ctakes.cancer.ae.PittHeaderAnnotator;
-import org.apache.ctakes.cancer.ae.PittHeaderCleaner;
-import org.apache.ctakes.cancer.ae.PropertyToEventCopier;
+import org.apache.ctakes.cancer.ae.*;
 import org.apache.ctakes.chunker.ae.Chunker;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.CopyNPChunksToLookupWindowAnnotations;
@@ -17,13 +13,12 @@ import org.apache.ctakes.core.ae.TokenizerAnnotatorPTB;
 import org.apache.ctakes.core.cc.FileTreeXmiWriter;
 import org.apache.ctakes.core.cr.FileTreeReader;
 import org.apache.ctakes.core.cr.FilesInDirectoryCollectionReader;
-import org.apache.ctakes.coreference.ae.DeterministicMarkableAnnotator;
 import org.apache.ctakes.coreference.ae.MarkableSalienceAnnotator;
 import org.apache.ctakes.coreference.ae.MentionClusterCoreferenceAnnotator;
-import org.apache.ctakes.coreference.eval.EvaluationOfEventCoreference.RemovePersonMarkables;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.JCasTermAnnotator;
+import org.apache.ctakes.necontexts.ContextAnnotator;
 import org.apache.ctakes.postagger.POSTagger;
 import org.apache.ctakes.relationextractor.ae.LocationOfRelationExtractorAnnotator;
 import org.apache.ctakes.relationextractor.ae.ModifierExtractorAnnotator;
@@ -146,7 +141,8 @@ final public class CancerPipelineFactory {
    static private void addAttributeEngines( final AggregateBuilder aggregateBuilder )
          throws ResourceInitializationException {
       aggregateBuilder.add( ClearNLPDependencyParserAE.createAnnotatorDescription() );
-      aggregateBuilder.add( PolarityCleartkAnalysisEngine.createAnnotatorDescription() );
+//      aggregateBuilder.add( PolarityCleartkAnalysisEngine.createAnnotatorDescription() );
+      aggregateBuilder.add( ContextAnnotator.createAnnotatorDescription() );
       aggregateBuilder.add( UncertaintyCleartkAnalysisEngine.createAnnotatorDescription() );
 //      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ClearNLPSemanticRoleLabelerAE.class ) );
 //      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ConstituencyParser.class ) );
@@ -187,8 +183,7 @@ final public class CancerPipelineFactory {
 
    private static void addCorefEngines( final AggregateBuilder aggregateBuilder )
          throws ResourceInitializationException {
-      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( DeterministicMarkableAnnotator.class ) );
-      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( RemovePersonMarkables.class ) );
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( IdentifiedAnnotationMarkableAnnotator.class ) );
       aggregateBuilder.add( MarkableSalienceAnnotator
             .createAnnotatorDescription( "/org/apache/ctakes/temporal/ae/salience/model.jar" ) );
       aggregateBuilder.add( MentionClusterCoreferenceAnnotator

@@ -267,7 +267,7 @@ final public class PhenotypeAnnotationUtil {
       if ( relations == null || relations.isEmpty() ) {
          return Collections.emptyList();
       }
-      return getFirstArguments( relations, locatable );
+      return getSecondArguments( relations, locatable );
    }
 
 

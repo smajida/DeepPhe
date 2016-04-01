@@ -51,7 +51,7 @@ final public class TnmPhenotypeFactory extends AbstractPhenotypeFactory<TnmType,
                                               final SpannedProperty<TnmType, TnmValue> tnm,
                                               final Iterable<IdentifiedAnnotation> neoplasms,
                                               final Iterable<IdentifiedAnnotation> diagnosticTests ) {
-      final SignSymptomMention eventMention = createEventMention( jcas, windowStartOffset, tnm );
+      final SignSymptomMention eventMention = createTypeEventMention( jcas, windowStartOffset, tnm );
       final Modifier valueModifier = createValueModifier( jcas, windowStartOffset, tnm );
       createEventMentionDegree( jcas, eventMention, valueModifier );
       createEventMentionNeoplasm( jcas, windowStartOffset, tnm, eventMention, neoplasms );
@@ -63,7 +63,7 @@ final public class TnmPhenotypeFactory extends AbstractPhenotypeFactory<TnmType,
     * {@inheritDoc}
     */
    @Override
-   protected SignSymptomMention createEventMention( final JCas jcas, final int startOffset, final int endOffset ) {
+   protected SignSymptomMention createSpanEventMention( final JCas jcas, final int startOffset, final int endOffset ) {
       final SignSymptomMention finding = new SignSymptomMention( jcas, startOffset, endOffset );
       finding.setTypeID( NE_TYPE_ID_FINDING );
       return finding;
