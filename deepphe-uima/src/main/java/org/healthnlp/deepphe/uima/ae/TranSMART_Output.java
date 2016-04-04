@@ -68,69 +68,74 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
 		File metaFile = new File(outputDir,"tcga-meta-data-import.tsv");
 		File dataFile = new File(outputDir,"tcga-data-import.tsv");
-		
-		
+
 		MedicalRecord record = PhenotypeResourceFactory.loadMedicalRecord(jcas);
-		
-		// create a Transmart meta file (.tsv)
-		//  filename: file where the data is 
-		//	category: + separated category code
-		//	col #:	column number in data
-		//	data label: leaf column name
-		int n = 1;
-		StringBuffer buffer = new StringBuffer();
-		for(Map<String,String> map: mapping){
-			buffer.append(dataFile.getName()+T);
-			buffer.append(map.get(CATEGORY_CODE)+T);
-			//buffer.append(map.get(CATEGORY_NUM)+T);
-			buffer.append(n+T);
-			buffer.append(map.get(DATA_LABEL)+"\n");
-			n++;
-		}
-		// save meta file
-		try {
-			saveText(buffer.toString(),metaFile,false);
-		} catch (IOException e) {
-			throw new AnalysisEngineProcessException(e);
-		}
-		
-		
+
+		writeMetaFile(metaFile, dataFile);
+		writeDataFile(dataFile, record);
+	}
+
+	private void writeDataFile(File dataFile, MedicalRecord record) throws AnalysisEngineProcessException {
+		StringBuffer buffer;
+
+
 		// create a Transmart data file
 		// has actual columns described above
 		buffer  = new StringBuffer();
-		
-		//int lastColumn = 1;
+
+		//Add header
+		int prevColumn = 1;
 		for(Map<String,String> map: mapping){
-			//int column = Integer.parseInt(map.get(CATEGORY_NUM));
+
+			String dataLabel = map.get(DATA_LABEL);
+			int column = Integer.parseInt(map.get(CATEGORY_NUM));
+
+			// pad columns based on a count
+			for(int i=prevColumn;i<column;i++){
+				buffer.append(T);
+			}
+			prevColumn = column;
+
+			buffer.append(dataLabel).append(T);
+		}
+		buffer.append("\n");
+
+
+		//Add Content
+		prevColumn = 1;
+		for(Map<String,String> map: mapping){
+
 			String dataLabel = map.get(DATA_LABEL);
 			String category = map.get(CATEGORY_CODE);
 			String entryClass = map.get(ENTRY_CLASS);
 			String entryRestriction = map.get(ENTRY_RESTRICTION);
 			String entryProperty = map.get(ENTRY_PROPERTY);
-			
+
+			int column = Integer.parseInt(map.get(CATEGORY_NUM));
+
 			// pad columns based on a count
-			/*for(int i=lastColumn;i<column;i++){
+			for(int i=prevColumn;i<column;i++){
 				buffer.append(T);
 			}
-			lastColumn = column;*/
-			
+			prevColumn = column;
+
 			// special case for some data labels
-			String value = "";
-			
+			String value;
+
 			if(STUDY_ID.equals(dataLabel)){
 				value = DEFAULT_STUDY;
 			}else if(SUBJECT_ID.equals(dataLabel)){
-				value = getSubjectId(record); 
+				value = getSubjectId(record);
 			}else{
-				// add value 
+				// add value
 				Summary summary = getSummary(record,category,entryRestriction);
 				value = getSummaryFactValue(summary, entryClass, entryRestriction,entryProperty);
 			}
-			buffer.append(value+T);
+			buffer.append(value).append(T);
 		}
 		buffer.append("\n");
-		
-		
+
+
 		// save meta file
 		try {
 			saveText(buffer.toString(),dataFile,true);
@@ -138,7 +143,40 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 			throw new AnalysisEngineProcessException(e);
 		}
 	}
-	
+
+	/**
+	 *  create a Transmart meta file (.tsv)
+	 *  filename: file where the data is
+	 *	category: + separated category code
+	 *	col #:	column number in data
+	 *	data label: leaf column name
+	 * @param metaFile
+	 * @param dataFile
+	 * @throws AnalysisEngineProcessException
+     */
+	private void writeMetaFile(File metaFile, File dataFile) throws AnalysisEngineProcessException {
+		int count = 1;
+		StringBuffer buffer = new StringBuffer();
+
+		//Add Header
+		buffer.append("Filename").append(T).append("Category Code").append(T).append("Column Number").append(T).append("Data Label");
+
+		//Add Contents
+		for(Map<String,String> map: mapping){
+			buffer.append(dataFile.getName()).append(T);
+			buffer.append(map.get(CATEGORY_CODE)).append(T);
+			//buffer.append(map.get(CATEGORY_NUM)+T);
+			buffer.append(count).append(T);
+			buffer.append(map.get(DATA_LABEL)).append("\n");
+			count++;
+		}
+		// save meta file
+		try {
+			saveText(buffer.toString(),metaFile,false);
+		} catch (IOException e) {
+			throw new AnalysisEngineProcessException(e);
+		}
+	}
 
 
 	private String getSubjectId(MedicalRecord record) {

@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.uima.drools;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kie.api.KieServices;
 import org.kie.api.event.rule.DebugAgendaEventListener;
@@ -34,7 +35,8 @@ public class TestSampleRules {
 			session.dispose();
 		}
 	}
-	
+
+	@Ignore
 	@Test
 	public void testRuleOne() {
 		try{
