@@ -27,7 +27,7 @@ public class Neo4JRESTCallerTest {
 	@Test
 	public void testGetPatients() {
 		String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
-    	String username = "neo4j";
+    	String username = "graph";
     	String password = "neo4jpass";
     
     	DatamodelUtility caller = new DatamodelUtility(SERVER_ROOT_URI, username, password);
@@ -50,7 +50,7 @@ public class Neo4JRESTCallerTest {
     	ClientConfig config = new ClientConfig();
     	Client client = ClientBuilder.newClient(config);
 	    HttpAuthenticationFeature authFeature =
-	            HttpAuthenticationFeature.basic("neo4j", "neo4jpass");
+	            HttpAuthenticationFeature.basic("graph", "neo4jpass");
 	    client.register(authFeature);
  	    WebTarget target = client.target(txUri);
  	    

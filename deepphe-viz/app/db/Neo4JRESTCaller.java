@@ -27,8 +27,8 @@ public class Neo4JRESTCaller {
 	
 	String serverRootURI = "http://localhost:7474/db/data/";
 
-	String username = "neo4j";
-	String password = "neo4j";
+	String username = "graph";
+	String password = "graph";
 	
 	
 	public Neo4JRESTCaller(String serverRootURI, String username, String password) {

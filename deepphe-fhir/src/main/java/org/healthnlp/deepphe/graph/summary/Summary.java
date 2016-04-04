@@ -1,4 +1,4 @@
-package org.healthnlp.deepphe.neo4j.summary;
+package org.healthnlp.deepphe.graph.summary;
 
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.Patient;
@@ -8,6 +8,9 @@ import java.net.URI;
 
 
 public abstract class Summary {
+
+    private Long id;
+
     protected Report report;
     protected Patient patient;
     private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
@@ -32,9 +35,20 @@ public abstract class Summary {
     }
 
     public void setReport(Report r) {
+        if(r==null)
+            return;
+
         report = r;
         if (r.getPatient() != null)
             setPatient(r.getPatient());
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Patient getPatient() {

@@ -10,13 +10,16 @@ import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
+import org.healthnlp.deepphe.graph.GraphObjectFactory;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
+import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.io.fs.FileUtils;
 import org.neo4j.ogm.service.Components;
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
 import org.neo4j.ogm.transaction.Transaction;
 
+import static org.healthnlp.deepphe.graph.GraphObjectFactory.copy;
 
 
 public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
@@ -48,7 +51,7 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
         .setDriverClassName("org.neo4j.ogm.drivers.embedded.driver.EmbeddedDriver")
         .setURI(f.toURI().toString());
 
-		SessionFactory sf = new SessionFactory("org.healthnlp.deepphe.fhir");
+		SessionFactory sf = new SessionFactory(GraphObjectFactory.POJO_PACKAGE);
 
 		return sf;
 	}
@@ -71,8 +74,8 @@ public class GraphDBPhenotypeConsumerAE extends JCasAnnotator_ImplBase {
 
 	public void processPatient(Session session, MedicalRecord mr) {
 		Transaction tx = session.beginTransaction();
-		
-		session.save(mr);
+		org.healthnlp.deepphe.graph.summary.MedicalRecord graphMR = GraphObjectFactory.copy(mr);
+		session.save(graphMR);
 		tx.commit();
 		tx.close();
 

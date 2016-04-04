@@ -1,6 +1,8 @@
 package org.healthnlp.deepphe.uima.fhir;
 
 import org.healthnlp.deepphe.fhir.*;
+import org.healthnlp.deepphe.fhir.fact.DefaultFactList;
+import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.hl7.fhir.instance.model.CodeableConcept;
@@ -38,6 +40,8 @@ public class FHIRObjectMocker {
 
 
 	private void init(){
+		final DefaultFactList bodySiteFL = new DefaultFactList();
+
 		final CodeableConcept bodySiteCC = context.mock(CodeableConcept.class,"bodySiteCC");
 		final CodeableConcept outcomesCC = context.mock(CodeableConcept.class,"outcomesCC");
 		final CodeableConcept treatmentCC = context.mock(CodeableConcept.class,"treatmentCC");
@@ -165,9 +169,7 @@ public class FHIRObjectMocker {
 				will(returnValue("Taxotere"));
 				
 				//CancerSummary
-				allowing(cancerSummary).getObjectId();
-				will(returnValue(null));
-				
+
 				allowing(cancerSummary).getDisplayText();
 				will(returnValue("Cancer Summary"));
 				
@@ -181,7 +183,7 @@ public class FHIRObjectMocker {
 				will(returnValue(FHIRConstants.CANCER_SUMMARY_URI));
 				
 				allowing(cancerSummary).getBodySite();
-				will(returnValue(Collections.singletonList(bodySiteCC)));
+				will(returnValue(bodySiteFL));
 
 				allowing(cancerSummary).getOutcomes();
 				will(returnValue(Collections.singletonList(outcomesCC)));
@@ -191,10 +193,11 @@ public class FHIRObjectMocker {
 
 				allowing(cancerSummary).getPhenotypes();
 				will(returnValue(Collections.singletonList(cancerPhenotype)));
-				
+
+				allowing(cancerSummary).getReport();
+				will(returnValue(report));
 				//Cancer Phenotype
-				allowing(cancerPhenotype).getObjectId();
-				will(returnValue(null));
+
 				
 				allowing(cancerPhenotype).getDisplayText();
 				will(returnValue("Phenotype Summary"));
@@ -233,8 +236,7 @@ public class FHIRObjectMocker {
 				will(returnValue(Collections.singletonList(tumorSummary)));
 				
 				//Tumor Summary
-				allowing(tumorSummary).getObjectId();
-				will(returnValue(null));
+
 				
 				allowing(tumorSummary).getDisplayText();
 				will(returnValue("Tumor Summary"));
@@ -267,8 +269,7 @@ public class FHIRObjectMocker {
 				will(returnValue(tumorPhenotype));
 				
 				//Tumor Phenotype
-				allowing(tumorPhenotype).getObjectId();
-				will(returnValue(null));
+
 				
 				allowing(tumorPhenotype).getDisplayText();
 				will(returnValue("Tumor Phenotype"));
@@ -292,10 +293,7 @@ public class FHIRObjectMocker {
 				will(returnValue(Collections.singletonList(tumorExtentCC)));
 				
 				//Patient Summary
-				allowing(patientSummary).getObjectId();
-				will(returnValue(null));
-				
-				
+
 				allowing(patientSummary).getDisplayText();
 				will(returnValue("Patient Summary"));
 				
@@ -313,9 +311,7 @@ public class FHIRObjectMocker {
 				
 				
 				//Medical Record
-				allowing(medicalRecord).getObjectId();
-				will(returnValue(null));
-				
+
 				allowing(medicalRecord).getPatientSummary();
 				will(returnValue(patientSummary));
 				
@@ -324,6 +320,12 @@ public class FHIRObjectMocker {
 				
 				allowing(medicalRecord).getPatient();
 				will(returnValue(patient));
+
+				allowing(medicalRecord).getPatientIdentifier();
+				will(returnValue("patientIdentifier"));
+
+				allowing(medicalRecord).getReports();
+				will(returnValue(Collections.singletonList(report)));
 			}
 		});
 	}
@@ -375,7 +377,9 @@ public class FHIRObjectMocker {
 	public MedicalRecord getMedicalRecord() {
 		return medicalRecord;
 	}
-	
-	
-	
+
+
+	public CancerSummary getCancerSummary() {
+		return cancerSummary;
+	}
 }

@@ -1,4 +1,4 @@
-package org.healthnlp.deepphe.neo4j.summary;
+package org.healthnlp.deepphe.graph.summary;
 
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
@@ -12,11 +12,13 @@ import java.util.List;
 
 
 /**
- * medical record for a given patient
- * @author tseytlin
+ * medical record copy for graph
+ * @author Girish Chavan
  *
  */
 public class MedicalRecord {
+	private Long id;
+
 	private String patientIdentifier;
 	private Patient patient;
 	private PatientSummary patientSummary;
@@ -83,4 +85,11 @@ public class MedicalRecord {
 		this.reports = reports;
 	}
 
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 }

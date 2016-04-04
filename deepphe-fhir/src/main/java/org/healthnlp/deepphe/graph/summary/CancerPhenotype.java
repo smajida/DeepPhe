@@ -1,4 +1,4 @@
-package org.healthnlp.deepphe.neo4j.summary;
+package org.healthnlp.deepphe.graph.summary;
 
 
 import org.healthnlp.deepphe.fhir.fact.FactList;

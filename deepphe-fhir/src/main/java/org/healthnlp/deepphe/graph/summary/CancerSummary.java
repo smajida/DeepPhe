@@ -1,4 +1,4 @@
-package org.healthnlp.deepphe.neo4j.summary;
+package org.healthnlp.deepphe.graph.summary;
 
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.FactList;
@@ -60,6 +60,8 @@ public class CancerSummary extends Summary {
 	}
 
 	public void setReport(Report r){
+		if(r==null)
+			return;
 		super.setReport(r);
 		getPhenotypes().get(0).setReport(r);
 		for(TumorSummary ts: getTumors()){

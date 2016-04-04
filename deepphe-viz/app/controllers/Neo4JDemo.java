@@ -36,7 +36,7 @@ public class Neo4JDemo extends Controller {
 //
 //	    Client client = ClientBuilder.newClient(config);
 //	    HttpAuthenticationFeature authFeature =
-//	            HttpAuthenticationFeature.basic("neo4j", "neo4jpass");
+//	            HttpAuthenticationFeature.basic("graph", "neo4jpass");
 //	         
 //	    client.register(authFeature);
 //	    
@@ -59,7 +59,7 @@ public class Neo4JDemo extends Controller {
    public Result demo() {
 	   
 	    String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
-	   	String username = "neo4j";
+	   	String username = "graph";
 	   	String password = "neo4jdemo";
 	   
 	   	try {
@@ -84,7 +84,7 @@ public class Neo4JDemo extends Controller {
 //    	ClientConfig config = new ClientConfig();
 //    	Client client = ClientBuilder.newClient(config);
 //	    HttpAuthenticationFeature authFeature =
-//	            HttpAuthenticationFeature.basic("neo4j", "neo4jpass");
+//	            HttpAuthenticationFeature.basic("graph", "neo4jpass");
 //	    client.register(authFeature);
 // 	    WebTarget target = client.target(txUri);
 // 	    
