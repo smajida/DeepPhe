@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -103,6 +104,26 @@ public class Neo4JRESTCaller {
 	              request().
 	              accept(MediaType.APPLICATION_JSON_TYPE).
 	              get(Response.class);
+    	
+	    String jsonStr = response.readEntity(String.class);
+		return jsonStr;
+	}
+	
+	
+	public String makePOSTCall(String restURI,String query) {
+		ClientConfig config = new ClientConfig();
+
+	    Client client = ClientBuilder.newClient(config);
+	    HttpAuthenticationFeature authFeature =
+	            HttpAuthenticationFeature.basic(username, password);
+	         
+	    client.register(authFeature);
+	    
+	    WebTarget target = client.target(restURI);
+	    
+	    Response response = target.
+	              request(MediaType.APPLICATION_JSON_TYPE).
+	               post(Entity.entity(query,MediaType.APPLICATION_JSON_TYPE));
     	
 	    String jsonStr = response.readEntity(String.class);
 		return jsonStr;
