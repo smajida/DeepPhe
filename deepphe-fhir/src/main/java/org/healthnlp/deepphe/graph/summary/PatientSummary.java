@@ -70,6 +70,8 @@ public class PatientSummary extends Summary {
     }
 
     public String getSummaryText() {
+        if(super.getSummaryText()==null)
+            return "";
         StringBuffer st = new StringBuffer(super.getSummaryText());
         st.append(getPhenotype().getSummaryText() + "\n");
         return st.toString();

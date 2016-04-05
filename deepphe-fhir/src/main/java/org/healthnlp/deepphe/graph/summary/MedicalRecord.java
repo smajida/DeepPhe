@@ -13,83 +13,95 @@ import java.util.List;
 
 /**
  * medical record copy for graph
- * @author Girish Chavan
  *
+ * @author Girish Chavan
  */
 public class MedicalRecord {
-	private Long id;
+    private Long id;
 
-	private String patientIdentifier;
-	private Patient patient;
-	private PatientSummary patientSummary;
-	private CancerSummary cancerSummary;
-	private List<Report> reports;
+    private String patientIdentifier;
+    private Patient patient;
+    private PatientSummary patientSummary;
+    private CancerSummary cancerSummary;
+    private List<Report> reports;
 
-	public String getDisplayText() {
-		return (patient != null? patient.getPatientName():"Generic")+" Medical Record";
-	}
-	public String getSummaryText() {
-		StringBuffer b = new StringBuffer(getDisplayText());
-		b.append("\n==========================\n");
-		if(patientSummary != null){
-			b.append(patientSummary.getSummaryText()+"\n");
-		}
-		if(cancerSummary != null){
-			b.append(cancerSummary.getSummaryText());
-		}
-		return b.toString();
-	}
+    public String getDisplayText() {
+        return (patient != null ? patient.getPatientName() : "Generic") + " Medical Record";
+    }
 
-	public String getPatientIdentifier() {
-		if(patientIdentifier == null && patient != null)
-			patientIdentifier = getPatient().getResourceIdentifier();
-		return patientIdentifier;
-	}
-	public void setPatientIdentifier(String patientIdentifier) {
-		this.patientIdentifier = patientIdentifier;
-	}
+    public String getSummaryText() {
+        StringBuffer b = new StringBuffer(getDisplayText());
+        b.append("\n==========================\n");
+        if (patientSummary != null) {
+            b.append(patientSummary.getSummaryText() + "\n");
+        }
+        if (cancerSummary != null) {
+            b.append(cancerSummary.getSummaryText());
+        }
+        return b.toString();
+    }
 
-	public CodeableConcept getCode() {
-		return FHIRUtils.getCodeableConcept(getConceptURI());
-	}
-	public URI getConceptURI() {
-		return FHIRConstants.MEDICAL_RECORD_URI;
-	}
-	public String getAnnotationType() {
-		return FHIRConstants.ANNOTATION_TYPE_RECORD;
-	}
-	public Patient getPatient() {
-		return patient;
-	}
-	public void setPatient(Patient patient) {
-		this.patient = patient;
-	}
-	public PatientSummary getPatientSummary() {
-		return patientSummary;
-	}
-	public void setPatientSummary(PatientSummary patientSummary) {
-		this.patientSummary = patientSummary;
-	}
-	public CancerSummary getCancerSummary() {
-		return cancerSummary;
-	}
-	public void setCancerSummary(CancerSummary cancerSummary) {
-		this.cancerSummary = cancerSummary;
-	}
-	public List<Report> getReports() {
-		if(reports == null)
-			reports = new ArrayList<Report>();
-		return reports;
-	}
-	public void setReports(List<Report> reports) {
-		this.reports = reports;
-	}
+    public String getPatientIdentifier() {
+        if (patientIdentifier == null && patient != null)
+            patientIdentifier = getPatient().getResourceIdentifier();
+        return patientIdentifier;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public void setPatientIdentifier(String patientIdentifier) {
+        this.patientIdentifier = patientIdentifier;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public CodeableConcept getCode() {
+        return FHIRUtils.getCodeableConcept(getConceptURI());
+    }
+
+    public URI getConceptURI() {
+        return FHIRConstants.MEDICAL_RECORD_URI;
+    }
+
+    public String getAnnotationType() {
+        return FHIRConstants.ANNOTATION_TYPE_RECORD;
+    }
+
+    public Patient getPatient() {
+        return patient;
+    }
+
+    public void setPatient(Patient patient) {
+        this.patient = patient;
+    }
+
+    public PatientSummary getPatientSummary() {
+        return patientSummary;
+    }
+
+    public void setPatientSummary(PatientSummary patientSummary) {
+        this.patientSummary = patientSummary;
+    }
+
+    public CancerSummary getCancerSummary() {
+        return cancerSummary;
+    }
+
+    public void setCancerSummary(CancerSummary cancerSummary) {
+        this.cancerSummary = cancerSummary;
+    }
+
+    public List<Report> getReports() {
+        if (reports == null)
+            reports = new ArrayList<Report>();
+        return reports;
+    }
+
+    public void setReports(List<Report> reports) {
+        this.reports = reports;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

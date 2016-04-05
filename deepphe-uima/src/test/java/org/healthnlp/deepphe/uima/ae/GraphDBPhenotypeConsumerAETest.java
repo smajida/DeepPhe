@@ -47,7 +47,6 @@ public class GraphDBPhenotypeConsumerAETest {
         }
     }
 
-    @Ignore //TODO need to update FHIRObjectMocker to have allowances for all getters. Until then, disabled.
     @Test
     public void processTest() {
         String dbPath = TEST_DB + File.separator;

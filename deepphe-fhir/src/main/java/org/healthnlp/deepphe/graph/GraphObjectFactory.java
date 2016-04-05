@@ -36,8 +36,9 @@ public class GraphObjectFactory {
 
         for (Method destMethod : methods) {
 
-            //Identify setter methods
-            if (destMethod.getName().startsWith("set")) {
+            //Identify setter methods except the setId
+            if (destMethod.getName().startsWith("set") && !destMethod.getName().equals("setId") ) {
+
                 try {
                     //Try to get matching graph object.
                     Object neo4JObject = instantiateNeo4JObjectIfAvailable(destMethod);

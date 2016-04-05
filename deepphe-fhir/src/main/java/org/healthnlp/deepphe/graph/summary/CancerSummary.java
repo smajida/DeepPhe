@@ -63,9 +63,12 @@ public class CancerSummary extends Summary {
 		if(r==null)
 			return;
 		super.setReport(r);
-		getPhenotypes().get(0).setReport(r);
-		for(TumorSummary ts: getTumors()){
-			ts.setReport(r);
+		if(getPhenotypes()!=null)
+			getPhenotypes().get(0).setReport(r);
+		if(getTumors()!=null) {
+			for (TumorSummary ts : getTumors()) {
+				ts.setReport(r);
+			}
 		}
 	}
 
@@ -77,6 +80,9 @@ public class CancerSummary extends Summary {
 		return getClass().getSimpleName()+"_"+Math.abs(hashCode());
 	}
 	public String getSummaryText() {
+		if(super.getSummaryText()==null)
+				return "";
+
 		StringBuilder st = new StringBuilder(super.getSummaryText());
 		st.append(getPhenotypes().get(0).getSummaryText());
 		st.append("\n");

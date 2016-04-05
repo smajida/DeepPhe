@@ -5,6 +5,7 @@ import org.healthnlp.deepphe.fhir.fact.DefaultFactList;
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.util.FHIRConstants;
+import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -28,6 +29,7 @@ public class FHIRObjectMocker {
 	final CancerSummary cancerSummary = context.mock(CancerSummary.class);
 	final TumorSummary tumorSummary = context.mock(TumorSummary.class);
 	final PatientSummary patientSummary = context.mock(PatientSummary.class);
+	final PatientPhenotype patientPhenotype = context.mock(PatientPhenotype.class);
 	final CancerPhenotype cancerPhenotype = context.mock(CancerPhenotype.class);
 	final TumorPhenotype tumorPhenotype = context.mock(TumorPhenotype.class);
 	final MedicalRecord medicalRecord = context.mock(MedicalRecord.class);
@@ -41,6 +43,25 @@ public class FHIRObjectMocker {
 
 	private void init(){
 		final DefaultFactList bodySiteFL = new DefaultFactList();
+		final DefaultFactList outcomesFL = new DefaultFactList();
+		final DefaultFactList treatmentFL = new DefaultFactList();
+		final DefaultFactList cancerStageFL = new DefaultFactList();
+		final DefaultFactList cancerTypeFL = new DefaultFactList();
+		final DefaultFactList distantMetastasisClassificationFL = new DefaultFactList();
+		final DefaultFactList manifestationsFL = new DefaultFactList();
+		final DefaultFactList primaryTumorClassificationFL = new DefaultFactList();
+		final DefaultFactList regionalLympNodeClassificationFL = new DefaultFactList();
+		final DefaultFactList tumorExtentFL = new DefaultFactList();
+		final DefaultFactList tumorSequenceVariantsFL = new DefaultFactList();
+		final DefaultFactList tumorTypeFL = new DefaultFactList();
+		final DefaultFactList histologicTypesFL = new DefaultFactList();
+		final DefaultFactList germlineSequenceVariantFL = new DefaultFactList();
+		final DefaultFactList exposureFL = new DefaultFactList();
+		final DefaultFactList stageFL = new DefaultFactList();
+		final DefaultFactList genderFL = new DefaultFactList();
+		final DefaultFactList birthDateFL = new DefaultFactList();
+		final DefaultFactList deathDateFL = new DefaultFactList();
+		final DefaultFactList nameFL = new DefaultFactList();
 
 		final CodeableConcept bodySiteCC = context.mock(CodeableConcept.class,"bodySiteCC");
 		final CodeableConcept outcomesCC = context.mock(CodeableConcept.class,"outcomesCC");
@@ -75,10 +96,12 @@ public class FHIRObjectMocker {
 				allowing(report).getReportText();
 				will(returnValue("Patient is a 54 year old female with history of T2N0M0 left breast cancer ER-neg,\n"
 						+ "PR-neg, HER2+, now undergoing neoadjuvant chemo with taxotere, carboplatin, Herceptin, and pertuzumab."));
-				
+
+
+				allowing(report).getPatient();
+				will(returnValue(patient));
+
 				allowing(report).getCompositionSummaries();
-				// TODO - this is illegal.  None of the elements (**summary) implement Fact,
-				// TODO - so GraphDBPhenotypeConsumerAETest fails
 				will(returnValue(Arrays.asList(new Summary[]{cancerSummary,tumorSummary,patientSummary})));
 				
 				allowing(report).getDiagnoses();
@@ -186,18 +209,32 @@ public class FHIRObjectMocker {
 				will(returnValue(bodySiteFL));
 
 				allowing(cancerSummary).getOutcomes();
-				will(returnValue(Collections.singletonList(outcomesCC)));
+				will(returnValue(outcomesFL));
 
 				allowing(cancerSummary).getTreatments();
-				will(returnValue(Collections.singletonList(treatmentCC)));
+				will(returnValue(treatmentFL));
 
 				allowing(cancerSummary).getPhenotypes();
 				will(returnValue(Collections.singletonList(cancerPhenotype)));
 
+				allowing(cancerSummary).getTumors();
+				will(returnValue(Collections.singletonList(tumorSummary)));
+
 				allowing(cancerSummary).getReport();
 				will(returnValue(report));
-				//Cancer Phenotype
 
+				allowing(cancerSummary).getPatient();
+				will(returnValue(patient));
+
+				allowing(cancerSummary).getAnnotationType();
+				will(returnValue(FHIRConstants.ANNOTATION_TYPE_RECORD));
+
+				//Cancer Phenotype
+				allowing(cancerPhenotype).getPatient();
+				will(returnValue(patient));
+
+				allowing(cancerPhenotype).getReport();
+				will(returnValue(report));
 				
 				allowing(cancerPhenotype).getDisplayText();
 				will(returnValue("Phenotype Summary"));
@@ -212,32 +249,33 @@ public class FHIRObjectMocker {
 				will(returnValue(FHIRConstants.CANCER_PHENOTYPE_SUMMARY_URI));
 				
 				allowing(cancerPhenotype).getCancerStage();
-				will(returnValue(cancerStageCC));
+				will(returnValue(cancerStageFL));
 				
 				allowing(cancerPhenotype).getCancerType();
-				will(returnValue(cancerTypeCC));
+				will(returnValue(cancerTypeFL));
 				
 				allowing(cancerPhenotype).getDistantMetastasisClassification();
-				will(returnValue(distantMetastasisClassificationCC));
-				
-				/*allowing(cancerPhenotype).getManifestations();
-				will(returnValue(Collections.singletonList(manifestationsCC)));*/
+				will(returnValue(distantMetastasisClassificationFL));
 				
 				allowing(cancerPhenotype).getPrimaryTumorClassification();
-				will(returnValue(primaryTumorClassificationCC));
+				will(returnValue(primaryTumorClassificationFL));
 				
 				allowing(cancerPhenotype).getRegionalLymphNodeClassification();
-				will(returnValue(regionalLympNodeClassificationCC));
+				will(returnValue(regionalLympNodeClassificationFL));
 				
 				allowing(cancerPhenotype).getTumorExtent();
-				will(returnValue(tumorExtentCC));
-				
-				allowing(cancerSummary).getTumors();
-				will(returnValue(Collections.singletonList(tumorSummary)));
-				
-				//Tumor Summary
+				will(returnValue(tumorExtentFL));
 
-				
+				allowing(cancerPhenotype).getAnnotationType();
+				will(returnValue(FHIRConstants.ANNOTATION_TYPE_RECORD));
+
+				//Tumor Summary
+				allowing(tumorSummary).getPatient();
+				will(returnValue(patient));
+
+				allowing(tumorSummary).getReport();
+				will(returnValue(report));
+
 				allowing(tumorSummary).getDisplayText();
 				will(returnValue("Tumor Summary"));
 				
@@ -251,26 +289,36 @@ public class FHIRObjectMocker {
 				will(returnValue(FHIRConstants.TUMOR_SUMMARY_URI));
 								
 				allowing(tumorSummary).getBodySite();
-				will(returnValue(Collections.singletonList(bodySiteCC)));
+				will(returnValue(bodySiteFL));
 
-				/*allowing(tumorSummary).getOutcomes();
-				will(returnValue(Collections.singletonList(outcomesCC)));
+				allowing(tumorSummary).getAnnotationType();
+				will(returnValue(FHIRConstants.ANNOTATION_TYPE_RECORD));
 
-				allowing(tumorSummary).getTreatments();
-				will(returnValue(Collections.singletonList(treatmentCC)));
+				allowing(tumorSummary).getOutcome();
+				will(returnValue(outcomesFL));
+
+				allowing(tumorSummary).getTreatment();
+				will(returnValue(treatmentFL));
 				
-				allowing(tumorSummary).getTumorSequenceVarients();
-				will(returnValue(Collections.singletonList(tumorSequenceVariantsCC)));*/
+				allowing(tumorSummary).getSequenceVariants();
+				will(returnValue(tumorSequenceVariantsFL));
 				
 				allowing(tumorSummary).getTumorType();
-				will(returnValue(tumorTypeCC));
+				will(returnValue(tumorTypeFL));
 
 				allowing(tumorSummary).getPhenotype();
 				will(returnValue(tumorPhenotype));
 				
 				//Tumor Phenotype
+				allowing(tumorPhenotype).getAnnotationType();
+				will(returnValue(FHIRConstants.ANNOTATION_TYPE_RECORD));
 
-				
+				allowing(tumorPhenotype).getReport();
+				will(returnValue(report));
+
+				allowing(tumorPhenotype).getPatient();
+				will(returnValue(patient));
+
 				allowing(tumorPhenotype).getDisplayText();
 				will(returnValue("Tumor Phenotype"));
 				
@@ -284,45 +332,108 @@ public class FHIRObjectMocker {
 				will(returnValue(FHIRConstants.TUMOR_PHENOTYPE_SUMMARY_URI));
 				
 				allowing(tumorPhenotype).getHistologicTypes();
-				will(returnValue(Collections.singletonList(manifestationsCC)));
+				will(returnValue(histologicTypesFL));
 				
 				allowing(tumorPhenotype).getManifestations();
-				will(returnValue(Collections.singletonList(histologicTypesCC)));				
+				will(returnValue(manifestationsFL));
 				
 				allowing(tumorPhenotype).getTumorExtent();
-				will(returnValue(Collections.singletonList(tumorExtentCC)));
-				
+				will(returnValue(tumorExtentFL));
+
+				//Patient Phenotype
+				allowing(patientPhenotype).getReport();
+				will(returnValue(report));
+
+				allowing(patientPhenotype).getAnnotationType();
+				will(returnValue(FHIRConstants.ANNOTATION_TYPE_RECORD));
+
+
+				allowing(patientPhenotype).getPatient();
+				will(returnValue(patient));
+
+				allowing(patientPhenotype).getDisplayText();
+				will(returnValue("Patient Phenotype"));
+
+				allowing(patientPhenotype).getResourceIdentifier();
+				will(returnValue("PatientPhenotype01"));
+
+				allowing(patientPhenotype).getSummaryText();
+				will(returnValue("This is the Patient Phenotype"));
+
+				allowing(patientPhenotype).getConceptURI();
+				will(returnValue(FHIRConstants.PATIENT_PHENOTYPE_SUMMARY_URI));
 				//Patient Summary
+				allowing(patientSummary).getPatient();
+				will(returnValue(patient));
+
+				allowing(patientSummary).getReport();
+				will(returnValue(report));
+
+				allowing(patientSummary).getName();
+				will(returnValue(nameFL));
 
 				allowing(patientSummary).getDisplayText();
 				will(returnValue("Patient Summary"));
 				
 				allowing(patientSummary).getResourceIdentifier();
 				will(returnValue("PatientSummary01"));
-				
+
 				allowing(patientSummary).getSummaryText();
 				will(returnValue("This is the patient summary"));
+
+				allowing(patientSummary).getPhenotype();
+				will(returnValue(patientPhenotype));
 				
 				allowing(patientSummary).getConceptURI();
 				will(returnValue(FHIRConstants.PATIENT_SUMMARY_URI));
 				
 				allowing(patientSummary).getOutcomes();
-				will(returnValue(Collections.singletonList(outcomesCC)));
-				
-				
+				will(returnValue(outcomesFL));
+
+				allowing(patientSummary).getSequenceVariant();
+				will(returnValue(tumorSequenceVariantsFL));
+
+				allowing(patientSummary).getGender();
+				will(returnValue(genderFL));
+
+				allowing(patientSummary).getBirthDate();
+				will(returnValue(birthDateFL));
+
+				allowing(patientSummary).getDeathDate();
+				will(returnValue(deathDateFL));
+
+				allowing(patientSummary).getAnnotationType();
+				will(returnValue(FHIRConstants.ANNOTATION_TYPE_RECORD));
+
 				//Medical Record
+
+
+				allowing(medicalRecord).getDisplayText();
+				will(returnValue("Generic Medical Record"));
+
+				allowing(medicalRecord).getSummaryText();
+				will(returnValue("Medical Record Summary"));
+
+				allowing(medicalRecord).getPatientIdentifier();
+				will(returnValue("patientIdentifier"));
+
+				allowing(medicalRecord).getConceptURI();
+				will(returnValue(FHIRConstants.MEDICAL_RECORD_URI));
+
+				allowing(medicalRecord).getCode();
+				will(returnValue(FHIRUtils.getCodeableConcept(FHIRConstants.MEDICAL_RECORD_URI)));
+
+				allowing(medicalRecord).getAnnotationType();
+				will(returnValue(FHIRConstants.ANNOTATION_TYPE_RECORD));
+
+				allowing(medicalRecord).getPatient();
+				will(returnValue(patient));
 
 				allowing(medicalRecord).getPatientSummary();
 				will(returnValue(patientSummary));
 				
 				allowing(medicalRecord).getCancerSummary();
 				will(returnValue(cancerSummary));
-				
-				allowing(medicalRecord).getPatient();
-				will(returnValue(patient));
-
-				allowing(medicalRecord).getPatientIdentifier();
-				will(returnValue("patientIdentifier"));
 
 				allowing(medicalRecord).getReports();
 				will(returnValue(Collections.singletonList(report)));
@@ -341,6 +452,7 @@ public class FHIRObjectMocker {
 	public Patient getPatient() {
 		return patient;
 	}
+
 
 
 

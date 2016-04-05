@@ -1,35 +1,16 @@
 package controllers;
 
-import java.io.IOException;
-import java.util.List;
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Map;
-import java.util.ArrayList;
-
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
 import db.DataCreatorUtility;
-import db.Patient;
-import play.api.libs.json.JsValue;
-import play.api.libs.json.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import views.html.index;
-import views.html.neo4jdemo;
 
 public class DummyData extends Controller {
 
