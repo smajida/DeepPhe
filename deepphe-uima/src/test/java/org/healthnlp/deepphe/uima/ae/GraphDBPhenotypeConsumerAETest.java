@@ -33,14 +33,6 @@ public class GraphDBPhenotypeConsumerAETest {
     }
 
     @Test
-    public void copyingTest(){
-        FHIRObjectMocker mocker = new FHIRObjectMocker();
-        CancerSummary cs = new CancerSummary();
-        GraphObjectFactory.copy(mocker.getCancerSummary(),cs);
-        cs.getPhenotypes();
-    }
-    @Ignore
-    @Test
     public void initializationTest() {
         try {
             String dbPath = TEST_DB + File.separator;
@@ -55,7 +47,7 @@ public class GraphDBPhenotypeConsumerAETest {
         }
     }
 
-    @Ignore
+    @Ignore //TODO need to update FHIRObjectMocker to have allowances for all getters. Until then, disabled.
     @Test
     public void processTest() {
         String dbPath = TEST_DB + File.separator;

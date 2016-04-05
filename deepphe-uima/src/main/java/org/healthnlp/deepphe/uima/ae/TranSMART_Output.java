@@ -120,7 +120,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 			prevColumn = column;
 
 			// special case for some data labels
-			String value;
+			String value = "";
 
 			if(STUDY_ID.equals(dataLabel)){
 				value = DEFAULT_STUDY;
@@ -129,7 +129,8 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 			}else{
 				// add value
 				Summary summary = getSummary(record,category,entryRestriction);
-				value = getSummaryFactValue(summary, entryClass, entryRestriction,entryProperty);
+				if(summary!=null)
+					value = getSummaryFactValue(summary, entryClass, entryRestriction,entryProperty);
 			}
 			buffer.append(value).append(T);
 		}
@@ -191,7 +192,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 	 * @param category
 	 * @return
 	 */
-	private Summary getSummary(MedicalRecord record, String category,String restriction){
+	private Summary getSummary(MedicalRecord record, String category, String restriction){
 		if(category.startsWith("Cancer")){
 			if(category.endsWith("Phenotype"))
 				return record.getCancerSummary().getPhenotype();
@@ -199,7 +200,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 				return record.getCancerSummary();
 		}else if(category.startsWith("Tumor")){
 			TumorSummary tumor = getTumor(record.getCancerSummary().getTumors(),restriction);
-			if(category.endsWith("Phenotype"))
+			if(tumor!=null && category.endsWith("Phenotype"))
 				return tumor.getPhenotype();
 			else
 				return tumor;
@@ -221,6 +222,8 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 	 */
 	private TumorSummary getTumor(List<TumorSummary> tumors, String restriction) {
 		//TODO: this is messed up as we need to know which tumor we need
+		if(tumors.isEmpty())
+			return null;
 		return tumors.get(0);
 	}
 

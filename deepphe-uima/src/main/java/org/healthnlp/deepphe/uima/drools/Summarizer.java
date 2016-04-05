@@ -63,6 +63,9 @@ public class Summarizer {
 	public String getType(Map<String,List<Fact>> map){
 		List<List<Fact>> facts = new ArrayList<List<Fact>>(map.values());
 
+		if(facts.isEmpty())
+			return null;
+
 		String toret = facts.get(0).get(0).getType();
 
 		facts.clear();
