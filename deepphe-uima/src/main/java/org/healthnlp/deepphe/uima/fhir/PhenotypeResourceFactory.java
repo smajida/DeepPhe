@@ -35,17 +35,9 @@ import org.hl7.fhir.instance.model.Quantity;
 import java.net.URI;
 import java.util.*;
 
-import org.apache.uima.jcas.tcas.Annotation;
-
 public class PhenotypeResourceFactory {
 	
-	/**
-	 * get annotation from CAS based on an idenfier
-	 * @param JCas cas
-	 * @param id
-	 * @return
-	 */
-	private static Annotation getAnnotationByIdentifer(JCas jcas, String id){
+	private static Annotation getAnnotationByIdentifier(JCas jcas, String id){
 		if(id == null)
 			return null;
 		
@@ -148,7 +140,7 @@ public class PhenotypeResourceFactory {
 	 */
 	public static Composition saveReport(Report r, JCas jcas) {
 		// first lets create Report annotation
-		Annotation a = getAnnotationByIdentifer(jcas,r.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,r.getResourceIdentifier());
 		Composition comp = a == null?new Composition(jcas):(Composition)a;
 		comp.setBegin(r.getOffset());
 		comp.setEnd(r.getOffset()+r.getReportText().length());
@@ -220,7 +212,7 @@ public class PhenotypeResourceFactory {
 	 * @return
 	 */
 	private static org.healthnlp.deepphe.uima.types.Tumor saveTumorSummary(TumorSummary summaryFHIR, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,summaryFHIR.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,summaryFHIR.getResourceIdentifier());
 		org.healthnlp.deepphe.uima.types.Tumor summaryAnnotation = (a == null)?new org.healthnlp.deepphe.uima.types.Tumor(jcas):(org.healthnlp.deepphe.uima.types.Tumor)a;
 		
 		// add phenotype
@@ -244,13 +236,6 @@ public class PhenotypeResourceFactory {
 		return summaryAnnotation;
 	}
 
-	/**
-	 * create saving of fact list
-	 * @param jcas
-	 * @param facts
-	 * @return
-	 */
-	
 	private static org.healthnlp.deepphe.uima.types.FactList saveFactList(FactList factList, JCas jcas) {
 		//TODO: solve replication of lists
 		org.healthnlp.deepphe.uima.types.FactList annotation = new org.healthnlp.deepphe.uima.types.FactList(jcas);
@@ -277,13 +262,7 @@ public class PhenotypeResourceFactory {
 	
 	
 	
-	/**
-	 * create saving of fact list
-	 * @param jcas
-	 * @param facts
-	 * @return
-	 */
-	
+
 	private static FactList loadFactList(org.healthnlp.deepphe.uima.types.FactList annotation) {
 		FactList facts = new DefaultFactList();
 		facts.setCategory(annotation.getHasCategory());
@@ -296,13 +275,7 @@ public class PhenotypeResourceFactory {
 		
 		return facts;
 	}
-	
-	/**
-	 * create saving of fact list
-	 * @param jcas
-	 * @param facts
-	 * @return
-	 */
+
 	private static Fact loadFact(org.healthnlp.deepphe.uima.types.Fact annotation) {
 		// try to convert if annotation
 		Element element = loadElement(annotation);
@@ -331,7 +304,7 @@ public class PhenotypeResourceFactory {
 	/**
 	 * create saving of fact list
 	 * @param jcas
-	 * @param facts
+	 * @param fact
 	 * @return
 	 */
 	private static org.healthnlp.deepphe.uima.types.Fact saveFact(Fact fact, org.healthnlp.deepphe.uima.types.Fact annotation, JCas jcas) {
@@ -357,25 +330,15 @@ public class PhenotypeResourceFactory {
 		return annotation;
 	}
 	
-	/**
-	 * create saving of fact list
-	 * @param jcas
-	 * @param facts
-	 * @return
-	 */
+
 	private static org.healthnlp.deepphe.uima.types.Fact saveFact(Fact fact, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,fact.getIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,fact.getIdentifier());
 		org.healthnlp.deepphe.uima.types.Fact annotation = (a == null)? new org.healthnlp.deepphe.uima.types.Fact(jcas):(org.healthnlp.deepphe.uima.types.Fact) a;
 		return saveFact(fact,annotation,jcas);
 	}
 	
 	
-	/**
-	 * create saving of fact list
-	 * @param jcas
-	 * @param facts
-	 * @return
-	 */
+
 	private static org.healthnlp.deepphe.uima.types.Fact saveFact(CodeableConcept c, JCas jcas) {
 		return saveFact(FactFactory.createFact(c), jcas);
 	}
@@ -389,7 +352,7 @@ public class PhenotypeResourceFactory {
 	 */
 
 	private static org.healthnlp.deepphe.uima.types.TumorPhenotype saveTumorPhenotype(TumorPhenotype phenotype, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,phenotype.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,phenotype.getResourceIdentifier());
 		org.healthnlp.deepphe.uima.types.TumorPhenotype summaryAnnotation = (a == null)? new org.healthnlp.deepphe.uima.types.TumorPhenotype(jcas):(org.healthnlp.deepphe.uima.types.TumorPhenotype)a;
 		
 		// add content
@@ -415,7 +378,7 @@ public class PhenotypeResourceFactory {
 	 * @return
 	 */
 	private static org.healthnlp.deepphe.uima.types.Cancer saveCancerSummary(CancerSummary summaryFHIR, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,summaryFHIR.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,summaryFHIR.getResourceIdentifier());
 		org.healthnlp.deepphe.uima.types.Cancer summaryAnnotation = (a == null)?new org.healthnlp.deepphe.uima.types.Cancer(jcas):(org.healthnlp.deepphe.uima.types.Cancer)a;
 		
 		// add phenotype
@@ -456,7 +419,7 @@ public class PhenotypeResourceFactory {
 	 */
 
 	private static CancerPhenotype saveCancerPhenotype(org.healthnlp.deepphe.fhir.summary.CancerPhenotype phenotype, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,phenotype.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,phenotype.getResourceIdentifier());
 		CancerPhenotype summaryAnnotation = (a == null)?new CancerPhenotype(jcas):(CancerPhenotype)a;
 		
 		// add content
@@ -476,7 +439,7 @@ public class PhenotypeResourceFactory {
 	}
 
 	private static org.healthnlp.deepphe.uima.types.PatientSummary savePatientSummary(PatientSummary summaryFHIR, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,summaryFHIR.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,summaryFHIR.getResourceIdentifier());
 		org.healthnlp.deepphe.uima.types.PatientSummary summaryAnnotation = (a == null)?new org.healthnlp.deepphe.uima.types.PatientSummary(jcas):(org.healthnlp.deepphe.uima.types.PatientSummary)a;
 	
 		// add content
@@ -502,7 +465,7 @@ public class PhenotypeResourceFactory {
 	
 
 	private static org.healthnlp.deepphe.uima.types.PatientPhenotype savePatientPhenotype(PatientPhenotype phenotype, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,phenotype.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,phenotype.getResourceIdentifier());
 		org.healthnlp.deepphe.uima.types.PatientPhenotype summaryAnnotation = (a == null)?new org.healthnlp.deepphe.uima.types.PatientPhenotype(jcas):(org.healthnlp.deepphe.uima.types.PatientPhenotype)a;
 		
 		// add content
@@ -611,7 +574,7 @@ public class PhenotypeResourceFactory {
 	/**
 	 * 
 	 * @param jcas
-	 * @param val
+	 * @param vals
 	 * @return
 	 */
 	private static FSArray getValues(JCas jcas,Collection<FeatureStructure> vals){
@@ -630,7 +593,7 @@ public class PhenotypeResourceFactory {
 	/**
 	 * 
 	 * @param jcas
-	 * @param val
+	 * @param vals
 	 * @return
 	 */
 	private static StringArray getStringValues(JCas jcas,Collection<String> vals){
@@ -651,7 +614,7 @@ public class PhenotypeResourceFactory {
 		if(e == null)
 			return null;
 		
-		org.healthnlp.deepphe.uima.types.Patient p  = (org.healthnlp.deepphe.uima.types.Patient) getAnnotationByIdentifer(jcas,e.getResourceIdentifier());
+		org.healthnlp.deepphe.uima.types.Patient p  = (org.healthnlp.deepphe.uima.types.Patient) getAnnotationByIdentifier(jcas,e.getResourceIdentifier());
 		//org.healthnlp.deepphe.uima.types.Patient p = getPatient(jcas);
 		// init the patient
 		if(p == null){
@@ -709,19 +672,19 @@ public class PhenotypeResourceFactory {
 	}
 
 	private static org.healthnlp.deepphe.uima.types.MedicationStatement saveMedication(Medication e, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,e.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,e.getResourceIdentifier());
 		org.healthnlp.deepphe.uima.types.MedicationStatement t = (a == null)? new  org.healthnlp.deepphe.uima.types.MedicationStatement(jcas):(org.healthnlp.deepphe.uima.types.MedicationStatement)a;
 		return t;
 	}
 
 	private static BodySite saveAnatomicalSite(AnatomicalSite e, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,e.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,e.getResourceIdentifier());
 		BodySite t = (a == null)? new  BodySite(jcas):(BodySite)a;
 		return t;
 	}
 	
 	private static org.healthnlp.deepphe.uima.types.Procedure saveProcedure(Procedure e, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,e.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,e.getResourceIdentifier());
 		org.healthnlp.deepphe.uima.types.Procedure t = (a == null)?new  org.healthnlp.deepphe.uima.types.Procedure(jcas):(org.healthnlp.deepphe.uima.types.Procedure)a;
 		
 		// add body location
@@ -738,7 +701,7 @@ public class PhenotypeResourceFactory {
 		String id = FHIRUtils.getResourceIdentifer(cc);
 		
 		// fetch a previously registered Finding
-		Annotation a = getAnnotationByIdentifer(jcas,id);
+		Annotation a = getAnnotationByIdentifier(jcas,id);
 		if(a != null){
 			return (org.healthnlp.deepphe.uima.types.Finding) a;
 		}
@@ -754,7 +717,7 @@ public class PhenotypeResourceFactory {
 	
 	
 	private static org.healthnlp.deepphe.uima.types.Finding saveFinding(Finding e, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,e.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,e.getResourceIdentifier());
 		org.healthnlp.deepphe.uima.types.Finding t = (a == null)? new  org.healthnlp.deepphe.uima.types.Finding(jcas):(org.healthnlp.deepphe.uima.types.Finding) a;
 		
 		// add body location
@@ -766,7 +729,7 @@ public class PhenotypeResourceFactory {
 	}
 
 	private static org.healthnlp.deepphe.uima.types.Observation saveObservation(Observation e, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,e.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,e.getResourceIdentifier());
 		org.healthnlp.deepphe.uima.types.Observation ob = (a == null)?new  org.healthnlp.deepphe.uima.types.Observation(jcas):(org.healthnlp.deepphe.uima.types.Observation) a;
 		
 		// add interpretation
@@ -807,7 +770,7 @@ public class PhenotypeResourceFactory {
 	}
 	
 	private static DiseaseDisorder saveDiagnosis(Disease e, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,e.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,e.getResourceIdentifier());
 		DiseaseDisorder dd = (a == null)? new DiseaseDisorder(jcas): (DiseaseDisorder) a;
 		
 		try{
@@ -877,7 +840,7 @@ public class PhenotypeResourceFactory {
 		List<FeatureStructure> sites = new ArrayList<FeatureStructure>();
 		for(CodeableConcept bs: bodySites){
 			String id = FHIRUtils.getResourceIdentifer(bs);
-			BodySite bodySite = (BodySite) getAnnotationByIdentifer(jcas,id);
+			BodySite bodySite = (BodySite) getAnnotationByIdentifier(jcas,id);
 			if(bodySite == null && id != null){
 				bodySite =  new  BodySite(jcas);
 				bodySite.setHasURI(""+FHIRUtils.getConceptURI(bs));
@@ -892,14 +855,7 @@ public class PhenotypeResourceFactory {
 		return sites;
 	}
 	
-	
-	
-	
-	/**
-	 * load typesystem element into corresponding FHIR object
-	 * @param el
-	 * @return
-	 */
+
 	public static Element loadElement(org.healthnlp.deepphe.uima.types.Fact e){
 		Element el = null;
 		if(e instanceof DiseaseDisorder){
@@ -1095,11 +1051,6 @@ public class PhenotypeResourceFactory {
 		return pp;
 	}
 	
-	/**
-	 * load report from composition annotation
-	 * @param r
-	 * @return
-	 */
 	public static Report loadReport(Composition comp){
 		Report rr = new Report();
 		
@@ -1284,13 +1235,7 @@ public class PhenotypeResourceFactory {
 		return p != null?loadPatient(p):null;
 	}
 	
-	
 
-	/**
-	 * load a set of reports from JCas
-	 * @param jcas
-	 * @return
-	 */
 	public static List<Report>  loadReports(JCas cas){
 		List<Report> reports = new ArrayList<Report>();
 		for(Annotation a: getAnnotations(cas,Composition.type)){
@@ -1306,7 +1251,7 @@ public class PhenotypeResourceFactory {
 	 * @param jcas
 	 */
 	public static org.healthnlp.deepphe.uima.types.MedicalRecord saveMedicalRecord(MedicalRecord record, JCas jcas) {
-		Annotation a = getAnnotationByIdentifer(jcas,record.getResourceIdentifier());
+		Annotation a = getAnnotationByIdentifier(jcas,record.getResourceIdentifier());
 		org.healthnlp.deepphe.uima.types.MedicalRecord summaryAnnotation = (a == null)?new org.healthnlp.deepphe.uima.types.MedicalRecord(jcas):(org.healthnlp.deepphe.uima.types.MedicalRecord)a;
 		
 		summaryAnnotation.setBegin(0);
@@ -1333,7 +1278,7 @@ public class PhenotypeResourceFactory {
 		
 		List<FeatureStructure> list = new ArrayList<FeatureStructure>();
 		for(Report r:  record.getReports()){
-			Composition c = (Composition) getAnnotationByIdentifer(jcas,r.getResourceIdentifier());
+			Composition c = (Composition) getAnnotationByIdentifier(jcas,r.getResourceIdentifier());
 			if(c != null)
 				list.add(c);
 		}
@@ -1343,11 +1288,7 @@ public class PhenotypeResourceFactory {
 		return summaryAnnotation;
 	}
 	
-	/**
-	 * create medical record
-	 * @param record
-	 * @param jcas
-	 */
+
 	public static MedicalRecord loadMedicalRecord(JCas jcas) {
 		org.healthnlp.deepphe.uima.types.MedicalRecord annotationRecord = null;
 		for(Annotation a: getAnnotations(jcas,org.healthnlp.deepphe.uima.types.MedicalRecord.type)){

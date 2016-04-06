@@ -3,7 +3,6 @@ package org.healthnlp.deepphe.uima.ae;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,18 +17,16 @@ import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.healthnlp.deepphe.fhir.Patient;
-import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
-import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
-import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.fhir.summary.TumorSummary;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 
 import edu.pitt.dbmi.nlp.noble.ontology.OntologyUtils;
+
+import static org.apache.ctakes.dependency.parser.util.DependencyUtility.logger;
 
 public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 	private final String T = "\t";
@@ -51,8 +48,12 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 	public static final String PARAM_TRANSMART_MAP_FILE = "TRANSMART_MAP_FILE";
 
 	private List<Map<String,String>> mapping;
-	
+
+	boolean firstRun = true;
+
 	public void initialize(UimaContext aContext) throws ResourceInitializationException {
+		firstRun = true;
+
 		outputDir = new File((String) aContext.getConfigParameterValue(PARAM_OUTPUTDIR),"tranSMART");
 		if(!outputDir.exists())
 			outputDir.mkdirs();
@@ -61,21 +62,42 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 		} catch (IOException e) {
 			throw new ResourceInitializationException(e);
 		}
+
+		File metaFile = null;
+		File dataFile = null;
+		try {
+			metaFile = new File(outputDir,"tcga-meta-data-import.tsv");
+			metaFile.delete();
+			metaFile.createNewFile();
+
+			dataFile = new File(outputDir,"tcga-data-import.tsv");
+			dataFile.delete();
+			dataFile.createNewFile();
+		} catch (IOException e) {
+			throw new ResourceInitializationException(e);
+		}
+
+		writeMetaFile(metaFile, dataFile);
 	}
 	
 
 
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
-		File metaFile = new File(outputDir,"tcga-meta-data-import.tsv");
-		File dataFile = new File(outputDir,"tcga-data-import.tsv");
 
 		MedicalRecord record = PhenotypeResourceFactory.loadMedicalRecord(jcas);
 
-		writeMetaFile(metaFile, dataFile);
+		if(record.getPatient()==null) {
+			throw new AnalysisEngineProcessException(new Exception("Medical Record has no patient attached. Skipping"));
+		}
+
+		File dataFile = new File(outputDir,"tcga-data-import.tsv");
 		writeDataFile(dataFile, record);
 	}
 
 	private void writeDataFile(File dataFile, MedicalRecord record) throws AnalysisEngineProcessException {
+
+
+
 		StringBuffer buffer;
 
 
@@ -84,45 +106,28 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 		buffer  = new StringBuffer();
 
 		//Add header
-		int prevColumn = 1;
-		for(Map<String,String> map: mapping){
-
-			String dataLabel = map.get(DATA_LABEL);
-			int column = Integer.parseInt(map.get(CATEGORY_NUM));
-
-			// pad columns based on a count
-			for(int i=prevColumn;i<column;i++){
-				buffer.append(T);
+		if(firstRun) {
+			firstRun = false;
+			for (Map<String, String> map : mapping) {
+				String dataLabel = map.get(DATA_LABEL);
+				buffer.append(dataLabel).append(T);
 			}
-			prevColumn = column;
-
-			buffer.append(dataLabel).append(T);
+			buffer.append("\n");
 		}
-		buffer.append("\n");
-
 
 		//Add Content
-		prevColumn = 1;
 		for(Map<String,String> map: mapping){
-
 			String dataLabel = map.get(DATA_LABEL);
 			String category = map.get(CATEGORY_CODE);
 			String entryClass = map.get(ENTRY_CLASS);
 			String entryRestriction = map.get(ENTRY_RESTRICTION);
 			String entryProperty = map.get(ENTRY_PROPERTY);
 
-			int column = Integer.parseInt(map.get(CATEGORY_NUM));
-
-			// pad columns based on a count
-			for(int i=prevColumn;i<column;i++){
-				buffer.append(T);
-			}
-			prevColumn = column;
-
 			// special case for some data labels
 			String value = "";
-
-			if(STUDY_ID.equals(dataLabel)){
+			if("OMIT".equals(category))
+				;
+			else if(STUDY_ID.equals(dataLabel)){
 				value = DEFAULT_STUDY;
 			}else if(SUBJECT_ID.equals(dataLabel)){
 				value = getSubjectId(record);
@@ -133,11 +138,12 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 					value = getSummaryFactValue(summary, entryClass, entryRestriction,entryProperty);
 			}
 			buffer.append(value).append(T);
+
 		}
 		buffer.append("\n");
 
 
-		// save meta file
+		// save to file
 		try {
 			saveText(buffer.toString(),dataFile,true);
 		} catch (IOException e) {
@@ -155,7 +161,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 	 * @param dataFile
 	 * @throws AnalysisEngineProcessException
      */
-	private void writeMetaFile(File metaFile, File dataFile) throws AnalysisEngineProcessException {
+	private void writeMetaFile(File metaFile, File dataFile) throws ResourceInitializationException {
 		int count = 1;
 		StringBuffer buffer = new StringBuffer();
 
@@ -171,11 +177,11 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 			buffer.append(map.get(DATA_LABEL)).append("\n");
 			count++;
 		}
-		// save meta file
+		// save to file
 		try {
 			saveText(buffer.toString(),metaFile,false);
 		} catch (IOException e) {
-			throw new AnalysisEngineProcessException(e);
+			throw new ResourceInitializationException(e);
 		}
 	}
 
@@ -256,7 +262,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 				// we found a class, awesome
 				if(fact.getName().equals(entryClass)){
 					// lets check restriction and if it is satisfied 
-					if(isRestrictionSutisfied(fact,entryRestriction)){
+					if(isRestrictionSatisfied(fact,entryRestriction)){
 						return getFactValue(fact,entryClass,entryProperty);
 					}
 				}
@@ -287,7 +293,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 
 
 
-	private boolean isRestrictionSutisfied(Fact fact, String entryRestriction) {
+	private boolean isRestrictionSatisfied(Fact fact, String entryRestriction) {
 		// if no restriction specified, then just return true
 		if(entryRestriction == null || entryRestriction.trim().length() == 0)
 			return true;
@@ -332,9 +338,11 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 				map.put(header.get(i).trim(),parts[i].trim());
 			}
 			// if not omit then add it
-			if(!"OMIT".equals(map.get(CATEGORY_CODE))){
-				mapping.add(map);
-			}
+//			if(!"OMIT".equals(map.get(CATEGORY_CODE))){
+//				mapping.add(map);
+//			}
+
+			mapping.add(map);
 		}
 		r.close();
 		return mapping;
