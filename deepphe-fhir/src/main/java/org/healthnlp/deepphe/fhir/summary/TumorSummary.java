@@ -12,6 +12,11 @@ import java.util.List;
 
 public class TumorSummary extends Summary {
 	private TumorPhenotype phenotype;
+	
+	private String summaryType = getClass().getSimpleName();
+	private String uuid = String.valueOf(Math.abs(hashCode()));
+	private FactList tumorType;
+	
 	public TumorSummary(){
 		phenotype = new TumorPhenotype();
 	}
@@ -27,13 +32,26 @@ public class TumorSummary extends Summary {
 	 */
 	public List<Fact> getContainedFacts(){
 		List<Fact> list = super.getContainedFacts();
-		list.addAll(getPhenotype().getContainedFacts());	
+		//list.addAll(getPhenotype().getContainedFacts());	
+		List<Fact> phFacts = getPhenotype().getContainedFacts();
+		for(Fact f:phFacts){
+			f.addContainerIdentifier(getResourceIdentifier());
+			list.add(f);
+		}
+		
 		return list;
 	}
 	
 	public FactList getTumorType() {
-		return getFacts(FHIRConstants.HAS_TUMOR_TYPE);
+		if(tumorType == null)
+			tumorType = getFacts(FHIRConstants.HAS_TUMOR_TYPE);
+		return tumorType;
 	}
+	
+	public void setTumorType(FactList tumorType){
+		this.tumorType = tumorType;
+	}
+	
 	public TumorPhenotype getPhenotype() {
 		return phenotype;
 	}
@@ -53,10 +71,10 @@ public class TumorSummary extends Summary {
 		return getFactsOrInsert(FHIRConstants.HAS_BODY_SITE);
 	}
 	public String getDisplayText() {
-		return  getClass().getSimpleName();
+		return  summaryType;
 	}
 	public String getResourceIdentifier() {
-		return getClass().getSimpleName()+"_"+Math.abs(hashCode());
+		return summaryType+"_"+uuid;
 	}
 	public String getSummaryText() {
 		StringBuffer st = new StringBuffer(super.getSummaryText());
@@ -68,6 +86,22 @@ public class TumorSummary extends Summary {
 	}
 	public URI getConceptURI() {
 		return FHIRConstants.TUMOR_SUMMARY_URI;
+	}
+	
+	public String getSummaryType() {
+		return summaryType;
+	}
+
+	public void setSummaryType(String summaryType) {
+		this.summaryType = summaryType;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 	
 	

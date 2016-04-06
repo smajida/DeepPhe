@@ -23,10 +23,11 @@ import edu.pitt.dbmi.nlp.noble.ontology.IRestriction;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 /**
- * create composition cancer and tumor suammries on document level
+ * create composition cancer and tumor summaries on document level
  * @author tseytlin
  *
  */
@@ -152,6 +153,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 				if(cls != null){
 					for(Element e: report.getReportElements()){
 						URI uri  = FHIRUtils.getConceptURI(e.getCode());
+
 						if(uri != null){
 							IClass c = ontology.getClass(""+uri);
 							if(c != null){
@@ -296,6 +298,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		}
 		
 		// add TNM stage infromation
+		
 		Stage stage = diagnosis.getStage();
 		if(stage != null){
 			phenotype.addFact(FHIRConstants.HAS_CANCER_STAGE,createFact(stage.getSummary()));
@@ -303,6 +306,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			phenotype.addFact(FHIRConstants.HAS_N_CLASSIFICATION,createFact(stage.getRegionalLymphNodeStageCode()));
 			phenotype.addFact(FHIRConstants.HAS_M_CLASSIFICATION,createFact(stage.getDistantMetastasisStageCode()));
 		}
+		
 		
 		// create diagnosis fact
 		Fact dx = FactFactory.createFact(diagnosis);
@@ -377,20 +381,22 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			
 			// document type RULE
 			// if cancer location is the same as tumor location, then tumor is 'primary'
-			// else tumor type is 'recurent' if they are not the same
+			// else tumor type is 'recurrent' if they are not the same
 			// cancer has to be more specific then a tumor, then infer
 			// else can't infer a type
 			//tumor.setTumorType(null);  // primary vs local recurance, distance recurance  infered from rules
-			/*if(cancer != null){
+			/*
+			if(cancer != null){
 				URI tumorType = null;
-				if(hasCommonBodySite(cancer.getBodySites(),tumor.getBodySites())){
+				if(hasCommonBodySite(cancer.getBodySite(),tumor.getBodySite())){
 					tumorType = FHIRConstants.PRIMARY_TUMOR_URI;
 				}else{
 					tumorType = FHIRConstants.RECURRENT_TUMOR_URI;
 				}
 				if(tumorType != null)
-					tumor.setTumorType(FHIRUtils.getCodeableConcept(tumorType));
-			}*/
+					tumor.setTumorType(tumor.getTumorType());
+			}
+			*/
 		}
 
 		return tumor;
@@ -436,11 +442,32 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			URI ua = FHIRUtils.getConceptURI(ca);
 			for(CodeableConcept cb: bb){
 				URI ub = FHIRUtils.getConceptURI(cb);
-				// if equal, or first argument is more specific theen the second
+				// if equal, or first argument is more specific than the second
 				if(ua.equals(ub) || ontology.getClass(ua.toString()).hasSuperClass(ontology.getClass(ub.toString()))){
 					return true;
 				}
 			}
+		}
+		return false;
+	}
+	
+	private boolean hasCommonBodySite(FactList  aa, FactList bb){
+		try {
+		for(Fact ca: aa){
+			URI ua = new URI(ca.getUri());
+			
+			for(Fact cb: bb){
+				URI ub = new URI(cb.getUri());
+				// if equal, or first argument is more specific than the second
+				if(ua.equals(ub) || ontology.getClass(ua.toString()).hasSuperClass(ontology.getClass(ub.toString()))){
+					return true;
+				}
+			}
+		}
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
 		}
 		return false;
 	}

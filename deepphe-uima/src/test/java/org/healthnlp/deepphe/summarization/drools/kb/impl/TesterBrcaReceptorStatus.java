@@ -15,8 +15,10 @@ import org.drools.io.ResourceFactory;
 import org.drools.runtime.StatefulKnowledgeSession;*/
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class TesterBrcaReceptorStatus {
 /*
 	private StatefulKnowledgeSession session = null;

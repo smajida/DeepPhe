@@ -31,8 +31,10 @@ import org.healthnlp.deepphe.summarization.drools.kb.Tumor;
 import org.healthnlp.deepphe.summarization.drools.kb.TumorType;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class TesterBrcaMetastasis {
 /*
 	private StatefulKnowledgeSession session = null;

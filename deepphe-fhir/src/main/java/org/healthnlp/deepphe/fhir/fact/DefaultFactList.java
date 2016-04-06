@@ -91,7 +91,19 @@ public class DefaultFactList extends ArrayList<Fact> implements FactList {
     */
    @Override
    public boolean add( Fact e ) {
-      return e != null && super.add( e );
+	   if(canAdd(e))
+		   return e != null && super.add( e );
+	   else
+		   return false;
+   }
+   
+   public boolean canAdd(Fact e){
+	   String eInfo = e.getInfo();
+	   for(Fact f:this){
+		   if(eInfo.equals(f.getInfo()))
+			   return false;
+	   }
+	   return true;
    }
 
 }

@@ -26,8 +26,11 @@ import org.healthnlp.deepphe.summarization.drools.kb.M1;
 import org.healthnlp.deepphe.summarization.drools.kb.Tumor;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+
+@Ignore
 public class TesterBreastCancerMetastasis {
 /*
 	private StatefulKnowledgeSession session = null;

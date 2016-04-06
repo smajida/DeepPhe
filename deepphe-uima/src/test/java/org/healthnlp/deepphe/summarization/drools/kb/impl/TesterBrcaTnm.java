@@ -24,8 +24,10 @@ import org.healthnlp.deepphe.summarization.drools.kb.Pn1mi;
 import org.healthnlp.deepphe.summarization.drools.kb.Tis;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class TesterBrcaTnm {
 /*
 	private StatefulKnowledgeSession session = null;

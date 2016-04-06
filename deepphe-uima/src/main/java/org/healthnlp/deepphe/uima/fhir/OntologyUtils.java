@@ -33,8 +33,7 @@ public class OntologyUtils {
 				IClass c = parents.remove();
 				for(IClass parent: c.getDirectSuperClasses()){
 					parents.add(parent);
-					fact.addAncestor(parent.getName());
-				}
+					fact.addAncestor(parent.getName());				}
 			}
 		}
 	}

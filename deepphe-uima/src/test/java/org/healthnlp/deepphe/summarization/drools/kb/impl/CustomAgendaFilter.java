@@ -3,10 +3,12 @@ package org.healthnlp.deepphe.summarization.drools.kb.impl;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.kie.api.runtime.rule.ActivationGroup;
 import org.kie.api.runtime.rule.Agenda;
 import org.kie.api.runtime.rule.AgendaGroup;
 import org.kie.api.runtime.rule.RuleFlowGroup;
+
 
 public class CustomAgendaFilter implements Agenda {
 	
