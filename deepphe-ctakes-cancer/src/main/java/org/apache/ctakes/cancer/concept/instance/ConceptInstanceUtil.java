@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author SPF , chip-nlp
@@ -42,9 +43,18 @@ final public class ConceptInstanceUtil {
     * @return collection of instances with the given uri
     */
    static public Collection<ConceptInstance> getBranchConceptInstances( final JCas jCas, final String uri ) {
-      return OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( jCas, uri )
-            .map( ConceptInstance::new )
+      return getBranchConceptInstanceStream( jCas, uri )
             .collect( Collectors.toList() );
+   }
+
+   /**
+    * @param jCas ye olde ...
+    * @param uri  uri for instance of interest
+    * @return stream of instances with the given uri
+    */
+   static public Stream<ConceptInstance> getBranchConceptInstanceStream( final JCas jCas, final String uri ) {
+      return OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( jCas, uri )
+            .map( ConceptInstance::new );
    }
 
    /**

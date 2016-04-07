@@ -51,7 +51,7 @@ enum StageValue implements Value {
     */
    @Override
    public String getUri() {
-      return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + _uri;
+      return OwlOntologyConceptUtil.CANCER_OWL + "#" + _uri;
    }
 
    /**

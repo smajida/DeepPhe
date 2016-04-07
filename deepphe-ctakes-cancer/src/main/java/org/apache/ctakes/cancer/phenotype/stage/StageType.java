@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  * @since 2/8/2016
  */
 enum StageType implements Type {
-   DEFAULT( "Stage", "Cancer_Stage", "Stage\\s*" );
+   DEFAULT( "Stage", "CancerStage", "Stage\\s*" );
 
    final private String _title;
    final private String _uri;
@@ -38,7 +38,7 @@ enum StageType implements Type {
     */
    @Override
    public String getUri() {
-      return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + _uri;
+      return OwlOntologyConceptUtil.CANCER_OWL + "#" + _uri;
    }
 
    /**

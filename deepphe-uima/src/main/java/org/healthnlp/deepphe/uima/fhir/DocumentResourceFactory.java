@@ -5,12 +5,10 @@ import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import edu.pitt.dbmi.nlp.noble.ontology.IResource;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
-
 import org.apache.ctakes.cancer.concept.instance.ConceptInstance;
 import org.apache.ctakes.cancer.concept.instance.ConceptInstanceUtil;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.phenotype.size.SizePropertyUtil;
-import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.core.util.DocumentIDAnnotationUtil;
@@ -245,8 +243,8 @@ final public class DocumentResourceFactory {
 	 */
 	static private <T extends Element> List<T> getElementList( final JCas jcas, final URI uri,
 																				  final Function<ConceptInstance, ? extends T> mapper ) {
-		return cTAKESUtils.getAnnotationsByType( jcas, uri ).stream()
-				.filter( t -> (!t.isNegated()) )
+		return ConceptInstanceUtil.getBranchConceptInstanceStream( jcas, uri.toString() )
+				.filter( t -> !t.isNegated() )
 				.map( mapper )
 				.collect( Collectors.toList() );
 	}
@@ -264,18 +262,16 @@ final public class DocumentResourceFactory {
 	}
 
 	public static List<Finding> getFindings( JCas cas ) {
-		final List<Finding> list
-				= getElementList( cas, FHIRConstants.FINDING_URI, DocumentResourceFactory::createFinding );
-
-		// add individual T N M to list
-		ConceptInstanceUtil.getBranchConceptInstances( cas, TnmPropertyUtil.getParentUri() ).stream()
-				.map( DocumentResourceFactory::createFinding )
-				.forEach( list::add );
-		// add Stage to list
-		ConceptInstanceUtil.getBranchConceptInstances( cas, StagePropertyUtil.getParentUri() ).stream()
-				.map( DocumentResourceFactory::createFinding )
-				.forEach( list::add );
-		return list;
+		return getElementList( cas, FHIRConstants.FINDING_URI, DocumentResourceFactory::createFinding );
+		// TNM and Stage should be under the #Finding URI, so there is no need to fetch them explicitly
+//		// add individual T N M to list
+//		ConceptInstanceUtil.getBranchConceptInstanceStream( cas, TnmPropertyUtil.getParentUri() )
+//				.map( DocumentResourceFactory::createFinding )
+//				.forEach( list::add );
+//		// add Stage to list
+//		ConceptInstanceUtil.getBranchConceptInstanceStream( cas, StagePropertyUtil.getParentUri() )
+//				.map( DocumentResourceFactory::createFinding )
+//				.forEach( list::add );
 	}
 
 
@@ -287,9 +283,13 @@ final public class DocumentResourceFactory {
 		final List<Observation> list
 				= getElementList( cas, FHIRConstants.OBSERVATION_URI, DocumentResourceFactory::createObservation );
 		// add cancer size
-		ConceptInstanceUtil.getBranchConceptInstances( cas, SizePropertyUtil.getParentUri() ).stream()
+		ConceptInstanceUtil.getBranchConceptInstanceStream( cas, SizePropertyUtil.getParentUri() )
 				.map( DocumentResourceFactory::createObservation )
 				.forEach( list::add );
+		// add Receptor Status to list	- no need as it is under #Observation
+//		ConceptInstanceUtil.getBranchConceptInstanceStream( cas, StatusPropertyUtil.getParentUri() )
+//				.map( DocumentResourceFactory::createFinding )
+//				.forEach( list::add );
 		return list;
 	}
 	
