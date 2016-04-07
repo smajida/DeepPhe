@@ -82,6 +82,8 @@ done, the dependency versions should be moved into the parent pom -->
                   <version>2.5.0</version>
                   <executions>
                      <execution>
+                        <!-- depends on older classes being cleaned up -->
+                        <phase>clean</phase>
                         <goals>
                            <goal>generate</goal>
                         </goals>
