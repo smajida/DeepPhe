@@ -2,10 +2,8 @@ machine:
   java:
     version: oraclejdk8
 dependencies:
-  pre:
-    - mvn -q -e clean -P runJcasGen -DskipTests
   override:
-    - mvn -q -e compile -DskipTests
+    - mvn -q -e clean compile
 ## I really hate to do this, but failed tests are killing us.
 # test:
 #  override:
