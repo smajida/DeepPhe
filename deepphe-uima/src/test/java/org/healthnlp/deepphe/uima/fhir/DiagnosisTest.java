@@ -1,18 +1,17 @@
 package org.healthnlp.deepphe.uima.fhir;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-
+import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import org.apache.ctakes.cancer.owl.UriAnnotationFactory;
 import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
+import org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory;
 import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.relation.LocationOfTextRelation;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
 import org.apache.ctakes.typesystem.type.structured.DocumentID;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
-import org.apache.uima.analysis_engine.*;
+import org.apache.log4j.Logger;
+import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.jcas.JCas;
@@ -22,9 +21,16 @@ import org.healthnlp.deepphe.fhir.Disease;
 import org.healthnlp.deepphe.uima.ae.DocumentSummarizerAE;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+
+import static org.junit.Assert.fail;
+
 
 public class DiagnosisTest {
-	
+
+	static private final Logger LOGGER = Logger.getLogger( "DiagnosisTest" );
+
 	/**
 	 * create mention
 	 * @param dd
@@ -108,8 +114,14 @@ public class DiagnosisTest {
 			lt.addToIndexes();
 			
 			// process AE
+			try {
+				OwlConnectionFactory.getInstance().getOntology( "data/ontology/nlpBreastCancer.owl" );
+			} catch ( IOntologyException | FileNotFoundException multE ) {
+				LOGGER.error( multE.getMessage() );
+			}
+
 			for(Disease dx : DocumentResourceFactory.getDiagnoses(jcas)){
-				System.out.println(dx.getSummaryText());
+				LOGGER.info( dx.getSummaryText() );
 			}
 			
 		} catch (ResourceInitializationException e) {
