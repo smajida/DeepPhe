@@ -65,12 +65,23 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		CancerSummary cancerSummary =  new CancerSummary();
 		cancerSummary.setAnnotationType(FHIRConstants.ANNOTATION_TYPE_RECORD);
 		
+		// record to load into drools
 		MedicalRecord record = new MedicalRecord();
 		record.setPatient(PhenotypeResourceFactory.loadPatient(jcas));
 		record.setPatientSummary(patientSummary);
 		record.setCancerSummary(cancerSummary);
 		
+		//record after drools
+		MedicalRecord summRecord = new MedicalRecord();
+		CancerSummary emptyCancerSummary = new CancerSummary();
+		loadTemplate(emptyCancerSummary);
+		CancerPhenotype emptyPhenotype = emptyCancerSummary.getPhenotype();
+		loadTemplate(emptyPhenotype);
 		
+		
+		summRecord.setPatient(PhenotypeResourceFactory.loadPatient(jcas));
+		summRecord.setPatientSummary(patientSummary);
+		summRecord.setCancerSummary(emptyCancerSummary);
 		
 		for(Report report: PhenotypeResourceFactory.loadReports(jcas)){
 			record.addReport(report);		
@@ -105,15 +116,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			droolsSession = de.getSession();
 			//droolsSession.addEventListener( new DebugAgendaEventListener() );
 			
-			CancerSummary emptyCancerSummary = new CancerSummary();
-			loadTemplate(emptyCancerSummary);
-			CancerPhenotype emptyPhenotype = emptyCancerSummary.getPhenotype();
-			loadTemplate(emptyPhenotype);
 			
-			MedicalRecord summRecord = new MedicalRecord();
-			summRecord.setPatient(PhenotypeResourceFactory.loadPatient(jcas));
-			summRecord.setPatientSummary(patientSummary);
-			summRecord.setCancerSummary(emptyCancerSummary);
 			
 			droolsSession.insert(summRecord);
 					
@@ -134,7 +137,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		}
 	
 		//this is where you save your work back to CAS
-		PhenotypeResourceFactory.saveMedicalRecord(record, jcas);
+		PhenotypeResourceFactory.saveMedicalRecord(summRecord, jcas);
 		
 	}
 	
