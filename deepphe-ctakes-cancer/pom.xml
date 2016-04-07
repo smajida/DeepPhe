@@ -66,29 +66,37 @@ done, the dependency versions should be moved into the parent pom -->
 
    </dependencies>
 
-   <build>
-      <plugins>
-         <plugin>
-            <groupId>org.apache.uima</groupId>
-            <artifactId>jcasgen-maven-plugin</artifactId>
-            <version>2.5.0</version>
-            <executions>
-               <execution>
-                  <goals>
-                     <goal>generate</goal>
-                  </goals>
-                  <configuration>
-                     <typeSystemIncludes>
-                        <typeSystemInclude>src/main/resources/org/apache/ctakes/**/types/TypeSystem.xml</typeSystemInclude>
-                     </typeSystemIncludes>
-                     <limitToProject>false</limitToProject>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-      </plugins>
-   </build>
    <profiles>
+      <profile>
+         <id>runJcasGen</id>
+         <activation>
+            <property>
+               <name>runJcasGen</name>
+            </property>
+         </activation>
+         <build>
+            <plugins>
+               <plugin>
+                  <groupId>org.apache.uima</groupId>
+                  <artifactId>jcasgen-maven-plugin</artifactId>
+                  <version>2.5.0</version>
+                  <executions>
+                     <execution>
+                        <goals>
+                           <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                           <typeSystemIncludes>
+                              <typeSystemInclude>src/main/resources/org/apache/ctakes/**/types/TypeSystem.xml</typeSystemInclude>
+                           </typeSystemIncludes>
+                           <limitToProject>false</limitToProject>
+                        </configuration>
+                     </execution>
+                  </executions>
+               </plugin>
+            </plugins>
+         </build>
+      </profile>
       <profile>
          <id>runCancerCVD</id>
          <activation>
