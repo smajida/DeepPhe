@@ -117,7 +117,6 @@ public class DictionaryGenerator {
 			try {
 				metathesaurus = new NobleCoderTerminology("NCI_Metathesaurus");
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		return metathesaurus;
@@ -137,7 +136,7 @@ public class DictionaryGenerator {
 	/**
 	 * is concept filtered out by sem
 	 * @param c
-	 * @param semanticTypeFilter
+	 * @param c
 	 * @return
 	 */
 	private boolean isFilteredOut(Concept c){
@@ -226,9 +225,9 @@ public class DictionaryGenerator {
 	/**
 	 * export single concept as class
 	 * @param c
-	 * @param hashSet
-	 * @param semanticTypeFilter
-	 * @param root
+	 * @param c
+	 * @param defaultURL
+
 	 */
 	private void exportConcept(Concept c, URI defaultURL) throws Exception {
 		// first make sure that it fits the filter
