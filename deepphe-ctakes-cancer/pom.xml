@@ -63,16 +63,19 @@ done, the dependency versions should be moved into the parent pom -->
       <scope>system</scope>
       <systemPath>${project.basedir}/lib/ctakes-coref-cleartk-0.0.1-deepphe.jar</systemPath>
       </dependency>
-
    </dependencies>
 
    <profiles>
       <profile>
          <id>runJcasGen</id>
          <activation>
-            <property>
-               <name>runJcasGen</name>
-            </property>
+            <!--<property>-->
+            <!--<name>runJcasGen</name>-->
+            <!--</property>-->
+            <!--<file>-->
+            <!--<missing>target/generated-sources/jcasgen/org/apache/ctakes/cancer/type/relation/NeoplasmRelation.class</missing>-->
+            <!--</file>-->
+            <activeByDefault>true</activeByDefault>
          </activation>
          <build>
             <plugins>
@@ -82,6 +85,7 @@ done, the dependency versions should be moved into the parent pom -->
                   <version>2.5.0</version>
                   <executions>
                      <execution>
+                        <!--<phase>compile</phase>-->
                         <goals>
                            <goal>generate</goal>
                         </goals>
@@ -97,6 +101,7 @@ done, the dependency versions should be moved into the parent pom -->
             </plugins>
          </build>
       </profile>
+
       <profile>
          <id>runCancerCVD</id>
          <activation>
