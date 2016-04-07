@@ -72,8 +72,10 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		record.setCancerSummary(cancerSummary);
 		
 		//record after drools
+		/*
 		MedicalRecord summRecord = new MedicalRecord();
 		CancerSummary emptyCancerSummary = new CancerSummary();
+		emptyCancerSummary.setAnnotationType(FHIRConstants.ANNOTATION_TYPE_RECORD);
 		loadTemplate(emptyCancerSummary);
 		CancerPhenotype emptyPhenotype = emptyCancerSummary.getPhenotype();
 		loadTemplate(emptyPhenotype);
@@ -82,6 +84,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		summRecord.setPatient(PhenotypeResourceFactory.loadPatient(jcas));
 		summRecord.setPatientSummary(patientSummary);
 		summRecord.setCancerSummary(emptyCancerSummary);
+		*/
 		
 		for(Report report: PhenotypeResourceFactory.loadReports(jcas)){
 			record.addReport(report);		
@@ -106,30 +109,30 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			}
 		}
 		
+		//long stT = System.currentTimeMillis();
+		//Olga: for TMN and Stage testing empty *Classification and Cancer stage
+		record.getCancerSummary().getPhenotype().clearFactList(FHIRConstants.HAS_CANCER_STAGE);
+		record.getCancerSummary().getPhenotype().clearFactList(FHIRConstants.HAS_T_CLASSIFICATION);
+		record.getCancerSummary().getPhenotype().clearFactList(FHIRConstants.HAS_N_CLASSIFICATION);
+		record.getCancerSummary().getPhenotype().clearFactList(FHIRConstants.HAS_M_CLASSIFICATION);
 		
-
 		//insert record into drools
-		//long stT = System.currentTimeMillis();	
 		DroolsEngine de = new DroolsEngine();
 		KieSession droolsSession = null;
 		try {
 			droolsSession = de.getSession();
 			//droolsSession.addEventListener( new DebugAgendaEventListener() );
-			
-			
-			
-			droolsSession.insert(summRecord);
-					
+
+			droolsSession.insert(record);					
 			for(Fact f: record.getReportLevelFacts()){
 				//System.out.println(f.getInfo());
 				droolsSession.insert(f);
-			}
-			
+			}		
 			droolsSession.fireAllRules();
 			droolsSession.dispose();
 			//System.out.println("DROOLS TIME: "+(System.currentTimeMillis() - stT)/1000+"  sec");
 			
-			System.out.println("RECORD Summary: "+summRecord.getSummaryText());
+			System.out.println("RECORD Summary: "+record.getSummaryText());
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -137,7 +140,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		}
 	
 		//this is where you save your work back to CAS
-		PhenotypeResourceFactory.saveMedicalRecord(summRecord, jcas);
+		PhenotypeResourceFactory.saveMedicalRecord(record, jcas);
 		
 	}
 	

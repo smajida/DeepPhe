@@ -53,6 +53,17 @@ public abstract class Summary extends List_  implements Element {
 	}
 	
 	/**
+	 * clear list for drools testing
+	 * @param category
+	 */
+	public void clearFactList(String category){
+		FactList list = getContent().get(category);
+		if(list != null){
+			list.clear();
+		}
+	}
+	
+	/**
 	 * get fact categories
 	 * @return
 	 */
