@@ -24,20 +24,15 @@ enum StatusType implements Type {
    ER( "Estrogen receptor",
          "Estrogen_Receptor_Status",
          "(Triple|Estrogen|ER)",
-         "C1516974", "C1516974", "C1516974", IHC ),
+         "C1719706", "C1719707", "C0279758", IHC ),
    PR( "Progesterone receptor",
          "Progesterone_Receptor_Status",
          "(Triple|Progesterone|PR)",
-         "C1514471", "C1514471", "C1514471", IHC ),
+         "C0279759", "C0279766", "C0279768", IHC ),
    HER2( "Human epidermal growth factor receptor 2",
          "HER2_Neu_Status",
          "(Triple|(HER-?2( ?/ ?neu)?))",
-         "C1512413", "C1512413", "C1512413", IHC, FISH, CISH, DISH );
-
-   // TODO
-//   http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#Triple_Negative
-//   http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#Triple_Positive
-
+         "C2348909", "C2348908", "C2348910", IHC, FISH, CISH, DISH );
 
    static private final String RECEPTOR_EX = "(\\s*-?\\s*?Receptors?\\s*-?)?";
 

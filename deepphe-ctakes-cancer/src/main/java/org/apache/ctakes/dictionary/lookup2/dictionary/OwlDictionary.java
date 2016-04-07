@@ -43,6 +43,11 @@ public class OwlDictionary implements RareWordDictionary {
 
 
    public OwlDictionary( final String name, final String owlFilePath ) {
+      try {
+         OwlConnectionFactory.getInstance().getOntology( owlFilePath );
+      } catch ( IOntologyException | FileNotFoundException ontE ) {
+         LOGGER.error( ontE.getMessage() );
+      }
       // Get the bsv terms first just in case there are crazy overlaps
       final Collection<CuiTerm> cuiTerms = parseBsvFiles( owlFilePath );
       cuiTerms.addAll( parseOwlFile( owlFilePath ) );
@@ -88,6 +93,9 @@ public class OwlDictionary implements RareWordDictionary {
       }
       final String[] synonyms = concept.getSynonyms();
       if ( synonyms == null || synonyms.length == 0 ) {
+         return Collections.emptyList();
+      }
+      if ( OwlParserUtil.isPhenotypeUri( OwlParserUtil.getUriString( iClass ) ) ) {
          return Collections.emptyList();
       }
       return Arrays.stream( synonyms )
@@ -180,7 +188,7 @@ public class OwlDictionary implements RareWordDictionary {
             if ( cuiTerm != null ) {
                cuiTerms.add( cuiTerm );
             } else {
-               LOGGER.warn( "Bad BSV line " + line + " in " + bsvFilePath );
+               LOGGER.debug( "Bad BSV line " + line + " in " + bsvFilePath );
             }
             line = reader.readLine();
          }
@@ -196,6 +204,10 @@ public class OwlDictionary implements RareWordDictionary {
     */
    static private CuiTerm createCuiTuiTerm( final String... columns ) {
       if ( columns.length < 4 ) {
+         return null;
+      }
+      final String uri = columns[ 3 ].trim();
+      if ( OwlParserUtil.isPhenotypeUri( uri ) ) {
          return null;
       }
       final String cui = columns[ 0 ];

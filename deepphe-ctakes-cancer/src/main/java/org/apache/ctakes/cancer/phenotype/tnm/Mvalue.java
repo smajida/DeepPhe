@@ -56,7 +56,7 @@ final class Mvalue implements TnmValue {
     */
    @Override
    public String getUri() {
-      return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + _uri;
+      return OwlOntologyConceptUtil.CANCER_OWL + "#" + _uri;
    }
 
    /**

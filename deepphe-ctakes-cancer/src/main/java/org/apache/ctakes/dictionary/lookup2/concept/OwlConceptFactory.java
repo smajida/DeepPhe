@@ -33,13 +33,18 @@ public class OwlConceptFactory implements ConceptFactory {
 
    static private final String OWL_FILE_PATH = "owlPath";
 
-   final private ConceptFactory _delegateFactory;
+   private final ConceptFactory _delegateFactory;
 
    public OwlConceptFactory( final String name, final UimaContext uimaContext, final Properties properties ) {
       this( name, properties.getProperty( OWL_FILE_PATH ) );
    }
 
    public OwlConceptFactory( final String name, final String owlFilePath ) {
+      try {
+         OwlConnectionFactory.getInstance().getOntology( owlFilePath );
+      } catch ( IOntologyException | FileNotFoundException ontE ) {
+         LOGGER.error( ontE.getMessage() );
+      }
       // Get the bsv terms first just in case there are crazy overlaps
       final Map<Long, Concept> conceptMap = parseBsvFiles( owlFilePath );
       conceptMap.putAll( parseOwlFile( owlFilePath ) );
@@ -83,6 +88,9 @@ public class OwlConceptFactory implements ConceptFactory {
       }
       final String[] synonyms = concept.getSynonyms();
       if ( synonyms == null || synonyms.length == 0 ) {
+         return Collections.emptyMap();
+      }
+      if ( OwlParserUtil.isPhenotypeUri( OwlParserUtil.getUriString( iClass ) ) ) {
          return Collections.emptyMap();
       }
       final Long cuiCode = CuiCodeUtil.getInstance().getCuiCode( cui );
@@ -158,6 +166,9 @@ public class OwlConceptFactory implements ConceptFactory {
       final Collection<CuiTuiUriTerm> cuiTuiTerms = parseBsvFile( bsvFilePath );
       final Map<Long, Concept> conceptMap = new HashMap<>( cuiTuiTerms.size() );
       for ( CuiTuiUriTerm cuiTuiTerm : cuiTuiTerms ) {
+         if ( OwlParserUtil.isPhenotypeUri( cuiTuiTerm.getUri() ) ) {
+            continue;
+         }
          final CollectionMap<String, String, ? extends Collection<String>> codes
                = new HashSetMap<>();
          codes.placeValue( Concept.TUI, TuiCodeUtil.getAsTui( cuiTuiTerm.getTui() ) );
@@ -194,7 +205,7 @@ public class OwlConceptFactory implements ConceptFactory {
             if ( cuiTuiTerm != null ) {
                cuiTuiTerms.add( cuiTuiTerm );
             } else {
-               LOGGER.warn( "Bad BSV line " + line + " in " + bsvFilePath );
+               LOGGER.debug( "Bad BSV line " + line + " in " + bsvFilePath );
             }
             line = reader.readLine();
          }
@@ -212,11 +223,13 @@ public class OwlConceptFactory implements ConceptFactory {
       if ( columns.length < 4 ) {
          return null;
       }
+      final String uri = columns[ 3 ].trim();
+      if ( OwlParserUtil.isPhenotypeUri( uri ) ) {
+         return null;
+      }
       final String cui = columns[ 0 ];
-      final String term = columns[ 1 ].trim().toLowerCase();
       // default for an empty tui column is tui 0 = unknown
       final String tui = columns[ 2 ].trim().isEmpty() ? "T000" : columns[ 2 ].trim();
-      final String uri = columns[ 3 ].trim();
       return new CuiTuiUriTerm( cui, tui, uri );
    }
 

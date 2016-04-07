@@ -4,12 +4,17 @@ package org.apache.ctakes.dictionary.lookup2.ontology;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 import edu.pitt.dbmi.nlp.noble.terminology.SemanticType;
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.phenotype.receptor.StatusPropertyUtil;
+import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
+import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.log4j.Logger;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +37,7 @@ final public class OwlParserUtil {
    static private final Pattern ICD9CM_PATTERN = Pattern.compile( "(\\d+) \\[ICD9CM\\]" );
    static private final Pattern ICD10CM_PATTERN = Pattern.compile( "(\\d+) \\[ICD10CM\\]" );
 
+   static private final Collection<String> PHENOTYPE_URIS = new HashSet<>();
 
 //   static public Long getCuiCode( final Concept concept ){
 //      final Collection<Object> allCodes = concept.getCodes().values();
@@ -54,7 +60,6 @@ final public class OwlParserUtil {
    static public String getCui( final IClass iClass ) {
       return getCui( iClass.getConcept() );
    }
-
 
    /**
     * @param concept -
@@ -117,6 +122,16 @@ final public class OwlParserUtil {
    static public URI getUri( final IClass iClass ) {
       return iClass.getURI();
    }
+
+   static public boolean isPhenotypeUri( final String uri ) {
+      if ( PHENOTYPE_URIS.isEmpty() ) {
+         OwlOntologyConceptUtil.getUriBranchStream( StagePropertyUtil.getParentUri() ).forEach( PHENOTYPE_URIS::add );
+         OwlOntologyConceptUtil.getUriBranchStream( TnmPropertyUtil.getParentUri() ).forEach( PHENOTYPE_URIS::add );
+         OwlOntologyConceptUtil.getUriBranchStream( StatusPropertyUtil.getParentUri() ).forEach( PHENOTYPE_URIS::add );
+      }
+      return PHENOTYPE_URIS.contains( uri );
+   }
+
 
    /**
     * @param concept -
