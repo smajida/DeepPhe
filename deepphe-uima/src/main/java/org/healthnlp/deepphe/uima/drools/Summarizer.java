@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactFactory;
@@ -15,6 +17,8 @@ import org.healthnlp.deepphe.fhir.fact.FactFactory;
  *
  */
 public class Summarizer {
+	private Pattern tnmPattern = Pattern.compile("(T[0-4])|(M[0-4])|(N[0-4])");
+	
 	private int numDocuments = 0;
 	private Map<String, List<Fact>> tClassificationMap = new HashMap<String, List<Fact>>();
 	private Map<String, List<Fact>> mClassificationMap = new HashMap<String, List<Fact>>();
@@ -100,7 +104,7 @@ public class Summarizer {
 	/**
 	 * Creates summary fact with the same: name,uri,label,category,type,
 	 *                                    patientIdentifier
-	 * Considering that all Fcats in List<Fact> have the SAME  parameters
+	 * Considering that all Facts in List<Fact> have the SAME  parameters
 	 * @param uri
 	 * @param map
 	 * @return
@@ -128,5 +132,14 @@ public class Summarizer {
 		return newFact;
 		
 	}
+	
+	
+	public String regexStatus(String longName){
+		Matcher m = tnmPattern.matcher(longName);
+		String toret = m.find()?m.group(1):null;
+		m.reset();
+		return toret;
+	}
+
 	
 }

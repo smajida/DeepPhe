@@ -9,13 +9,13 @@ import org.hl7.fhir.instance.model.CodeableConcept;
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
 
+
 /**
  * Fact representing a piece of information in Ontology
  * @author tseytlin
  *
  */
 
-@NodeEntity
 public class Fact {
 	
 	@GraphId
@@ -30,7 +30,9 @@ public class Fact {
 	}
 	
 	private String name,uri,identifier,label,category,type = getClass().getSimpleName();
+	private String summaryType, summaryId;
 	private Set<String> ancestors;
+	private Set<String> rulesApplied;
 	private List<Fact> provenanceFacts;
 	private List<TextMention> provenanceText;
 
@@ -76,6 +78,8 @@ public class Fact {
 	}
 	public void addProvenanceFacts(List<Fact> facts) {
 		getProvenanceFacts().addAll(facts);
+		facts.clear();
+		facts = null;
 	}
 	
 	public List<TextMention> getProvenanceText() {
@@ -166,6 +170,15 @@ public class Fact {
 		getContainerIdentifier().add(containerIdentifier);
 	}
 	
+	public Set<String> getRulesApplied() {
+		if(rulesApplied == null)
+			rulesApplied = new LinkedHashSet<String>();
+		return rulesApplied;
+	}
+	public void addRulesApplied(String ruleName) {
+		getRulesApplied().add(ruleName);
+	}
+	
 	public String getInfo(){
 		StringBuffer b = new StringBuffer();
 		b.append("name: "+getName()+"|");
@@ -175,9 +188,13 @@ public class Fact {
 		b.append("id: "+getIdentifier()+"|");
 		b.append("patient id: "+getPatientIdentifier()+"|");
 		b.append("document id: "+getDocumentIdentifier()+"|");
-		b.append("document tyoe: "+getDocumentType()+"|");
+		b.append("document type: "+getDocumentType()+"|");
+		b.append("summary type: "+getSummaryType()+"|");
+		b.append("summary id: "+getSummaryId()+"|");
 		b.append("container ids: "+getContainerIdentifier()+"|");
+		//b.append("rulesApplied: "+getRulesApplied()+"|");
 		b.append("ancestors: "+getAncestors()+"\n");
+	   
 		return b.toString();
 	}
 	
@@ -209,6 +226,18 @@ public class Fact {
 	 */
 	public Fact getValue(String property){
 		return this;
+	}
+	public String getSummaryType() {
+		return summaryType;
+	}
+	public void setSummaryType(String summaryType) {
+		this.summaryType = summaryType;
+	}
+	public String getSummaryId() {
+		return summaryId;
+	}
+	public void setSummaryId(String summaryId) {
+		this.summaryId = summaryId;
 	}
 	
 }

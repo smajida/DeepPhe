@@ -7,7 +7,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.healthnlp.deepphe.summarization.drools.kb.KbIdentified;
+import org.junit.Ignore;
 
+@Ignore
 public class DroolsKnowledgeBaseAndSession {
 // Olga commented out the guts - doesn't work with a new drools engine
 	/*

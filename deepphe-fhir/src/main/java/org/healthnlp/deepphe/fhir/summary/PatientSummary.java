@@ -12,6 +12,8 @@ import org.healthnlp.deepphe.util.FHIRConstants;
 
 public class PatientSummary extends Summary {
 	private PatientPhenotype phenotype;
+	private String summaryType = getClass().getSimpleName();
+	private String uuid = String.valueOf(Math.abs(hashCode()));
 
 	public void setReport(Report r){
 		super.setReport(r);
@@ -67,11 +69,11 @@ public class PatientSummary extends Summary {
 	}
 
 	public String getDisplayText() {
-		return getClass().getSimpleName();
+		return summaryType;
 	}
 
 	public String getResourceIdentifier() {
-		return getClass().getSimpleName()+"_"+Math.abs(hashCode());
+		return summaryType+"_"+uuid;
 	}
 
 	public String getSummaryText() {
@@ -82,6 +84,22 @@ public class PatientSummary extends Summary {
 
 	public URI getConceptURI() {
 		return FHIRConstants.PATIENT_SUMMARY_URI;
+	}
+	
+	public String getSummaryType() {
+		return summaryType;
+	}
+
+	public void setSummaryType(String summaryType) {
+		this.summaryType = summaryType;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 
 	public boolean isAppendable(Summary s) {

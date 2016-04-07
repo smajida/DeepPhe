@@ -26,8 +26,10 @@ import org.healthnlp.deepphe.summarization.drools.kb.Positive;
 import org.healthnlp.deepphe.summarization.drools.kb.ProgesteroneReceptorStatus;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class TesterBreastCancerReceptorStatus {
 /*
 	private StatefulKnowledgeSession session = null;

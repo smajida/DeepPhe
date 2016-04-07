@@ -72,6 +72,8 @@ public abstract class Summary extends List_  implements Element {
 		
 	public abstract String getDisplayText();
 	public abstract String getResourceIdentifier();
+	public abstract String getSummaryType();
+	public abstract String getUuid();
 	
 	public String getSummaryText() {
 		StringBuffer st = new StringBuffer();
@@ -165,6 +167,9 @@ public abstract class Summary extends List_  implements Element {
 		fact.setDocumentType(reportType);
 		fact.setPatientIdentifier(patientId);
 		fact.addContainerIdentifier(getResourceIdentifier());
+		fact.setSummaryType(getSummaryType());
+		fact.setSummaryId(getUuid());
+		
 	}
 	
 	
@@ -182,6 +187,7 @@ public abstract class Summary extends List_  implements Element {
 				list.add(fact);
 				for(Fact f: fact.getContainedFacts()){
 					addIdentifiersToFact(f, category);
+					
 					list.add(f);
 				}
 			}

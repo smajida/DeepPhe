@@ -15,8 +15,12 @@ public class CancerSummary extends Summary {
 	private CancerPhenotype phenotype;
 	private List<TumorSummary> tumors;
 	
+	private String summaryType = getClass().getSimpleName();
+	private String uuid = String.valueOf(Math.abs(hashCode()));
+	
 	public CancerSummary(){
 		phenotype = new CancerPhenotype();
+		
 	}
 
 	public void setReport(Report r){
@@ -33,9 +37,19 @@ public class CancerSummary extends Summary {
 	 */
 	public List<Fact> getContainedFacts(){
 		List<Fact> list = super.getContainedFacts();
-		list.addAll(getPhenotype().getContainedFacts());	
+		List<Fact> phFacts = getPhenotype().getContainedFacts();
+		for(Fact f:phFacts){
+			f.addContainerIdentifier(getResourceIdentifier());
+			list.add(f);
+		}
+		//list.addAll(getPhenotype().getContainedFacts());	
 		for(TumorSummary ts: getTumors()){
-			list.addAll(ts.getContainedFacts());
+			List<Fact> tsFacts = ts.getContainedFacts();
+			for(Fact f:tsFacts){
+				f.addContainerIdentifier(getResourceIdentifier());
+				list.add(f);
+			}
+			//list.addAll(ts.getContainedFacts());
 		}
 		return list;
 	}
@@ -44,6 +58,7 @@ public class CancerSummary extends Summary {
 	public FactList getBodySite() {
 		return getFactsOrInsert(FHIRConstants.HAS_BODY_SITE);
 	}
+	
 	public List<CancerPhenotype> getPhenotypes() {
 		return Arrays.asList(getPhenotype());
 	}
@@ -69,12 +84,29 @@ public class CancerSummary extends Summary {
 		tumor.setAnnotationType(getAnnotationType());
 		getTumors().add(tumor);
 	}
+	
+	public TumorSummary getTumorSummaryByUuid(String uuid){
+		TumorSummary toret = null;
+		for(TumorSummary ts: getTumors()){
+			if(ts.getUuid().equals(uuid))
+				toret = ts;
+		}
+		if(toret == null){
+			toret = new TumorSummary();
+			toret.setUuid(uuid);
+			addTumor(toret);
+		}
+		
+		return toret;
+	}
+	
 	public String getDisplayText() {
-		return getClass().getSimpleName();
+		return summaryType;
 	}
 	public String getResourceIdentifier() {
-		return getClass().getSimpleName()+"_"+Math.abs(hashCode());
+		return summaryType+"_"+uuid;
 	}
+	
 	public String getSummaryText() {
 		StringBuffer st = new StringBuffer(super.getSummaryText());
 		st.append(getPhenotype().getSummaryText()+"\n");
@@ -131,5 +163,21 @@ public class CancerSummary extends Summary {
 			addTumor(tumor);
 		}
 			
+	}
+
+	public String getSummaryType() {
+		return summaryType;
+	}
+
+	public void setSummaryType(String summaryType) {
+		this.summaryType = summaryType;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 }

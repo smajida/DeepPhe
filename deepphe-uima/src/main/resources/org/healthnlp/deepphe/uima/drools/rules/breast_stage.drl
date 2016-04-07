@@ -1,0 +1,586 @@
+package org.healthnlp.deepphe.uima.drools;
+
+import java.lang.Object;
+import java.util.List;
+import java.util.ArrayList;
+
+import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.FHIRConstants;
+
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
+
+import org.healthnlp.deepphe.fhir.summary.*;
+import org.healthnlp.deepphe.uima.drools.Summarizer;
+
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+
+
+// There is no Breast Stage 0
+/*
+//If Tis, N0, M0 then Stage 0 Breast Cancer 
+rule "Stage0-1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*Tis.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage0-1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage0-1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage0-1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage0-1") }
+		modify($nFact){	addRulesApplied("Stage0-1") }
+		modify($mFact){	addRulesApplied("Stage0-1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_0");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}			
+		System.out.println("*** Stage0-1 for MR");
+end
+*/
+
+//If T1, N0, M0, then Stage IA Breast Cancer 
+rule "Stage1A-1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage1A-1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage1A-1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage1A-1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage1A-1") }
+		modify($nFact){	addRulesApplied("Stage1A-1") }
+		modify($mFact){	addRulesApplied("Stage1A-1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IA_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF);
+		}			
+		System.out.println("*** Stage1A-1 for MR");
+end
+
+//If T0, N1mi, M0, then Stage IB Breast Cancer  
+rule "Stage1B-1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T0.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage1B-1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N1mi.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage1B-1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage1B-1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage1B-1") }
+		
+		modify($nFact){	addRulesApplied("Stage1B-1") }
+		modify($mFact){	addRulesApplied("Stage1B-1") }
+				
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IB_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF);
+		}			
+		System.out.println("*** Stage1B-1 for MR");
+end
+
+//If T1, N1mi, M0, then Stage IB Breast Cancer  
+rule "Stage1B-2"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage1B-2")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N1mi.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage1B-2")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage1B-2")
+	then
+
+		modify($tFact){	addRulesApplied("Stage1B-2") }
+		modify($nFact){	addRulesApplied("Stage1B-2") }
+		modify($mFact){	addRulesApplied("Stage1B-2") }
+			
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IB_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF);
+		}			
+		System.out.println("*** Stage1B-2 for MR");
+end
+
+//If T0, N1, M0, then Stage IIA Breast Cancer  
+rule "Stage2A-1.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T0.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage2A-1.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage2A-1.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage2A-1.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage2A-1.1") }
+		modify($nFact){	addRulesApplied("Stage2A-1.1") }
+		modify($mFact){	addRulesApplied("Stage2A-1.1") }
+				
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIA_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF);
+		}			
+		System.out.println("*** Stage2A-1.1 for MR");
+end
+
+//If T1, N1, M0, then Stage IIA Breast Cancer   
+rule "Stage2A-2.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage2A-2.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage2A-2.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage2A-2.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage2A-2.1") }
+		modify($nFact){	addRulesApplied("Stage2A-2.1") }
+		modify($mFact){	addRulesApplied("Stage2A-2.1") }
+				
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIA_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF);
+		}			
+		System.out.println("*** Stage2A-2.1 for MR");
+end
+
+//If T2, N0, M0, then Stage IIA Breast Cancer  
+rule "Stage2A-3.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T2.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage2A-3.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage2A-3.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage2A-3.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage2A-3.1") }
+		modify($nFact){	addRulesApplied("Stage2A-3.1") }
+		modify($mFact){	addRulesApplied("Stage2A-3.1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIA_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}
+				
+		System.out.println("*** Stage2A-3.1 for MR");
+end
+
+//If T2, N1, M0, then Stage IIB Breast Cancer 
+rule "Stage2B-1.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T2.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage2B-1.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage2B-1.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage2B-1.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage2B-1.1") }
+		modify($nFact){	addRulesApplied("Stage2B-1.1") }
+		modify($mFact){	addRulesApplied("Stage2B-1.1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIB_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}
+				
+		System.out.println("*** Stage2B-1.1 for MR");
+end
+
+//If T3, N0, M0, then Stage IIB Breast Cancer 
+rule "Stage2B-2.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T3.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage2B-2.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage2B-2.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage2B-2.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage2B-2.1") }
+		modify($nFact){	addRulesApplied("Stage2B-2.1") }
+		modify($mFact){	addRulesApplied("Stage2B-2.1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIB_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}
+				
+		System.out.println("*** Stage2B-2.1 for MR");
+end
+
+//If T0, N2, M0, then Stage IIIA Breast Cancer 
+rule "Stage3A-1.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T0.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage3A-1.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3A-1.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3A-1.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage3A-1.1") }
+		modify($nFact){	addRulesApplied("Stage3A-1.1") }
+		modify($mFact){	addRulesApplied("Stage3A-1.1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}
+				
+		System.out.println("*** Stage3A-1.1 for MR");
+end
+
+//If T1, N2, M0, then Stage IIIA Breast Cancer 
+rule "Stage3A-2.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage3A-2.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3A-2.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3A-2.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage3A-2.1") }
+		modify($nFact){	addRulesApplied("Stage3A-2.1") }
+		modify($mFact){	addRulesApplied("Stage3A-2.1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}
+				
+		System.out.println("*** Stage3A-2.1 for MR");
+end
+
+//If T2, N2, M0, then Stage IIIA Breast Cancer 
+rule "Stage3A-3.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T2.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage3A-3.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3A-3.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3A-3.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage3A-3.1") }
+		modify($nFact){	addRulesApplied("Stage3A-3.1") }
+		modify($mFact){	addRulesApplied("Stage3A-3.1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}
+				
+		System.out.println("*** Stage3A-3.1 for MR");
+end
+
+//If T3, N1, M0, then Stage IIIA Breast Cancer 
+rule "Stage3A-4.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T3.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage3A-4.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3A-4.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3A-4.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage3A-4.1") }
+		modify($nFact){	addRulesApplied("Stage3A-4.1") }
+		modify($mFact){	addRulesApplied("Stage3A-4.1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}
+				
+		System.out.println("*** Stage3A-4.1 for MR");
+end
+
+//If T3, N2, M0, then Stage IIIA Breast Cancer 
+rule "Stage3A-5.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T3.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage3A-5.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3A-5.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3A-5.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage3A-5.1") }
+		modify($nFact){	addRulesApplied("Stage3A-5.1") }
+		modify($mFact){	addRulesApplied("Stage3A-5.1") }
+			
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}
+				
+		System.out.println("*** Stage3A-5.1 for MR");
+end
+
+//If T4, N0, M0, then Stage IIIB Breast Cancer 
+rule "Stage3B-1.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T4.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage3B-1.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3B-1.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3B-1.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage3B-1.1") }
+		modify($nFact){	addRulesApplied("Stage3B-1.1") }
+		modify($mFact){	addRulesApplied("Stage3B-1.1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIB_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}
+				
+		System.out.println("*** Stage3B-1.1 for MR");
+end
+
+//If T4, N1, M0, then Stage IIIB Breast Cancer 
+rule "Stage3B-2.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T4.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage3B-2.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3B-2.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3B-2.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage3B-2.1") }
+		modify($nFact){	addRulesApplied("Stage3B-2.1") }
+		modify($mFact){	addRulesApplied("Stage3B-2.1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIB_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}
+				
+		System.out.println("*** Stage3B-2.1 for MR");
+end
+
+//If T4, N2, M0, then Stage IIIB Breast Cancer 
+rule "Stage3B-3.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T4.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage3B-3.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3B-3.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3B-3.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage3B-3.1") }
+		modify($nFact){	addRulesApplied("Stage3B-3.1") }
+		modify($mFact){	addRulesApplied("Stage3B-3.1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIB_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}
+				
+		System.out.println("*** Stage3B-3.1 for MR");
+end
+
+//If any T value, N3, M0, then Stage IIIC Breast Cancer 
+rule "Stage3C-1.1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage3C-1.1")
+		$nFact : Fact(category == "hasNClassification", name matches ".*N3.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3C-1.1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage3C-1.1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage3C-1.1") }
+		modify($nFact){	addRulesApplied("Stage3C-1.1") }
+		modify($mFact){	addRulesApplied("Stage3C-1.1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIC_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}
+				
+		System.out.println("*** Stage3C-1.1 for MR");
+end
+
+//If any T value, any N value, M1, then Stage IV Breast Cancer  
+rule "Stage4-1"
+	salience 9999999
+	no-loop true
+	when
+		$record : MedicalRecord()		
+		$tFact : Fact(category == "hasTClassification", $uri:uri, $patientId : patientIdentifier, $docId : documentIdentifier, 
+					rulesApplied not contains "Stage4-1")
+		$nFact : Fact(category == "hasNClassification", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage4-1")
+		$mFact : Fact(category == "hasMClassification", name matches ".*M1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+					rulesApplied not contains "Stage4-1")
+	then
+
+		modify($tFact){	addRulesApplied("Stage4-1") }
+		modify($nFact){	addRulesApplied("Stage4-1") }
+		modify($mFact){	addRulesApplied("Stage4-1") }
+		
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IV_Breast_Cancer");
+		List<Fact> provFacts = new ArrayList<Fact>();
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		stageF.addProvenanceFacts(provFacts);
+		
+		modify($record){
+			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
+		}
+				
+		System.out.println("*** Stage4-1 for MR");
+end
+	
