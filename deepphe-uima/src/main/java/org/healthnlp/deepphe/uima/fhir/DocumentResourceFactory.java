@@ -33,11 +33,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 
 
 final public class DocumentResourceFactory {
@@ -249,6 +249,37 @@ final public class DocumentResourceFactory {
 				.collect( Collectors.toList() );
 	}
 
+	/**
+	 * Obtain a list of Values for Elements of type T in the given cas with the given uri
+	 *
+	 * @param jcas   ye olde ...
+	 * @param uri    uri for the identified annotation
+	 * @param mapper creates the desired output class T from an identified annotation
+	 * @param <T>    some extension of fhir element
+	 * @return list of Elements of type T in the given cas with the given uri
+	 */
+	static private <T extends Element> List<T> getValueElementList( final JCas jcas, final URI uri,
+																						 final Function<ConceptInstance, ? extends T> mapper ) {
+		return ConceptInstanceUtil.getBranchConceptInstanceStream( jcas, uri.toString() )
+				.map( DocumentResourceFactory::getValuesOrSame )
+				.flatMap( Collection::stream )
+				.filter( t -> !t.isNegated() )
+				.map( mapper )
+				.collect( Collectors.toList() );
+	}
+
+	/**
+	 * @param finding finding or observation that may or may not be a phenotype with associated values
+	 * @return the associated values or the original finding if there are none
+	 */
+	static private Collection<ConceptInstance> getValuesOrSame( final ConceptInstance finding ) {
+		final Collection<ConceptInstance> values = ConceptInstanceUtil.getPhenotypeValues( finding );
+		if ( values.isEmpty() ) {
+			return Collections.singletonList( finding );
+		}
+		return values;
+	}
+
 
 	public static List<Procedure> getProcedures( JCas cas ) {
 		return getElementList( cas, FHIRConstants.PROCEDURE_URI, DocumentResourceFactory::createProcedure );
@@ -262,18 +293,8 @@ final public class DocumentResourceFactory {
 	}
 
 	public static List<Finding> getFindings( JCas cas ) {
-		return getElementList( cas, FHIRConstants.FINDING_URI, DocumentResourceFactory::createFinding );
-		// TNM and Stage should be under the #Finding URI, so there is no need to fetch them explicitly
-//		// add individual T N M to list
-//		ConceptInstanceUtil.getBranchConceptInstanceStream( cas, TnmPropertyUtil.getParentUri() )
-//				.map( DocumentResourceFactory::createFinding )
-//				.forEach( list::add );
-//		// add Stage to list
-//		ConceptInstanceUtil.getBranchConceptInstanceStream( cas, StagePropertyUtil.getParentUri() )
-//				.map( DocumentResourceFactory::createFinding )
-//				.forEach( list::add );
+		return getValueElementList( cas, FHIRConstants.FINDING_URI, DocumentResourceFactory::createFinding );
 	}
-
 
 	public static List<AnatomicalSite> getAnatomicalSite( JCas cas ) {
 		return getElementList( cas, FHIRConstants.BODY_SITE_URI, DocumentResourceFactory::createAnatomicalSite );
@@ -281,15 +302,11 @@ final public class DocumentResourceFactory {
 
 	public static List<Observation> getObservations( JCas cas ) {
 		final List<Observation> list
-				= getElementList( cas, FHIRConstants.OBSERVATION_URI, DocumentResourceFactory::createObservation );
+				= getValueElementList( cas, FHIRConstants.OBSERVATION_URI, DocumentResourceFactory::createObservation );
 		// add cancer size
 		ConceptInstanceUtil.getBranchConceptInstanceStream( cas, SizePropertyUtil.getParentUri() )
 				.map( DocumentResourceFactory::createObservation )
 				.forEach( list::add );
-		// add Receptor Status to list	- no need as it is under #Observation
-//		ConceptInstanceUtil.getBranchConceptInstanceStream( cas, StatusPropertyUtil.getParentUri() )
-//				.map( DocumentResourceFactory::createFinding )
-//				.forEach( list::add );
 		return list;
 	}
 	
