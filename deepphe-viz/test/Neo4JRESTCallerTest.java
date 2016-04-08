@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +24,7 @@ import db.Patient;
 
 public class Neo4JRESTCallerTest {
 
-	
+	@Ignore
 	@Test
 	public void testGetPatients() {
 		String SERVER_ROOT_URI = "http://localhost:7474/db/data/";

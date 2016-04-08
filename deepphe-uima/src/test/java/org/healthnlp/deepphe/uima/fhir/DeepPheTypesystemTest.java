@@ -23,12 +23,14 @@ import org.healthnlp.deepphe.uima.types.Composition;
 import org.healthnlp.deepphe.uima.types.DiseaseDisorder;
 import org.healthnlp.deepphe.uima.types.MedicationStatement;
 import org.healthnlp.deepphe.uima.types.Observation;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory.*;
 
 public class DeepPheTypesystemTest {
 
+	@Ignore
 	@Test
 	public void testFHIRimport() {
 		char F = File.separatorChar;
