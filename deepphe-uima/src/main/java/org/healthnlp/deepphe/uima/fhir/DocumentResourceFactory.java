@@ -395,7 +395,6 @@ final public class DocumentResourceFactory {
 	 * @return -
 	 */
 	public static Report loadReport( File reportDir ) throws Exception {
-		// TODO check first, otherwise may get NPE
 		if ( reportDir == null || !reportDir.isDirectory() ) {
 			return null;
 		}

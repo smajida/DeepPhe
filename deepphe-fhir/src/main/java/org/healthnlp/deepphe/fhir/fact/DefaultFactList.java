@@ -110,7 +110,10 @@ public class DefaultFactList extends ArrayList<Fact> implements FactList {
    }
    
    public boolean canAdd(Fact e){
-	   String eInfo = e.getInfo();
+	   if(e==null)
+           return false;
+
+       String eInfo = e.getInfo();
 	   for(Fact f:this){
 		   if(eInfo.equals(f.getInfo()))
 			   return false;
