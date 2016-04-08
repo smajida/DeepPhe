@@ -75,6 +75,13 @@ public class DiagnosisTest {
 	
 	@Test
 	public void testFHIRexport() {
+		// specify the default ontology
+		try {
+			OwlConnectionFactory.getInstance().getOntology( "data/ontology/nlpBreastCancer.owl" );
+		} catch ( IOntologyException | FileNotFoundException multE ) {
+			LOGGER.error( multE.getMessage() );
+		}
+
 		File outputDirectory = new File(System.getProperty("user.home")+File.separator+"Output");
 		if(!outputDirectory.exists())
 			outputDirectory.mkdirs();
@@ -114,12 +121,6 @@ public class DiagnosisTest {
 			lt.addToIndexes();
 			
 			// process AE
-			try {
-				OwlConnectionFactory.getInstance().getOntology( "data/ontology/nlpBreastCancer.owl" );
-			} catch ( IOntologyException | FileNotFoundException multE ) {
-				LOGGER.error( multE.getMessage() );
-			}
-
 			for(Disease dx : DocumentResourceFactory.getDiagnoses(jcas)){
 				LOGGER.info( dx.getSummaryText() );
 			}
