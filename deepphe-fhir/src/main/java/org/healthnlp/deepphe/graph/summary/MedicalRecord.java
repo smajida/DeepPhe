@@ -5,6 +5,7 @@ import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
+import org.neo4j.ogm.annotation.Relationship;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -23,6 +24,8 @@ public class MedicalRecord {
     private Patient patient;
     private PatientSummary patientSummary;
     private CancerSummary cancerSummary;
+
+    @Relationship(direction = Relationship.OUTGOING)
     private List<Report> reports;
 
     public String getDisplayText() {

@@ -177,7 +177,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	
 	/**
 	 * add diagnosis that this report is describing
-	 * @param dx
+	 * @param el element to be added
 	 */
 	public void addReportElement(Element el){
 		//if(getReportElements().contains(el))

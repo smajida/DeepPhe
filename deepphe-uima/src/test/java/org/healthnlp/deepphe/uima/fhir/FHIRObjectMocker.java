@@ -118,7 +118,20 @@ public class FHIRObjectMocker {
 				
 				allowing(report).getMedications();
 				will(returnValue(Collections.singletonList(medication)));
-				
+
+				allowing(report).getCompositionSummaries();
+				will(returnValue(Arrays.asList(new Summary[]{cancerSummary,patientSummary,tumorSummary})));
+
+				allowing(report).getCancerSummaries();
+				will(returnValue(Collections.singletonList(cancerSummary)));
+
+				allowing(report).getTumorSummaries();
+				will(returnValue(patientSummary));
+
+				allowing(report).getPatientSummary();
+				will(returnValue(Collections.singletonList(medication)));
+
+
 				//Stage
 				allowing(stage).getSummary();
 				will(returnValue(stageCC));
