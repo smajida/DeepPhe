@@ -16,7 +16,7 @@ public class TypeSystemTest {
 
     @Ignore
     @Test
-    public static void testTypeSystem() throws Exception {
+    public void testTypeSystem() throws Exception {
 		TypeSystemDescription typesystem = TypeSystemDescriptionFactory
 				.createTypeSystemDescription();
 		typesystem.toXML(System.out);

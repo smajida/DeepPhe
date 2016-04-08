@@ -183,7 +183,7 @@ public class FHIRUtils {
 	 */
 	public static String getConceptCode(CodeableConcept c){
 		for(Coding cc: c.getCoding()){
-			if(SCHEMA_UMLS.equals(cc.getSystem())){
+			if(SCHEMA_OWL.equals(cc.getSystem())){
 				return cc.getCode();
 			}
 		}
@@ -199,7 +199,7 @@ public class FHIRUtils {
 	public static String getConceptName(CodeableConcept c){
 		String name = c.getText();
 		for(Coding cc: c.getCoding()){
-			if(SCHEMA_UMLS.equals(cc.getSystem())){
+			if(SCHEMA_OWL.equals(cc.getSystem())){
 				if(cc.getDisplay() != null)
 					name = cc.getDisplay();
 			}
