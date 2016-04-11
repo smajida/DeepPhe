@@ -793,6 +793,10 @@ public class FHIRUtils {
 		
 	}
 	
+	public static boolean isEmpty(CodeableConcept cc){
+		return cc == null || cc.getCoding() == null || cc.getCoding().isEmpty();
+	}
+	
 	
 	public static void main(String [] args) throws Exception{
 		//System.out.println(getHeaderValues(TextTools.getText(new FileInputStream(new File("/home/tseytlin/Work/DeepPhe/data/sample/docs/doc1.txt")))));

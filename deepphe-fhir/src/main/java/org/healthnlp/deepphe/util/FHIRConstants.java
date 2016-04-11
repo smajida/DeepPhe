@@ -113,7 +113,7 @@ public class FHIRConstants {
 	public static final String DISCHARGE_SUMMARY_URI = null;
 	public static final String PROGRESS_NOTE_URI = null;*/
 	public static final URI QUANTITY_URI = URI.create("http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity");
-
+	public static final URI GENERIC_TNM = URI.create(MODEL_CANCER_URL+"#TNM_Staging_System");
 
 
 

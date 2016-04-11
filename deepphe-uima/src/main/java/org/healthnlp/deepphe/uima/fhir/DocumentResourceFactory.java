@@ -188,7 +188,7 @@ final public class DocumentResourceFactory {
 	public static Patient getPatient(org.hl7.fhir.instance.model.Patient p) {
 		Patient patient = new Patient();
 		patient.copy(p);
-		FHIRRegistry.getInstance().addResource(patient);
+		cTAKESUtils.addResource(patient);
 		return patient;
 	}
 	
@@ -209,7 +209,7 @@ final public class DocumentResourceFactory {
 			p.addExtension(FHIRUtils.createMentionExtension(pn,n,n+pn.length()));
 			
 			// register
-			FHIRRegistry.getInstance().addResource(p);
+			cTAKESUtils.addResource(p);
 			
 			return p;
 		}
@@ -293,7 +293,8 @@ final public class DocumentResourceFactory {
 	}
 
 	public static List<Finding> getFindings( JCas cas ) {
-		return getValueElementList( cas, FHIRConstants.FINDING_URI, DocumentResourceFactory::createFinding );
+		return getElementList( cas, FHIRConstants.FINDING_URI, DocumentResourceFactory::createFinding );
+		//return getValueElementList( cas, FHIRConstants.FINDING_URI, DocumentResourceFactory::createFinding );
 	}
 
 	public static List<AnatomicalSite> getAnatomicalSite( JCas cas ) {
@@ -302,7 +303,9 @@ final public class DocumentResourceFactory {
 
 	public static List<Observation> getObservations( JCas cas ) {
 		final List<Observation> list
-				= getValueElementList( cas, FHIRConstants.OBSERVATION_URI, DocumentResourceFactory::createObservation );
+				= getElementList( cas, FHIRConstants.OBSERVATION_URI, DocumentResourceFactory::createObservation );
+		//= getValueElementList( cas, FHIRConstants.OBSERVATION_URI, DocumentResourceFactory::createObservation );
+		
 		// add cancer size
 		ConceptInstanceUtil.getBranchConceptInstanceStream( cas, SizePropertyUtil.getParentUri() )
 				.map( DocumentResourceFactory::createObservation )
@@ -320,7 +323,7 @@ final public class DocumentResourceFactory {
 			return null;
 		Report report = new Report();
 		report.copy(c);
-		FHIRRegistry.getInstance().addResource(report);
+		cTAKESUtils.addResource(report);
 		return report;
 	}
 	
@@ -329,7 +332,7 @@ final public class DocumentResourceFactory {
 			return null;
 		Finding d = new Finding();
 		d.copy(c);
-		FHIRRegistry.getInstance().addResource(d);
+		cTAKESUtils.addResource(d);
 		return d;
 	}
 	public static Disease getDiagnosis(Condition c){
@@ -337,7 +340,7 @@ final public class DocumentResourceFactory {
 			return null;
 		Disease d = new Disease();
 		d.copy(c);
-		FHIRRegistry.getInstance().addResource(d);
+		cTAKESUtils.addResource(d);
 		return d;
 	}
 	
@@ -346,7 +349,7 @@ final public class DocumentResourceFactory {
 			return null;
 		Procedure pp = new Procedure();
 		pp.copy(p);
-		FHIRRegistry.getInstance().addResource(pp);
+		cTAKESUtils.addResource(pp);
 		return pp;
 	}
 	
@@ -355,7 +358,7 @@ final public class DocumentResourceFactory {
 			return null;
 		Observation pp = new Observation();
 		pp.copy(p);
-		FHIRRegistry.getInstance().addResource(pp);
+		cTAKESUtils.addResource(pp);
 		return pp;
 	}
 	
@@ -364,7 +367,7 @@ final public class DocumentResourceFactory {
 			return null;
 		Medication pp = new Medication();
 		pp.copy(p);
-		FHIRRegistry.getInstance().addResource(pp);
+		cTAKESUtils.addResource(pp);
 		return pp;
 	}
 	
@@ -375,7 +378,7 @@ final public class DocumentResourceFactory {
 			return null;
 		AnatomicalSite pp = new AnatomicalSite();
 		pp.copy(p);
-		FHIRRegistry.getInstance().addResource(pp);
+		cTAKESUtils.addResource(pp);
 		return pp;
 	}
 
@@ -469,7 +472,7 @@ final public class DocumentResourceFactory {
 		FHIRUtils.createIdentifier(anatomicalSite.addIdentifier(),anatomicalSite);
 		
 		// register
-		FHIRRegistry.getInstance().addResource( anatomicalSite, conceptInstance );
+		cTAKESUtils.addResource( anatomicalSite, conceptInstance );
 		
 		return anatomicalSite;
 	}
@@ -481,28 +484,18 @@ final public class DocumentResourceFactory {
 	 * @return -
 	 */
 	public static Finding load( Finding finding, final ConceptInstance conceptInstance ) {
-		finding.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
-
-		cTAKESUtils.addLanguageContext( conceptInstance, finding );
-
-
-		// see if we have annotations or maybe parent might have them
-		IdentifiedAnnotation ia = conceptInstance.getIdentifiedAnnotation();
-		if ( ia.getBegin() == 0 && ia.getEnd() == 0 ) {
-			try {
-				final IdentifiedAnnotation tnm
-						= OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( ia.getCAS().getJCas(),
-						TnmPropertyUtil.getParentUri() )
-						.filter( conceptInstance::equals )
-						.findFirst().get();
-				if ( tnm != null ) {
-					ia.setBegin( tnm.getBegin() );
-					ia.setEnd( tnm.getEnd() );
-				}
-			} catch (CASException e) {
-				e.printStackTrace();
+		Collection<ConceptInstance> vals = ConceptInstanceUtil.getPhenotypeValues( conceptInstance);
+		
+		// TNM and other Findings have the URL of interest stored in Value
+		if(vals.isEmpty()){
+			finding.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
+		}else{
+			for(ConceptInstance ci: vals){
+				finding.setCode( cTAKESUtils.getCodeableConcept( ci ) );
 			}
 		}
+		
+		cTAKESUtils.addLanguageContext( conceptInstance, finding );
 		
 		// add mention text
 		finding.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
@@ -512,7 +505,7 @@ final public class DocumentResourceFactory {
 	
 		
 		// register
-		FHIRRegistry.getInstance().addResource( finding, conceptInstance );
+		cTAKESUtils.addResource( finding, conceptInstance );
 		
 		return finding;
 	}
@@ -532,18 +525,28 @@ final public class DocumentResourceFactory {
 		
 		// now lets take a look at the location of this disease
 		for ( ConceptInstance ci : ConceptInstanceUtil.getLocations( conceptInstance ) ) {
-			final IdentifiedAnnotation as = ci.getIdentifiedAnnotation();
 			CodeableConcept location = dx.addBodySite();
-			cTAKESUtils.setCodeableConcept( location, as );
-			AnatomicalSite site = (AnatomicalSite) FHIRRegistry.getInstance().getResource(as);
+			cTAKESUtils.setCodeableConcept( location, ci );
+			AnatomicalSite site = (AnatomicalSite) cTAKESUtils.getResource(ci);
 			if ( site != null ) {
 				FHIRUtils.addResourceReference( location, site );
 			}
 		}
 
+		/*
 		Collection<IdentifiedAnnotation> stages = cTAKESUtils.getCancerStages( conceptInstance.getIdentifiedAnnotation() );
 		Collection<IdentifiedAnnotation> tnms = cTAKESUtils.getTnmClassifications( conceptInstance.getIdentifiedAnnotation());
+		
+		Collection<ConceptInstance> phenotypes = ConceptInstanceUtil.getNeoplasmAllPhenotypes(conceptInstance);
+		for(ConceptInstance ci: phenotypes){
+			System.out.println(ci.getUri());
+		}
+		
 		dx.setStage( createStage( stages, tnms ) );
+		 */
+		Stage stage = createStage(conceptInstance);
+		if(stage != null)
+			dx.setStage(stage);
 
 		// add mention text
 		dx.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
@@ -552,7 +555,7 @@ final public class DocumentResourceFactory {
 		FHIRUtils.createIdentifier(dx.addIdentifier(),dx);
 		
 		// register
-		FHIRRegistry.getInstance().addResource( dx, conceptInstance );
+		cTAKESUtils.addResource( dx, conceptInstance );
 		
 		return dx;
 	}
@@ -572,7 +575,7 @@ final public class DocumentResourceFactory {
 		md.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
 		cTAKESUtils.addLanguageContext( conceptInstance, md );
 		// register
-		FHIRRegistry.getInstance().addResource( md, conceptInstance );
+		cTAKESUtils.addResource( md, conceptInstance );
 		return md;
 	}
 
@@ -637,7 +640,7 @@ final public class DocumentResourceFactory {
 		FHIRUtils.createIdentifier(ob.addIdentifier(),ob);
 		
 		// register
-		FHIRRegistry.getInstance().addResource( ob, conceptInstance );
+		cTAKESUtils.addResource( ob, conceptInstance );
 		
 		return ob;
 	}
@@ -662,10 +665,9 @@ final public class DocumentResourceFactory {
 		
 		// now lets take a look at the location of this disease
 		for ( ConceptInstance ci : ConceptInstanceUtil.getLocations( conceptInstance ) ) {
-			final IdentifiedAnnotation as = ci.getIdentifiedAnnotation();
 			CodeableConcept location = pr.addBodySite();
-			cTAKESUtils.setCodeableConcept(location,as);
-			AnatomicalSite site = (AnatomicalSite) FHIRRegistry.getInstance().getResource(as);
+			cTAKESUtils.setCodeableConcept(location,ci);
+			AnatomicalSite site = (AnatomicalSite) cTAKESUtils.getResource(ci);
 			if(site != null)
 				FHIRUtils.addResourceReference(location,site);
 		}
@@ -682,7 +684,7 @@ final public class DocumentResourceFactory {
 
 
 		// register
-		FHIRRegistry.getInstance().addResource( pr, conceptInstance );
+		cTAKESUtils.addResource( pr, conceptInstance );
 		return pr;
 	}
 
@@ -690,11 +692,15 @@ final public class DocumentResourceFactory {
 	//	public static Stage createStage(CancerStage st, TnmClassification tnm) {
 	//		return load(new Stage(),st,tnm);
 	//	}
+	/*
 	public static Stage createStage( final Collection<IdentifiedAnnotation> stages,
 												final Collection<IdentifiedAnnotation> tnms ) {
 		return load( new Stage(),stages, tnms );
 	}
-
+*/
+	public static Stage createStage( final ConceptInstance neoplasm ) {
+		return load( new Stage(),neoplasm);
+	}
 
 	public static AnatomicalSite createAnatomicalSite( final ConceptInstance conceptInstance ) {
 		return load( new AnatomicalSite(), conceptInstance );
@@ -720,7 +726,7 @@ final public class DocumentResourceFactory {
 //			stage.setSummary(c);
 //
 //			// add id to cancer stage
-//			Finding f = (Finding) FHIRRegistry.getInstance().getResource(st);
+//			Finding f = (Finding) cTAKESUtils.getResource(st);
 //			if(f != null)
 //				FHIRUtils.addResourceReference(c,f);
 //
@@ -738,21 +744,21 @@ final public class DocumentResourceFactory {
 //		// extract individual Stage levels if values are conflated
 //		if(tnm != null){
 //			if(tnm.getSize() != null){
-//				Finding f = (Finding) FHIRRegistry.getInstance().getResource(tnm.getSize());
+//				Finding f = (Finding) cTAKESUtils.getResource(tnm.getSize());
 //				if(f == null)
 //					f = createFinding(tnm.getSize());
 //				stage.addAssessment(f);
 //				//stage.setStringExtension(Stage.TNM_PRIMARY_TUMOR,cTAKESUtils.getConceptURI(st.getSize()));
 //			}
 //			if(tnm.getNodeSpread() != null){
-//				Finding f = (Finding) FHIRRegistry.getInstance().getResource(tnm.getNodeSpread());
+//				Finding f = (Finding) cTAKESUtils.getResource(tnm.getNodeSpread());
 //				if(f == null)
 //					f = createFinding(tnm.getNodeSpread());
 //				stage.addAssessment(f);
 //				//stage.setStringExtension(Stage.TNM_REGIONAL_LYMPH_NODES,cTAKESUtils.getConceptURI(st.getNodeSpread()));
 //			}
 //			if(tnm.getMetastasis() != null){
-//				Finding f = (Finding) FHIRRegistry.getInstance().getResource(tnm.getMetastasis());
+//				Finding f = (Finding) cTAKESUtils.getResource(tnm.getMetastasis());
 //				if(f == null)
 //					f = createFinding(tnm.getMetastasis());
 //				stage.addAssessment(f);
@@ -763,10 +769,11 @@ final public class DocumentResourceFactory {
 //
 //
 //		// register
-//		//FHIRRegistry.getInstance().addResource(stage,st);
+//		//cTAKESUtils.addResource(stage,st);
 //
 //		return stage;
 //	}
+	/*
 	public static Stage load( Stage stage,
 									  final Collection<IdentifiedAnnotation> stageAnnotations,
 									  final Collection<IdentifiedAnnotation> tnmAnnotations ) {
@@ -781,7 +788,7 @@ final public class DocumentResourceFactory {
 				c.setText( firstStageAnnotation.getCoveredText() );
 				stage.setSummary( c );
 				// add id to cancer stage
-				Finding f = (Finding)FHIRRegistry.getInstance().getResource( firstStageAnnotation );
+				Finding f = (Finding)cTAKESUtils.getResource( firstStageAnnotation );
 				if ( f != null ) {
 					FHIRUtils.addResourceReference( c, f );
 				}
@@ -811,7 +818,7 @@ final public class DocumentResourceFactory {
 				LOGGER.error( "No Cas exists for TNM annotations" );
 			} else {
 				for ( IdentifiedAnnotation tnm : tnmAnnotations ) {
-					Finding f = (Finding)FHIRRegistry.getInstance().getResource( tnm );
+					Finding f = (Finding)cTAKESUtils.getResource( tnm );
 					if ( f == null ) {
 						f = createFinding( new ConceptInstance( tnm ) );
 					}
@@ -824,9 +831,49 @@ final public class DocumentResourceFactory {
 					firstTnmAnnotation.getBegin(), firstTnmAnnotation.getEnd() ) );
 		}
 		// register
-		//FHIRRegistry.getInstance().addResource(stage,st);
+		//cTAKESUtils.addResource(stage,st);
 		return stage;
 	}
-
+*/
+	
+	public static Stage load( Stage stage, ConceptInstance neoplasm ) {
+		// see if we have cancer stage
+		for(ConceptInstance ci: ConceptInstanceUtil.getNeoplasmStage(neoplasm)){
+			
+			CodeableConcept c = cTAKESUtils.getCodeableConcept(ci);
+			
+			// add id to cancer stage
+			Finding f = (Finding) cTAKESUtils.getResource(ci);
+			if (f != null) {
+				FHIRUtils.addResourceReference(c, f);
+			}
+			// add extension
+			stage.addExtension(cTAKESUtils.createMentionExtension(ci));	
+			stage.setSummary(c);
+		}
+		
+		// add other neoplasm assessments
+		for(ConceptInstance ci: ConceptInstanceUtil.getNeoplasmTNM(neoplasm)){
+			Collection<ConceptInstance> vi = ConceptInstanceUtil.getPhenotypeValues( ci);
+			// add id to cancer stage
+			Finding f = (Finding) cTAKESUtils.getResource(!vi.isEmpty()?vi.iterator().next():ci);
+			if (f != null) {
+				stage.addAssessment(f);
+			}		
+		}
+		
+		// set generic placeholder Stage if needed
+		if(FHIRUtils.isEmpty(stage.getSummary())){
+			if(stage.getAssessmentTarget().isEmpty())
+				return null;
+			stage.setSummary(FHIRUtils.getCodeableConcept(FHIRConstants.GENERIC_TNM));
+		}
+		
+		
+	
+		// register
+		// cTAKESUtils.addResource(stage,st);
+		return stage;
+	}
 
 }

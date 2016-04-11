@@ -29,12 +29,13 @@ import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.cas.TOP;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.jcas.tcas.DocumentAnnotation;
+import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.Extension;
-
+import org.healthnlp.deepphe.fhir.Element;
 import java.net.URI;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -69,7 +70,15 @@ public class cTAKESUtils {
 
 	public static Extension createMentionExtension( final ConceptInstance conceptInstance ) {
 		IdentifiedAnnotation mention = conceptInstance.getIdentifiedAnnotation();
-		return FHIRUtils.createMentionExtension( mention.getCoveredText(), mention.getBegin(), mention.getEnd() );
+		StringBuffer b = new StringBuffer(mention.getCoveredText());
+		int st = mention.getBegin();
+		int en = mention.getEnd();
+		
+		for(ConceptInstance v : ConceptInstanceUtil.getPropertyValues(conceptInstance)){
+			b.append(v.getIdentifiedAnnotation().getCoveredText());
+			en = v.getIdentifiedAnnotation().getEnd();
+		}
+		return FHIRUtils.createMentionExtension(b.toString(),st, en );
 	}
 
 
@@ -99,6 +108,16 @@ public class cTAKESUtils {
 	 * @param ia -
 	 * @return -
 	 */
+	public static CodeableConcept setCodeableConcept(CodeableConcept cc,ConceptInstance ia){
+		return setCodeableConcept(cc, ia.getIdentifiedAnnotation());
+	}
+	
+	/**
+	 * get codeblce concept form OntologyConcept annotation
+	 * @param cc -
+	 * @param ia -
+	 * @return -
+	 */
 	public static CodeableConcept setCodeableConcept(CodeableConcept cc,IdentifiedAnnotation ia){
 		cc.setText(ia.getCoveredText());
 		
@@ -113,6 +132,7 @@ public class cTAKESUtils {
 				ccc.setCode(c.getCode());
 				ccc.setDisplay(getConceptName(ia));
 				ccc.setSystem(c.getCodingScheme());
+				cc.setText(ccc.getDisplay()); //TODO: decide if i want to use URI name or string
 				cuis.add(c.getCode());
 				
 				// add codign for UMLS
@@ -486,6 +506,16 @@ public class cTAKESUtils {
 
 	private static boolean isEmpty(String s){
 		return s == null || s.trim().length() == 0;
+	}
+	
+	public static void addResource(Element e, ConceptInstance conceptInstance) {
+		FHIRRegistry.getInstance().addResource( e, conceptInstance.getIdentifiedAnnotation() );
+	}
+	public static void addResource(Element e) {
+		FHIRRegistry.getInstance().addResource( e);
+	}
+	public static Element getResource(ConceptInstance ci){
+		return FHIRRegistry.getInstance().getResource(ci.getIdentifiedAnnotation());
 	}
 	
 	public static void addLanguageContext( ConceptInstance conceptInstance, DomainResource dx ) {
