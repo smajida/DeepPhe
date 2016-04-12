@@ -166,7 +166,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 		StringBuffer buffer = new StringBuffer();
 
 		//Add Header
-		buffer.append("Filename").append(T).append("Category Code").append(T).append("Column Number").append(T).append("Data Label");
+		buffer.append("Filename").append(T).append("Category Code").append(T).append("Column Number").append(T).append("Data Label").append("\n");
 
 		//Add Contents
 		for(Map<String,String> map: mapping){
