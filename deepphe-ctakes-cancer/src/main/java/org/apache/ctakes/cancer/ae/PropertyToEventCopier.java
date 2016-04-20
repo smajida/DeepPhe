@@ -1,6 +1,7 @@
 package org.apache.ctakes.cancer.ae;
 
 import org.apache.ctakes.typesystem.type.textsem.EventMention;
+import org.apache.log4j.Logger;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.component.JCasAnnotator_ImplBase;
 import org.apache.uima.fit.util.JCasUtil;
@@ -12,11 +13,14 @@ import org.apache.uima.jcas.JCas;
  */
 final public class PropertyToEventCopier extends JCasAnnotator_ImplBase {
 
+   static private final Logger LOGGER = Logger.getLogger( "PropertyToEventCopier" );
+
    /**
     * {@inheritDoc}
     */
    @Override
    public void process( final JCas jcas ) throws AnalysisEngineProcessException {
+      LOGGER.info( "Starting processing" );
       for ( EventMention mention : JCasUtil.select( jcas, EventMention.class ) ) {
          // get temporal event mentions and not dictinoary-derived subclasses
          // find either an exact matching span, or an end-matching span with the smallest overlap
@@ -45,5 +49,7 @@ final public class PropertyToEventCopier extends JCasAnnotator_ImplBase {
             }
          }
       }
+      LOGGER.info( "Finished processing" );
    }
+
 }
