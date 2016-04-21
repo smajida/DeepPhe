@@ -21,7 +21,6 @@ enum StatusValue implements Value {
    final private Pattern _pattern;
 
 
-   static private final String VALUE_TYPE_URI = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl#TNMValue";
 
    StatusValue( final String title, final String uri, final String regex ) {
       _title = title;

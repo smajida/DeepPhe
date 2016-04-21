@@ -52,8 +52,8 @@
 
    <rareWordConsumer>
       <name>Term Consumer</name>
-      <!--<implementationName>org.apache.ctakes.dictionary.lookup2.consumer.SemanticCleanupTermConsumer</implementationName>-->
-      <implementationName>org.apache.ctakes.dictionary.lookup2.consumer.PrecisionTermConsumer</implementationName>
+      <implementationName>org.apache.ctakes.dictionary.lookup2.consumer.SemanticCleanupTermConsumer</implementationName>
+      <!--<implementationName>org.apache.ctakes.dictionary.lookup2.consumer.PrecisionTermConsumer</implementationName>-->
       <!--<implementationName>org.apache.ctakes.dictionary.lookup2.consumer.DefaultTermConsumer</implementationName>-->
       <properties>
          <!-- Depending upon the consumer, the value of codingScheme may or may not be used.  With the packaged consumers,

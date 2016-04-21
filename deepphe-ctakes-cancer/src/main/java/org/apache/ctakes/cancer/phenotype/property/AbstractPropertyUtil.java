@@ -120,7 +120,7 @@ abstract public class AbstractPropertyUtil<T extends Type, V extends Value> {
          }
       }
       if ( bestValue == null ) {
-         return "";
+         return getUnknownValue().getUri();
       }
       return bestValue.getUri();
    }
