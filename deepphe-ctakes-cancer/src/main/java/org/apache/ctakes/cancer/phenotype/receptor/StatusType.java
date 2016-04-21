@@ -23,16 +23,21 @@ import static org.apache.ctakes.cancer.phenotype.receptor.StatusTest.*;
 enum StatusType implements Type {
    ER( "Estrogen receptor",
          "Estrogen_Receptor_Status",
-         "(Triple|Estrogen|ER)",
+         "(Estrogen|ER)",
          "C1719706", "C1719707", "C0279758", IHC ),
    PR( "Progesterone receptor",
          "Progesterone_Receptor_Status",
-         "(Triple|Progesterone|PR)",
+         "(Progesterone|PR)",
          "C0279759", "C0279766", "C0279768", IHC ),
    HER2( "Human epidermal growth factor receptor 2",
          "HER2_Neu_Status",
-         "(Triple|(HER-?2( ?/ ?neu)?))",
-         "C2348909", "C2348908", "C2348910", IHC, FISH, CISH, DISH );
+         "(HER-?2( ?/ ?neu)?)",
+         "C2348909", "C2348908", "C2348910", IHC, FISH, CISH, DISH ),
+   NEG_3( "Triple Negative",
+         "Triple_Negative_Breast_Carcinoma",
+         "Triple",
+         "C2348819", "C2348819", "C2348819",
+         IHC, FISH, CISH, DISH );
 
    static private final String RECEPTOR_EX = "(\\s*-?\\s*?Receptors?\\s*-?)?";
 
