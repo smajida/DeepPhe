@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.deep.phe.data;
+package edu.pitt.dbmi.deep.phe.data.sample;
 
 import java.io.*;
 import java.util.*;
@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import edu.pitt.dbmi.deep.phe.data.model.*;
 import edu.pitt.dbmi.deep.phe.util.TextUtils;
+import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 
 public class DataReportSampler {
 	private List<Filter> filters;
@@ -23,22 +24,21 @@ public class DataReportSampler {
 	 */
 	public static void main(String[] args) throws IOException {
 		//String domain = "Melanoma";
-		boolean delimitedInput = false;
+		boolean delimitedInput = true;
 		File dir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/");
 		File patientDates = new File(dir,"TCGA_patients+dates.csv");
-		File dataFile = new File(dir,"TCGA_data.bar");
-		File outputFile = new File(dir,"TCGA_data_filtered.bar");
+		File dataFile = new File(dir,"TCGA_CARE_data.tsv");
+		File outputFile = new File(dir,"TCGA_CARE_data_filtered.bar");
 		if(!outputFile.getParentFile().exists())
 			outputFile.getParentFile().mkdirs();
 		if(outputFile.exists())
 			outputFile.delete();
 		
 		
-		DataPatientSampler ps = new DataPatientSampler();
 		DataReportSampler rs = new DataReportSampler();
 		
 		// load selected patient data into data structure
-		Map<String,Patient> patientMap = (delimitedInput)?ps.loadDelimitedDataset(dataFile):ps.loadBARDataset(dataFile);
+		Map<String,Patient> patientMap = (delimitedInput)?rs.loadDelimitedDataset(dataFile):rs.loadBARDataset(dataFile);
 		
 		// load extra date information
 		rs.loadPatientDates(patientMap,patientDates);
@@ -49,9 +49,98 @@ public class DataReportSampler {
 			if(!p.getDates().isEmpty())
 				rs.saveReportSample(p,outputFile);
 		}
-		
 	}
 
+	
+	/**
+	 * Load dataset of BAR dataset
+	 * @param dataFile
+	 * @throws IOException 
+	 */
+	public Map<String,Patient> loadBARDataset(File dataFile) throws IOException {
+		Map<String,Patient> results = new HashMap<String, Patient>();
+		
+		BufferedReader r = new BufferedReader(new FileReader(dataFile));
+		boolean inReport = false;
+		StringBuffer b = new StringBuffer();
+		for(String l=r.readLine();l != null;l=r.readLine()){
+			l = l.trim();
+			if("S_O_H".equals(l)){
+				inReport = true;
+				b.append(l+"\n");
+			}else if("E_O_R".equals(l)){
+				b.append(l+"\n");
+				Report rp = Report.readBARformat(b.toString());
+				Patient p = results.get(rp.getPatient().getMedicalRecordNumber());
+				if(p == null){
+					p = rp.getPatient();
+					results.put(p.getMedicalRecordNumber(),p);
+				}
+				p.addReport(rp);
+				// reset
+				inReport = false;
+				b = new StringBuffer();
+			}else if(inReport){
+				b.append(l+"\n");
+			}
+			
+		}
+		r.close();
+		return results;
+	}
+	
+	
+	/**
+	 * Load dataset of BAR dataset
+	 * @param dataFile
+	 * @throws IOException 
+	 */
+	public Map<String,Patient> loadDelimitedDataset(File dataFile) throws IOException {
+		Map<String,Patient> results = new HashMap<String, Patient>();
+		
+		BufferedReader r = new BufferedReader(new FileReader(dataFile));
+		List<String> names = null;
+		for(String l=r.readLine();l != null;l=r.readLine()){
+			l = l.trim();
+			if(names == null){
+				names =  TextTools.parseCSVline(l,'\t');
+			}else{
+				List<String> values = TextTools.parseCSVline(l,'\t');
+				Map<String,String> rmap = new LinkedHashMap<String, String>();
+				for(int i=0;i<values.size();i++){
+					String key = names.get(i);
+					String val = values.get(i).trim();
+					rmap.put(key,val);
+				}
+				if(!rmap.isEmpty() && rmap.containsKey("NOTE_TEXT")){
+					Report rp = Report.readMAPformat(rmap);
+					Patient p = results.get(rp.getPatient().getMedicalRecordNumber());
+					if(p == null){
+						p = rp.getPatient();
+						results.put(p.getMedicalRecordNumber(),p);
+					}
+					// check if this report should be appended to a previous one
+					if(Integer.parseInt(rmap.get("LINE")) > 1){
+						Report last = p.getReport(rp.getRecordId());
+						if(last != null){
+							last.appendReport(rp);
+						}else{
+							// if we don't have report, then it must have been thrown out because
+							// it was duplicated earlier
+							//System.err.println(rp.getRecordId()+" "+rmap.get("LINE"));
+						}
+					}else{
+						p.addReport(rp);
+					}
+				}
+			}
+		}
+		r.close();
+		return results;
+	}
+	
+	
+	
 	public List<Filter> getFilters() {
 		if(filters == null){
 			filters = new ArrayList<Filter>();
@@ -154,7 +243,7 @@ public class DataReportSampler {
 	 * @param outputFile
 	 * @throws IOException 
 	 */
-	private void saveReportSample(Patient p, File outputFile) throws IOException {
+	public void saveReportSample(Patient p, File outputFile) throws IOException {
 		List<Report> filtered = filterReports(p);
 		System.out.println(p.getMedicalRecordNumber()+" -> sampled "+filtered.size()+" out of "+p.getReportCount());
 		BufferedWriter w = new BufferedWriter(new FileWriter(outputFile,true));

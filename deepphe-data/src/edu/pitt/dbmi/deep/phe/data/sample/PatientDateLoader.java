@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.deep.phe.data;
+package edu.pitt.dbmi.deep.phe.data.sample;
 
 import java.io.*;
 import java.util.*;
@@ -141,8 +141,8 @@ public class PatientDateLoader {
 	 */
 	public static void main(String[] args) throws IOException {
 		File dir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/");
-		File in  = new File(dir,"TCGA.tsv");
-		File out = new File(dir,"TCGA_patients+dates.csv");
+		File in  = new File(dir,"TCGA_CARE_data.tsv");
+		File out = new File(dir,"TCGA_CARE_patients+dates.csv");
 		System.out.print("converting "+in.getAbsolutePath()+" ..");
 		convert(in,out);
 		System.out.println("done");

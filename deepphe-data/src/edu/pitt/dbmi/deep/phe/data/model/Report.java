@@ -109,6 +109,14 @@ public class Report {
 		this.eventDate = eventDate;
 	}
 	
+	public int textHash(){
+		if(body != null)
+			return body.hashCode();
+		if(text != null)
+			return text.hashCode();
+		return hashCode();
+	}
+	
 	/**
 	 * read MARS summary line
 	 * MRN|Event Date|Doc Type|Report ID
@@ -233,11 +241,18 @@ public class Report {
 		doc.setRecordStatus("FINAL");
 		doc.setEventDate(TextUtils.parseDateString(map.get("CONTACT_DATE")));
 		doc.setRecordId(map.get("NOTE_CSN_ID"));
-		doc.setMedicalRecordNumber(map.get("MEDIPAC_MRN"));
+		if(map.containsKey("MEDIPAC_MRN"))
+			doc.setMedicalRecordNumber(map.get("MEDIPAC_MRN"));
+		else if(map.containsKey("EPIC_MRN"))
+			doc.setMedicalRecordNumber(map.get("EPIC_MRN"));
+		
 		//doc.setRace(hd[RACE].trim());
 		//doc.setBirthDate(TextUtils.parseDateString(hd[DOB].trim()));
 		//doc.setGender(hd[SEX].trim());
-		doc.setName(map.get("PAT_NAME"));
+		if(map.containsKey("PAT_NAME"))
+			doc.setName(map.get("PAT_NAME"));
+		else if(map.containsKey("PAT_LAST_NAME") && map.containsKey("PAT_FIRST_NAME"))
+			doc.setName(map.get("PAT_LAST_NAME").toUpperCase()+", "+map.get("PAT_FIRST_NAME").toUpperCase());
 		//doc.setSocialSecurityNumber(hd[SSN].replaceAll("\\D", "").trim());
 	
 		// set body and xml
@@ -246,8 +261,16 @@ public class Report {
 		txt = txt.replaceAll("  ","\n").replaceAll(":__",":  ");
 		//txt = txt.replaceAll("\n{2,}(\\w{1,20}:)","\n$1");
 		doc.setBody(txt);
-		// create a BAR looking text 
+		doc.setText(doc.createBARtext());
 		
+		return doc;
+	}
+	
+	/**
+	 * create BAR text for a body
+	 * @return
+	 */
+	private String createBARtext(){
 		final int RECORD_TYPE = 4;
 		final int RECORD_STATUS = 70;
 		final int DATE = 3;
@@ -259,20 +282,34 @@ public class Report {
 		b.append("S_O_H\n");
 		for(int i=0;i<=RECORD_STATUS;i++){
 			switch(i){
-			case RECORD_TYPE: 	b.append(doc.getDocumentType()); break;
-			case RECORD_STATUS:	b.append(doc.getRecordStatus()); break;
-			case RECORD_ID:	 	b.append(doc.getRecordId()); break;
-			case ID: 			b.append(doc.getMedicalRecordNumber()); break;
-			case DATE: 			b.append(sdf.format(doc.getEventDate())); break;
-			case NAME: 			b.append(doc.getName()); break;
+			case RECORD_TYPE: 	b.append(getDocumentType()); break;
+			case RECORD_STATUS:	b.append(getRecordStatus()); break;
+			case RECORD_ID:	 	b.append(getRecordId()); break;
+			case ID: 			b.append(getMedicalRecordNumber()); break;
+			case DATE: 			b.append(sdf.format(getEventDate())); break;
+			case NAME: 			b.append(getName()); break;
 			}
 			b.append("|");
 		}
 		b.append("\nE_O_H\n");
-		b.append(doc.getBody()+"\n");
+		b.append(getBody()+"\n");
 		b.append("E_O_R\n");
-		doc.setText(b.toString());
+		return b.toString();
+	}
+	
+	
+	/**
+	 * append report text to this one
+	 * @param rp
+	 */
+	public void appendReport(Report rp) {
+		if(getRecordId().equals(rp.getRecordId())){
+			String txt = getBody()+"\n"+rp.getBody();
+			setBody(txt);
+			setText(createBARtext());
+		}else{
+			System.err.println("FUCK!");
+		}
 		
-		return doc;
 	}
 }
