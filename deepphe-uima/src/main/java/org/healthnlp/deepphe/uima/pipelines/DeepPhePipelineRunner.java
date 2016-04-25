@@ -38,6 +38,8 @@ final public class DeepPhePipelineRunner {
 		public String getClipsDirectoryPath();
 	  @Option(shortName = "t", description = "transmart mapping file")
 		public String getTransmartMappingFile();
+	@Option(shortName = "p", description = "TCGA name mapping file")
+		public String getTCGANameMappingFile();
    }
 
    public static void main( final String... args ) throws UIMAException, IOException {
@@ -50,7 +52,7 @@ final public class DeepPhePipelineRunner {
 	      final Options options = CliFactory.parseArguments( Options.class, args );
 	      //CancerPipelineRunner.runCancerPipeline( options.getInputDirectory(), options.getOutputDirectory() );
 	      DocumentSummarizerPipeline.runDocumentSummarizerPipeline( options.getInputDirectory(), options.getOutputDirectory(), options.getOntologyPath());
-	      PhenotypeSummarizerPipeline.runPhenotypeSummarizerPipeline(options.getInputDirectory(), options.getOntologyPath(), options.getOutputDirectory(),options.getTransmartMappingFile());
+	      PhenotypeSummarizerPipeline.runPhenotypeSummarizerPipeline(options.getInputDirectory(), options.getOntologyPath(), options.getOutputDirectory(),options.getTransmartMappingFile(),options.getTCGANameMappingFile());
 	      
 	   }
 }

@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.uima.ae;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,7 +27,6 @@ import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 
 import edu.pitt.dbmi.nlp.noble.ontology.OntologyUtils;
 
-import static org.apache.ctakes.dependency.parser.util.DependencyUtility.logger;
 
 public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 	private final String T = "\t";
@@ -46,7 +46,8 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 	private File outputDir;
 	public static final String PARAM_OUTPUTDIR = "OUTPUT_DIR";
 	public static final String PARAM_TRANSMART_MAP_FILE = "TRANSMART_MAP_FILE";
-
+	public static final String PARAM_TCGA_ID_MAP_FILE = "TCGA_ID_MAP_FILE";
+	private Map<String,String> nameMap;
 	private List<Map<String,String>> mapping;
 
 	boolean firstRun = true;
@@ -59,9 +60,12 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 			outputDir.mkdirs();
 		try {
 			mapping = loadTCGAmap(new File((String) aContext.getConfigParameterValue(PARAM_TRANSMART_MAP_FILE)));
+			nameMap = loadNameMap((String) aContext.getConfigParameterValue(PARAM_TCGA_ID_MAP_FILE));
 		} catch (IOException e) {
 			throw new ResourceInitializationException(e);
 		}
+	
+		
 
 		File metaFile = null;
 		File dataFile = null;
@@ -82,6 +86,23 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 	
 
 
+	private Map<String,String> loadNameMap(String nameMapFile) throws IOException {
+		Map<String,String> nameMap = new LinkedHashMap<String, String>();
+		if(nameMapFile != null ){
+			File file = new File(nameMapFile);
+			BufferedReader r = new BufferedReader(new FileReader(file));
+			for(String l=r.readLine();l != null;l = r.readLine()){
+				String [] parts = l.split(T);
+				if(parts.length==2)
+					nameMap.put(parts[0].trim(),parts[1].trim());
+			}
+			r.close();
+		}
+		return nameMap;
+	}
+
+
+
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
 
 		MedicalRecord record = PhenotypeResourceFactory.loadMedicalRecord(jcas);
@@ -95,11 +116,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 	}
 
 	private void writeDataFile(File dataFile, MedicalRecord record) throws AnalysisEngineProcessException {
-
-
-
 		StringBuffer buffer;
-
 
 		// create a Transmart data file
 		// has actual columns described above
@@ -187,8 +204,8 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 
 
 	private String getSubjectId(MedicalRecord record) {
-		// TODO: do TCGA subject mapping file lookup to get TCGA ID for a name
-		return record.getPatient().getPatientName();
+		String name = record.getPatient().getPatientName();
+		return nameMap.containsKey(name)?nameMap.get(name):name;
 	}
 
 
