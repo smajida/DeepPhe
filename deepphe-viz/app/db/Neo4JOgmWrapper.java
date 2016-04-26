@@ -13,33 +13,30 @@ import org.healthnlp.deepphe.graph.GraphObjectFactory;
 
 public class Neo4JOgmWrapper {
 
-
-	private SessionFactory sessionFactory;
-	public Neo4JOgmWrapper() {
 	
-		sessionFactory = initializeGraphDatabase("foo"); //fix	
+	  private static Neo4JOgmWrapper factory = new Neo4JOgmWrapper();
+	  private static  SessionFactory sessionFactory;
+	  /** HARDWIRE ALERT - replace with something more configurable **/
+	  private static final String GRAPHDB_URI="http://localhost:7474";
+
+	  public static Neo4JOgmWrapper getInstance() {
+		  return factory;
+	  }	
 	
-	}
-
-
-	public SessionFactory initializeGraphDatabase(String dbPath)  {
-		File f = new File(dbPath);
-		if(f.exists()){
-			try {
-				FileUtils.deleteRecursively(f);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+	  private Neo4JOgmWrapper() {
+	
+		  Components.configuration()
+		  .driverConfiguration()
+		  .setDriverClassName("org.neo4j.ogm.drivers.http.driver.HttpDriver")
+		  .setURI(GRAPHDB_URI);
 		
-		Components.configuration()
-        .driverConfiguration()
-        .setDriverClassName("org.neo4j.ogm.drivers.embedded.driver.EmbeddedDriver")
-        .setURI(f.toURI().toString());
-		SessionFactory sf = new SessionFactory(GraphObjectFactory.POJO_PACKAGE);
+		  sessionFactory = new SessionFactory(GraphObjectFactory.POJO_PACKAGE);	
+	  }
 
-		return sf;
-	}
-
+	  public Session getNeo4JSession() {
+		  return sessionFactory.openSession();
+	  }	
+	  
+	 
 
 }

@@ -16,6 +16,7 @@ libraryDependencies ++= Seq(
   javaWs,
   "org.glassfish.jersey.core" % "jersey-client" % "2.22.1",
   "org.neo4j" % "neo4j" % "2.3.1",
+  "org.neo4j" % "neo4j-ogm-http-driver" % "2.0.0-M04",
   "org.neo4j" % "neo4j-ogm-core" % "2.0.0-M04", 
   "org.healthnlp" % "deepphe-fhir" % "0.0.1-SNAPSHOT"
 )
@@ -27,3 +28,6 @@ routesGenerator := InjectedRoutesGenerator
 
 
 fork in run := true
+
+// Compile the project before generating Eclipse files, so that generated .scala or .class files for views and routes are present
+EclipseKeys.preTasks := Seq(compile in Compile)
