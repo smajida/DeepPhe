@@ -1,10 +1,14 @@
 package edu.pitt.dbmi.deep.phe.data.model;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -266,6 +270,63 @@ public class Report {
 		return doc;
 	}
 	
+	/**
+	 * read DEID format
+	 * @param fs
+	 * @return
+	 * @throws IOException 
+	 */
+	public static Report readDeIDformat(File fs) throws IOException{
+		BufferedReader r = new BufferedReader(new FileReader(fs));
+		StringBuffer report = null, body = null;
+		Report currentReport = null;
+		for(String l=r.readLine(); l != null; l = r.readLine()){
+			if(l.matches("={4,}")){
+				// start of header
+				if(report == null){
+					report = new StringBuffer();
+					body = new StringBuffer();
+				}else{// end of header	
+					// parse existing header
+					/*
+					Report ID.....................2,HuUnE+zzpudA
+					Patient ID....................HuUnE+zzpudA
+					Patient Name..................**NAME[AAA BBB M]
+					Principal Date................20060223 1325
+					Record Subtype................PVS06-2730
+					Record Type...................SP
+					*/
+					//String currentPatient = getHeaderField(report.toString(),"Patient ID");
+					currentReport = new Report();
+					currentReport.setName(getHeaderField(report.toString(),"Patient Name"));
+					currentReport.setEventDate(TextUtils.parseDateString(getHeaderField(report.toString(),"Principal Date")));
+					currentReport.setDocumentType(getHeaderField(report.toString(),"Record Type"));
+				}
+			}else if(currentReport != null){
+				body.append(l+"\n");
+			}
+			
+			// add to report
+			if(report != null){
+				report.append(l+"\n");
+			}
+			
+		}
+		r.close();
+		currentReport.setText(report.toString());
+		currentReport.setBody(body.toString());
+		
+		return currentReport;
+	}
+	
+	private static String getHeaderField(String header,String field){
+		Pattern pt = Pattern.compile(field+"\\.{2,}(.+)");
+		Matcher mt = pt.matcher(header);
+		if(mt.find()){
+			return mt.group(1);
+		}
+		return "";
+	}
 	/**
 	 * create BAR text for a body
 	 * @return

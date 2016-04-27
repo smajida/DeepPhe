@@ -1,5 +1,9 @@
 package edu.pitt.dbmi.deep.phe.data.model;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class Patient {
@@ -156,6 +160,19 @@ public class Patient {
 				return o1.getEventDate().compareTo(o2.getEventDate());
 			}
 		});
+	}
+	
+	
+	public void writeReports(File outputDir) throws IOException{
+		int rn = 1;
+		for(Report rp: getReports()){
+			File rf = new File(outputDir,String.format("%s_report%03d_%s.txt",getName(),rn,rp.getDocumentType()));
+			//System.out.println(rf.getName()+"..");
+			BufferedWriter w = new BufferedWriter(new FileWriter(rf));
+			w.write(rp.getText()+"\n");
+			w.close();
+			rn ++;
+		}
 	}
 }
 
