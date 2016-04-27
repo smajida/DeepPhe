@@ -275,7 +275,11 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	
 	
 	private void addAncestors(Fact fact){
-		new org.healthnlp.deepphe.uima.fhir.OntologyUtils(ontology).addAncestors(fact);
+		org.healthnlp.deepphe.uima.fhir.OntologyUtils ou = new org.healthnlp.deepphe.uima.fhir.OntologyUtils(ontology);
+		ou.addAncestors(fact);
+		for(Fact f:	fact.getContainedFacts()){
+			ou.addAncestors(f);
+		}
 	}
 	
 	

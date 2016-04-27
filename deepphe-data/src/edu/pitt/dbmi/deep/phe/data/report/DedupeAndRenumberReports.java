@@ -10,8 +10,8 @@ import edu.pitt.dbmi.deep.phe.data.model.Report;
 public class DedupeAndRenumberReports {
 
 	public static void main(String[] args) throws IOException {
-		File inputDir = new File("/home/tseytlin/Data/DeepPhe/Data/Sample/DeepPhe_130_patients");
-		File outputDir = new File("/home/tseytlin/Data/DeepPhe/Data/Sample/DeepPhe_130_patients.clean");
+		File inputDir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/Output/TCGA_data");
+		File outputDir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/Output/TCGA_data.clean");
 		
 		DedupeAndRenumberReports dr = new DedupeAndRenumberReports();
 		dr.process(inputDir,outputDir);
