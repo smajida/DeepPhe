@@ -27,7 +27,7 @@ final class Stage extends DefaultProperty<StageType, StageValue> {
    @Override
    public String toString() {
       final StageValue value = getSpannedValue().getValue();
-      if ( value == StageValue.IS_0 || value == StageValue.RCR || value == StageValue.UNKNOWN ) {
+      if ( value == StageValue.O_IS || value == StageValue.RCR || value == StageValue.UNKNOWN ) {
          return value.getTitle() + " Breast Carcinoma";
       }
       return getSpannedType().getType().getTitle() + " " + value.getTitle() + " Breast Carcinoma";

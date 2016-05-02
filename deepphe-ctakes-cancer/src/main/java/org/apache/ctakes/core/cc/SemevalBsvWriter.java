@@ -30,8 +30,27 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
+ *
+ *
+ *
+ *
+ * FFFFFFFFF  RRRRRR    EEEEEEE  EEEEEEE   ZZZZZZZ   EEEEEEE
+ * FF         RR    RR  EE       EE            ZZ    EE
+ * FFFFF      RRRRRR    EEEEE    EEEEE        ZZ     EEEEE
+ * FF         RR  RR    EE       EE         ZZ       EE
+ * FF         RR   RR   EE       EE        ZZ        EE
+ * FF         RR    RR  EEEEEEE  EEEEEEE  ZZZZZZZZZ  EEEEEEE
+ *
+ *
+ *
+ *       AT SPRINT 10 ONTOLOGY !!!!!!!!!!!!!!!!!!!!!!
+ *
+ *
+ *
+ *
  * @author SPF , chip-nlp
  * @version %I%
  * @since 3/22/2016
@@ -77,10 +96,11 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       }
       final String fileName = DocumentIDAnnotationUtil.getDocumentIdForFile( jcas ) + ".pipe";
       try {
-         writeFhirLikeBsv( jcas, getOutputDir( "CancerStage" ), fileName, StagePropertyUtil.getParentUri() );
-         writeFhirLikeBsv( jcas, getOutputDir( "ReceptorStatus" ), fileName, StatusPropertyUtil.getParentUri() );
-         writeFhirLikeTnmBsv( jcas, getOutputDir( "TnmClassification" ), fileName, TnmPropertyUtil.getParentUri() );
-         writeFhirLikeDisBsv( jcas, getOutputDir( "Disorder" ), fileName,
+         writePhenotypeBsv( jcas, getOutputDir( "CancerStage" ), fileName, StagePropertyUtil.getParentUri() );
+         writePhenotypeBsv( jcas, getOutputDir( "ReceptorStatus" ), fileName, StatusPropertyUtil.getParentUri(),
+               OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Triple_Negative_Breast_Carcinoma" );
+         writeTnmBsv( jcas, getOutputDir( "TnmClassification" ), fileName, TnmPropertyUtil.getParentUri() );
+         writeDisorderBsv( jcas, getOutputDir( "Disorder" ), fileName,
                OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Neoplasm",
                OwlOntologyConceptUtil.CANCER_OWL + "#Cancer",
                OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Metastasis" );
@@ -95,33 +115,35 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       return dir;
    }
 
-   static private void writeFhirLikeBsv( final JCas jCas, final File outputDir, final String fileName,
-                                         final String... uris )
-         throws IOException {
-      final Collection<ConceptInstance> conceptInstances = Arrays.stream( uris )
+   static private Stream<ConceptInstance> getConceptInstanceStream( final JCas jCas, final String... uris ) {
+      return Arrays.stream( uris )
             .map( uri -> ConceptInstanceUtil.getBranchConceptInstances( jCas, uri ) )
             .flatMap( Collection::stream )
+            .filter( ci -> getCuiValue( ci ) != null );
+   }
+
+   static private void writePhenotypeBsv( final JCas jCas, final File outputDir, final String fileName,
+                                          final String... uris )
+         throws IOException {
+      final Collection<ConceptInstance> conceptInstances = getConceptInstanceStream( jCas, uris )
             .collect( Collectors.toList() );
       writeBsv( conceptInstances, new File( outputDir, fileName ) );
    }
 
-   static private void writeFhirLikeTnmBsv( final JCas jCas, final File outputDir, final String fileName,
+   static private void writeTnmBsv( final JCas jCas, final File outputDir, final String fileName,
                                             final String... uris )
          throws IOException {
-      final Collection<ConceptInstance> conceptInstances = Arrays.stream( uris )
-            .map( uri -> ConceptInstanceUtil.getBranchConceptInstances( jCas, uri ) )
-            .flatMap( Collection::stream )
+      final Collection<ConceptInstance> conceptInstances = getConceptInstanceStream( jCas, uris )
             .collect( Collectors.toList() );
       writeTnmBsv( conceptInstances, new File( outputDir, fileName ) );
    }
 
 
-   static private void writeFhirLikeDisBsv( final JCas jCas, final File outputDir, final String fileName,
+   static private void writeDisorderBsv( final JCas jCas, final File outputDir, final String fileName,
                                             final String... uris )
          throws IOException {
-      final Collection<ConceptInstance> conceptInstances = Arrays.stream( uris )
-            .map( uri -> ConceptInstanceUtil.getBranchConceptInstances( jCas, uri ) )
-            .flatMap( Collection::stream )
+      final Collection<ConceptInstance> conceptInstances = getConceptInstanceStream( jCas, uris )
+            // If the neoplasm has no phenotypes then it came from dictionary lookup and we don't want it
             .filter( p -> !ConceptInstanceUtil.getNeoplasmAllPhenotypes( jCas, p ).isEmpty() )
             .collect( Collectors.toList() );
       writeBsv( conceptInstances, new File( outputDir, fileName ) );
@@ -130,7 +152,7 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
    /**
     * Serialize a CAS to a file in semeval BSV format
     *
-    * @param conceptInstances fhirlike resources
+    * @param conceptInstances -
     * @param bsvFile   output file
     * @throws IOException -
     */
@@ -138,9 +160,10 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
          throws IOException {
       final String sourceFilename = bsvFile.getName().replace( ".pipe", "" );
       try ( BufferedWriter writer = new BufferedWriter( new FileWriter( bsvFile ) ) ) {
-         for ( ConceptInstance resource : conceptInstances ) {
+         for ( ConceptInstance conceptInstance : conceptInstances ) {
+            // DocName|
             writer.write( sourceFilename + "|" );
-            writer.write( createPhenotypeLine( resource ) );
+            writer.write( createPhenotypeLine( conceptInstance ) );
             writer.write( "\n" );
          }
       } catch ( IOException ioE ) {
@@ -152,9 +175,14 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
          throws IOException {
       final String sourceFilename = bsvFile.getName().replace( ".pipe", "" );
       try ( BufferedWriter writer = new BufferedWriter( new FileWriter( bsvFile ) ) ) {
-         for ( ConceptInstance resource : conceptInstances ) {
+         for ( ConceptInstance conceptInstance : conceptInstances ) {
+            // We are interested in value annotations, some of which are null for tnm
+            if ( PhenotypeAnnotationUtil.getPhenotypeValues( conceptInstance.getIdentifiedAnnotation() ).isEmpty() ) {
+               continue;
+            }
+            // DocName|
             writer.write( sourceFilename + "|" );
-            writer.write( createTnmPhenotypeLine( resource ) );
+            writer.write( createTnmPhenotypeLine( conceptInstance ) );
             writer.write( "\n" );
          }
       } catch ( IOException ioE ) {
@@ -163,29 +191,13 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
    }
 
 
+
    static private String createPhenotypeLine( final ConceptInstance conceptInstance ) {
       final StringBuilder sb = new StringBuilder();
-      // DocName|Phenotype_Spans|CUI|
+      // Phenotype_Spans|CUI|
       sb.append( getSpannedCuiText( conceptInstance.getIdentifiedAnnotation(), "unmarked" ) );
-      // Neg_value|Neg_span|
-      sb.append( getAttributeTextYN( conceptInstance.isNegated() ) );
-      // Subj_value|Subj_span|
-      sb.append( getAttributeText( conceptInstance.getSubject(), "patient" ) );
-      // Uncertain_value|Uncertain_span|
-      sb.append( getAttributeTextYN( conceptInstance.isUncertain() ) );
-      // Course_value|Course_span|
-      sb.append( "unmarked|NULL|" );
-      // Severity_value|Severity_span|
-      sb.append( "unmarked|NULL|" );
-      // Cond_value|Cond_span|
-      sb.append( getAttributeTextTF( conceptInstance.isConditional() ) );
-      // Generic_value|Generic_span|
-      sb.append( getAttributeTextTF( conceptInstance.isHypothetical() ) );
-      // Bodyloc_value|Bodyloc_span|
-      sb.append( getCuiSpannedText( PhenotypeAnnotationUtil
-            .getLocations( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
-      // DocTimeRel|DocTimeRelSpan|
-      sb.append( getAttributeText( conceptInstance.getDocTimeRel(), "unmarked" ) );
+      // All negation, subject, uncertainty, course, severity, conditional, generic, location, doctimerel
+      sb.append( createStandardColumns( conceptInstance ) );
       // Value_Spans|CUI|
       sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
             .getPhenotypeValues( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
@@ -200,9 +212,26 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
 
    static private String createTnmPhenotypeLine( final ConceptInstance conceptInstance ) {
       final StringBuilder sb = new StringBuilder();
-      // DocName|Phenotype_Spans|CUI|
+      // Phenotype_Spans|CUI|
       sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
             .getPhenotypeValues( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
+      // All negation, subject, uncertainty, course, severity, conditional, generic, location, doctimerel
+      sb.append( createStandardColumns( conceptInstance ) );
+      // Value_Spans|CUI|  -----> null for TNM
+      sb.append( "unmarked|NULL|" );
+//      sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
+//            .getPhenotypeValues( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
+      // Neoplasm_Spans|CUI|
+      sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
+            .getPhenotypeNeoplasms( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
+      // AssociatedTest_Spans|CUI|    --> TNM "Diagnostic Test" is actually the prefix (if present)
+      sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
+            .getDiagnosticTests( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
+      return sb.toString();
+   }
+
+   static private String createStandardColumns( final ConceptInstance conceptInstance ) {
+      final StringBuilder sb = new StringBuilder();
       // Neg_value|Neg_span|
       sb.append( getAttributeTextYN( conceptInstance.isNegated() ) );
       // Subj_value|Subj_span|
@@ -219,53 +248,32 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       sb.append( getAttributeTextTF( conceptInstance.isHypothetical() ) );
       // Bodyloc_value|Bodyloc_span|
       sb.append( getCuiSpannedText( PhenotypeAnnotationUtil
-            .getLocations( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
+            .getLocations( conceptInstance.getIdentifiedAnnotation() ), "null" ) );
       // DocTimeRel|DocTimeRelSpan|
       sb.append( getAttributeText( conceptInstance.getDocTimeRel(), "unmarked" ) );
-      // Value_Spans|CUI|
-      sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
-            .getPhenotypeValues( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
-      // Neoplasm_Spans|CUI|
-      sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
-            .getPhenotypeNeoplasms( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
-      // AssociatedTest_Spans|CUI|
-      sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
-            .getDiagnosticTests( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
       return sb.toString();
    }
+
+   static private IdentifiedAnnotation getFirstAnnotation( final Collection<IdentifiedAnnotation> annotations ) {
+      return annotations.stream().findFirst().orElse( null );
+   }
+
 
    static private String getSpannedCuiText( final Collection<IdentifiedAnnotation> annotations,
                                             final String defaultText ) {
-      return getSpannedCuiText( annotations.stream().findFirst().orElse( null ), defaultText );
+      return getSpannedCuiText( getFirstAnnotation( annotations ), defaultText );
    }
 
    static private String getSpannedCuiText( final IdentifiedAnnotation annotation, final String defaultText ) {
-      if ( annotation == null ) {
-         return defaultText + "|NULL|";
-      }
-      final StringBuilder sb = new StringBuilder();
-      sb.append( annotation.getBegin() ).append( '-' ).append( annotation.getEnd() ).append( '|' );
-      final Collection<String> cuis = OntologyConceptUtil.getCuis( annotation );
-      final String cui = cuis == null ? "NULL"
-                                      : cuis.stream().filter( c -> !c.isEmpty() ).findFirst().orElse( "NULL" );
-      sb.append( cui ).append( '|' );
-      return sb.toString();
+      return getSpanText( annotation, defaultText ) + '|' + getNormalizedCuiText( annotation ) + '|';
    }
 
    static private String getCuiSpannedText( final Collection<IdentifiedAnnotation> annotations,
                                             final String defaultText ) {
-      if ( annotations == null || annotations.isEmpty() ) {
-         return "NULL|" + defaultText + "|";
-      }
-      final IdentifiedAnnotation annotation = annotations.stream().findFirst().get();
-      final StringBuilder sb = new StringBuilder();
-      final Collection<String> cuis = OntologyConceptUtil.getCuis( annotation );
-      final String cui = cuis == null ? "NULL"
-                                      : cuis.stream().filter( c -> !c.isEmpty() ).findFirst().orElse( "NULL" );
-      sb.append( cui ).append( '|' );
-      sb.append( annotation.getBegin() ).append( '-' ).append( annotation.getEnd() ).append( '|' );
-      return sb.toString();
+      final IdentifiedAnnotation annotation = getFirstAnnotation( annotations );
+      return getNormalizedCuiText( annotation ) + '|' + getSpanText( annotation, defaultText ) + '|';
    }
+
 
    static private String getAttributeTextYN( final boolean isAttributePositive ) {
       final String value = isAttributePositive ? "yes" : "no";
@@ -282,14 +290,87 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       return value + "|NULL|";
    }
 
-   public static AnalysisEngineDescription createAnnotatorDescription() throws ResourceInitializationException {
-      return createAnnotatorDescription( "" );
-   }
+//   public static AnalysisEngineDescription createAnnotatorDescription() throws ResourceInitializationException {
+//      return createAnnotatorDescription( "" );
+//   }
 
    public static AnalysisEngineDescription createAnnotatorDescription( String outputDirectoryPath )
          throws ResourceInitializationException {
       return AnalysisEngineFactory
             .createEngineDescription( SemevalBsvWriter.class, "OutputDirectory", outputDirectoryPath );
    }
+
+   static private String getCuiValue( final ConceptInstance conceptInstance ) {
+      return conceptInstance == null ? null : getCuiValue( conceptInstance.getIdentifiedAnnotation() );
+   }
+
+   static private String getCuiValue( final IdentifiedAnnotation annotation ) {
+      if ( annotation == null ) {
+         return null;
+      }
+      final Collection<String> cuis = OntologyConceptUtil.getCuis( annotation );
+      return cuis.isEmpty() ? null : cuis.stream().filter( c -> !c.isEmpty() ).findFirst().orElse( null );
+   }
+
+   static private String getSpanText( final IdentifiedAnnotation annotation, final String defaultSpanText ) {
+      return annotation == null ? defaultSpanText : (annotation.getBegin() + "-" + annotation.getEnd());
+   }
+
+
+//   static private String getNormalizedCuiText( final ConceptInstance conceptInstance ) {
+//      return getNormalizedCuiText( conceptInstance.getIdentifiedAnnotation() );
+//   }
+
+//   static private String getNormalizedCuiText( final Collection<IdentifiedAnnotation> annotations ) {
+//      return getNormalizedCuiText( getFirstAnnotation( annotations ) );
+//   }
+
+   static private String getNormalizedCuiText( final IdentifiedAnnotation annotation ) {
+      final String cuiValue = getCuiValue( annotation );
+      return cuiValue == null ? "unmarked" : getNormalizedCuiText( cuiValue );
+   }
+
+   static private String getNormalizedCuiText( final String cui ) {
+      switch ( cui ) {
+         // Stage 4, 3a, 2b
+         case "C0278488":
+            return "C0441772";
+         case "C0278489":
+            return "C0456598";
+         case "C1336178":
+            return "C0441769";
+         // ER
+         case "C1719706":
+            return "C1516974";
+         case "C1719707":
+            return "C1516974";
+         case "C0279758":
+            return "C1516974";
+         // PR
+         case "C0279759":
+            return "C1514471";
+         case "C0279766":
+            return "C1514471";
+         case "C0279768":
+            return "C1514471";
+         // Her2
+         case "C2348909":
+            return "C1512413";
+         case "C2348908":
+            return "C1512413";
+         case "C2348910":
+            return "C1512413";
+         // Triple -
+         case "C2348820":
+            return "C2348819";
+         // Breast Neoplasm
+         case "CL437240":
+            return "C1458155";
+         case "C2981607":    // CDISC
+            return "C0027651";
+      }
+      return cui;
+   }
+
 
 }

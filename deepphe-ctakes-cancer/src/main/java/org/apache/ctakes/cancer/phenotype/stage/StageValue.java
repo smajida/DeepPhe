@@ -12,20 +12,34 @@ import java.util.regex.Pattern;
  * @since 8/20/2015
  */
 enum StageValue implements Value {
-   IS_0( "In Situ", "In_Situ_Lesion", "(IS|0)\\b" ),
-   I( "I", "Stage_I", "(I|1)\\b" ),
-   I_A( "IA", "Stage_IA", "(IA|1A)\\b" ),
-   I_B( "IB", "Stage_IB", "(IB|1B)\\b" ),
-   II( "II", "Stage_II", "(II|2)\\b" ),
-   II_A( "IIA", "Stage_IIA", "(IIA|2A)\\b" ),
-   II_B( "IIB", "Stage_IIB", "(IIB|2B)\\b" ),
-   III( "III", "Stage_III", "(III|3)\\b" ),
-   III_A( "IIIA", "Stage_IIIA", "(IIIA|3A)\\b" ),
-   III_B( "IIIB", "Stage_IIIB", "(IIIB|3B)\\b" ),
-   III_C( "IIIC", "Stage_IIIC", "(IIIC|3C)\\b" ),
-   IV( "IV", "Stage_IV", "(IV|4)\\b" ),
-   RCR( "Recurrent", "Recurrence", "\\bRecurrent" ),
-   UNKNOWN( "Unspecified", "Stage_Unspecified", "(Unknown|Unspecified)\\b" );
+   IS( "In Situ", "Is", "IS\\b" ),
+   O_IS( "0 In Situ", "Stage_0is", "0is\\b" ),
+   O_A( "0A", "Stage_0a", "0A\\b" ),
+   I( "1", "Stage_1", "(I|1)\\b" ),
+   I_A( "1A", "Stage_1A", "(I|1)A\\b" ),
+   I_A1( "1A1", "Stage_1A1", "(I|1)A1\\b" ),
+   I_A2( "1A2", "Stage_1A2", "(I|1)A2\\b" ),
+   I_M( "1M", "Stage_1m", "(I|1)m\\b" ),
+   I_B( "1B", "Stage_1B", "(I|1)B\\b" ),
+   I_B1( "1B1", "Stage_1B1", "(I|1)B1\\b" ),
+   I_B2( "1B2", "Stage_1B2", "(I|1)B2\\b" ),
+   II( "2", "Stage_2", "(II|2)\\b" ),
+   II_A( "2A", "Stage_2A", "(II|2)A\\b" ),
+   II_B( "2B", "Stage_2B", "(II|2)B\\b" ),
+   II_C( "2C", "Stage_2C", "(II|2)C\\b" ),
+   III( "3", "Stage_3", "(III|3)\\b" ),
+   III_A( "3A", "Stage_3A", "(III|3)A\\b" ),
+   III_B( "3B", "Stage_3B", "(III|3)B\\b" ),
+   III_C( "3C", "Stage_3C", "(III|3)C\\b" ),
+   III_C1( "3C1", "Stage_IIIC1", "(III|3)C1\\b" ),
+   III_C2( "3C2", "Stage_IIIC2", "(III|3)C2\\b" ),
+   IV( "4", "Stage_4", "(IV|4)\\b" ),
+   IV_A( "4A", "Stage_4A", "(IV|4)A\\b" ),
+   IV_B( "4B", "Stage_4B", "(IV|4)B\\b" ),
+   IV_C( "4C", "Stage_4C", "(IV|4)C\\b" ),
+   IV_S( "4S", "Stage_IVS", "(IV|4)s\\b" ),
+   RCR( "Recurrent", "Recurrence", "\\bRecurrent" ), // No longer exists
+   UNKNOWN( "Unspecified", "Stage_Unspecified", "(Unknown|Unspecified)\\b" );  // No longer exists
 
    final private String _title;
    final private String _uri;

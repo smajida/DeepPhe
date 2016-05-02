@@ -19,7 +19,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 	public static final String TNM_DISTANT_METASTASIS = FHIRUtils.STAGE_URL+"/DistantMetastasis";
 	public static final String TNM_REGIONAL_LYMPH_NODES = FHIRUtils.STAGE_URL+"/RegionalLymphNodes";
 
-	private static final String TNM_SUFFIX  = "Stage Finding";
+	private static final String TNM_SUFFIX  = "Stage_Finding";
 	
 	public void setStringExtension(String url, String value) {
 		Extension e = new Extension();

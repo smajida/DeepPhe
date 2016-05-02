@@ -22,7 +22,9 @@ import org.apache.ctakes.necontexts.ContextAnnotator;
 import org.apache.ctakes.postagger.POSTagger;
 import org.apache.ctakes.relationextractor.ae.LocationOfRelationExtractorAnnotator;
 import org.apache.ctakes.relationextractor.ae.ModifierExtractorAnnotator;
-import org.apache.ctakes.temporal.ae.*;
+import org.apache.ctakes.temporal.ae.BackwardsTimeAnnotator;
+import org.apache.ctakes.temporal.ae.DocTimeRelAnnotator;
+import org.apache.ctakes.temporal.ae.EventAnnotator;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReader;
@@ -83,7 +85,7 @@ final public class CancerPipelineFactory {
       // Cancer deep phe tnm, stage, hormone receptor status annotator.  Do before temporal (but after polarity?)
       aggregateBuilder.add( CancerPropertiesAnnotator.createAnnotatorDescription() );
       // Temporal is horribly slow on these notes.  Do not use it until necessary
-//      addTemporalEngines( aggregateBuilder );
+      addTemporalEngines( aggregateBuilder );
       // Kludge to clean out unwanted annotations from the pittsburgh header
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( PittHeaderCleaner.class ) );
       addUmlsRelationEngines( aggregateBuilder );
@@ -116,8 +118,8 @@ final public class CancerPipelineFactory {
 
    static private void addCoreEngines( final AggregateBuilder aggregateBuilder )
          throws ResourceInitializationException {
-      aggregateBuilder
-            .add( SentenceDetectorAnnotator.getDescription( "/org/apache/ctakes/core/sentdetect/model.jar" ) );
+      addLoggedEngine( aggregateBuilder,
+            SentenceDetectorAnnotator.getDescription( "/org/apache/ctakes/core/sentdetect/model.jar" ) );
       aggregateBuilder.add( TokenizerAnnotatorPTB.createAnnotatorDescription() );
       aggregateBuilder.add( ContextDependentTokenizerAnnotator.createAnnotatorDescription() );
       aggregateBuilder.add( POSTagger.createAnnotatorDescription() );
@@ -140,31 +142,30 @@ final public class CancerPipelineFactory {
 
    static private void addAttributeEngines( final AggregateBuilder aggregateBuilder )
          throws ResourceInitializationException {
-      aggregateBuilder.add( ClearNLPDependencyParserAE.createAnnotatorDescription() );
+      addLoggedEngine( aggregateBuilder, ClearNLPDependencyParserAE.createAnnotatorDescription() );
 //      aggregateBuilder.add( PolarityCleartkAnalysisEngine.createAnnotatorDescription() );
-      aggregateBuilder.add( ContextAnnotator.createAnnotatorDescription() );
-      aggregateBuilder.add( UncertaintyCleartkAnalysisEngine.createAnnotatorDescription() );
+      addLoggedEngine( aggregateBuilder, ContextAnnotator.createAnnotatorDescription() );
+      addLoggedEngine( aggregateBuilder, UncertaintyCleartkAnalysisEngine.createAnnotatorDescription() );
 //      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ClearNLPSemanticRoleLabelerAE.class ) );
 //      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ConstituencyParser.class ) );
    }
 
    static private void addTemporalEngines( final AggregateBuilder aggregateBuilder )
          throws ResourceInitializationException {
-      aggregateBuilder.add( EventAnnotator.createAnnotatorDescription() );
-      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( PropertyToEventCopier.class ) );
-      aggregateBuilder.add(
+      addLoggedEngine( aggregateBuilder, EventAnnotator.createAnnotatorDescription() );
+      addLoggedEngine( aggregateBuilder,
             DocTimeRelAnnotator.createAnnotatorDescription( getModelPath( "temporal/ae/doctimerel" ) ) );
-      aggregateBuilder.add(
+      addLoggedEngine( aggregateBuilder,
             BackwardsTimeAnnotator.createAnnotatorDescription( getModelPath( "temporal/ae/timeannotator" ) ) );
-      aggregateBuilder.add(
-            EventTimeRelationAnnotator.createAnnotatorDescription( getModelPath( "temporal/ae/eventtime" ) ) );
-      aggregateBuilder.add(
-            EventEventRelationAnnotator.createAnnotatorDescription( getModelPath( "temporal/ae/eventevent" ) ) );
+//      aggregateBuilder.add(
+//            EventTimeRelationAnnotator.createAnnotatorDescription( getModelPath( "temporal/ae/eventtime" ) ) );
+//      aggregateBuilder.add(
+//            EventEventRelationAnnotator.createAnnotatorDescription( getModelPath( "temporal/ae/eventevent" ) ) );
    }
 
    static private void addUmlsRelationEngines( final AggregateBuilder aggregateBuilder )
          throws ResourceInitializationException {
-      aggregateBuilder.add(
+      addLoggedEngine( aggregateBuilder,
             AnalysisEngineFactory.createEngineDescription(
                   ModifierExtractorAnnotator.class,
                   GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
@@ -174,7 +175,7 @@ final public class CancerPipelineFactory {
 //                  DegreeOfRelationExtractorAnnotator.class,
 //                  GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
 //                  getModelPath( "relationextractor/models/degree_of" ) ) );
-      aggregateBuilder.add(
+      addLoggedEngine( aggregateBuilder,
             AnalysisEngineFactory.createEngineDescription(
                   LocationOfRelationExtractorAnnotator.class,
                   GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
@@ -188,6 +189,14 @@ final public class CancerPipelineFactory {
             .createAnnotatorDescription( "/org/apache/ctakes/temporal/ae/salience/model.jar" ) );
       aggregateBuilder.add( MentionClusterCoreferenceAnnotator
             .createAnnotatorDescription( "/org/apache/ctakes/coreference/mention-cluster/model.jar" ) );
+   }
+
+   static private void addLoggedEngine( final AggregateBuilder aggregateBuilder,
+                                        final AnalysisEngineDescription description )
+         throws ResourceInitializationException {
+      aggregateBuilder.add( StartEndProgressLogger.getDescription( description.getAnnotatorImplementationName(), true ) );
+      aggregateBuilder.add( description );
+      aggregateBuilder.add( StartEndProgressLogger.getDescription( description.getAnnotatorImplementationName(), false ) );
    }
 
 
