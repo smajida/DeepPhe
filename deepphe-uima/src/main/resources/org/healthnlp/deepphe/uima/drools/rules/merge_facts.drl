@@ -1,0 +1,50 @@
+package org.healthnlp.deepphe.uima.drools;
+
+import java.lang.Object;
+import java.util.List;
+import java.util.ArrayList;
+
+import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.FHIRConstants;
+
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
+
+import org.healthnlp.deepphe.fhir.summary.*;
+import org.healthnlp.deepphe.uima.drools.Summarizer;
+
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+
+declare updateFactContainer
+	oldContainer : String
+	newContainer : String
+end
+
+/**
+* Merge the facts from different type of doculemts
+*/
+
+//merge cancer summaries for the same disease name, Pathology Report prevails 
+rule "leave_PR_with the lowestID"
+	salience 99999910
+	no-loop true
+	when	
+		$fact_1 : Fact(category == "wasDerivedFrom", name : $name, $patientId : patientIdentifier, summaryType=="Pathology Report",
+					type=="Condition", summaryType=="CancerSummary", $summaryId_1 : summaryId) 
+	    $fact_2 : Fact(category == "wasDerivedFrom", name==$name, $patientId==patientIdentifier, summaryType=="Pathology Report",
+					type=="Condition", summaryType=="CancerSummary", $summaryId_2 : summaryId, $summaryId_2 >$summaryId_1)
+					
+	then
+		System.out.println("*** leave_PR_with the lowestID. RETRACTING: "+$fact_2.getInfo());
+		modify($fact_1){addProvenanceFact($fact_2) }
+		retract($fact_2)
+		insert(new updateFactContainer("CancerSummary_"+$summaryId_2,"CancerSummary_"+$summaryId_1))
+		
+end
+
+rule "updateContainer"
+	salience 1000
+	no-loop true
+	updateFactContainer( $oldContainer :oldContainer, $newContainer : newContainer)
+	$fact(
+

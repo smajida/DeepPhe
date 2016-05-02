@@ -72,6 +72,7 @@ rule "TNM_pN1-1"
 * hasPhenotype(?tumor, ?tumorphen), hasTumorExtent(?tumorphen, ?insitu) 
 */
 rule "TNM_Tis-1" 
+	no-loop true
 	when
 	
 		$tFact : Fact(summaryType == "TumorSummary", $summaryType : summaryType, $summaryId : summaryId,

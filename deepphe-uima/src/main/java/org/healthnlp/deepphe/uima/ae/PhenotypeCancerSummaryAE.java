@@ -126,7 +126,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 
 			droolsSession.insert(record);					
 			for(Fact f: record.getReportLevelFacts()){
-				//System.out.println(f.getInfo());
+				System.out.println(f.getInfo());
 				droolsSession.insert(f);
 			}		
 			droolsSession.fireAllRules();

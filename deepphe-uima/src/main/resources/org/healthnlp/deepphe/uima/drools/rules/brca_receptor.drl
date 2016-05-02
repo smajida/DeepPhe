@@ -1,0 +1,23 @@
+
+
+/* Rule for paper
+rule "receptor-ISM-beforeFISH"
+	no-loop true
+	when
+		$record : MedicalRecord()
+		$rs1: Fact(category == "hasReceptorStatus", $rsId1 : identifier, $temporalOrder1 : temporalOrder
+					$patientId : patientIdentifier, $docId : documentIdentifier)
+		$rs2: Fact(category == "hasReceptorStatus", $rsId2 : identifier, $rsId2 != $rsId1, temporalOrder > $temporalOrder1,
+					patientIdentifier==$patientId, documentIdentifier==$docId, $containerIdentifier2 : containerIdentifier)
+		Fact(category == "hasMethod", name == "Immunohistochemistry Staining Method", containerIdentifier contains $rsId1)
+		Fact(category == "hasMethod", name == "Fluorescence In Situ Hybridization", containerIdentifier contains $rsId2)
+		Fact(category == "hasInterpretation", name == "OrdinalInterpretation", containerIdentifier contains $rsId2)
+		
+	then	
+		modify($record){
+			Tumor tumor = getTumorPhenotype($containerIdentifier2);
+			Fact interpF = FactFactory.createFact(FHIRConstants.PROCEDURE, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#OrdinalInterpretation");
+			tumor.getPhenotype().addFact(FHIRConstants.HAS_INTERPRETATION, interpF);
+		}			
+end
+*/
