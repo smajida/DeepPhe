@@ -45,14 +45,17 @@ final public class PhenotypeSummarizerPipeline {
 		
 		@Option(shortName = "t", description = "transmart mapping file")
 		public String getTransmartMappingFile();
+		
+		@Option(shortName = "p", description = "TCGA name mapping file", defaultToNull = true)
+		public String getTCGANameMappingFile();
 	}
 
 	public static void main(final String... args) throws UIMAException, IOException {
 		final Options options = CliFactory.parseArguments(Options.class, args);
-		runPhenotypeSummarizerPipeline(options.getInputDirectory(), options.getOntologyPath(),options.getOutputDirectory(),options.getTransmartMappingFile());
+		runPhenotypeSummarizerPipeline(options.getInputDirectory(), options.getOntologyPath(),options.getOutputDirectory(),options.getTransmartMappingFile(),options.getTCGANameMappingFile());
 	}
 
-	public static void runPhenotypeSummarizerPipeline(final String inputDirectory, final String ontologyPath, final String outputDirectory, final String mappingFile) throws UIMAException, IOException {
+	public static void runPhenotypeSummarizerPipeline(final String inputDirectory, final String ontologyPath, final String outputDirectory, final String mappingFile, final String tcgaMap) throws UIMAException, IOException {
 		final CollectionReader collectionReader = createCollectionReader(inputDirectory);
 		final AnalysisEngine compositionSummarizerAE = AnalysisEngineFactory.createEngine(
 				CompositionCancerSummaryAE.class, CompositionCancerSummaryAE.PARAM_ONTOLOGY_PATH, ontologyPath);
@@ -65,7 +68,8 @@ final public class PhenotypeSummarizerPipeline {
 		final AnalysisEngine graphDBConsumerAE = AnalysisEngineFactory.createEngine(GraphDBPhenotypeConsumerAE.class,
 				GraphDBPhenotypeConsumerAE.PARAM_DBPATH, outputDirectory + File.separator + "neo4jogmdb2");
 
-		final AnalysisEngine transmartAE = AnalysisEngineFactory.createEngine(TranSMART_Output.class,TranSMART_Output.PARAM_TRANSMART_MAP_FILE,mappingFile,TranSMART_Output.PARAM_OUTPUTDIR,outputDirectory); 
+		final AnalysisEngine transmartAE = AnalysisEngineFactory.createEngine(TranSMART_Output.class,TranSMART_Output.PARAM_TRANSMART_MAP_FILE,mappingFile,
+													TranSMART_Output.PARAM_TCGA_ID_MAP_FILE,tcgaMap,TranSMART_Output.PARAM_OUTPUTDIR,outputDirectory); 
 		
 		
 		// run the damn pipeline

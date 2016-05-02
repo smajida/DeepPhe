@@ -97,7 +97,8 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       final String fileName = DocumentIDAnnotationUtil.getDocumentIdForFile( jcas ) + ".pipe";
       try {
          writePhenotypeBsv( jcas, getOutputDir( "CancerStage" ), fileName, StagePropertyUtil.getParentUri() );
-         writePhenotypeBsv( jcas, getOutputDir( "ReceptorStatus" ), fileName, StatusPropertyUtil.getParentUri() );
+         writePhenotypeBsv( jcas, getOutputDir( "ReceptorStatus" ), fileName, StatusPropertyUtil.getParentUri(),
+               OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Triple_Negative_Breast_Carcinoma" );
          writeTnmBsv( jcas, getOutputDir( "TnmClassification" ), fileName, TnmPropertyUtil.getParentUri() );
          writeDisorderBsv( jcas, getOutputDir( "Disorder" ), fileName,
                OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Neoplasm",
@@ -120,7 +121,6 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
             .flatMap( Collection::stream )
             .filter( ci -> getCuiValue( ci ) != null );
    }
-
 
    static private void writePhenotypeBsv( final JCas jCas, final File outputDir, final String fileName,
                                           final String... uris )
@@ -219,6 +219,8 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       sb.append( createStandardColumns( conceptInstance ) );
       // Value_Spans|CUI|  -----> null for TNM
       sb.append( "unmarked|NULL|" );
+//      sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
+//            .getPhenotypeValues( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
       // Neoplasm_Spans|CUI|
       sb.append( getSpannedCuiText( PhenotypeAnnotationUtil
             .getPhenotypeNeoplasms( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
@@ -358,9 +360,14 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
             return "C1512413";
          case "C2348910":
             return "C1512413";
+         // Triple -
+         case "C2348820":
+            return "C2348819";
          // Breast Neoplasm
          case "CL437240":
             return "C1458155";
+         case "C2981607":    // CDISC
+            return "C0027651";
       }
       return cui;
    }

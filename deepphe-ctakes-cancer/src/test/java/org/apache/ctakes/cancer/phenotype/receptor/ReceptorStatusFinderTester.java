@@ -245,16 +245,18 @@ final public class ReceptorStatusFinderTester {
       final List<Status> statuses = new ArrayList<>( 3 );
       for ( String sentence : sentences ) {
          statuses.addAll( StatusFinder.getReceptorStatuses( sentence ) );
-         assertEquals( "Expect three Hormone Receptor in " + sentence, 3, statuses.size() );
-         assertTrue( "No PR status in " + sentence, hasStatusType( statuses, StatusType.PR ) );
-         assertTrue( "No ER status in " + sentence, hasStatusType( statuses, StatusType.ER ) );
-         assertTrue( "No HER2 status in " + sentence, hasStatusType( statuses, StatusType.HER2 ) );
-         assertTrue( "Receptor is " + expectedValue.getTitle() + " in " + sentence,
-               statuses.get( 0 ).getSpannedValue().getValue() == expectedValue );
-         assertTrue( "Receptor is " + expectedValue.getTitle() + " in " + sentence,
-               statuses.get( 1 ).getSpannedValue().getValue() == expectedValue );
-         assertTrue( "Receptor is " + expectedValue.getTitle() + " in " + sentence,
-               statuses.get( 2 ).getSpannedValue().getValue() == expectedValue );
+         assertEquals( "Expect one Triple Negative in " + sentence, 1, statuses.size() );
+         assertTrue( "No Triple Negative in " + sentence, hasStatusType( statuses, StatusType.NEG_3 ) );
+//         assertEquals( "Expect three Hormone Receptor in " + sentence, 3, statuses.size() );
+//         assertTrue( "No PR status in " + sentence, hasStatusType( statuses, StatusType.PR ) );
+//         assertTrue( "No ER status in " + sentence, hasStatusType( statuses, StatusType.ER ) );
+//         assertTrue( "No HER2 status in " + sentence, hasStatusType( statuses, StatusType.HER2 ) );
+//         assertTrue( "Receptor is " + expectedValue.getTitle() + " in " + sentence,
+//               statuses.get( 0 ).getSpannedValue().getValue() == expectedValue );
+//         assertTrue( "Receptor is " + expectedValue.getTitle() + " in " + sentence,
+//               statuses.get( 1 ).getSpannedValue().getValue() == expectedValue );
+//         assertTrue( "Receptor is " + expectedValue.getTitle() + " in " + sentence,
+//               statuses.get( 2 ).getSpannedValue().getValue() == expectedValue );
          statuses.clear();
       }
    }

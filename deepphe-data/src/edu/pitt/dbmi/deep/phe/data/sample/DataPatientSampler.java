@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.deep.phe.data;
+package edu.pitt.dbmi.deep.phe.data.sample;
 
 import java.io.*;
 import java.util.*;
@@ -24,80 +24,6 @@ public class DataPatientSampler {
 		public boolean filter(Patient p);
 	}
 	
-	
-	/**
-	 * Load dataset of BAR dataset
-	 * @param dataFile
-	 * @throws IOException 
-	 */
-	public Map<String,Patient> loadBARDataset(File dataFile) throws IOException {
-		Map<String,Patient> results = new HashMap<String, Patient>();
-		
-		BufferedReader r = new BufferedReader(new FileReader(dataFile));
-		boolean inReport = false;
-		StringBuffer b = new StringBuffer();
-		for(String l=r.readLine();l != null;l=r.readLine()){
-			l = l.trim();
-			if("S_O_H".equals(l)){
-				inReport = true;
-				b.append(l+"\n");
-			}else if("E_O_R".equals(l)){
-				b.append(l+"\n");
-				Report rp = Report.readBARformat(b.toString());
-				Patient p = results.get(rp.getPatient().getMedicalRecordNumber());
-				if(p == null){
-					p = rp.getPatient();
-					results.put(p.getMedicalRecordNumber(),p);
-				}
-				p.addReport(rp);
-				// reset
-				inReport = false;
-				b = new StringBuffer();
-			}else if(inReport){
-				b.append(l+"\n");
-			}
-			
-		}
-		r.close();
-		return results;
-	}
-	
-	
-	/**
-	 * Load dataset of BAR dataset
-	 * @param dataFile
-	 * @throws IOException 
-	 */
-	public Map<String,Patient> loadDelimitedDataset(File dataFile) throws IOException {
-		Map<String,Patient> results = new HashMap<String, Patient>();
-		
-		BufferedReader r = new BufferedReader(new FileReader(dataFile));
-		List<String> names = null;
-		for(String l=r.readLine();l != null;l=r.readLine()){
-			l = l.trim();
-			if(names == null){
-				names =  TextTools.parseCSVline(l,'|');
-			}else{
-				List<String> values = TextTools.parseCSVline(l,'|');
-				Map<String,String> rmap = new LinkedHashMap<String, String>();
-				for(int i=0;i<values.size();i++){
-					String key = names.get(i);
-					String val = values.get(i).trim();
-					rmap.put(key,val);
-				}
-				
-				Report rp = Report.readMAPformat(rmap);
-				Patient p = results.get(rp.getPatient().getMedicalRecordNumber());
-				if(p == null){
-					p = rp.getPatient();
-					results.put(p.getMedicalRecordNumber(),p);
-				}
-				p.addReport(rp);
-			}
-		}
-		r.close();
-		return results;
-	}
 	
 	
 	public List<Filter> getFilters() {
@@ -256,7 +182,7 @@ public class DataPatientSampler {
 		}
 	}
 	
-	public void save(List<Patient> pt, String outfile) throws Exception {
+	public void save(List<Patient> pt, File outfile) throws Exception {
 		BufferedWriter w = new BufferedWriter(new FileWriter(outfile));
 		for(Patient p: pt){
 			w.write(p.getMedicalRecordNumber()+"\n");
@@ -299,7 +225,7 @@ public class DataPatientSampler {
 		System.out.println("..");
 		
 		// just save the MRNs for extraction
-		ds.save(patients,outfile);
+		//ds.save(patients,outfile);
 	}
 
 }
