@@ -31,7 +31,7 @@ public class DeIDTagScrubber {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	private String process(File file) throws FileNotFoundException, IOException {
+	public String process(File file) throws FileNotFoundException, IOException {
 		if(file.isFile()){
 			StringBuffer str = new StringBuffer();
 			BufferedReader r = null;
@@ -292,11 +292,9 @@ public class DeIDTagScrubber {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		String type = "Ovarian";
-	
-		File dir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/");
-		File fd = new File(dir,"TCGA_data_filtered.deid.fixed");
-		File fs = new File(dir,"TCGA_data_filtered.scrubbed");
+			File dir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/");
+		File fd = new File(dir,"TCGA_CARE_data_filtered.deid.fixed");
+		File fs = new File(dir,"TCGA_CARE_data_filtered.scrubbed");
 				
 		
 		
@@ -308,7 +306,7 @@ public class DeIDTagScrubber {
 		w.write(text);
 		w.close();
 		
-		System.out.println(type+"\t"+fd.getParentFile().getAbsolutePath());
+		System.out.println(fd.getParentFile().getAbsolutePath());
 		//System.out.println(scrubber.nameMap);
 		
 	}

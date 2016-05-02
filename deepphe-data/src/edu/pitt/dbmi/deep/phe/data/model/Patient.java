@@ -1,5 +1,9 @@
 package edu.pitt.dbmi.deep.phe.data.model;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class Patient {
@@ -9,6 +13,9 @@ public class Patient {
 	private Date cancerDate;
 	private Map<String,Date> dates;
 	private Map<String,Integer> countMap;
+	private Set<Integer> reportHashes;
+	private Map<String,Report> reportMap;
+	
 	public String getMedicalRecordNumber() {
 		return mrn;
 	}
@@ -61,9 +68,31 @@ public class Patient {
 		this.cancerDate = cancerDate;
 	}
 	public void addReport(Report r) {
-		getReports().add(r);
-		r.setPatient(this);
+		// don't import report whose text we already have
+		if(!hasIdenticalReport(r)){
+			getReports().add(r);
+			r.setPatient(this);
+			reportHashes.add(r.textHash());
+			getReportMap().put(r.getRecordId(),r);
+		}
 	}
+	
+	private Map<String,Report> getReportMap(){
+		if(reportMap == null)
+			reportMap = new HashMap<String, Report>();
+		return reportMap;
+	}
+	
+	public Report getReport(String id){
+		return getReportMap().get(id);
+	}
+	
+	private boolean hasIdenticalReport(Report r){
+		if(reportHashes == null)
+			reportHashes = new HashSet<Integer>();
+		return reportHashes.contains(r.textHash());
+	}
+	
 	public int getReportCount(){
 		return getReports().size();
 	}
@@ -131,6 +160,19 @@ public class Patient {
 				return o1.getEventDate().compareTo(o2.getEventDate());
 			}
 		});
+	}
+	
+	
+	public void writeReports(File outputDir) throws IOException{
+		int rn = 1;
+		for(Report rp: getReports()){
+			File rf = new File(outputDir,String.format("%s_report%03d_%s.txt",getName(),rn,rp.getDocumentType()));
+			//System.out.println(rf.getName()+"..");
+			BufferedWriter w = new BufferedWriter(new FileWriter(rf));
+			w.write(rp.getText()+"\n");
+			w.close();
+			rn ++;
+		}
 	}
 }
 

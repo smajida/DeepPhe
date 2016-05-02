@@ -108,8 +108,8 @@ public class DeIDReportSplitter {
 	 */
 	public static void main(String[] args) throws IOException {
 		File dir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/");
-		File fs = new File(dir,"TCGA_data_filtered.scrubbed");
-		File fd = new File(dir,"TCGA_data_filtered_scrubbed");
+		File fs = new File(dir,"TCGA_CARE_data_filtered.scrubbed");
+		File fd = new File(dir,"TCGA_CARE_data_filtered_scrubbed");
 		
 		DeIDReportSplitter splitter = new DeIDReportSplitter();
 		splitter.split(fs,fd);

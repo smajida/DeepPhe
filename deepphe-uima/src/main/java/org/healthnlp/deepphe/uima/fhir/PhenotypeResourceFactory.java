@@ -295,7 +295,11 @@ public class PhenotypeResourceFactory {
 		for(int i=0;i<getSize(annotation.getHasProvenanceText());i++){
 			fact.addProvenanceText(FactFactory.createTextMention(annotation.getHasProvenanceText(i)));
 		}
-		//TODO: implement further
+		
+		// add ancestors
+		for(int i=0;i<getSize(annotation.getHasAncestors());i++){
+			fact.addAncestor(annotation.getHasAncestors(i));
+		}
 		
 		return fact;
 	}

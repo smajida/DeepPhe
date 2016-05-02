@@ -59,7 +59,7 @@ public class DeIDNameResolver {
 	 * @param fd
 	 * @throws Exception 
 	 */
-	private void resolve(List<Map<String, String>> result, File fd) throws Exception {
+	public void resolve(List<Map<String, String>> result, File fd) throws Exception {
 		Map<String,File> mapping = new LinkedHashMap<String,File>();
 		for(File d: fd.listFiles()){
 			if(d.isDirectory()){
@@ -229,10 +229,10 @@ public class DeIDNameResolver {
 	
 	public static void main(String[] args) throws Exception{
 		File dir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/");
-		File fr = new File(dir,"TCGA_data_filtered.bar");
-		File ff = new File(dir,"TCGA_data_filtered.scrubbed");
-		File fd = new File(dir,"TCGA_data_filtered_scrubbed");
-		File fo = new File(dir,"TCGA_data_filtered.link");
+		File fr = new File(dir,"TCGA_CARE_data_filtered.bar");
+		File ff = new File(dir,"TCGA_CARE_data_filtered.scrubbed");
+		File fd = new File(dir,"TCGA_CARE_data_filtered_scrubbed");
+		File fo = new File(dir,"TCGA_CARE_data_filtered.link");
 		
 		
 		

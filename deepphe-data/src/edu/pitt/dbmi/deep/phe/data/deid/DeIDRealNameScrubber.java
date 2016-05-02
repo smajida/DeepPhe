@@ -103,7 +103,7 @@ public class DeIDRealNameScrubber {
 	 * @param output
 	 * @throws Exception
 	 */
-	private void process(File input, File output) throws Exception {
+	public void process(File input, File output) throws Exception {
 		currentReport=0;
 		BufferedReader r = new BufferedReader(new FileReader(input));
 		BufferedWriter w = new BufferedWriter(new FileWriter(output));
@@ -125,9 +125,9 @@ public class DeIDRealNameScrubber {
 	public static void main(String[] args) throws Exception {
 		//String type = "Melanoma";
 		File dir = new File("/home/tseytlin/Data/DeepPhe/Data/TCGA/");
-		File fd = new File(dir,"TCGA_data_filtered.deid");
-		File fr = new File(dir,"TCGA_data_filtered.bar");
-		File ff = new File(dir,"TCGA_data_filtered.deid.fixed");
+		File fd = new File(dir,"TCGA_CARE_data_filtered.deid");
+		File fr = new File(dir,"TCGA_CARE_data_filtered.bar");
+		File ff = new File(dir,"TCGA_CARE_data_filtered.deid.fixed");
 				
 		
 		DeIDRealNameScrubber scrubber = new DeIDRealNameScrubber();
