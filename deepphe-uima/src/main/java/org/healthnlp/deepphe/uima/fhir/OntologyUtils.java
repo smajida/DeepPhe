@@ -26,6 +26,10 @@ public class OntologyUtils {
 	
 	public void addAncestors(Fact fact){
 		IClass cls = ontology.getClass(fact.getUri());
+		if(cls == null){
+			cls = ontology.getClass(fact.getName());
+			fact.setUri(cls.getURI().toString());
+		}
 		if(cls != null){
 			Queue<IClass> parents = new LinkedList<IClass>(); 
 			parents.add(cls);
@@ -33,7 +37,12 @@ public class OntologyUtils {
 				IClass c = parents.remove();
 				for(IClass parent: c.getDirectSuperClasses()){
 					parents.add(parent);
-					fact.addAncestor(parent.getName());				}
+					// stop, if we have a parent that is defined in upper level ontology
+					if(parent.getURI().toString().startsWith(FHIRConstants.SCHEMA_URL) || parent.getURI().toString().startsWith(FHIRConstants.CONTEXT_URL)){
+						return;		
+					}
+					fact.addAncestor(parent.getName());	
+				}
 			}
 		}
 	}

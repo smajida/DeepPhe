@@ -1,6 +1,7 @@
 package org.healthnlp.deepphe.fhir.fact;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +36,9 @@ public class Fact {
 	private Set<String> rulesApplied;
 	private List<Fact> provenanceFacts;
 	private List<TextMention> provenanceText;
-
+	private Date recordedDate;
+	private int temporalOrder;
+	
 	private transient String documentIdentifier, patientIdentifier, documentType;
 	private transient Set<String> containerIdentifier;
 
@@ -198,6 +201,23 @@ public class Fact {
 		return b.toString();
 	}
 	
+	
+	public Date getRecordedDate() {
+		return recordedDate;
+	}
+
+	public void setRecordedDate(Date recordedDate) {
+		this.recordedDate = recordedDate;
+	}
+
+	public int getTemporalOrder() {
+		return temporalOrder;
+	}
+
+	public void setTemporalOrder(int temporalOrder) {
+		this.temporalOrder = temporalOrder;
+	}
+
 	/**
 	 * return all facts that are contained within this fact
 	 * @return

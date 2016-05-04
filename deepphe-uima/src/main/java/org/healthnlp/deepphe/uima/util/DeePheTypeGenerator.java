@@ -133,7 +133,10 @@ public class DeePheTypeGenerator {
 		features.appendChild(createFeatureDesciption(doc,"hasDocumentOffset",null,"uima.cas.Integer",null));
 		features.appendChild(createFeatureDesciption(doc,"hasAncestors",null,"uima.cas.StringArray",null));
 		features.appendChild(createFeatureDesciption(doc,"hasProperties",null,"uima.cas.FSArray",TYPE_PREFIX+"Property"));
-
+		features.appendChild(createFeatureDesciption(doc,"hasRecordedDate"));
+		features.appendChild(createFeatureDesciption(doc,"hasTemporalOrder",null,"uima.cas.Integer",null));
+		
+		
 		element.appendChild(features);
 
 		return element;
