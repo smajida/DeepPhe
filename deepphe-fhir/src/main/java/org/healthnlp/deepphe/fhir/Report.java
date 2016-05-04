@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
 import org.healthnlp.deepphe.fhir.summary.Summary;
@@ -332,6 +333,12 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	
 	public void addCompositionSummary(Summary s){
 		s.setReport(this);
+		// set recorded date for all facts
+		if(getDate() != null){
+			for(Fact f: s.getContainedFacts()){
+				f.setRecordedDate(getDate());
+			}
+		}
 		getCompositionSummaryMap().put(s.getResourceIdentifier(),s);
 	}
 	public void addCompositionSummaries(List<? extends Summary> s){

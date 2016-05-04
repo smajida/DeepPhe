@@ -1,9 +1,8 @@
 package org.healthnlp.deepphe.uima.ae;
 
-import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.uima.UimaContext;
@@ -15,7 +14,6 @@ import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.DefaultFactList;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
-import org.healthnlp.deepphe.fhir.summary.CancerPhenotype;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
@@ -24,9 +22,6 @@ import org.healthnlp.deepphe.fhir.summary.TumorSummary;
 import org.healthnlp.deepphe.uima.drools.DroolsEngine;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
-import org.healthnlp.deepphe.util.FHIRRegistry;
-import org.healthnlp.deepphe.util.FHIRUtils;
-import org.kie.api.event.rule.DebugAgendaEventListener;
 import org.kie.api.runtime.KieSession;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
@@ -71,21 +66,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		record.setPatientSummary(patientSummary);
 		record.setCancerSummary(cancerSummary);
 		
-		//record after drools
-		/*
-		MedicalRecord summRecord = new MedicalRecord();
-		CancerSummary emptyCancerSummary = new CancerSummary();
-		emptyCancerSummary.setAnnotationType(FHIRConstants.ANNOTATION_TYPE_RECORD);
-		loadTemplate(emptyCancerSummary);
-		CancerPhenotype emptyPhenotype = emptyCancerSummary.getPhenotype();
-		loadTemplate(emptyPhenotype);
-		
-		
-		summRecord.setPatient(PhenotypeResourceFactory.loadPatient(jcas));
-		summRecord.setPatientSummary(patientSummary);
-		summRecord.setCancerSummary(emptyCancerSummary);
-		*/
-		
+		// merte stuff around
 		for(Report report: PhenotypeResourceFactory.loadReports(jcas)){
 
 			record.addReport(report);
@@ -109,6 +90,19 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			}
 
 		}
+		// check ancestors
+		checkAncestors(record.getRecordLevelFacts());
+
+		for(Fact f: record.getReportLevelFacts()){
+			if(f.getAncestors().isEmpty())
+				System.err.println(f.getCategory()+" "+f.getName()+" "+f.getUri());
+			else
+				System.out.println(f.getCategory()+" "+f.getName()+" "+f.getUri()+" "+f.getAncestors());
+		}
+		
+		
+	
+		
 		
 		//long stT = System.currentTimeMillis();
 		//Olga: for TMN and Stage testing empty *Classification and Cancer stage
@@ -146,6 +140,15 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		PhenotypeResourceFactory.saveMedicalRecord(record, jcas);
 		
 	}
+	
+	public void checkAncestors(Collection<Fact> facts){
+		org.healthnlp.deepphe.uima.fhir.OntologyUtils ou = new org.healthnlp.deepphe.uima.fhir.OntologyUtils(ontology);
+		for(Fact f:	facts){
+			if(f.getAncestors().isEmpty())
+				ou.addAncestors(f);
+		}
+	}
+	
 	
 	/**
 	 * load template based on the ontology

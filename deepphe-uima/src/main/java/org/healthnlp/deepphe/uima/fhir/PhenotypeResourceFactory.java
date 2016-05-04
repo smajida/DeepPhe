@@ -32,8 +32,11 @@ import org.hl7.fhir.instance.model.*;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Quantity;
 
+import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PhenotypeResourceFactory {
 	
@@ -55,14 +58,8 @@ public class PhenotypeResourceFactory {
 	 * @return
 	 */
 	private static String getPrefferedName(Annotation a){
-		if(a instanceof org.healthnlp.deepphe.uima.types.Annotation){
-			return ((org.healthnlp.deepphe.uima.types.Annotation) a).getHasPreferredName();
-		}else if(a instanceof Attribute){
-			return ((Attribute) a).getHasPreferredName();
-		}else if(a instanceof Modifier){
-			return ((Modifier) a).getHasPreferredName();
-		}else if(a instanceof org.healthnlp.deepphe.uima.types.Summary){
-			return ((org.healthnlp.deepphe.uima.types.Summary) a).getHasPreferredName();
+		if(a instanceof org.healthnlp.deepphe.uima.types.Fact){
+			return ((org.healthnlp.deepphe.uima.types.Fact) a).getHasPreferredName();
 		}
 		return null;
 	}
@@ -73,28 +70,16 @@ public class PhenotypeResourceFactory {
 	 * @return
 	 */
 	private static String getIdentifier(Annotation a){
-		if(a instanceof org.healthnlp.deepphe.uima.types.Annotation){
-			return ((org.healthnlp.deepphe.uima.types.Annotation) a).getHasIdentifier();
-		}else if(a instanceof Attribute){
-			return ((Attribute) a).getHasIdentifier();
-		}else if(a instanceof Modifier){
-			return ((Modifier) a).getHasIdentifier();
-		}else if(a instanceof org.healthnlp.deepphe.uima.types.Summary){
-			return ((org.healthnlp.deepphe.uima.types.Summary) a).getHasIdentifier();
+		if(a instanceof org.healthnlp.deepphe.uima.types.Fact){
+			return ((org.healthnlp.deepphe.uima.types.Fact) a).getHasIdentifier();
 		}
 		return null;
 	}
 	
 	
 	private static String getResourceURI(Annotation a){
-		if(a instanceof org.healthnlp.deepphe.uima.types.Annotation){
-			return ((org.healthnlp.deepphe.uima.types.Annotation) a).getHasURI();
-		}else if(a instanceof Attribute){
-			return ((Attribute) a).getHasURI();
-		}else if(a instanceof Modifier){
-			return ((Modifier) a).getHasURI();
-		}else if(a instanceof org.healthnlp.deepphe.uima.types.Summary){
-			return ((org.healthnlp.deepphe.uima.types.Summary) a).getHasURI();
+		if(a instanceof org.healthnlp.deepphe.uima.types.Fact){
+			return ((org.healthnlp.deepphe.uima.types.Fact) a).getHasURI();
 		}
 		return null;
 	}
@@ -150,7 +135,6 @@ public class PhenotypeResourceFactory {
 		
 		// add doc type
 		if(r.getType() != null){
-			//TODO: refactor????
 			org.healthnlp.deepphe.uima.types.Fact dont = (org.healthnlp.deepphe.uima.types.Fact) getAnnotationByName(jcas,org.healthnlp.deepphe.uima.types.Fact.type, r.getType().getText());
 			if(dont == null)		
 				dont = new org.healthnlp.deepphe.uima.types.Fact(jcas);
@@ -169,6 +153,7 @@ public class PhenotypeResourceFactory {
 		
 		// init individual components
 		List<FeatureStructure> events = new ArrayList<FeatureStructure>();
+		int n = 1;
 		for(Element e: r.getReportElements()){
 			// add to FSArray
 			org.healthnlp.deepphe.uima.types.Fact el = saveElement(e,jcas);
@@ -181,6 +166,13 @@ public class PhenotypeResourceFactory {
 				el.setHasDocumentOffset(r.getOffset());
 				el.setBegin(st[0]+r.getOffset());
 				el.setEnd(st[1]+r.getOffset());
+				
+			/*	// add report date and temporal order
+				if(r.getDate() != null){
+					el.setHasRecordedDate(r.getDate().toString());
+				}
+				el.setHasTemporalOrder(FHIRUtils.createTemporalOrder(e,n++));*/
+				
 				// ommit non-annotations
 				if(el instanceof org.healthnlp.deepphe.uima.types.Annotation)
 					events.add(el);
@@ -279,17 +271,23 @@ public class PhenotypeResourceFactory {
 	private static Fact loadFact(org.healthnlp.deepphe.uima.types.Fact annotation) {
 		// try to convert if annotation
 		Element element = loadElement(annotation);
+		
+		Fact fact = null;
 		if(element != null){
-			return FactFactory.createFact(element);
+			fact =  FactFactory.createFact(element);
+		}else{
+			fact = FactFactory.createFact(annotation.getHasType());
 		}
 		
 		// create a generic fact if possible		
-		Fact fact = FactFactory.createFact(annotation.getHasType());
 		fact.setName(annotation.getHasPreferredName());
 		fact.setUri(annotation.getHasURI());
 		fact.setIdentifier(annotation.getHasIdentifier());
 		fact.setLabel(annotation.getHasLabel());
 		fact.setType(annotation.getHasType());
+		fact.setTemporalOrder(annotation.getHasTemporalOrder());
+		if(annotation.getHasRecordedDate() != null)
+			fact.setRecordedDate(TextTools.parseDate(annotation.getHasRecordedDate()));
 		
 		// add provinence
 		for(int i=0;i<getSize(annotation.getHasProvenanceText());i++){
@@ -318,6 +316,9 @@ public class PhenotypeResourceFactory {
 		annotation.setHasLabel(fact.getLabel());
 		annotation.setHasProvenanceText(getStringValues(jcas,fact.getProvenanceMentions()));
 		annotation.setHasType(fact.getType());
+		annotation.setHasTemporalOrder(fact.getTemporalOrder());
+		if(fact.getRecordedDate() != null)
+			annotation.setHasRecordedDate(fact.getRecordedDate().toString());
 		
 		// set begin & end if not set prior
 		for(TextMention m: fact.getProvenanceText()){
@@ -329,11 +330,30 @@ public class PhenotypeResourceFactory {
 		if(!fact.getAncestors().isEmpty())
 			annotation.setHasAncestors(getStringValues(jcas, fact.getAncestors()));
 		
-	
+		// handle different fact types for additional info
+		if(fact instanceof ObservationFact && annotation instanceof org.healthnlp.deepphe.uima.types.Observation){
+			//saveObservationFact((ObservationFact) fact,(org.healthnlp.deepphe.uima.types.Observation)annotation, jcas);
+		}
+		
 		annotation.addToIndexes();
 		return annotation;
 	}
 	
+
+	private static void saveObservationFact(ObservationFact fact,  org.healthnlp.deepphe.uima.types.Observation annotation, JCas jcas) {
+		if(!fact.getBodySite().isEmpty())
+			annotation.setHasBodySite(getValues(jcas,fact.getBodySite().stream().map(f -> saveFact(f, jcas)).collect(Collectors.toList())));
+		
+		if(fact.getInterpretation() != null)
+			annotation.setHasInterpretation(getValue(jcas,saveFact(fact.getInterpretation(),jcas)));
+		
+		if(fact.getValue() != null)
+			annotation.setHasNumValue(getValue(jcas,saveFact(fact.getValue(),jcas)));
+		
+		if(fact.getMethod() != null)
+			annotation.setHasMethod(getValue(jcas,saveFact(fact.getMethod(),jcas)));
+		
+	}
 
 	private static org.healthnlp.deepphe.uima.types.Fact saveFact(Fact fact, JCas jcas) {
 		Annotation a = getAnnotationByIdentifier(jcas,fact.getIdentifier());
@@ -892,6 +912,7 @@ public class PhenotypeResourceFactory {
 		Medication ob = new Medication();
 		ob.setCode(getCodeableConcept(e));
 		addMention(ob,e);
+		//FHIRUtils.createIdentifier(ob.addIdentifier(),e.getHasIdentifier());
 		return ob;
 	}
 

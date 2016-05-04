@@ -812,5 +812,17 @@ public class FHIRUtils {
 		// insert space into camel back
 		return str.replaceAll("([a-z])([A-Z])","$1 $2");
 	}
+
+	
+	/**
+	 * create temperal order from given N (mention offset) and DocTimeRel
+	 * @param e
+	 * @param i
+	 * @return
+	 */
+	public static int createTemporalOrder(Element e, int i) {
+		//TODO: account for DocTimeRel
+		return i;
+	}
 	
 }
