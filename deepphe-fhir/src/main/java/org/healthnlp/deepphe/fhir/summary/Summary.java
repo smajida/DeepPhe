@@ -80,6 +80,17 @@ public abstract class Summary extends List_  implements Element {
 		}
 		list.add(fact);
 	}
+	
+	public Fact getFactByCategoryID(String category, String identifier){
+		Fact toret = null;
+		FactList fl = getFacts(category);
+		for(Fact f:fl){
+			if(f.getIdentifier().equals(identifier)){
+				toret = f;
+			}
+		}
+		return toret;
+	}
 		
 	public abstract String getDisplayText();
 	public abstract String getResourceIdentifier();

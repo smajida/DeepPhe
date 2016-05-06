@@ -92,14 +92,13 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		}
 		// check ancestors
 		checkAncestors(record.getRecordLevelFacts());
-
-		for(Fact f: record.getReportLevelFacts()){
+	
+		/*for(Fact f: record.getReportLevelFacts()){
 			if(f.getAncestors().isEmpty())
 				System.err.println(f.getCategory()+" "+f.getName()+" "+f.getUri());
 			else
 				System.out.println(f.getCategory()+" "+f.getName()+" "+f.getUri()+" "+f.getAncestors());
-		}
-		
+		}*/
 		
 	
 		
@@ -120,8 +119,10 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 
 			droolsSession.insert(record);					
 			for(Fact f: record.getReportLevelFacts()){
-				System.out.println(f.getInfo());
-				droolsSession.insert(f);
+				if(!f.getCategory().equalsIgnoreCase("wasDerivedFrom")){
+		//			System.out.println(f.getInfo());
+					droolsSession.insert(f);
+				}
 			}		
 			droolsSession.fireAllRules();
 			droolsSession.dispose();

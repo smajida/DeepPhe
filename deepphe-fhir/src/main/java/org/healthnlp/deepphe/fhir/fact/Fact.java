@@ -31,7 +31,7 @@ public class Fact {
 	}
 	
 	private String name,uri,identifier,label,category,type = getClass().getSimpleName();
-	private String summaryType, summaryId;
+	private String summaryType, summaryId, summaryFullId;
 	private Set<String> ancestors;
 	private Set<String> rulesApplied;
 	private List<Fact> provenanceFacts;
@@ -42,7 +42,13 @@ public class Fact {
 	private transient String documentIdentifier, patientIdentifier, documentType;
 	private transient Set<String> containerIdentifier;
 
+	public String getSummaryFullId(){
+		return summaryType+"_"+summaryId;
+	}
 	
+	public void setSummaryFullId(String summaryFullId){
+		this.summaryFullId = summaryFullId;
+	}
 	
 	public String getName() {
 		return name;
@@ -194,6 +200,7 @@ public class Fact {
 		b.append("document type: "+getDocumentType()+"|");
 		b.append("summary type: "+getSummaryType()+"|");
 		b.append("summary id: "+getSummaryId()+"|");
+		b.append("summary full id: "+getSummaryFullId()+"|");
 		b.append("container ids: "+getContainerIdentifier()+"|");
 		//b.append("rulesApplied: "+getRulesApplied()+"|");
 		b.append("ancestors: "+getAncestors()+"\n");

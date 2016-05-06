@@ -50,6 +50,8 @@ public class FHIRConstants {
 	public static final String TREATMENT = "Treatment";
 	public static final String MANIFISTATION = "ManifestationOfDisease";
 	public static final String MEDICAL_RECORD = "MedicalRecord";
+	public static final String MODIFIER = "Modifier";
+	
 	
 	public static final String HAS_BODY_SITE = "hasBodySite";
 	public static final String HAS_TREATMENT = "hasTreatment";
@@ -71,6 +73,7 @@ public class FHIRConstants {
 	public static final String HAS_INTERPRETATION = "hasInterpretation";
 	public static final String HAS_NUM_VALUE = "hasNumValue";
 	public static final String HAS_METHOD = "hasMethod";
+
 	
 	
 	public static final String T_STAGE = "T_Stage";

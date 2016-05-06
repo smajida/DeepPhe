@@ -20,11 +20,69 @@ declare updateFactContainer
 	newContainer : String
 end
 
+
 /**
-* Merge the facts from different type of doculemts
+* Rename to deepest all tumor summaries if they have the same ancestors
+*/
+rule "rename_all_tumors_to_deepest_value"
+	salience 99999
+	no-loop true
+	when	
+		$record : MedicalRecord()
+		$cancer_f : Fact(summaryType=="CancerSummary", $cancer_fullId : summaryFullId, $patientId :patientIdentifier,
+						$cancer_ancestors: ancestors)
+		$tumor1_f : Fact(summaryType=="TumorSummary", $category1 : category, patientIdentifier==$patientId, $tumor1_identifier : identifier, 
+						containerIdentifier contains $cancer_fullId,
+						$tumor1_name : name, $tumor1_uri : uri)			
+		$tumor2_f : Fact(summaryType=="TumorSummary", category==$category1 , patientIdentifier==$patientId, 
+						containerIdentifier contains $cancer_fullId, identifier != $tumor1_identifier,
+						ancestors contains  $tumor1_name, $tumor2_name : name, $tumor2_name != $tumor1_name, $tumor2_uri : uri)
+	then
+		System.out.println("*** rename_ALL_tumors_to_deepest_value: from "+$tumor1_name+" to "+$tumor2_name);
+		modify($tumor1_f){
+			setName($tumor2_name),
+			setUri($tumor2_uri)		
+		}
+		
+		//modify($record){
+			Fact f = $record.getCancerSummary().getTumorSummaryByUuid($tumor1_identifier).getFactByCategoryID($category1, $tumor1_identifier);
+			System.out.println("BEFORE: name: "+f.getName());
+		//}
+	
+		
+end
+
+
+/**
+* For each cancer change name, URI to the deepest value in cancer for the same catogory
+* IF there is no other bodySite for the same tumor
+*/
+
+rule "rename_cancer_to_deepest_tumor"
+	salience 99998
+	no-loop true
+	when	
+		$cancer_f : Fact(summaryType=="CancerSummary", $category: category, $patientId : patientIdentifier, $cancer_fullId : summaryFullId, 
+						$cancer_container : containerIdentifier,
+						$cancer_ancestors: ancestors, $cancer_name : name, $cancer_uri : uri)
+		$tumor_f : Fact(summaryType=="TumorSummary", category==$category, patientIdentifier==$patientId, $tumor_identifier : identifier, 
+						containerIdentifier contains $cancer_fullId,
+						$tumor_name : name, $tumor_name != $cancer_name, $tumor_uri : uri, ancestors contains  $cancer_name )			
+		not Fact(summaryType=="TumorSummary", category==$category, patientIdentifier==$patientId, 
+						containerIdentifier contains $cancer_fullId, identifier != $tumor_identifier,
+						ancestors contains  $cancer_name, $tumor_name2 : name, $tumor_name2 != $cancer_name, $tumor_name2 != $tumor_name)
+	then
+		System.out.println("*** rename_cancer_to_deepest_tumor: from "+$cancer_name+" to "+$tumor_name);
+end
+		
+
+
+/**
+* Merge the facts from different type of documents
 */
 
 //merge cancer summaries for the same disease name, Pathology Report prevails 
+/*
 rule "leave_PR_with the lowestID"
 	salience 99999910
 	no-loop true
@@ -42,9 +100,11 @@ rule "leave_PR_with the lowestID"
 		
 end
 
+
 rule "updateContainer"
 	salience 1000
 	no-loop true
 	updateFactContainer( $oldContainer :oldContainer, $newContainer : newContainer)
 	$fact(
 
+*/
