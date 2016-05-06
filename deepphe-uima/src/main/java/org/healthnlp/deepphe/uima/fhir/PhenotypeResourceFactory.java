@@ -1199,6 +1199,7 @@ public class PhenotypeResourceFactory {
 		for(int i=0;i<getSize(summaryAnnotation.getHasPhenotype());i++){
 			CancerPhenotype pheneAnnotation = summaryAnnotation.getHasPhenotype(i);
 			org.healthnlp.deepphe.fhir.summary.CancerPhenotype phenotype = new org.healthnlp.deepphe.fhir.summary.CancerPhenotype();
+			phenotype.setResourceIdentifier(pheneAnnotation.getHasIdentifier());
 			
 			// add generic values
 			for(int j=0;j<getSize(pheneAnnotation.getHasContent());j++){
@@ -1232,6 +1233,7 @@ public class PhenotypeResourceFactory {
 		for(int i=0;i<getSize(summaryAnnotation.getHasPhenotype());i++){
 			org.healthnlp.deepphe.uima.types.TumorPhenotype pheneAnnotation = summaryAnnotation.getHasPhenotype(i);
 			TumorPhenotype phenotype = new TumorPhenotype();
+			phenotype.setResourceIdentifier(pheneAnnotation.getHasIdentifier());
 			// add generic values
 			for(int j=0;j<getSize(pheneAnnotation.getHasContent());j++){
 				FactList flist = loadFactList(pheneAnnotation.getHasContent(j));

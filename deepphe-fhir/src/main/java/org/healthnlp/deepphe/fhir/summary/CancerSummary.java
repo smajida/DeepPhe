@@ -83,21 +83,19 @@ public class CancerSummary extends Summary {
 		getTumors().add(tumor);
 	}
 	
-	/*
-	public TumorSummary getTumorSummaryByUuid(String uuid){
+	public TumorSummary getTumorSummaryByIdentifier(String uuid){
 		TumorSummary toret = null;
 		for(TumorSummary ts: getTumors()){
-			if(ts.getUuid().equals(uuid))
+			if(ts.getResourceIdentifier().equals(uuid))
 				toret = ts;
 		}
 		if(toret == null){
-			toret = new TumorSummary();
-			toret.setUuid(uuid);
+			toret = new TumorSummary(uuid);
 			addTumor(toret);
 		}
 		return toret;
 	}
-	*/
+	
 	public String getSummaryText() {
 		StringBuffer st = new StringBuffer(super.getSummaryText());
 		st.append(getPhenotype().getSummaryText()+"\n");
