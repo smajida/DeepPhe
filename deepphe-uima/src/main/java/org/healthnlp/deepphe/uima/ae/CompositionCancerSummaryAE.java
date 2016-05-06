@@ -301,7 +301,8 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	 * @return
 	 */
 	private CancerSummary createCancerSummary(Report report, Disease diagnosis){
-		CancerSummary cancer = new CancerSummary();
+		CancerSummary cancer = new CancerSummary(report.getTitle());
+		
 		loadTemplate(cancer);
 		CancerPhenotype phenotype = cancer.getPhenotype();
 		loadTemplate(phenotype);
@@ -357,66 +358,73 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	
 	
 	private TumorSummary createTumorSummary(Report report, Condition diagnosis, CancerSummary cancer){
-		TumorSummary tumor = new TumorSummary();
+		TumorSummary tumor = new TumorSummary(report.getTitle()+createTumorId(diagnosis));
 		loadTemplate(tumor);
 		TumorPhenotype phenotype = tumor.getPhenotype();
 		loadTemplate(phenotype);
 		
-		if(diagnosis != null){
-			// create diagnosis fact
-			Fact dx = FactFactory.createFact((Element)diagnosis);
-			addAncestors(dx);
-			// add body location
-			for(CodeableConcept cc: diagnosis.getBodySite()){
-				tumor.addFact(FHIRConstants.HAS_BODY_SITE,createFact(cc));
-			}
-				
-			//phenotype.addHistologicType(null); // ductal, lobular infered from DX
-			CodeableConcept ht = getHistologicType(diagnosis);
-			if(ht != null){
-				Fact f = createFact(ht);
-				f.addProvenanceFact(dx);
-				phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,f);
-			}
-			// insitu vs invasive 
-			//phenotype.addTumorExtent(null);    // insitu vs invasive
-			CodeableConcept te = getTumorExtent(diagnosis);
-			if(te != null){
-				Fact f = createFact(te);
-				f.addProvenanceFact(dx);
-				phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,f);  
-			}
-			
-			
-			// add treatment (// chemo)
-			loadElementsFromReport(tumor, report);
-			loadElementsFromReport(phenotype, report);
-			
-			
-			
-			// document type RULE
-			// if cancer location is the same as tumor location, then tumor is 'primary'
-			// else tumor type is 'recurrent' if they are not the same
-			// cancer has to be more specific then a tumor, then infer
-			// else can't infer a type
-			//tumor.setTumorType(null);  // primary vs local recurance, distance recurance  infered from rules
-			/*
-			if(cancer != null){
-				URI tumorType = null;
-				if(hasCommonBodySite(cancer.getBodySite(),tumor.getBodySite())){
-					tumorType = FHIRConstants.PRIMARY_TUMOR_URI;
-				}else{
-					tumorType = FHIRConstants.RECURRENT_TUMOR_URI;
-				}
-				if(tumorType != null)
-					tumor.setTumorType(tumor.getTumorType());
-			}
-			*/
+		// create diagnosis fact
+		Fact dx = FactFactory.createFact((Element)diagnosis);
+		addAncestors(dx);
+		// add body location
+		for(CodeableConcept cc: diagnosis.getBodySite()){
+			tumor.addFact(FHIRConstants.HAS_BODY_SITE,createFact(cc));
 		}
+			
+		//phenotype.addHistologicType(null); // ductal, lobular infered from DX
+		CodeableConcept ht = getHistologicType(diagnosis);
+		if(ht != null){
+			Fact f = createFact(ht);
+			f.addProvenanceFact(dx);
+			phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,f);
+		}
+		// insitu vs invasive 
+		//phenotype.addTumorExtent(null);    // insitu vs invasive
+		CodeableConcept te = getTumorExtent(diagnosis);
+		if(te != null){
+			Fact f = createFact(te);
+			f.addProvenanceFact(dx);
+			phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,f);  
+		}
+		
+		
+		// add treatment (// chemo)
+		loadElementsFromReport(tumor, report);
+		loadElementsFromReport(phenotype, report);
+		
+		
+		
+		// document type RULE
+		// if cancer location is the same as tumor location, then tumor is 'primary'
+		// else tumor type is 'recurrent' if they are not the same
+		// cancer has to be more specific then a tumor, then infer
+		// else can't infer a type
+		//tumor.setTumorType(null);  // primary vs local recurance, distance recurance  infered from rules
+		/*
+		if(cancer != null){
+			URI tumorType = null;
+			if(hasCommonBodySite(cancer.getBodySite(),tumor.getBodySite())){
+				tumorType = FHIRConstants.PRIMARY_TUMOR_URI;
+			}else{
+				tumorType = FHIRConstants.RECURRENT_TUMOR_URI;
+			}
+			if(tumorType != null)
+				tumor.setTumorType(tumor.getTumorType());
+		}
+		*/
+		
 
 		return tumor;
 	}
 	
+	private String createTumorId(Condition diagnosis) {
+		StringBuffer b = new StringBuffer();
+		for(CodeableConcept cc: diagnosis.getBodySite()){
+			b.append("-"+FHIRUtils.getConceptName(cc));
+		}
+		return b.toString();
+	}
+
 	// ductal, lobular infered from DX
 	private CodeableConcept getHistologicType(Condition diagnosis) {
 		return getLexicalPartValue(diagnosis,""+FHIRConstants.HISTOLOGIC_TYPE_URI);

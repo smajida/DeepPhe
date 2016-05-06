@@ -44,8 +44,8 @@ public class DotLogger implements Closeable {
       public void run() {
          DOT_LOGGER.info( "." );
          _count++;
-         if ( _count % 50 == 0 ) {
-            EOL_LOGGER.info( " " + _count );
+         if ( _count % 30 == 0 ) {
+            EOL_LOGGER.info( " " + (_count / 3) );
          }
       }
    }

@@ -22,9 +22,7 @@ import org.apache.ctakes.necontexts.ContextAnnotator;
 import org.apache.ctakes.postagger.POSTagger;
 import org.apache.ctakes.relationextractor.ae.LocationOfRelationExtractorAnnotator;
 import org.apache.ctakes.relationextractor.ae.ModifierExtractorAnnotator;
-import org.apache.ctakes.temporal.ae.BackwardsTimeAnnotator;
 import org.apache.ctakes.temporal.ae.DocTimeRelAnnotator;
-import org.apache.ctakes.temporal.ae.EventAnnotator;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReader;
@@ -152,11 +150,11 @@ final public class CancerPipelineFactory {
 
    static private void addTemporalEngines( final AggregateBuilder aggregateBuilder )
          throws ResourceInitializationException {
-      addLoggedEngine( aggregateBuilder, EventAnnotator.createAnnotatorDescription() );
+//      addLoggedEngine( aggregateBuilder, EventAnnotator.createAnnotatorDescription() );
       addLoggedEngine( aggregateBuilder,
             DocTimeRelAnnotator.createAnnotatorDescription( getModelPath( "temporal/ae/doctimerel" ) ) );
-      addLoggedEngine( aggregateBuilder,
-            BackwardsTimeAnnotator.createAnnotatorDescription( getModelPath( "temporal/ae/timeannotator" ) ) );
+//      addLoggedEngine( aggregateBuilder,
+//            BackwardsTimeAnnotator.createAnnotatorDescription( getModelPath( "temporal/ae/timeannotator" ) ) );
 //      aggregateBuilder.add(
 //            EventTimeRelationAnnotator.createAnnotatorDescription( getModelPath( "temporal/ae/eventtime" ) ) );
 //      aggregateBuilder.add(

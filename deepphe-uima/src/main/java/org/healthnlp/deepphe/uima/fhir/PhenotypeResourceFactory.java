@@ -1187,7 +1187,7 @@ public class PhenotypeResourceFactory {
 	 */
 	
 	private static CancerSummary loadCancerSummary(Cancer summaryAnnotation) {
-		CancerSummary cancerSummary = new CancerSummary();
+		CancerSummary cancerSummary = new CancerSummary(summaryAnnotation.getHasIdentifier());
 		
 		// add generic values
 		for(int i=0;i<getSize(summaryAnnotation.getHasContent());i++){
@@ -1220,7 +1220,7 @@ public class PhenotypeResourceFactory {
 	
 
 	private static TumorSummary loadTumorSummary(Tumor summaryAnnotation) {
-		TumorSummary tumorSummary = new TumorSummary();
+		TumorSummary tumorSummary = new TumorSummary(summaryAnnotation.getHasIdentifier());
 	
 		// add generic values
 		for(int i=0;i<getSize(summaryAnnotation.getHasContent());i++){

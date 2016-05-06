@@ -369,6 +369,11 @@ public class DeePheTypeGenerator {
 	}
 
 
+	/**
+	 *  THIS IS WHERE I START CONTSTRACTING THE CAS
+	 * @param doc
+	 * @return
+	 */
 
 	private List<Element> createTypeDescriptions(Document doc) {
 		Element prop = createTypeDescriptionProperty(doc);

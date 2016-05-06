@@ -10,6 +10,7 @@ import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.DefaultFactList;
 import org.healthnlp.deepphe.fhir.fact.Fact;
@@ -54,15 +55,16 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
 		
 		// for now, lets assume there is only one cancer summary
+		Patient patient = PhenotypeResourceFactory.loadPatient(jcas);
 		PatientSummary patientSummary = new PatientSummary();
 		patientSummary.setAnnotationType(FHIRConstants.ANNOTATION_TYPE_RECORD);
 		
-		CancerSummary cancerSummary =  new CancerSummary();
+		CancerSummary cancerSummary =  new CancerSummary(patient.getPatientName());
 		cancerSummary.setAnnotationType(FHIRConstants.ANNOTATION_TYPE_RECORD);
 		
 		// record to load into drools
 		MedicalRecord record = new MedicalRecord();
-		record.setPatient(PhenotypeResourceFactory.loadPatient(jcas));
+		record.setPatient(patient);
 		record.setPatientSummary(patientSummary);
 		record.setCancerSummary(cancerSummary);
 		
@@ -92,14 +94,11 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		}
 		// check ancestors
 		checkAncestors(record.getRecordLevelFacts());
-	
-		/*for(Fact f: record.getReportLevelFacts()){
-			if(f.getAncestors().isEmpty())
-				System.err.println(f.getCategory()+" "+f.getName()+" "+f.getUri());
-			else
-				System.out.println(f.getCategory()+" "+f.getName()+" "+f.getUri()+" "+f.getAncestors());
-		}*/
-		
+
+		for(Fact f: record.getReportLevelFacts()){
+			System.out.println(f.getInfo());
+		}
+
 	
 		
 		

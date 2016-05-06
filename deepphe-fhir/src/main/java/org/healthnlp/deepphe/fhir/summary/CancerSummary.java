@@ -14,13 +14,11 @@ import java.util.List;
 public class CancerSummary extends Summary {
 	private CancerPhenotype phenotype;
 	private List<TumorSummary> tumors;
-	
-	private String summaryType = getClass().getSimpleName();
-	private String uuid = String.valueOf(Math.abs(hashCode()));
-	
-	public CancerSummary(){
+
+	public CancerSummary(String id){
+		setResourceIdentifier(id);
 		phenotype = new CancerPhenotype();
-		
+		phenotype.setResourceIdentifier(id);
 	}
 
 	public void setReport(Report r){
@@ -85,6 +83,7 @@ public class CancerSummary extends Summary {
 		getTumors().add(tumor);
 	}
 	
+	/*
 	public TumorSummary getTumorSummaryByUuid(String uuid){
 		TumorSummary toret = null;
 		for(TumorSummary ts: getTumors()){
@@ -96,17 +95,9 @@ public class CancerSummary extends Summary {
 			toret.setUuid(uuid);
 			addTumor(toret);
 		}
-		
 		return toret;
 	}
-	
-	public String getDisplayText() {
-		return summaryType;
-	}
-	public String getResourceIdentifier() {
-		return summaryType+"_"+uuid;
-	}
-	
+	*/
 	public String getSummaryText() {
 		StringBuffer st = new StringBuffer(super.getSummaryText());
 		st.append(getPhenotype().getSummaryText()+"\n");
@@ -138,14 +129,23 @@ public class CancerSummary extends Summary {
 		}
 	}
 
+	private String getTumorBodySite(TumorSummary ts){
+		StringBuffer b = new StringBuffer();
+		for(Fact f : ts.getBodySite()){
+			b.append("-"+f.getName());
+		}
+		return b.toString();
+	}
+	
 	/**
 	 * append tumor summary if possible
 	 * @param s
 	 */
 	public void append(TumorSummary ts) {
+		String id = resourceIdentifier+getTumorBodySite(ts);
 		// add tumors if none exist
 		if(getTumors().isEmpty()){
-			addTumor(new TumorSummary());
+			addTumor(new TumorSummary(id));
 		}
 		// go over existing tumors and append if possible
 		boolean appended = false;
@@ -158,26 +158,11 @@ public class CancerSummary extends Summary {
 		// if this tumor was not appened to existing tumors
 		// add a new one
 		if(!appended){
-			TumorSummary tumor = new TumorSummary();
+			TumorSummary tumor = new TumorSummary(id);
 			tumor.append(ts);
 			addTumor(tumor);
 		}
 			
 	}
 
-	public String getSummaryType() {
-		return summaryType;
-	}
-
-	public void setSummaryType(String summaryType) {
-		this.summaryType = summaryType;
-	}
-
-	public String getUuid() {
-		return uuid;
-	}
-
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
-	}
 }

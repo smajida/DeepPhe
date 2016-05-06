@@ -21,6 +21,7 @@ public abstract class Summary extends List_  implements Element {
 	protected Patient patient;
 	private String annotationType = FHIRConstants.ANNOTATION_TYPE_DOCUMENT;
 	protected Map<String,FactList> content;
+	protected String resourceIdentifier;
 	public Map<String, FactList> getContent() {
 		if ( content == null ) {
 			content = new LinkedHashMap<>();
@@ -63,6 +64,23 @@ public abstract class Summary extends List_  implements Element {
 		}
 	}
 	
+	
+	public void setResourceIdentifier(String resourceIdentifier) {
+		String cname = getClass().getSimpleName()+"-";
+		if(resourceIdentifier.startsWith(cname))
+			resourceIdentifier = resourceIdentifier.substring(cname.length());
+		this.resourceIdentifier = resourceIdentifier;
+	}
+	
+	public String getResourceIdentifier() {
+		return getClass().getSimpleName()+"-"+resourceIdentifier;
+	}
+	
+	public String getDisplayText() {
+		return getClass().getSimpleName()+" ("+resourceIdentifier+")";
+	}
+
+	
 	/**
 	 * get fact categories
 	 * @return
@@ -92,10 +110,9 @@ public abstract class Summary extends List_  implements Element {
 		return toret;
 	}
 		
-	public abstract String getDisplayText();
-	public abstract String getResourceIdentifier();
-	public abstract String getSummaryType();
-	public abstract String getUuid();
+	public String getSummaryType(){
+		return getClass().getSimpleName();
+	}
 	
 	public String getSummaryText() {
 		StringBuffer st = new StringBuffer();
@@ -190,7 +207,7 @@ public abstract class Summary extends List_  implements Element {
 		fact.setPatientIdentifier(patientId);
 		fact.addContainerIdentifier(getResourceIdentifier());
 		fact.setSummaryType(getSummaryType());
-		fact.setSummaryId(getUuid());
+		fact.setSummaryId(getResourceIdentifier());
 		
 	}
 	
