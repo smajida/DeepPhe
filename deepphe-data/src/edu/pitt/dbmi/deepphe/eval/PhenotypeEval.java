@@ -137,16 +137,17 @@ public class PhenotypeEval {
 				}
 				out.println(hd+"\t gold: "+gold+"\t pred: "+pred+"\t score: "+compare(gold,pred));
 			}
-			out.println("Weighted Score: "+getWeightedScore());
+			out.println("Weighted Score: "+getWeightedScore()+"\n");
 		}
 
 		public double getWeightedScore() {
 			if(pairedRecord != null){
-				double total = 0;
+				double score = 0;
+				int total =  getValueHeaders().size();
 				for(String hd: getValueHeaders()){
-					total += compare(getValues(hd),pairedRecord.getValues(hd));
+					score += compare(getValues(hd),pairedRecord.getValues(hd));
 				}
-				return total/ getValueHeaders().size();
+				return score/ total;
 			}
 			return 1.0;
 		}
@@ -163,6 +164,9 @@ public class PhenotypeEval {
 				}
 			}
 			double t = val1.size() + (val2.size() - score);
+			// if all values are empty, then we have a match :)
+			if(t == 0)
+				return 1.0;
 			return score / t;
 		}
 
@@ -200,9 +204,11 @@ public class PhenotypeEval {
 	private Map<String, Record> loadAnnotations(File file) throws IOException {
 		Map<String,Record> map = new LinkedHashMap<String, PhenotypeEval.Record>();
 		BufferedReader reader = new BufferedReader(new FileReader(file));
+		boolean headerLine = true;
 		for(String l=reader.readLine();l != null; l = reader.readLine()){
-			if(Record.hasHeaders()){
+			if(headerLine){
 				Record.loadHeaders(l);
+				headerLine = false;
 			}else{
 				Record record = Record.loadRecord(l);
 				map.put(record.getId(),record);
@@ -224,7 +230,10 @@ public class PhenotypeEval {
 	
 	private void evaluate(File file1, File file2) throws IOException {
 		Map<String,Record> goldAnnotations = loadAnnotations(file1);
-		Map<String,Record> candidateAnnotations = loadAnnotations(file1);
+		Map<String,Record> candidateAnnotations = loadAnnotations(file2);
+		System.out.println("Gold File:\t"+file1.getAbsolutePath());
+		System.out.println("Candidate File:\t"+file2.getAbsolutePath());
+		System.out.println("");
 		double TP = 0,FP = 0 ,FN = 0;
 		
 		// iterate over gold standard
@@ -277,6 +286,11 @@ public class PhenotypeEval {
 		System.out.println("\n\n=================================================");
 		System.out.println("Total number of gold annotations: "+goldAnnotations.size());
 		System.out.println("Total number of candidate annotations: "+candidateAnnotations.size());
+		
+		System.out.println("TP:\t"+TP);
+		System.out.println("FP:\t"+FP);
+		System.out.println("FN:\t"+FN);
+		System.out.println("");
 		System.out.println("Precision: "+precision);
 		System.out.println("Recall: "+recall);
 		System.out.println("F-Score: "+Fscore);
