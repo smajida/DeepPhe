@@ -4,11 +4,11 @@
 	
 	@for(patient <- patients){
     	<h1>@patient.getName() Summary</h1>
-    	@for(summary <- patient.getSummaries()){
+    	<!--@for(summary <- patient.getSummaries()){
     		<h2>@summary.getName() Summary</h2>
-   		}
+   		} -->
 		<hr/>    	
-    	@for(document <- patient.getDocuments()){
+    <!--	@for(document <- patient.getDocuments()){
     		<h2>@document.getName() Summary</h2>
     		<h3>Diagnoses</h3>
     		@if(document.getDiagnoses()!=null){
@@ -45,6 +45,6 @@
     		<hr/>
     		<h4>Report Text</h4>
     		<p>@document.getText()</p>
-    	}
+    	} -->
     }
 }

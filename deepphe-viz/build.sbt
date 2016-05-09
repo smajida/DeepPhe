@@ -27,7 +27,7 @@ libraryDependencies ++= Seq(
 routesGenerator := InjectedRoutesGenerator
 
 
-fork in run := true
+fork in run := false
 
 // Compile the project before generating Eclipse files, so that generated .scala or .class files for views and routes are present
 EclipseKeys.preTasks := Seq(compile in Compile)

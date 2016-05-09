@@ -1,6 +1,10 @@
 package db;
 
 import java.util.List;
+import db.Procedure;
+import db.Observation;
+import db.Medication;
+import db.Diagnosis;
 
 public class Document extends Node {
 	String text;

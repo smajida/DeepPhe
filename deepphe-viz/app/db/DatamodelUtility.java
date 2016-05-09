@@ -24,7 +24,7 @@ public class DatamodelUtility extends Neo4JRESTCaller{
 		for(LinkedHashMap<String,Object> datamap:rows){
 			Patient p = new Patient();
 			patientList.add(p);
-			p.setId((int) datamap.get("id"));
+			p.setId((Long) datamap.get("id"));
 			p.setName((String) datamap.get("name"));
 			p.setSummaries(new ArrayList<Summary>());
 			p.setDocuments(new ArrayList<Document>());
@@ -34,7 +34,7 @@ public class DatamodelUtility extends Neo4JRESTCaller{
 			
 			for(LinkedHashMap<String,Object> sdatamap:srows){
 				CancerSummary cs = new CancerSummary();
-				cs.setId((int) sdatamap.get("id"));
+				cs.setId((long) sdatamap.get("id"));
 				cs.setName((String) sdatamap.get("name"));
 				p.getSummaries().add(cs);
 				
@@ -42,7 +42,7 @@ public class DatamodelUtility extends Neo4JRESTCaller{
 				
 				for(LinkedHashMap<String,Object> cpdatamap:cprows){
 					CancerPhenotype cp = new CancerSummary.CancerPhenotype();
-					cp.setId((int) cpdatamap.get("id"));
+					cp.setId((long) cpdatamap.get("id"));
 					cp.setName((String) cpdatamap.get("name"));
 					cs.addPhenotype(cp);
 				}
@@ -51,7 +51,7 @@ public class DatamodelUtility extends Neo4JRESTCaller{
 				
 				for(LinkedHashMap<String,Object> tsdatamap:trows){
 					TumorSummary ts = new TumorSummary();
-					ts.setId((int) tsdatamap.get("id"));
+					ts.setId((long) tsdatamap.get("id"));
 					ts.setName((String) tsdatamap.get("name"));
 					cs.addTumor(ts);
 				}
@@ -61,7 +61,7 @@ public class DatamodelUtility extends Neo4JRESTCaller{
 			
 			for(LinkedHashMap<String,Object> psdatamap:psrows){
 				PatientSummary ps = new PatientSummary();
-				ps.setId((int) psdatamap.get("id"));
+				ps.setId((long) psdatamap.get("id"));
 				ps.setName((String) psdatamap.get("name"));
 				p.getSummaries().add(ps);
 				
@@ -74,7 +74,7 @@ public class DatamodelUtility extends Neo4JRESTCaller{
 			
 			for(LinkedHashMap<String,Object> docdatamap:docrows){
 				Document document = new Document();
-				document.setId((int) docdatamap.get("id"));
+				document.setId((long) docdatamap.get("id"));
 				document.setName((String) docdatamap.get("name"));
 				document.setText((String)docdatamap.get("text"));
 				
@@ -89,7 +89,7 @@ public class DatamodelUtility extends Neo4JRESTCaller{
 			
 				for(LinkedHashMap<String,Object> dmap:drows){
 					Diagnosis di = new Diagnosis();
-					di.setId((int) dmap.get("id"));
+					di.setId((long) dmap.get("id"));
 					di.setName((String) dmap.get("name"));
 					
 					document.getDiagnoses().add(di);
@@ -99,7 +99,7 @@ public class DatamodelUtility extends Neo4JRESTCaller{
 				
 				for(LinkedHashMap<String,Object> dmap:drows){
 					Procedure di = new Procedure();
-					di.setId((int) dmap.get("id"));
+					di.setId((long) dmap.get("id"));
 					di.setName((String) dmap.get("name"));
 					
 					document.getProcedures().add(di);
@@ -109,7 +109,7 @@ public class DatamodelUtility extends Neo4JRESTCaller{
 				
 				for(LinkedHashMap<String,Object> dmap:drows){
 					Medication di = new Medication();
-					di.setId((int) dmap.get("id"));
+					di.setId((long) dmap.get("id"));
 					di.setName((String) dmap.get("name"));
 					
 					document.getMedications().add(di);

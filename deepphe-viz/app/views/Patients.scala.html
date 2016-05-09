@@ -1,0 +1,9 @@
+@(patients: List[db.Patient])
+
+@main("Patients") {
+	
+	@for(patient <- patients){
+    	<h1>@patient.getName() Summary</h1>
+		<hr/>
+    }
+}

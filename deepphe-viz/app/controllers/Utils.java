@@ -21,7 +21,11 @@ public class Utils extends Controller {
     
     
     public Result ping() {
-    	return ok("Here I am");
+		String val = "harry";
+		String result = "Here I am, "+val;
+		System.err.println("test");
+
+		return ok(result);
     }
 
 }
