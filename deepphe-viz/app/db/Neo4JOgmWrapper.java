@@ -30,7 +30,7 @@ public class Neo4JOgmWrapper {
 		  .setDriverClassName("org.neo4j.ogm.drivers.http.driver.HttpDriver")
 		  .setURI(GRAPHDB_URI);
 		
-		  sessionFactory = new SessionFactory("db"); // was GraphObjectFactory.POJO_PACKAGE);
+		  sessionFactory = new SessionFactory(GraphObjectFactory.POJO_PACKAGE); // was GraphObjectFactory.POJO_PACKAGE);
 	  }
 
 	  public Session getNeo4JSession() {

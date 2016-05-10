@@ -1,7 +1,8 @@
 package controllers;
 
-import db.DatamodelUtility;
+//import db.DatamodelUtility;
 import db.Patient;
+import org.healthnlp.deepphe.graph.summary.MedicalRecord;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
@@ -25,9 +26,9 @@ public class PatientReader extends Controller {
         try {
             Session session = Neo4JOgmWrapper.getInstance().getNeo4JSession();
            // get patients. List<Patient> patient= caller.getPatients();
-            Iterable<Patient> patients = session.loadAll(Patient.class,0);
-            Iterator<Patient> ptiter = patients.iterator();
-            List<Patient> pts = new ArrayList<Patient>();
+            Iterable<MedicalRecord> patients = session.loadAll(MedicalRecord.class,-1);
+            Iterator<MedicalRecord> ptiter = patients.iterator();
+            List<MedicalRecord> pts = new ArrayList<MedicalRecord>();
             while (ptiter.hasNext()) {
                 pts.add(ptiter.next());
             }

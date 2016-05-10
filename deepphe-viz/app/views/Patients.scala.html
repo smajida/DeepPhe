@@ -1,9 +1,80 @@
-@(patients: List[db.Patient])
+@(patients: List[org.healthnlp.deepphe.graph.summary.MedicalRecord])
 
+
+@displayCancerPhenotype(pt:org.healthnlp.deepphe.graph.summary.CancerPhenotype) = {
+   <ul>
+	   <li>AnnotationType: @pt.getAnnotationType()</li>
+   </ul>
+}
+
+@displayTumorSummary(ts: org.healthnlp.deepphe.graph.summary.TumorSummary) = {
+<ul>
+	<li>AnnotationType: @ts.getAnnotationType()</li>
+	@if(ts.getPhenotype() != null) {
+	<li>Phenotype:@displayTumorPhenotype(ts.getPhenotype())</li>
+	}
+</ul>
+}
+
+@displayTumorPhenotype(tp: org.healthnlp.deepphe.graph.summary.TumorPhenotype) = {
+ <ul>
+	 <li>AnnotationType: @tp.getAnnotationType()</li>
+	 @if(tp.getSummaryText() != null) {
+	 	<li>Summary: @tp.getSummaryText()</li>
+	 }
+ </ul>
+}
+
+@displayCancerSummary(cs: org.healthnlp.deepphe.graph.summary.CancerSummary) = {
+
+<h3>CancerSummary:</h3>
+<ul>
+	<li>AnnotationType: @cs.getAnnotationType()</li>
+	@if(cs.getPhenotypes() != null) {
+		<li>Phenotypes:
+		<ul>
+			@for(pt <- cs.getPhenotypes()) {
+			    <li>@displayCancerPhenotype(pt)</li>
+			}
+		</ul></li>
+	}
+	@if(cs.getTumors() != null) {
+		<li>Tumors:
+			<ul>
+				 @for(ts <- cs.getTumors()) {
+					<li>@displayTumorSummary(ts)</li>
+				}
+			</ul>
+		</li>
+	}
+</ul>
+}
 @main("Patients") {
 	
 	@for(patient <- patients){
-    	<h1>@patient.getName() Summary</h1>
+    	<h1><b>Patient:</b>@patient.getPatientIdentifier()</h1>
+
+		@if(patient.getPatientSummary() != null) {
+			<h3>PatientSummary:</h3>
+			<ul>
+				<li>DisplayText: @patient.getPatientSummary().getDisplayText()</li>
+				<li>AnnotationType: @patient.getPatientSummary().getAnnotationType()</li>
+				@if(patient.getPatientSummary().getPhenotype() != null) {
+				<li>PatientPhenotype:
+					<ul>
+						<li>SummaryText: @patient.getPatientSummary().getPhenotype().getSummaryText()</li>
+						<Li>AnnotationType: @patient.getPatientSummary().getPhenotype().getAnnotationType()</LI>
+					</ul>
+
+				</li>
+				}
+			</ul>
+
+		}
+
+		@if(patient.getCancerSummary() != null) {
+			@displayCancerSummary(patient.getCancerSummary())
+		}
 		<hr/>
     }
 }
