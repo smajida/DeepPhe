@@ -4,8 +4,6 @@
 
 # Home page
 GET     /                           controllers.Application.index()
-GET     /neo4jdemo                  controllers.Neo4JDemo.demo()
-GET 	/populateDummyData	    controllers.DummyData.populate()
 GET	/cleardb		    controllers.Utils.clear()
 GET /ping	            controllers.Utils.ping()
 GET /patients           controllers.PatientReader.getPatients()
