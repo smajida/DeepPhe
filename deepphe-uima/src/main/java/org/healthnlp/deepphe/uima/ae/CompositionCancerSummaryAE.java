@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.uima.ae;
 import edu.pitt.dbmi.nlp.noble.ontology.*;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
@@ -15,6 +16,7 @@ import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
+
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.ILogicExpression;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
@@ -22,6 +24,7 @@ import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import edu.pitt.dbmi.nlp.noble.ontology.IRestriction;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -72,7 +75,6 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			//System.out.println(report.getSummaryText());
 		}
 		
-
 		PhenotypeResourceFactory.saveMedicalRecord(record, jcas);
 	}
 
@@ -151,6 +153,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			for(String name: summary.getFacts(category).getTypes()){
 				IClass cls = ontology.getClass(name);
 				if(cls != null){
+					int n = 1;
 					for(Element e: report.getReportElements()){
 						URI uri  = FHIRUtils.getConceptURI(e.getCode());
 
@@ -159,6 +162,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 							if(c != null){
 								if(c.equals(cls) || c.hasSuperClass(cls)){
 									Fact fact = FactFactory.createFact(e);
+									addTemporality(fact,e, report.getDate(),n++);
 									addAncestors(fact);
 									summary.addFact(category,fact);
 								}
@@ -171,6 +175,13 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	}
 	
 	
+	private void addTemporality(Fact fact, Element  el, Date dt, int i) {
+		if(dt != null)
+			fact.setRecordedDate(dt);
+		fact.setTemporalOrder(FHIRUtils.createTemporalOrder(el, i));
+		
+	}
+
 	private PatientSummary createPatientSummary(Patient loadPatient) {
 		PatientSummary ps = new PatientSummary();
 		loadTemplate(ps);
@@ -290,7 +301,8 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	 * @return
 	 */
 	private CancerSummary createCancerSummary(Report report, Disease diagnosis){
-		CancerSummary cancer = new CancerSummary();
+		CancerSummary cancer = new CancerSummary(report.getTitle());
+		
 		loadTemplate(cancer);
 		CancerPhenotype phenotype = cancer.getPhenotype();
 		loadTemplate(phenotype);
@@ -346,66 +358,73 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	
 	
 	private TumorSummary createTumorSummary(Report report, Condition diagnosis, CancerSummary cancer){
-		TumorSummary tumor = new TumorSummary();
+		TumorSummary tumor = new TumorSummary(report.getTitle()+createTumorId(diagnosis));
 		loadTemplate(tumor);
 		TumorPhenotype phenotype = tumor.getPhenotype();
 		loadTemplate(phenotype);
 		
-		if(diagnosis != null){
-			// create diagnosis fact
-			Fact dx = FactFactory.createFact((Element)diagnosis);
-			addAncestors(dx);
-			// add body location
-			for(CodeableConcept cc: diagnosis.getBodySite()){
-				tumor.addFact(FHIRConstants.HAS_BODY_SITE,createFact(cc));
-			}
-				
-			//phenotype.addHistologicType(null); // ductal, lobular infered from DX
-			CodeableConcept ht = getHistologicType(diagnosis);
-			if(ht != null){
-				Fact f = createFact(ht);
-				f.addProvenanceFact(dx);
-				phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,f);
-			}
-			// insitu vs invasive 
-			//phenotype.addTumorExtent(null);    // insitu vs invasive
-			CodeableConcept te = getTumorExtent(diagnosis);
-			if(te != null){
-				Fact f = createFact(te);
-				f.addProvenanceFact(dx);
-				phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,f);  
-			}
-			
-			
-			// add treatment (// chemo)
-			loadElementsFromReport(tumor, report);
-			loadElementsFromReport(phenotype, report);
-			
-			
-			
-			// document type RULE
-			// if cancer location is the same as tumor location, then tumor is 'primary'
-			// else tumor type is 'recurrent' if they are not the same
-			// cancer has to be more specific then a tumor, then infer
-			// else can't infer a type
-			//tumor.setTumorType(null);  // primary vs local recurance, distance recurance  infered from rules
-			/*
-			if(cancer != null){
-				URI tumorType = null;
-				if(hasCommonBodySite(cancer.getBodySite(),tumor.getBodySite())){
-					tumorType = FHIRConstants.PRIMARY_TUMOR_URI;
-				}else{
-					tumorType = FHIRConstants.RECURRENT_TUMOR_URI;
-				}
-				if(tumorType != null)
-					tumor.setTumorType(tumor.getTumorType());
-			}
-			*/
+		// create diagnosis fact
+		Fact dx = FactFactory.createFact((Element)diagnosis);
+		addAncestors(dx);
+		// add body location
+		for(CodeableConcept cc: diagnosis.getBodySite()){
+			tumor.addFact(FHIRConstants.HAS_BODY_SITE,createFact(cc));
 		}
+			
+		//phenotype.addHistologicType(null); // ductal, lobular infered from DX
+		CodeableConcept ht = getHistologicType(diagnosis);
+		if(ht != null){
+			Fact f = createFact(ht);
+			f.addProvenanceFact(dx);
+			phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,f);
+		}
+		// insitu vs invasive 
+		//phenotype.addTumorExtent(null);    // insitu vs invasive
+		CodeableConcept te = getTumorExtent(diagnosis);
+		if(te != null){
+			Fact f = createFact(te);
+			f.addProvenanceFact(dx);
+			phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,f);  
+		}
+		
+		
+		// add treatment (// chemo)
+		loadElementsFromReport(tumor, report);
+		loadElementsFromReport(phenotype, report);
+		
+		
+		
+		// document type RULE
+		// if cancer location is the same as tumor location, then tumor is 'primary'
+		// else tumor type is 'recurrent' if they are not the same
+		// cancer has to be more specific then a tumor, then infer
+		// else can't infer a type
+		//tumor.setTumorType(null);  // primary vs local recurance, distance recurance  infered from rules
+		/*
+		if(cancer != null){
+			URI tumorType = null;
+			if(hasCommonBodySite(cancer.getBodySite(),tumor.getBodySite())){
+				tumorType = FHIRConstants.PRIMARY_TUMOR_URI;
+			}else{
+				tumorType = FHIRConstants.RECURRENT_TUMOR_URI;
+			}
+			if(tumorType != null)
+				tumor.setTumorType(tumor.getTumorType());
+		}
+		*/
+		
 
 		return tumor;
 	}
 	
+	private String createTumorId(Condition diagnosis) {
+		StringBuffer b = new StringBuffer();
+		for(CodeableConcept cc: diagnosis.getBodySite()){
+			b.append("-"+FHIRUtils.getConceptName(cc));
+		}
+		return b.toString();
+	}
+
 	// ductal, lobular infered from DX
 	private CodeableConcept getHistologicType(Condition diagnosis) {
 		return getLexicalPartValue(diagnosis,""+FHIRConstants.HISTOLOGIC_TYPE_URI);

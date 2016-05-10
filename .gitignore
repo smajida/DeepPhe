@@ -14,4 +14,5 @@
 /resources/
 /deepphe-uima/testdb
 /deepphe-viz/project/.sbtserver
-/deepphe-viz/bin
+/deepphe.iml
+/deepphe-viz/bin/

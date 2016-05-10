@@ -29,6 +29,10 @@ final public class ReceptorStatusFinderTester {
          "ER and PR are negative, HER2/neu pos."
    };
 
+   static private final String[] MULTIPLE_MENTION_SENTENCES_2 = {
+         "Negative for Er, Pr, and Her-2/neu"
+   };
+
    static private final String[] NO_RECEPTOR_SENTENCES = {
          "Patient stated her position.", "Patient sex is neuter.", "Patient is positive her pulse is rapid.",
          "Patient was rushed to the ER", "The patient rapped PR to the ER for HER2 the neu!",
@@ -207,6 +211,31 @@ final public class ReceptorStatusFinderTester {
             statuses.get( 1 ).getSpannedValue().getValue() == StatusValue.NEGATIVE );
       assertTrue( "Third receptor is Positive in " + sentence,
             statuses.get( 2 ).getSpannedValue().getValue() == StatusValue.POSITIVE );
+   }
+
+   @Test
+   public void testMultipleMention2() {
+      for ( String sentence : MULTIPLE_MENTION_SENTENCES_2 ) {
+         testMultiples2( sentence );
+      }
+   }
+
+   static private void testMultiples2( final String sentence ) {
+      final List<Status> statuses
+            = StatusFinder.getReceptorStatuses2( sentence );
+      assertEquals( "Expect three Hormone Receptors in " + sentence, 3, statuses.size() );
+      assertTrue( "First receptor is Estrogen in " + sentence,
+            statuses.get( 0 ).getSpannedType().getType() == StatusType.ER );
+      assertTrue( "Second receptor is Progesterone in " + sentence,
+            statuses.get( 1 ).getSpannedType().getType() == StatusType.PR );
+      assertTrue( "Third receptor is HER2/neu in " + sentence,
+            statuses.get( 2 ).getSpannedType().getType() == StatusType.HER2 );
+      assertTrue( "First receptor is Negative in " + sentence,
+            statuses.get( 0 ).getSpannedValue().getValue() == StatusValue.NEGATIVE );
+      assertTrue( "Second receptor is Negative in " + sentence,
+            statuses.get( 1 ).getSpannedValue().getValue() == StatusValue.NEGATIVE );
+      assertTrue( "Third receptor is Positive in " + sentence,
+            statuses.get( 2 ).getSpannedValue().getValue() == StatusValue.NEGATIVE );
    }
 
    @Test
