@@ -30,8 +30,43 @@ public class PhenotypeEval {
 			System.err.println("Usage: java PhenotypeEval [-print|-strict] <gold .bsv file> <candidate .bsv file>");
 		}
 	}
-	public enum Confusion {
+	public static enum ConfusionLabel {
 		TP,FP,FN,TN
+	}
+	public static class ConfusionMatrix {
+		public double TP,FP,FN,TN;
+		public void append(ConfusionMatrix c){
+			TP += c.TP;
+			FP += c.FP;
+			FN += c.FN;
+			TN += c.TN;
+		}
+		
+		public double getPrecision(){
+			return TP / (TP+ FP);
+		}
+		public double getRecall(){
+			return  TP / (TP+ FN);
+		}
+		public double getFscore(){
+			double precision = getPrecision();
+			double recall = getRecall();
+			return (2*precision*recall)/(precision + recall);
+		}
+		public double getAccuracy(){
+			return (TP+TN) / (TP+TN+FP+FN);
+		}
+		
+		public static void printHeader(PrintStream out){
+			out.println("Label\tTP\tFP\tFN\tTN\tPrecision\tRecall\tAccuracy\tF1-Score");
+		}
+		public void print(PrintStream out,String label){
+			out.println(label+"\t"+TP+"\t"+FP+"\t"+FN+"\t"+TN+"\t"+
+					String.format("%.4f", getPrecision())+"\t"+
+					String.format("%.4f", getRecall())+"\t"+
+					String.format("%.4f",getAccuracy())+"\t"+
+					String.format("%.4f",getFscore()));
+		}
 	}
 	
 	/**
@@ -43,10 +78,10 @@ public class PhenotypeEval {
 	private static class Record {
 		private static final String I = "\\|";
 		private static final String FS = ";";
-		private static List<String> headers,valueHeaders;
+		private static List<String> headers,valueHeaders,ignoredHeaders;
 		private Map<String,String> content;
 		private String id;
-		private Confusion confusion;
+		private ConfusionLabel confusionLabel;
 		private Record pairedRecord;
 		
 		public static Record loadRecord(String l) {
@@ -103,12 +138,12 @@ public class PhenotypeEval {
 			return hd.startsWith("-");
 		}
 
-		public Confusion getConfusion() {
-			return confusion;
+		public ConfusionLabel getConfusion() {
+			return confusionLabel;
 		}
 
-		public void setConfusion(Confusion confusion) {
-			this.confusion = confusion;
+		public void setConfusion(ConfusionLabel confusionLabel) {
+			this.confusionLabel = confusionLabel;
 		}
 
 		public Record getPairedRecord() {
@@ -135,9 +170,21 @@ public class PhenotypeEval {
 				default:
 					break;
 				}
-				out.println(hd+"\t gold: "+gold+"\t pred: "+pred+"\t score: "+compare(gold,pred));
+				out.println("\t"+hd+"\t gold: "+PhenotypeEval.toString(gold)+"\t pred: "+PhenotypeEval.toString(pred)+"\t score: "+compare(gold,pred));
 			}
-			out.println("Weighted Score: "+getWeightedScore()+"\n");
+			out.println("\tWeighted Score: "+getWeightedScore()+"\n");
+			out.println("\t-----------");
+			for(String hd: getIgnoredHeaders()){
+				List<String> gold = getValues(hd);
+				List<String> pred = Collections.EMPTY_LIST;
+				if(!gold.isEmpty()){
+					if(getPairedRecord() != null )
+						pred = getPairedRecord().getValues(hd);
+					out.println("\t"+hd+"\t gold: "+PhenotypeEval.toString(gold)+"\t pred: "+PhenotypeEval.toString(pred));
+				}
+			}
+			out.println("\t-----------\n");
+			
 		}
 
 		public double getWeightedScore() {
@@ -151,6 +198,33 @@ public class PhenotypeEval {
 			}
 			return 1.0;
 		}
+		
+		
+		public Map<String,ConfusionMatrix> getAttributeConfusionMatricies() {
+			Map<String,ConfusionMatrix> map = new LinkedHashMap<String, PhenotypeEval.ConfusionMatrix>();
+			if(pairedRecord != null){
+				for(String hd: getValueHeaders()){
+					ConfusionMatrix c = new ConfusionMatrix();
+					List<String> val1 = getValues(hd);
+					List<String> val2 = pairedRecord.getValues(hd);
+					for(String v: val1){
+						if(val2.contains(v)){
+							c.TP++;
+						}else{
+							c.FN++;
+						}
+					}
+					for(String v: val2){
+						if(!val1.contains(v)){
+							c.FP++;
+						}
+					}
+					map.put(hd,c);
+				}
+			}
+			return map;
+		}
+		
 		
 		private double compare(List<String> val1, List<String> val2) {
 			// if strict calculation, do 1 or 0 match
@@ -173,7 +247,7 @@ public class PhenotypeEval {
 		public List<String> getValues(String hd) {
 			List<String> vals = new ArrayList<String>();
 			String str = content.get(hd);
-			if(str != null){
+			if(str != null && str.trim().length() > 0){
 				if(str.contains(FS)){
 					for(String s: str.split(FS)){
 						vals.add(s.trim());
@@ -197,6 +271,17 @@ public class PhenotypeEval {
 			}
 			return valueHeaders;
 		}
+		public List<String> getIgnoredHeaders(){
+			if(ignoredHeaders == null){
+				ignoredHeaders = new ArrayList<String>();
+				for(String h : headers){
+					if(isIgnoreField(h)){
+						ignoredHeaders.add(h);
+					}
+				}
+			}
+			return ignoredHeaders;
+		}
 		
 	}
 
@@ -219,8 +304,28 @@ public class PhenotypeEval {
 	}
 
 	
-
-
+	private void append(Map<String,ConfusionMatrix> first, Map<String,ConfusionMatrix> second){
+		for(String hd: second.keySet()){
+			ConfusionMatrix c = first.get(hd);
+			if(c == null){
+				c = new ConfusionMatrix();
+				first.put(hd,c);
+			}
+			c.append(second.get(hd));
+		}
+		
+	}
+	
+	private static String toString(Collection c){
+		if(c == null)
+			return "";
+		String s = c.toString();
+		if(s.startsWith("[") && s.endsWith("]"))
+			return s.substring(1,s.length()-1);
+		return s;
+	}
+	
+	
 	/**
 	 * evaluate phenotype of two BSV files
 	 * @param file1
@@ -234,7 +339,8 @@ public class PhenotypeEval {
 		System.out.println("Gold File:\t"+file1.getAbsolutePath());
 		System.out.println("Candidate File:\t"+file2.getAbsolutePath());
 		System.out.println("");
-		double TP = 0,FP = 0 ,FN = 0;
+		ConfusionMatrix totalConfusion = new ConfusionMatrix();
+		Map<String,ConfusionMatrix> attributeConfusions = new LinkedHashMap<String, PhenotypeEval.ConfusionMatrix>();
 		
 		// iterate over gold standard
 		List<Record> records = new ArrayList<PhenotypeEval.Record>();
@@ -243,13 +349,17 @@ public class PhenotypeEval {
 			Record candidate = candidateAnnotations.get(id);
 			// if we have a candidate with the same (like the same span), we have a TP
 			if(candidate != null){
-				gold.setConfusion(Confusion.TP);
+				gold.setConfusion(ConfusionLabel.TP);
 				gold.setPairedRecord(candidate);
-				TP += gold.getWeightedScore();
+				totalConfusion.TP += gold.getWeightedScore();
+				
+				// calculate stats per attribute
+				append(attributeConfusions,gold.getAttributeConfusionMatricies());
+			
 			// if we don't have a candidate, then we have a FN	
 			}else{
-				gold.setConfusion(Confusion.FN);
-				FN ++;
+				gold.setConfusion(ConfusionLabel.FN);
+				totalConfusion.FN ++;
 			}
 			records.add(gold);	
 		}
@@ -257,10 +367,10 @@ public class PhenotypeEval {
 		for(String id: candidateAnnotations.keySet()){
 			if(!goldAnnotations.containsKey(id)){
 				Record r = candidateAnnotations.get(id);
-				r.setConfusion(Confusion.FP);
+				r.setConfusion(ConfusionLabel.FP);
 				records.add(r);
 				
-				FP ++;
+				totalConfusion.FP ++;
 			}
 		}
 		
@@ -270,30 +380,23 @@ public class PhenotypeEval {
 				r.print(System.out);
 			}
 		}
+			
 		
-		// caluclate overall stats
-		/*
-		 *  precision = tp / (tp + fp)
-		 *  recall = tp / (tp + fn)
-		 *  f-score = (precision * recall) / precision + recall)
-		 */
+		System.out.println("\n\n-----------------------------------------------------------------------------------------");
+		String label = "Container";
+		if(file1.getName().toLowerCase().contains("cancer"))
+			label = "Cancer";
+		else if(file1.getName().toLowerCase().contains("tumor"))
+			label = "Tumor";
+		 
 		
-		double precision = TP / (TP+ FP);
-		double recall = TP / (TP+ FN);
-		double Fscore = (precision*recall)/(precision + recall);
-		
-		
-		System.out.println("\n\n=================================================");
-		System.out.println("Total number of gold annotations: "+goldAnnotations.size());
-		System.out.println("Total number of candidate annotations: "+candidateAnnotations.size());
-		
-		System.out.println("TP:\t"+TP);
-		System.out.println("FP:\t"+FP);
-		System.out.println("FN:\t"+FN);
-		System.out.println("");
-		System.out.println("Precision: "+precision);
-		System.out.println("Recall: "+recall);
-		System.out.println("F-Score: "+Fscore);
+		ConfusionMatrix.printHeader(System.out);
+		totalConfusion.print(System.out,label);
+		for(String attribute: attributeConfusions.keySet()){
+			attributeConfusions.get(attribute).print(System.out,attribute);
+	
+		}
+	
 	}
 
 }
