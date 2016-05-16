@@ -1,9 +1,9 @@
 package org.apache.ctakes.cancer.concept.instance;
 
+import org.apache.ctakes.cancer.location.LocationModifier;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.owl.OwlUriUtil;
 import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
-import org.apache.ctakes.dictionary.lookup2.custom.LocationFactory;
 import org.apache.ctakes.typesystem.type.refsem.BodySide;
 import org.apache.ctakes.typesystem.type.refsem.Event;
 import org.apache.ctakes.typesystem.type.refsem.EventProperties;
@@ -127,7 +127,7 @@ final public class ConceptInstance {
       return false;
    }
 
-   static private final String TEST_QUADRANT_URI = LocationFactory.Quadrant.LOWER_OUTER.getUri();
+   static private final String TEST_QUADRANT_URI = LocationModifier.Quadrant.LOWER_OUTER.getUri();
 
    public String getQuadrantUri() {
       final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().get();

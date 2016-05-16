@@ -23,7 +23,7 @@ import javax.annotation.concurrent.Immutable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.apache.ctakes.dictionary.lookup2.custom.LocationFactory.Quadrant;
+import static org.apache.ctakes.cancer.location.LocationModifier.Quadrant;
 /**
  * Utility class with methods that can be used to get information about Neoplasm Properties.
  * It can be used to:
