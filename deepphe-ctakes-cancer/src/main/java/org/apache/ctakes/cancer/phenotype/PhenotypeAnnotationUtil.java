@@ -20,11 +20,10 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.TOP;
 
 import javax.annotation.concurrent.Immutable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.apache.ctakes.dictionary.lookup2.custom.LocationFactory.Quadrant;
 /**
  * Utility class with methods that can be used to get information about Neoplasm Properties.
  * It can be used to:
@@ -270,6 +269,71 @@ final public class PhenotypeAnnotationUtil {
       return getSecondArguments( relations, locatable );
    }
 
+//   static private final Stream<String> QUADRANT_URIS = Arrays.stream( Quadrant.values() ).map( Quadrant::getUri );
+//   static private Predicate<IdentifiedAnnotation> isQuadrant = a -> {
+//      final Collection<String> aUris = OwlOntologyConceptUtil.getUris( a );
+//      return QUADRANT_URIS.anyMatch( aUris::contains );
+//   };
+
+   static public Collection<IdentifiedAnnotation> getQuadrants( final IdentifiedAnnotation anatomical ) {
+      return getQuadrants( getJcas( anatomical ), anatomical );
+   }
+
+   static public Collection<IdentifiedAnnotation> getQuadrants( final JCas jcas,
+                                                                final IdentifiedAnnotation anatomical ) {
+      if ( jcas == null ) {
+         return Collections.emptyList();
+      }
+      final Collection<LocationOfTextRelation> relations = JCasUtil.select( jcas, LocationOfTextRelation.class );
+      if ( relations == null || relations.isEmpty() ) {
+         return Collections.emptyList();
+      }
+      final Collection<String> quadrantUris = Arrays.stream( Quadrant.values() )
+            .map( Quadrant::getUri )
+            .collect( Collectors.toList() );
+      final Collection<IdentifiedAnnotation> firstArguments = getFirstArguments( relations, anatomical );
+      final Collection<IdentifiedAnnotation> quadrants = new HashSet<>();
+      for ( IdentifiedAnnotation argument : firstArguments ) {
+         final Collection<String> argumentUris = OwlOntologyConceptUtil.getUris( argument );
+         argumentUris.retainAll( quadrantUris );
+         if ( !argumentUris.isEmpty() ) {
+            quadrants.add( argument );
+         }
+      }
+      return quadrants;
+//      return getFirstArguments( relations, anatomical ).stream()
+//            .filter( isQuadrant )
+//            .collect( Collectors.toList() );
+   }
+
+//   static private Predicate<IdentifiedAnnotation> isClockwise = a -> {
+//      return OwlOntologyConceptUtil.getUriBranchStream( OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Clockface_position" )
+//            .anyMatch( OwlOntologyConceptUtil.getUris( a )::contains );
+//   };
+
+   static public Collection<IdentifiedAnnotation> getClockwises( final IdentifiedAnnotation anatomical ) {
+      return getClockwises( getJcas( anatomical ), anatomical );
+   }
+
+   static public Collection<IdentifiedAnnotation> getClockwises( final JCas jcas,
+                                                                 final IdentifiedAnnotation anatomical ) {
+      if ( jcas == null ) {
+         return Collections.emptyList();
+      }
+      final Collection<LocationOfTextRelation> relations = JCasUtil.select( jcas, LocationOfTextRelation.class );
+      if ( relations == null || relations.isEmpty() ) {
+         return Collections.emptyList();
+      }
+      final Collection<IdentifiedAnnotation> firstArguments = getFirstArguments( relations, anatomical );
+      final Collection<IdentifiedAnnotation> clockwises = new HashSet<>();
+      for ( IdentifiedAnnotation argument : firstArguments ) {
+         if ( OwlOntologyConceptUtil.getUris( argument ).contains(
+               OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Clockface_position" ) ) {
+            clockwises.add( argument );
+         }
+      }
+      return clockwises;
+   }
 
 //   static public Collection<String> getNeoplasmPropertyTypes( final JCas jcas, final IdentifiedAnnotation neoplasm ) {
 //      final Collection<NeoplasmRelation> relations = JCasUtil.select( jcas, NeoplasmRelation.class );

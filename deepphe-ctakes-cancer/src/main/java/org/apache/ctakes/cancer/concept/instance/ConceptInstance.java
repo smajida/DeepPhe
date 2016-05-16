@@ -1,8 +1,9 @@
 package org.apache.ctakes.cancer.concept.instance;
 
+import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.owl.OwlUriUtil;
 import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
-import org.apache.ctakes.typesystem.type.refsem.BodyLaterality;
+import org.apache.ctakes.dictionary.lookup2.custom.LocationFactory;
 import org.apache.ctakes.typesystem.type.refsem.BodySide;
 import org.apache.ctakes.typesystem.type.refsem.Event;
 import org.apache.ctakes.typesystem.type.refsem.EventProperties;
@@ -13,6 +14,7 @@ import org.apache.ctakes.typesystem.type.textsem.Modifier;
 import org.apache.log4j.Logger;
 
 import javax.annotation.concurrent.Immutable;
+import java.util.Collection;
 import java.util.stream.Stream;
 
 /**
@@ -125,24 +127,45 @@ final public class ConceptInstance {
       return false;
    }
 
-   public String getLocationLaterality() {
-      return getAnatomicalSites()
-            .map( AnatomicalSiteMention::getBodyLaterality )
-            .map( Modifier::getNormalizedForm )
-            .filter( BodyLaterality.class::isInstance )
-            .map( n -> (BodyLaterality)n )
-            .map( BodyLaterality::getValue )
-            .findFirst().orElse( "" );
+   static private final String TEST_QUADRANT_URI = LocationFactory.Quadrant.LOWER_OUTER.getUri();
+
+   public String getQuadrantUri() {
+      final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().get();
+      if ( firstAnatomical == null ) {
+         return TEST_QUADRANT_URI;
+      }
+      return PhenotypeAnnotationUtil.getQuadrants( firstAnatomical ).stream()
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .findAny()
+            .orElse( TEST_QUADRANT_URI );
    }
 
-   public String getLocationBodySide() {
+   static private final String TEST_CLOCKWISE = OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#4_o_clock_position";
+
+   public String getClockwiseUri() {
+      final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().get();
+      if ( firstAnatomical == null ) {
+         return TEST_CLOCKWISE;
+      }
+      return PhenotypeAnnotationUtil.getQuadrants( firstAnatomical ).stream()
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .findAny()
+            .orElse( TEST_CLOCKWISE );
+
+   }
+
+   static private final String TEST_BODY_SIDE = OwlOntologyConceptUtil.CANCER_OWL + "#Left";
+
+   public String getBodySideUri() {
       return getAnatomicalSites()
             .map( AnatomicalSiteMention::getBodySide )
             .map( Modifier::getNormalizedForm )
             .filter( BodySide.class::isInstance )
             .map( n -> (BodySide)n )
             .map( BodySide::getValue )
-            .findFirst().orElse( "" );
+            .findFirst().orElse( TEST_BODY_SIDE );
    }
 
 
