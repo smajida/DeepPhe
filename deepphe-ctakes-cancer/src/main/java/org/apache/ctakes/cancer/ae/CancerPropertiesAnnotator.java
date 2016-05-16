@@ -1,5 +1,6 @@
 package org.apache.ctakes.cancer.ae;
 
+import org.apache.ctakes.cancer.location.ModifierFinder;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.phenotype.metastasis.MetastasisFinder;
 import org.apache.ctakes.cancer.phenotype.receptor.StatusFinder;
@@ -81,6 +82,7 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
          if ( !metastases.isEmpty() ) {
             // sizes
             SizeFinder.addSizes( jcas, lookupWindow, metastases );
+            ModifierFinder.addLocationModifiers( jcas, lookupWindow );
          }
       }
       LOGGER.info( "Finished processing" );

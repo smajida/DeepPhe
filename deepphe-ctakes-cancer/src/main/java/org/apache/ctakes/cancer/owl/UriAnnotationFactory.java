@@ -102,6 +102,9 @@ final public class UriAnnotationFactory {
       final IClass iClass = OwlOntologyConceptUtil.getIClass( uri );
       if ( iClass == null ) {
          final UmlsConcept umlsConcept = new UmlsConcept( jcas );
+         umlsConcept.setCui( "" );
+         umlsConcept.setTui( "" );
+         umlsConcept.setPreferredText( "" );
          umlsConcept.setCodingScheme( OwlConcept.URI_CODING_SCHEME );
          umlsConcept.setCode( uri );
          return umlsConcept;

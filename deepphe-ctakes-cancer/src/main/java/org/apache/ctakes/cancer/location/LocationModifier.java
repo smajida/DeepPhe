@@ -1,90 +1,78 @@
 package org.apache.ctakes.cancer.location;
 
 
+import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
-import org.apache.ctakes.dictionary.lookup2.concept.Concept;
-import org.apache.log4j.Logger;
+import org.apache.ctakes.dictionary.lookup2.ontology.OwlParserUtil;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author SPF , chip-nlp
  * @version %I%
  * @since 5/16/2016
  */
-public class LocationModifier {
+public interface LocationModifier {
 
-   static private final Logger LOGGER = Logger.getLogger( "LocationModifier" );
+   default String getTitle() {
+      final IClass iClass = OwlOntologyConceptUtil.getIClass( getUri() );
+      if ( iClass == null ) {
+         return null;
+      }
+      return OwlParserUtil.getPreferredText( iClass );
+   }
+
+   String getUri();
+
+   Matcher getMatcher( final CharSequence lookupWindow );
 
 
-   public enum Quadrant {
-      UPPER_INNER( 222596l, "Upper_Inner_Quadrant_of_the_Breast", "upper-inner", "upper inner" ),
-      LOWER_INNER( 222597l, "Lower_Inner_Quadrant_of_the_Breast", "lower-inner", "lower inner" ),
-      UPPER_OUTER( 222598l, "Upper_Outer_Quadrant_of_the_Breast", "upper-outer", "upper outer" ),
-      LOWER_OUTER( 222599l, "Lower_Outer_Quadrant_of_the_Breast", "lower-outer", "lower outer" );
-      private final long __cui;
+   enum Quadrant implements LocationModifier {
+      UPPER_INNER( "Upper_Inner_Quadrant_of_the_Breast", "upper ?-? ?inner( quadrant)?" ),
+      LOWER_INNER( "Lower_Inner_Quadrant_of_the_Breast", "lower ?-? ?inner( quadrant)?" ),
+      UPPER_OUTER( "Upper_Outer_Quadrant_of_the_Breast", "upper ?-? ?outer( quadrant)?" ),
+      LOWER_OUTER( "Lower_Outer_Quadrant_of_the_Breast", "lower ?-? ?outer( quadrant)?" );
       private final String __uri;
-      private final String[] __synonyms;
+      private final Pattern __pattern;
 
-      private Quadrant( final long cui, final String uri, final String... synonyms ) {
-         __cui = cui;
+      Quadrant( final String uri, final String regex ) {
          __uri = uri;
-         __synonyms = synonyms;
+         __pattern = Pattern.compile( regex, Pattern.CASE_INSENSITIVE );
       }
 
-      private long getCui() {
-         return __cui;
-      }
-
-      // tui T082 is "Spatial Concept" and might be better than T033 "Finding"
-      private String getTui() {
-         return "T082";
-      }
 
       public String getUri() {
          return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + __uri;
       }
 
-      private String[] getSynonyms() {
-         return __synonyms;
+      public Matcher getMatcher( final CharSequence lookupWindow ) {
+         return __pattern.matcher( lookupWindow );
       }
    }
 
-   private enum Laterality {
 
+   enum BodySide implements LocationModifier {
+      LEFT( "Left", "((to the )?left( side)?)|lt|levo" ),
+      RIGHT( "Right", "((to the )?right( side)?)|rt|dextro" ),
+      BILATERAL( "Bilateral", "bilateral|(both sides)|(right and left)|(left and right)" );
+
+      private final String __uri;
+      private final Pattern __pattern;
+
+      BodySide( final String uri, final String regex ) {
+         __uri = uri;
+         __pattern = Pattern.compile( regex, Pattern.CASE_INSENSITIVE );
+      }
+
+      public String getUri() {
+         return OwlOntologyConceptUtil.CANCER_OWL + "#" + __uri;
+      }
+
+      public Matcher getMatcher( final CharSequence lookupWindow ) {
+         return __pattern.matcher( lookupWindow );
+      }
    }
 
-
-   /**
-    * Create a collection of {@link org.apache.ctakes.dictionary.lookup2.dictionary.RareWordTermMapCreator.CuiTerm} Objects
-    * by parsing all of the bsv files in the same directory as the owl file.
-    *
-    * @return collection of all valid terms read from bsv files
-    */
-   static public Map<Long, Concept> addLocationConcepts() {
-//      File owlDir;
-//      try {
-//         final File owlParent = FileLocator.locateFile( owlFilePath );
-//         owlDir = owlParent.getParentFile();
-//      } catch ( IOException ioE ) {
-//         return Collections.emptyMap();
-//      }
-//      final FilenameFilter bsvFilter = ( dir, name ) -> name.toLowerCase().endsWith( ".bsv" );
-//      final File[] bsvFiles = owlDir.listFiles( bsvFilter );
-//      if ( bsvFiles == null || bsvFiles.length == 0 ) {
-      return Collections.emptyMap();
-//      }
-//      final Map<Long, Concept> bsvConcepts = new HashMap<>();
-//      LOGGER.info( "Loading Concept BSV Files in " + owlDir.getPath() + ":" );
-//      try ( DotLogger dotter = new DotLogger() ) {
-//         for ( File bsvFile : bsvFiles ) {
-//            bsvConcepts.putAll( parseConceptFile( bsvFile.getPath() ) );
-//         }
-//      } catch ( IOException ioE ) {
-//         LOGGER.error( "Could not load Concept BSV Files in " + owlDir.getPath() );
-//      }
-//      return bsvConcepts;
-   }
 
 }
