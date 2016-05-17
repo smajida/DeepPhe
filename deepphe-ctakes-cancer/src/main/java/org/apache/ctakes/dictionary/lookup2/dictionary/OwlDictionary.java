@@ -92,7 +92,7 @@ public class OwlDictionary implements RareWordDictionary {
       if ( tui == null ) {
          return Collections.emptyList();
       }
-      if ( OwlParserUtil.isPhenotypeUri( OwlParserUtil.getUriString( iClass ) ) ) {
+      if ( OwlParserUtil.getInstance().isUnwantedUri( OwlParserUtil.getUriString( iClass ) ) ) {
          return Collections.emptyList();
       }
       final String[] synonyms = concept.getSynonyms();
@@ -125,6 +125,10 @@ public class OwlDictionary implements RareWordDictionary {
          final Collection<CuiTerm> cuiTerms = new ArrayList<>();
          for ( String rootUri : rootUris ) {
             final IClass root = ontology.getClass( rootUri.trim() );
+            if ( root == null ) {
+               LOGGER.error( "No class exists for root " + rootUri );
+               continue;
+            }
             for ( IClass childClass : root.getSubClasses() ) {
                cuiTerms.addAll( createCuiTerms( childClass ) );
             }

@@ -1,13 +1,6 @@
 package org.healthnlp.deepphe.uima.fhir;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.util.List;
-
-import org.apache.ctakes.cancer.ae.XMIWriter;
+import org.apache.ctakes.core.ae.XMIWriter;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
@@ -26,7 +19,11 @@ import org.healthnlp.deepphe.uima.types.Observation;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory.*;
+import java.io.File;
+import java.util.List;
+
+import static org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory.getAnnotations;
+import static org.junit.Assert.*;
 
 public class DeepPheTypesystemTest {
 

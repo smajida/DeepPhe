@@ -85,7 +85,7 @@ public class OwlConceptFactory implements ConceptFactory {
       if ( tui == null ) {
          return Collections.emptyMap();
       }
-      if ( OwlParserUtil.isPhenotypeUri( OwlParserUtil.getUriString( iClass ) ) ) {
+      if ( OwlParserUtil.getInstance().isUnwantedUri( OwlParserUtil.getUriString( iClass ) ) ) {
          return Collections.emptyMap();
       }
       final String[] synonyms = concept.getSynonyms();
@@ -122,6 +122,10 @@ public class OwlConceptFactory implements ConceptFactory {
             final Map<Long, Concept> conceptMap = new HashMap<>();
             for ( String rootUri : rootUris ) {
                final IClass root = ontology.getClass( rootUri.trim() );
+               if ( root == null ) {
+                  LOGGER.error( "No class exists for root " + rootUri );
+                  continue;
+               }
                for ( IClass childClass : root.getSubClasses() ) {
                   conceptMap.putAll( createOwlConcepts( childClass ) );
                }

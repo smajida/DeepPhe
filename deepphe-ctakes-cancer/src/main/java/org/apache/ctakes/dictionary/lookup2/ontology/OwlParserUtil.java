@@ -4,9 +4,6 @@ package org.apache.ctakes.dictionary.lookup2.ontology;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 import edu.pitt.dbmi.nlp.noble.terminology.SemanticType;
-import org.apache.ctakes.cancer.phenotype.receptor.StatusPropertyUtil;
-import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
-import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.log4j.Logger;
 
@@ -19,14 +16,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Utility class used to obtain information relevant to a ctakes UmlsConcept from an owl iClass or Concept
+ * Singleton used to obtain information relevant to a ctakes UmlsConcept from an owl iClass or Concept
  * @author SPF , chip-nlp
  * @version %I%
  * @since 9/23/2015
  */
-final public class OwlParserUtil {
+public enum OwlParserUtil {
+   INSTANCE;
 
-   private OwlParserUtil() {
+   static public OwlParserUtil getInstance() {
+      return INSTANCE;
    }
 
    static private final Logger LOGGER = Logger.getLogger( "OwlParserUtil" );
@@ -37,7 +36,28 @@ final public class OwlParserUtil {
    static private final Pattern ICD9CM_PATTERN = Pattern.compile( "(\\d+) \\[ICD9CM\\]" );
    static private final Pattern ICD10CM_PATTERN = Pattern.compile( "(\\d+) \\[ICD10CM\\]" );
 
-   static private final Collection<String> PHENOTYPE_URIS = new HashSet<>();
+   private final Collection<String> _unwantedUriRoots = new HashSet<>();
+   private final Collection<String> _unwantedUris = new HashSet<>();
+
+   synchronized public void addUnwantedUriRoot( final String unwantedUriRoot ) {
+      _unwantedUriRoots.add( unwantedUriRoot );
+   }
+
+   synchronized public void addUnwantedUris( final Collection<String> unwantedUris ) {
+      _unwantedUris.addAll( unwantedUris );
+   }
+
+   synchronized public void updateUnwantedUris() {
+      if ( !_unwantedUriRoots.isEmpty() ) {
+         _unwantedUriRoots.stream().flatMap( OwlOntologyConceptUtil::getUriBranchStream ).forEach( _unwantedUris::add );
+         _unwantedUriRoots.clear();
+      }
+   }
+
+   public boolean isUnwantedUri( final String uri ) {
+      return _unwantedUris.contains( uri );
+   }
+
 
 //   static public Long getCuiCode( final Concept concept ){
 //      final Collection<Object> allCodes = concept.getCodes().values();
@@ -123,14 +143,6 @@ final public class OwlParserUtil {
       return iClass.getURI();
    }
 
-   static public boolean isPhenotypeUri( final String uri ) {
-      if ( PHENOTYPE_URIS.isEmpty() ) {
-         OwlOntologyConceptUtil.getUriBranchStream( StagePropertyUtil.getParentUri() ).forEach( PHENOTYPE_URIS::add );
-         OwlOntologyConceptUtil.getUriBranchStream( TnmPropertyUtil.getParentUri() ).forEach( PHENOTYPE_URIS::add );
-         OwlOntologyConceptUtil.getUriBranchStream( StatusPropertyUtil.getParentUri() ).forEach( PHENOTYPE_URIS::add );
-      }
-      return PHENOTYPE_URIS.contains( uri );
-   }
 
 
    /**

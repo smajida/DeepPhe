@@ -55,6 +55,7 @@ public enum OwlConnectionFactory {
       ONTOLOGIES.put( fullOwlPath, ontology );
       if ( ONTOLOGIES.size() == 1 ) {
          _defaultOntologyPath = fullOwlPath;
+         OwlParserUtil.getInstance().updateUnwantedUris();
       }
       return ontology;
    }

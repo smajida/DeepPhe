@@ -2,12 +2,12 @@ package org.apache.ctakes.example.pipeline;
 
 
 import org.apache.ctakes.assertion.medfacts.cleartk.UncertaintyCleartkAnalysisEngine;
-import org.apache.ctakes.cancer.ae.StartEndProgressLogger;
 import org.apache.ctakes.chunker.ae.Chunker;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.contexttokenizer.ae.ContextDependentTokenizerAnnotator;
 import org.apache.ctakes.core.ae.SentenceDetectorAnnotator;
 import org.apache.ctakes.core.ae.SimpleSegmentAnnotator;
+import org.apache.ctakes.core.ae.StartEndProgressLogger;
 import org.apache.ctakes.core.ae.TokenizerAnnotatorPTB;
 import org.apache.ctakes.core.cc.FileTreeXmiWriter;
 import org.apache.ctakes.core.cr.FileTreeReader;

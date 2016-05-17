@@ -1,4 +1,4 @@
-package org.apache.ctakes.core.cc;
+package org.apache.ctakes.cancer.cc;
 
 
 import org.apache.ctakes.cancer.concept.instance.ConceptInstance;
