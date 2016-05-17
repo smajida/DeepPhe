@@ -1,9 +1,9 @@
 package org.healthnlp.deepphe.uima.fhir;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
-import org.apache.ctakes.cancer.owl.UriAnnotationFactory;
 import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
+import org.apache.ctakes.core.ontology.UriAnnotationFactory;
 import org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory;
 import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.relation.LocationOfTextRelation;

@@ -3,7 +3,7 @@ package org.apache.ctakes.core.cc;
 
 import org.apache.ctakes.cancer.concept.instance.ConceptInstance;
 import org.apache.ctakes.cancer.concept.instance.ConceptInstanceUtil;
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
 import org.apache.ctakes.cancer.phenotype.receptor.StatusPropertyUtil;
 import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
@@ -98,12 +98,12 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       try {
          writePhenotypeBsv( jcas, getOutputDir( "CancerStage" ), fileName, StagePropertyUtil.getParentUri() );
          writePhenotypeBsv( jcas, getOutputDir( "ReceptorStatus" ), fileName, StatusPropertyUtil.getParentUri(),
-               OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Triple_Negative_Breast_Carcinoma" );
+               OwlConstants.BREAST_CANCER_OWL + "#Triple_Negative_Breast_Carcinoma" );
          writeTnmBsv( jcas, getOutputDir( "TnmClassification" ), fileName, TnmPropertyUtil.getParentUri() );
          writeDisorderBsv( jcas, getOutputDir( "Disorder" ), fileName );
          writeMultiLocationBsv( jcas, getOutputDir( "Metastasis" ), fileName,
-               OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Metastasis",
-               OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Metastatic_Neoplasm" );
+               OwlConstants.BREAST_CANCER_OWL + "#Metastasis",
+               OwlConstants.BREAST_CANCER_OWL + "#Metastatic_Neoplasm" );
       } catch ( IOException ioE ) {
          throw new AnalysisEngineProcessException( ioE );
       }
@@ -142,7 +142,7 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
          throws IOException {
       final String[] uris2 = { StagePropertyUtil.getParentUri(), StatusPropertyUtil.getParentUri(),
                                StatusPropertyUtil.getParentUri(),
-                               OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Triple_Negative_Breast_Carcinoma",
+                               OwlConstants.BREAST_CANCER_OWL + "#Triple_Negative_Breast_Carcinoma",
                                TnmPropertyUtil.getParentUri() };
       final Collection<ConceptInstance> conceptInstances2 = getConceptInstanceStream( jCas, uris2 )
             .map( ci -> ConceptInstanceUtil.getPhenotypeNeoplasms( jCas, ci ) )
@@ -216,6 +216,9 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
                writer.write( "\n" );
             } else {
                for ( IdentifiedAnnotation location : locations ) {
+                  LOGGER.info( "Quadrant " + conceptInstance.getQuadrantUri() );
+                  LOGGER.info( "Body Side " + conceptInstance.getBodySideUri() );
+                  LOGGER.info( "Clockwise " + conceptInstance.getClockwiseUri() );
                   // DocName| standard line
                   writer.write( sourceFilename + "|" );
                   writer.write( createMultiLocationLine( conceptInstance, location ) );

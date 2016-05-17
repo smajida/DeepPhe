@@ -1,16 +1,15 @@
 package org.apache.ctakes.cancer.concept.instance;
 
 import org.apache.ctakes.cancer.location.LocationModifier;
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.owl.OwlUriUtil;
 import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
-import org.apache.ctakes.typesystem.type.refsem.BodySide;
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.refsem.Event;
 import org.apache.ctakes.typesystem.type.refsem.EventProperties;
 import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
 import org.apache.ctakes.typesystem.type.textsem.EventMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
-import org.apache.ctakes.typesystem.type.textsem.Modifier;
 import org.apache.log4j.Logger;
 
 import javax.annotation.concurrent.Immutable;
@@ -141,7 +140,21 @@ final public class ConceptInstance {
             .orElse( TEST_QUADRANT_URI );
    }
 
-   static private final String TEST_CLOCKWISE = OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#4_o_clock_position";
+   static private final String TEST_BODY_SIDE = OwlConstants.CANCER_OWL + "#Left";
+
+   public String getBodySideUri() {
+      final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().get();
+      if ( firstAnatomical == null ) {
+         return TEST_BODY_SIDE;
+      }
+      return PhenotypeAnnotationUtil.getBodySides( firstAnatomical ).stream()
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .findAny()
+            .orElse( TEST_BODY_SIDE );
+   }
+
+   static private final String TEST_CLOCKWISE = OwlConstants.BREAST_CANCER_OWL + "#4_o_clock_position";
 
    public String getClockwiseUri() {
       final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().get();
@@ -154,18 +167,6 @@ final public class ConceptInstance {
             .findAny()
             .orElse( TEST_CLOCKWISE );
 
-   }
-
-   static private final String TEST_BODY_SIDE = OwlOntologyConceptUtil.CANCER_OWL + "#Left";
-
-   public String getBodySideUri() {
-      return getAnatomicalSites()
-            .map( AnatomicalSiteMention::getBodySide )
-            .map( Modifier::getNormalizedForm )
-            .filter( BodySide.class::isInstance )
-            .map( n -> (BodySide)n )
-            .map( BodySide::getValue )
-            .findFirst().orElse( TEST_BODY_SIDE );
    }
 
 

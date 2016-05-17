@@ -1,8 +1,9 @@
 package org.apache.ctakes.cancer.location;
 
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;
@@ -78,7 +79,7 @@ public class ModifierFinder {
 
    static List<IdentifiedAnnotation> getClockwises( final JCas jCas, final int startIndex, final int endIndex ) {
       return OwlOntologyConceptUtil.getAnnotationStreamByUriBranch( jCas,
-            OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Clockface_position" )
+            OwlConstants.BREAST_CANCER_OWL + "#Clockface_position" )
             .filter( a -> a.getBegin() >= startIndex )
             .filter( a -> a.getEnd() <= endIndex )
             .collect( Collectors.toList() );

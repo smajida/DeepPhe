@@ -2,7 +2,8 @@ package org.apache.ctakes.cancer.location;
 
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.dictionary.lookup2.ontology.OwlParserUtil;
 
 import java.util.regex.Matcher;
@@ -43,7 +44,7 @@ public interface LocationModifier {
 
 
       public String getUri() {
-         return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + __uri;
+         return OwlConstants.BREAST_CANCER_OWL + "#" + __uri;
       }
 
       public Matcher getMatcher( final CharSequence lookupWindow ) {
@@ -66,7 +67,7 @@ public interface LocationModifier {
       }
 
       public String getUri() {
-         return OwlOntologyConceptUtil.CANCER_OWL + "#" + __uri;
+         return OwlConstants.CANCER_OWL + "#" + __uri;
       }
 
       public Matcher getMatcher( final CharSequence lookupWindow ) {

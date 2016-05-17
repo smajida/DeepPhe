@@ -13,7 +13,7 @@ import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.uima.drools.Summarizer;
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 
 
 // There is no Breast Stage 0

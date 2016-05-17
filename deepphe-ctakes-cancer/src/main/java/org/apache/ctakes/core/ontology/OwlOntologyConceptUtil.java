@@ -1,4 +1,4 @@
-package org.apache.ctakes.cancer.owl;
+package org.apache.ctakes.core.ontology;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
@@ -36,20 +36,6 @@ final public class OwlOntologyConceptUtil {
    private OwlOntologyConceptUtil() {
    }
 
-
-   static public final String CONTEXT_OWL = "http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl";
-   static public final String SCHEMA_OWL = "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl";
-   static public final String CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl";
-   static public final String BREAST_CANCER_OWL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl";
-
-   static public final String DISEASE_DISORDER_URI = SCHEMA_OWL + "#DiseaseDisorder";
-   static public final String SIGN_SYMPTOM_URI = SCHEMA_OWL + "#SignSymptom";
-   static public final String PROCEDURE_URI = SCHEMA_OWL + "#Procedure";
-   static public final String MEDICATION_URI = SCHEMA_OWL + "#MedicationStatement";
-
-   static public final String UNKNOWN_URI = SCHEMA_OWL + "#" + OwlConnectionFactory.ROOT_ELEMENT_NAME;
-
-//   static private final Function<String, String> asSelf = self -> self;
 
    static private final BinaryOperator<Collection<IdentifiedAnnotation>> mergeSets
          = ( set1, set2 ) -> {

@@ -1,6 +1,6 @@
 package org.apache.ctakes.cancer.phenotype.tnm;
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,7 +61,7 @@ final class Nvalue implements TnmValue {
     */
    @Override
    public String getUri() {
-      return OwlOntologyConceptUtil.CANCER_OWL + "#" + _uri;
+      return OwlConstants.CANCER_OWL + "#" + _uri;
    }
 
    /**

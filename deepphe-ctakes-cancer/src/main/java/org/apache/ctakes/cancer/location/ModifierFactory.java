@@ -1,7 +1,7 @@
 package org.apache.ctakes.cancer.location;
 
 
-import org.apache.ctakes.cancer.owl.UriAnnotationFactory;
+import org.apache.ctakes.core.ontology.UriAnnotationFactory;
 import org.apache.ctakes.typesystem.type.constants.CONST;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;

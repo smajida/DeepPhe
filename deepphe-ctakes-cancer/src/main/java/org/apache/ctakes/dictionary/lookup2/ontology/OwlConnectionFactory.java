@@ -27,9 +27,6 @@ public enum OwlConnectionFactory {
       return INSTANCE;
    }
 
-   static public final String ROOT_ELEMENT_NAME = "Annotation";
-   static public final String MODIFIER_ELEMENT_NAME = "Modifier";
-
    static private final Logger LOGGER = Logger.getLogger( "OwlConnectionFactory" );
 
 

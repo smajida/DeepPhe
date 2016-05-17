@@ -20,8 +20,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.ctakes.dictionary.lookup2.dictionary.RareWordTermMapCreator.CuiTerm;
-import static org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory.MODIFIER_ELEMENT_NAME;
-import static org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory.ROOT_ELEMENT_NAME;
 
 /**
  * @author SPF , chip-nlp
@@ -33,15 +31,19 @@ public class OwlDictionary implements RareWordDictionary {
    static private final Logger LOGGER = Logger.getLogger( "OwlDictionary" );
 
    static private final String OWL_FILE_PATH = "owlPath";
+   static private final String OWL_ROOT_URIS = "owlRootURIs";
 
    private RareWordDictionary _delegateDictionary;
 
    public OwlDictionary( final String name, final UimaContext uimaContext, final Properties properties ) {
-      this( name, properties.getProperty( OWL_FILE_PATH ) );
+      this( name, properties.getProperty( OWL_FILE_PATH ),
+            properties.getProperty( OWL_ROOT_URIS ) == null
+            ? new String[ 0 ]
+            : properties.getProperty( OWL_ROOT_URIS ).split( "," ) );
    }
 
 
-   public OwlDictionary( final String name, final String owlFilePath ) {
+   public OwlDictionary( final String name, final String owlFilePath, final String... rootUris ) {
       try {
          OwlConnectionFactory.getInstance().getOntology( owlFilePath );
       } catch ( IOntologyException | FileNotFoundException ontE ) {
@@ -49,7 +51,7 @@ public class OwlDictionary implements RareWordDictionary {
       }
       // Get the bsv terms first just in case there are crazy overlaps
       final Collection<CuiTerm> cuiTerms = BsvParserUtil.parseCuiTermFiles( owlFilePath );
-      cuiTerms.addAll( parseOwlFile( owlFilePath ) );
+      cuiTerms.addAll( parseOwlFile( owlFilePath, rootUris ) );
       final CollectionMap<String, RareWordTerm, ? extends Collection<RareWordTerm>> rareWordTermMap
             = RareWordTermMapCreator.createRareWordTermMap( cuiTerms );
       _delegateDictionary = new MemRareWordDictionary( name, rareWordTermMap );
@@ -113,17 +115,19 @@ public class OwlDictionary implements RareWordDictionary {
     * @param owlFilePath path to file containing ontology owl
     * @return collection of all valid terms read from the owl file
     */
-   static private Collection<CuiTerm> parseOwlFile( final String owlFilePath ) {
+   static private Collection<CuiTerm> parseOwlFile( final String owlFilePath, final String... rootUris ) {
+      if ( rootUris.length == 0 ) {
+         LOGGER.warn( "No root URIs provided, no owl terms created" );
+         return Collections.emptyList();
+      }
       try {
          final IOntology ontology = OwlConnectionFactory.getInstance().getOntology( owlFilePath );
          final Collection<CuiTerm> cuiTerms = new ArrayList<>();
-         final IClass root = ontology.getClass( ROOT_ELEMENT_NAME );
-         for ( IClass childClass : root.getSubClasses() ) {
-            cuiTerms.addAll( createCuiTerms( childClass ) );
-         }
-         final IClass root2 = ontology.getClass( MODIFIER_ELEMENT_NAME );
-         for ( IClass childClass : root2.getSubClasses() ) {
-            cuiTerms.addAll( createCuiTerms( childClass ) );
+         for ( String rootUri : rootUris ) {
+            final IClass root = ontology.getClass( rootUri.trim() );
+            for ( IClass childClass : root.getSubClasses() ) {
+               cuiTerms.addAll( createCuiTerms( childClass ) );
+            }
          }
          return cuiTerms;
       } catch ( IOntologyException | FileNotFoundException ontE ) {

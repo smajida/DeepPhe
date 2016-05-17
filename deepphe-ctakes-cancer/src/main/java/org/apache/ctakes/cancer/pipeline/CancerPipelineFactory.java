@@ -46,7 +46,6 @@ final public class CancerPipelineFactory {
          = "VB,VBD,VBG,VBN,VBP,VBZ,CC,CD,DT,EX,LS,MD,PDT,POS,PP,PP$,PRP,PRP$,RP,TO,WDT,WP,WPS,WRB";
    static private final String LOOKUP_CONFIG_DESC
          = "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml";
-//   = "C:/Spiffy/prj_darth_phenome/dev/github3/DeepPhe/resources/org/apache/ctakes/dictionary/lookup/fast/nci_proc.xml";
 
 
    private CancerPipelineFactory() {

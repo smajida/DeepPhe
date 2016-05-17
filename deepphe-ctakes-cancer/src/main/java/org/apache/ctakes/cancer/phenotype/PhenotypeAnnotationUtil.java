@@ -1,13 +1,14 @@
 package org.apache.ctakes.cancer.phenotype;
 
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.phenotype.receptor.StatusPropertyUtil;
 import org.apache.ctakes.cancer.phenotype.size.SizePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmType;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.relation.BinaryTextRelation;
 import org.apache.ctakes.typesystem.type.relation.DegreeOfTextRelation;
 import org.apache.ctakes.typesystem.type.relation.IndicatesTextRelation;
@@ -20,10 +21,16 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.TOP;
 
 import javax.annotation.concurrent.Immutable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static org.apache.ctakes.cancer.location.LocationModifier.BodySide;
 import static org.apache.ctakes.cancer.location.LocationModifier.Quadrant;
+
 /**
  * Utility class with methods that can be used to get information about Neoplasm Properties.
  * It can be used to:
@@ -269,11 +276,6 @@ final public class PhenotypeAnnotationUtil {
       return getSecondArguments( relations, locatable );
    }
 
-//   static private final Stream<String> QUADRANT_URIS = Arrays.stream( Quadrant.values() ).map( Quadrant::getUri );
-//   static private Predicate<IdentifiedAnnotation> isQuadrant = a -> {
-//      final Collection<String> aUris = OwlOntologyConceptUtil.getUris( a );
-//      return QUADRANT_URIS.anyMatch( aUris::contains );
-//   };
 
    static public Collection<IdentifiedAnnotation> getQuadrants( final IdentifiedAnnotation anatomical ) {
       return getQuadrants( getJcas( anatomical ), anatomical );
@@ -289,27 +291,36 @@ final public class PhenotypeAnnotationUtil {
          return Collections.emptyList();
       }
       final Collection<String> quadrantUris = Arrays.stream( Quadrant.values() )
-            .map( Quadrant::getUri )
+            .map( Quadrant::getUri ).collect( Collectors.toList() );
+      final Predicate<IdentifiedAnnotation> isQuadrant
+            = a -> OwlOntologyConceptUtil.getUris( a ).stream().anyMatch( quadrantUris::contains );
+      return getFirstArguments( relations, anatomical ).stream()
+            .filter( isQuadrant )
             .collect( Collectors.toList() );
-      final Collection<IdentifiedAnnotation> firstArguments = getFirstArguments( relations, anatomical );
-      final Collection<IdentifiedAnnotation> quadrants = new HashSet<>();
-      for ( IdentifiedAnnotation argument : firstArguments ) {
-         final Collection<String> argumentUris = OwlOntologyConceptUtil.getUris( argument );
-         argumentUris.retainAll( quadrantUris );
-         if ( !argumentUris.isEmpty() ) {
-            quadrants.add( argument );
-         }
-      }
-      return quadrants;
-//      return getFirstArguments( relations, anatomical ).stream()
-//            .filter( isQuadrant )
-//            .collect( Collectors.toList() );
    }
 
-//   static private Predicate<IdentifiedAnnotation> isClockwise = a -> {
-//      return OwlOntologyConceptUtil.getUriBranchStream( OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Clockface_position" )
-//            .anyMatch( OwlOntologyConceptUtil.getUris( a )::contains );
-//   };
+   static public Collection<IdentifiedAnnotation> getBodySides( final IdentifiedAnnotation anatomical ) {
+      return getBodySides( getJcas( anatomical ), anatomical );
+   }
+
+   static public Collection<IdentifiedAnnotation> getBodySides( final JCas jcas,
+                                                                final IdentifiedAnnotation anatomical ) {
+      if ( jcas == null ) {
+         return Collections.emptyList();
+      }
+      final Collection<LocationOfTextRelation> relations = JCasUtil.select( jcas, LocationOfTextRelation.class );
+      if ( relations == null || relations.isEmpty() ) {
+         return Collections.emptyList();
+      }
+      final Collection<String> bodySideUris = Arrays.stream( BodySide.values() )
+            .map( BodySide::getUri ).collect( Collectors.toList() );
+      final Predicate<IdentifiedAnnotation> isBodySide
+            = a -> OwlOntologyConceptUtil.getUris( a ).stream().anyMatch( bodySideUris::contains );
+      return getFirstArguments( relations, anatomical ).stream()
+            .filter( isBodySide )
+            .collect( Collectors.toList() );
+   }
+
 
    static public Collection<IdentifiedAnnotation> getClockwises( final IdentifiedAnnotation anatomical ) {
       return getClockwises( getJcas( anatomical ), anatomical );
@@ -324,15 +335,14 @@ final public class PhenotypeAnnotationUtil {
       if ( relations == null || relations.isEmpty() ) {
          return Collections.emptyList();
       }
-      final Collection<IdentifiedAnnotation> firstArguments = getFirstArguments( relations, anatomical );
-      final Collection<IdentifiedAnnotation> clockwises = new HashSet<>();
-      for ( IdentifiedAnnotation argument : firstArguments ) {
-         if ( OwlOntologyConceptUtil.getUris( argument ).contains(
-               OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#Clockface_position" ) ) {
-            clockwises.add( argument );
-         }
-      }
-      return clockwises;
+      final Collection<String> clockUris
+            = OwlOntologyConceptUtil.getUriBranchStream( OwlConstants.BREAST_CANCER_OWL + "#Clockface_position" )
+            .collect( Collectors.toList() );
+      final Predicate<IdentifiedAnnotation> isClockwise
+            = a -> OwlOntologyConceptUtil.getUris( a ).stream().anyMatch( clockUris::contains );
+      return getFirstArguments( relations, anatomical ).stream()
+            .filter( isClockwise )
+            .collect( Collectors.toList() );
    }
 
 //   static public Collection<String> getNeoplasmPropertyTypes( final JCas jcas, final IdentifiedAnnotation neoplasm ) {

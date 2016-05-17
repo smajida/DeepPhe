@@ -17,9 +17,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
-import static org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory.MODIFIER_ELEMENT_NAME;
-import static org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory.ROOT_ELEMENT_NAME;
-
 /**
  * @author SPF , chip-nlp
  * @version %I%
@@ -30,14 +27,18 @@ public class OwlConceptFactory implements ConceptFactory {
    static private final Logger LOGGER = Logger.getLogger( "OwlConceptFactory" );
 
    static private final String OWL_FILE_PATH = "owlPath";
+   static private final String OWL_ROOT_URIS = "owlRootURIs";
 
    private final ConceptFactory _delegateFactory;
 
    public OwlConceptFactory( final String name, final UimaContext uimaContext, final Properties properties ) {
-      this( name, properties.getProperty( OWL_FILE_PATH ) );
+      this( name, properties.getProperty( OWL_FILE_PATH ),
+            properties.getProperty( OWL_ROOT_URIS ) == null
+            ? new String[ 0 ]
+            : properties.getProperty( OWL_ROOT_URIS ).split( "," ) );
    }
 
-   public OwlConceptFactory( final String name, final String owlFilePath ) {
+   public OwlConceptFactory( final String name, final String owlFilePath, final String... rootUris ) {
       try {
          OwlConnectionFactory.getInstance().getOntology( owlFilePath );
       } catch ( IOntologyException | FileNotFoundException ontE ) {
@@ -45,7 +46,7 @@ public class OwlConceptFactory implements ConceptFactory {
       }
       // Get the bsv terms first just in case there are crazy overlaps
       final Map<Long, Concept> conceptMap = BsvParserUtil.parseConceptFiles( owlFilePath );
-      conceptMap.putAll( parseOwlFile( owlFilePath ) );
+      conceptMap.putAll( parseOwlFile( owlFilePath, rootUris ) );
       _delegateFactory = new MemConceptFactory( name, conceptMap );
    }
 
@@ -109,19 +110,21 @@ public class OwlConceptFactory implements ConceptFactory {
     * @param owlFilePath path to file containing ontology owl
     * @return collection of all valid terms read from the bsv file
     */
-   static private Map<Long, Concept> parseOwlFile( final String owlFilePath ) {
+   static private Map<Long, Concept> parseOwlFile( final String owlFilePath, final String... rootUris ) {
+      if ( rootUris.length == 0 ) {
+         LOGGER.warn( "No root URIs provided, no owl concepts created" );
+         return Collections.emptyMap();
+      }
       try {
          final IOntology ontology = OwlConnectionFactory.getInstance().getOntology( owlFilePath );
          LOGGER.info( "Creating Concepts from Ontology Owl:" );
          try ( DotLogger dotter = new DotLogger() ) {
             final Map<Long, Concept> conceptMap = new HashMap<>();
-            final IClass root = ontology.getClass( ROOT_ELEMENT_NAME );
-            for ( IClass childClass : root.getSubClasses() ) {
-               conceptMap.putAll( createOwlConcepts( childClass ) );
-            }
-            final IClass root2 = ontology.getClass( MODIFIER_ELEMENT_NAME );
-            for ( IClass childClass : root2.getSubClasses() ) {
-               conceptMap.putAll( createOwlConcepts( childClass ) );
+            for ( String rootUri : rootUris ) {
+               final IClass root = ontology.getClass( rootUri.trim() );
+               for ( IClass childClass : root.getSubClasses() ) {
+                  conceptMap.putAll( createOwlConcepts( childClass ) );
+               }
             }
             return conceptMap;
          } catch ( IOException ioE ) {
