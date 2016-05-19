@@ -52,8 +52,11 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
       for ( Annotation lookupWindow : lookupWindows ) {
          // Metastases
          final Collection<IdentifiedAnnotation> metastases
-               = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow,
-               OwlConstants.BREAST_CANCER_OWL + "#Metastatic_Neoplasm" );
+               = OwlOntologyConceptUtil
+               .getAnnotationsByUriBranch( jcas, OwlConstants.BREAST_CANCER_OWL + "#Metastasis" );
+         metastases.addAll(
+               OwlOntologyConceptUtil
+                     .getAnnotationsByUriBranch( jcas, OwlConstants.BREAST_CANCER_OWL + "#Metastatic_Neoplasm" ) );
          // All Neoplasms
          final Collection<IdentifiedAnnotation> breastNeoplasms
                = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow,
@@ -63,6 +66,8 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
          // Cancers are not under neoplasm, but we do want them as primaries
          breastNeoplasms.addAll( OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow,
                OwlConstants.CANCER_OWL + "#Cancer" ) );
+         // Find neoplasm location modifiers before adding phenotypes and metastases
+         ModifierFinder.addLocationModifiers( jcas, lookupWindow );
          // Neoplasm phenotypes
          if ( !breastNeoplasms.isEmpty() ) {
             // TNM
@@ -83,7 +88,6 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
          if ( !metastases.isEmpty() ) {
             // sizes
             SizeFinder.addSizes( jcas, lookupWindow, metastases );
-            ModifierFinder.addLocationModifiers( jcas, lookupWindow );
          }
       }
       LOGGER.info( "Finished processing" );

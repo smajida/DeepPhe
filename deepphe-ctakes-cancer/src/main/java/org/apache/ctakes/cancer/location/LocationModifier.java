@@ -33,7 +33,8 @@ public interface LocationModifier {
       UPPER_INNER( "Upper_Inner_Quadrant_of_the_Breast", "upper ?-? ?inner( quadrant)?" ),
       LOWER_INNER( "Lower_Inner_Quadrant_of_the_Breast", "lower ?-? ?inner( quadrant)?" ),
       UPPER_OUTER( "Upper_Outer_Quadrant_of_the_Breast", "upper ?-? ?outer( quadrant)?" ),
-      LOWER_OUTER( "Lower_Outer_Quadrant_of_the_Breast", "lower ?-? ?outer( quadrant)?" );
+      LOWER_OUTER( "Lower_Outer_Quadrant_of_the_Breast", "lower ?-? ?outer( quadrant)?" ),
+      CENTRAL_PORTION( "Central_Portion_of_the_Breast", "central portion" );
       private final String __uri;
       private final Pattern __pattern;
 

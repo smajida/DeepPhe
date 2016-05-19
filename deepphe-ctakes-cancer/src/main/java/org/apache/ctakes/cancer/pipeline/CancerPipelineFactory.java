@@ -2,10 +2,7 @@ package org.apache.ctakes.cancer.pipeline;
 
 
 import org.apache.ctakes.assertion.medfacts.cleartk.UncertaintyCleartkAnalysisEngine;
-import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
-import org.apache.ctakes.cancer.ae.IdentifiedAnnotationMarkableAnnotator;
-import org.apache.ctakes.cancer.ae.PittHeaderAnnotator;
-import org.apache.ctakes.cancer.ae.PittHeaderCleaner;
+import org.apache.ctakes.cancer.ae.*;
 import org.apache.ctakes.cancer.phenotype.receptor.StatusPropertyUtil;
 import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
@@ -188,6 +185,7 @@ final public class CancerPipelineFactory {
                   LocationOfRelationExtractorAnnotator.class,
                   GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
                   CTAKES_DIR_PREFIX + "relation/extractor/location_of.jar" ) );
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( MetastasisRelocator.class ) );
    }
 
    private static void addCorefEngines( final AggregateBuilder aggregateBuilder )
