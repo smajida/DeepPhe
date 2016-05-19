@@ -326,6 +326,17 @@ public class PhenotypeResourceFactory {
 			annotation.setEnd(m.getEnd()+annotation.getHasDocumentOffset());
 			break;
 		}
+
+		// set provinence facts
+		List<FeatureStructure> vals = new ArrayList<FeatureStructure>();
+		for(Fact p: fact.getProvenanceFacts()){
+			Annotation a = getAnnotationByIdentifier(jcas,p.getIdentifier());
+			if(a != null)
+				vals.add(a);
+		}
+		if(!vals.isEmpty())
+			annotation.setHasProvenanceFacts(getValues(jcas, vals));
+		
 		
 		if(!fact.getAncestors().isEmpty())
 			annotation.setHasAncestors(getStringValues(jcas, fact.getAncestors()));

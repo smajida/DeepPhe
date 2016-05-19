@@ -52,7 +52,7 @@ final public class DeepPhePipelineRunner {
 	      final Options options = CliFactory.parseArguments( Options.class, args );
 	      //CancerPipelineRunner.runCancerPipeline( options.getInputDirectory(), options.getOutputDirectory() );
 	      DocumentSummarizerPipeline.runDocumentSummarizerPipeline( options.getInputDirectory(), options.getOutputDirectory(), options.getOntologyPath());
-	      PhenotypeSummarizerPipeline.runPhenotypeSummarizerPipeline(options.getInputDirectory(), options.getOntologyPath(), options.getOutputDirectory(),options.getTransmartMappingFile(),options.getTCGANameMappingFile());
+	     // PhenotypeSummarizerPipeline.runPhenotypeSummarizerPipeline(options.getInputDirectory(), options.getOntologyPath(), options.getOutputDirectory(),options.getTransmartMappingFile(),options.getTCGANameMappingFile());
 	      
 	   }
 }

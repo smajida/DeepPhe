@@ -58,10 +58,12 @@ public class PhenotypeEval {
 		}
 		
 		public static void printHeader(PrintStream out){
-			out.println("Label\tTP\tFP\tFN\tTN\tPrecision\tRecall\tAccuracy\tF1-Score");
+			out.println(String.format("%1$-"+Record.MAX_ATTRIBUTE_SIZE+"s","Label")+"\tTP\tFP\tFN\tTN\tPrecis\tRecall\tAccur\tF1-Score");
 		}
 		public void print(PrintStream out,String label){
-			out.println(label+"\t"+TP+"\t"+FP+"\t"+FN+"\t"+TN+"\t"+
+			out.println(String.format("%1$-"+Record.MAX_ATTRIBUTE_SIZE+"s",label)+"\t"+
+					String.format("%.4f",TP)+"\t"+String.format("%.4f",FP)+"\t"+
+					String.format("%.4f",FN)+"\t"+String.format("%.4f",TN)+"\t"+
 					String.format("%.4f", getPrecision())+"\t"+
 					String.format("%.4f", getRecall())+"\t"+
 					String.format("%.4f",getAccuracy())+"\t"+
@@ -76,6 +78,7 @@ public class PhenotypeEval {
 	 */
 	
 	private static class Record {
+		public static int MAX_ATTRIBUTE_SIZE = 10;
 		private static final String I = "\\|";
 		private static final String FS = ";";
 		private static List<String> headers,valueHeaders,ignoredHeaders;
@@ -90,6 +93,8 @@ public class PhenotypeEval {
 			for(String s: l.split(I)){
 				String key = headers.get(i++);
 				String val = s.trim();
+				if(key.length() > MAX_ATTRIBUTE_SIZE)
+					MAX_ATTRIBUTE_SIZE = key.length();
 				r.addField(key,val);
 			}
 			return r;
@@ -170,9 +175,10 @@ public class PhenotypeEval {
 				default:
 					break;
 				}
-				out.println("\t"+hd+"\t gold: "+PhenotypeEval.toString(gold)+"\t pred: "+PhenotypeEval.toString(pred)+"\t score: "+compare(gold,pred));
+				out.println("\t"+String.format("%1$-"+Record.MAX_ATTRIBUTE_SIZE+"s",hd)+"\tscore: "+
+						String.format("%.4f",compare(gold,pred))+"\t gold: "+PhenotypeEval.toString(gold)+"\t pred: "+PhenotypeEval.toString(pred));
 			}
-			out.println("\tWeighted Score: "+getWeightedScore()+"\n");
+			out.println("\n\t"+String.format("%1$-"+Record.MAX_ATTRIBUTE_SIZE+"s","Weighted Score:")+"\t"+String.format("%.4f",getWeightedScore())+"\n");
 			out.println("\t-----------");
 			for(String hd: getIgnoredHeaders()){
 				List<String> gold = getValues(hd);
@@ -180,7 +186,7 @@ public class PhenotypeEval {
 				if(!gold.isEmpty()){
 					if(getPairedRecord() != null )
 						pred = getPairedRecord().getValues(hd);
-					out.println("\t"+hd+"\t gold: "+PhenotypeEval.toString(gold)+"\t pred: "+PhenotypeEval.toString(pred));
+					out.println("\t"+String.format("%1$-"+Record.MAX_ATTRIBUTE_SIZE+"s",hd)+"\t gold: "+PhenotypeEval.toString(gold)+"\t pred: "+PhenotypeEval.toString(pred));
 				}
 			}
 			out.println("\t-----------\n");

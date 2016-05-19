@@ -1,5 +1,6 @@
 package org.healthnlp.deepphe.fhir.summary;
 
+import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
@@ -11,6 +12,7 @@ import java.util.List;
 
 
 public class TumorSummary extends Summary {
+	private CancerSummary cancerSummary;
 	private TumorPhenotype phenotype;
 	private FactList tumorType;
 	
@@ -20,10 +22,29 @@ public class TumorSummary extends Summary {
 		phenotype.setResourceIdentifier(id);
 	}
 
+
 	public void setReport(Report r){
 		super.setReport(r);
 		getPhenotype().setReport(r);
 	}
+	public void setPatient(Patient r){
+		super.setPatient(r);
+		getPhenotype().setPatient(r);
+	}
+	
+
+	public CancerSummary getCancerSummary() {
+		return cancerSummary;
+	}
+
+
+
+	public void setCancerSummary(CancerSummary cancerSummary) {
+		this.cancerSummary = cancerSummary;
+	}
+
+
+
 	
 	/**
 	 * return all facts that are contained within this fact

@@ -1,0 +1,21 @@
+geographically determined (yes/no)		
+*patient ID		
+*cancer  link		
+*body location	Tumor	hasBodySite
+body location laterality	BodySite	hasBodySide
+body location clockface position	BodySite	hasClockfacePosition
+body location quadrant	BodySite	hasQuadrant
+Diagnosis	Tumor	hasDiagnosis
+tumor type	BreastCancerTumorPhenotype	hasTumorType
+cancer type	BreastCancerTumorPhenotype	hasCancerType
+histologic type	BreastCancerTumorPhenotype	hasHistologicType
+tumor extent	BreastCancerTumorPhenotype	hasTumorExtent
+er status interpretation	Estrogen_Receptor_Status	hasInterpretation
+er status numeric value	Estrogen_Receptor_Status	hasNumValue
+er status method	Estrogen_Receptor_Status	hasMethod
+pr status interpretation	Progesterone_Receptor_Status	hasInterpretation
+pr status numeric value	Progesterone_Receptor_Status	hasNumValue
+pr status method	Progesterone_Receptor_Status	hasMethod
+her2neu status interpretation	HER2_Neu_Status	hasInterpretation
+her2neu status numeric value	HER2_Neu_Status	hasNumValue
+her2neu status method	HER2_Neu_Status	hasMethod

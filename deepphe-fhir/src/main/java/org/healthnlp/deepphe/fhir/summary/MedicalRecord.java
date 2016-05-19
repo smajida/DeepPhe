@@ -78,6 +78,11 @@ public class MedicalRecord implements Element {
 	}
 	public void setPatient(Patient patient) {
 		this.patient = patient;
+		if(getPatientSummary() != null)
+			getPatientSummary().setPatient(patient);
+		if(getCancerSummary() != null)
+			getCancerSummary().setPatient(patient);
+		
 	}
 	public PatientSummary getPatientSummary() {
 		return patientSummary;
