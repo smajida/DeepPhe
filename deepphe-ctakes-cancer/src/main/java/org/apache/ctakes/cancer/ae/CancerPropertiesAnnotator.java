@@ -52,11 +52,8 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
       for ( Annotation lookupWindow : lookupWindows ) {
          // Metastases
          final Collection<IdentifiedAnnotation> metastases
-               = OwlOntologyConceptUtil
-               .getAnnotationsByUriBranch( jcas, OwlConstants.BREAST_CANCER_OWL + "#Metastasis" );
-         metastases.addAll(
-               OwlOntologyConceptUtil
-                     .getAnnotationsByUriBranch( jcas, OwlConstants.BREAST_CANCER_OWL + "#Metastatic_Neoplasm" ) );
+               = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, OwlConstants.BREAST_CANCER_OWL
+                                                                         + "#Metastatic_Neoplasm" );
          // All Neoplasms
          final Collection<IdentifiedAnnotation> breastNeoplasms
                = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow,

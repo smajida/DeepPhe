@@ -47,10 +47,8 @@ public class MetastasisRelocator extends JCasAnnotator_ImplBase {
       }
       // Metastases
       final Collection<IdentifiedAnnotation> metastases
-            = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, OwlConstants.BREAST_CANCER_OWL + "#Metastasis" );
-      metastases.addAll(
-            OwlOntologyConceptUtil
-                  .getAnnotationsByUriBranch( jcas, OwlConstants.BREAST_CANCER_OWL + "#Metastatic_Neoplasm" ) );
+            = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, OwlConstants.BREAST_CANCER_OWL
+                                                                      + "#Metastatic_Neoplasm" );
       if ( metastases.isEmpty() ) {
          LOGGER.info( "Finished Processing" );
          return;
