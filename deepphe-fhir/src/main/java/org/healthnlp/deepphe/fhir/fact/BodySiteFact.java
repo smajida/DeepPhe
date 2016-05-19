@@ -7,7 +7,7 @@ import java.util.List;
 
 public class BodySiteFact extends Fact {
 	private FactList modifiers;
-	private Fact side;
+
 	public BodySiteFact(){
 		setType(FHIRConstants.BODY_SITE);
 	}
@@ -21,18 +21,12 @@ public class BodySiteFact extends Fact {
 	public void setModifiers(FactList modifiers) {
 		this.modifiers = modifiers;
 	}
-	public Fact getSide() {
-		return side;
-	}
-	public void setSide(Fact side) {
-		this.side = side;
+	public void addModifier(Fact fact) {
+		getModifiers().add(fact);
 	}
 	
 	public List<Fact> getContainedFacts(){
 		List<Fact> facts = new ArrayList<Fact>();
-		if(side != null){
-			addContainedFact(facts,side);
-		}
 		for(Fact fact: getModifiers()){
 			addContainedFact(facts, fact);
 		}

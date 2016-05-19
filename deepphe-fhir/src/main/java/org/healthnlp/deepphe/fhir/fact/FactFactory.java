@@ -2,6 +2,7 @@ package org.healthnlp.deepphe.fhir.fact;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 
 import org.healthnlp.deepphe.fhir.AnatomicalSite;
@@ -200,8 +201,12 @@ public class FactFactory {
 	 */
 	public static BodySiteFact createFact(AnatomicalSite location) {
 		BodySiteFact fact = (BodySiteFact) createFact(location,new BodySiteFact());
+		for(CodeableConcept cc: location.getModifier()){
+			fact.addModifier(createFact(cc));
+		}
 		return fact;
 	}
+	
 	
 	
 	/**

@@ -19,6 +19,7 @@ import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.fact.DefaultFactList;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
@@ -97,6 +98,23 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 	}
 
 	
+	private String getPatientIdentifier(Patient patient){
+		return patient.getPatientName();
+	}
+	
+	private String getCancerIdentifier(CancerSummary cancer){
+		String temporality = "Current";
+		StringBuffer b = new StringBuffer("cancer_");
+		b.append(getPatientIdentifier(cancer.getPatient())+"_");
+		b.append(temporality+"_");
+		for(Fact site: cancer.getBodySite()){
+			b.append(site.getName()+"_");
+		}
+		b.replace(b.length()-1,b.length(),"");
+		return b.toString(); 
+	}
+	
+	
 	private void writeDataFile(List<Map<String,String>> mapping, File dataFile, CancerSummary cancer) throws AnalysisEngineProcessException {
 		StringBuffer buffer = new StringBuffer();
 
@@ -108,9 +126,9 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 			// special case for some data labels
 			String value = "";
 			if(dataLabel.startsWith("*") && dataLabel.contains("patient")){
-				value = cancer.getPatient().getResourceIdentifier();
+				value = getPatientIdentifier(cancer.getPatient());
 			}else if(dataLabel.startsWith("*") && dataLabel.contains("cancer")){
-				value = cancer.getResourceIdentifier();
+				value = getCancerIdentifier(cancer);
 			}else{
 				value = getSummaryFactValue(cancer, entryClass, entryProperty);
 				if(value.length() == 0)
@@ -142,9 +160,9 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 				// special case for some data labels
 				String value = "";
 				if(dataLabel.startsWith("*") && dataLabel.contains("patient")){
-					value = tumor.getPatient().getResourceIdentifier();
+					value = getPatientIdentifier(tumor.getPatient());
 				}else if(dataLabel.startsWith("*") && dataLabel.contains("cancer")){
-					value = tumor.getCancerSummary().getResourceIdentifier();
+					value = getCancerIdentifier(tumor.getCancerSummary());
 				}else{
 					value = getSummaryFactValue(tumor, entryClass, entryProperty);
 					if(value.length() == 0)
