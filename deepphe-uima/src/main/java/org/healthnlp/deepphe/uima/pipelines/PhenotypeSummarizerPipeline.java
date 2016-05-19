@@ -1,11 +1,8 @@
 package org.healthnlp.deepphe.uima.pipelines;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.annotation.concurrent.Immutable;
-
-import org.apache.ctakes.cancer.ae.XMIWriter;
+import com.lexicalscope.jewel.cli.CliFactory;
+import com.lexicalscope.jewel.cli.Option;
+import org.apache.ctakes.core.ae.XMIWriter;
 import org.apache.uima.UIMAException;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.collection.CollectionReader;
@@ -21,8 +18,9 @@ import org.healthnlp.deepphe.uima.ae.SummaryTextOutput;
 import org.healthnlp.deepphe.uima.ae.TranSMART_Output;
 import org.healthnlp.deepphe.uima.cr.FHIRCollectionReader;
 
-import com.lexicalscope.jewel.cli.CliFactory;
-import com.lexicalscope.jewel.cli.Option;
+import javax.annotation.concurrent.Immutable;
+import java.io.File;
+import java.io.IOException;
 
 @Immutable
 final public class PhenotypeSummarizerPipeline {

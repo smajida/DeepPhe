@@ -27,6 +27,7 @@
          <implementationName>org.apache.ctakes.dictionary.lookup2.dictionary.OwlDictionary</implementationName>
          <properties>
             <property key="owlPath" value="data/ontology/nlpBreastCancer.owl"/>
+            <property key="owlRootURIs" value="Annotation,Modifier"/>
          </properties>
       </dictionary>
    </dictionaries>
@@ -37,6 +38,7 @@
          <implementationName>org.apache.ctakes.dictionary.lookup2.concept.OwlConceptFactory</implementationName>
          <properties>
             <property key="owlPath" value="data/ontology/nlpBreastCancer.owl"/>
+            <property key="owlRootURIs" value="Annotation,Modifier"/>
          </properties>
       </conceptFactory>
    </conceptFactories>

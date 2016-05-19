@@ -1,20 +1,17 @@
 package org.healthnlp.deepphe.uima.ae;
 
-import java.io.File;
-import java.util.LinkedHashMap;
-
-import org.apache.ctakes.cancer.ae.XMIWriter;
-import org.apache.ctakes.typesystem.type.structured.DocumentID;
+import org.apache.ctakes.core.ae.XMIWriter;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
-import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.uima.fhir.DocumentResourceFactory;
-import org.healthnlp.deepphe.util.TextUtils;
+
+import java.io.File;
+import java.util.LinkedHashMap;
 
 /**
  * create FHIR represetnation of documen mention level data in 

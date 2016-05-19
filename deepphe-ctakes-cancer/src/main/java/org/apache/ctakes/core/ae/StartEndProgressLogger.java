@@ -1,4 +1,4 @@
-package org.apache.ctakes.cancer.ae;
+package org.apache.ctakes.core.ae;
 
 import org.apache.log4j.Logger;
 import org.apache.uima.UimaContext;

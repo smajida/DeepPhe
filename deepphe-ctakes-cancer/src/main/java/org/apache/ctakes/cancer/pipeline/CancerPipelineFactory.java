@@ -2,13 +2,20 @@ package org.apache.ctakes.cancer.pipeline;
 
 
 import org.apache.ctakes.assertion.medfacts.cleartk.UncertaintyCleartkAnalysisEngine;
-import org.apache.ctakes.cancer.ae.*;
+import org.apache.ctakes.cancer.ae.CancerPropertiesAnnotator;
+import org.apache.ctakes.cancer.ae.IdentifiedAnnotationMarkableAnnotator;
+import org.apache.ctakes.cancer.ae.PittHeaderAnnotator;
+import org.apache.ctakes.cancer.ae.PittHeaderCleaner;
+import org.apache.ctakes.cancer.phenotype.receptor.StatusPropertyUtil;
+import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
+import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.chunker.ae.Chunker;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.CopyNPChunksToLookupWindowAnnotations;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory.RemoveEnclosedLookupWindows;
 import org.apache.ctakes.contexttokenizer.ae.ContextDependentTokenizerAnnotator;
 import org.apache.ctakes.core.ae.SentenceDetectorAnnotator;
+import org.apache.ctakes.core.ae.StartEndProgressLogger;
 import org.apache.ctakes.core.ae.TokenizerAnnotatorPTB;
 import org.apache.ctakes.core.cc.FileTreeXmiWriter;
 import org.apache.ctakes.core.cr.FileTreeReader;
@@ -18,6 +25,7 @@ import org.apache.ctakes.coreference.ae.MentionClusterCoreferenceAnnotator;
 import org.apache.ctakes.dependency.parser.ae.ClearNLPDependencyParserAE;
 import org.apache.ctakes.dictionary.lookup2.ae.DefaultJCasTermAnnotator;
 import org.apache.ctakes.dictionary.lookup2.ae.JCasTermAnnotator;
+import org.apache.ctakes.dictionary.lookup2.ontology.OwlParserUtil;
 import org.apache.ctakes.necontexts.ContextAnnotator;
 import org.apache.ctakes.postagger.POSTagger;
 import org.apache.ctakes.relationextractor.ae.LocationOfRelationExtractorAnnotator;
@@ -46,7 +54,6 @@ final public class CancerPipelineFactory {
          = "VB,VBD,VBG,VBN,VBP,VBZ,CC,CD,DT,EX,LS,MD,PDT,POS,PP,PP$,PRP,PRP$,RP,TO,WDT,WP,WPS,WRB";
    static private final String LOOKUP_CONFIG_DESC
          = "org/apache/ctakes/cancer/dictionary/lookup/fast/cancerHsql.xml";
-//   = "C:/Spiffy/prj_darth_phenome/dev/github3/DeepPhe/resources/org/apache/ctakes/dictionary/lookup/fast/nci_proc.xml";
 
 
    private CancerPipelineFactory() {
@@ -127,6 +134,9 @@ final public class CancerPipelineFactory {
 
    static private void addDictionaryEngines( final AggregateBuilder aggregateBuilder )
          throws ResourceInitializationException {
+      OwlParserUtil.getInstance().addUnwantedUriRoot( StagePropertyUtil.getParentUri() );
+      OwlParserUtil.getInstance().addUnwantedUriRoot( TnmPropertyUtil.getParentUri() );
+      OwlParserUtil.getInstance().addUnwantedUriRoot( StatusPropertyUtil.getParentUri() );
       aggregateBuilder.add(
             AnalysisEngineFactory.createEngineDescription( CopyNPChunksToLookupWindowAnnotations.class ) );
       aggregateBuilder.add(

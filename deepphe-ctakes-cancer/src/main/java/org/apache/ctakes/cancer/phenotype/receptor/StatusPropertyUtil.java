@@ -1,9 +1,9 @@
 package org.apache.ctakes.cancer.phenotype.receptor;
 
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
 import org.apache.ctakes.cancer.phenotype.property.AbstractPropertyUtil;
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 

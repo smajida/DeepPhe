@@ -1,6 +1,6 @@
 package org.apache.ctakes.core.cc;
 
-import org.apache.ctakes.cancer.ae.XMISerializer;
+import org.apache.ctakes.core.ae.XMISerializer;
 import org.apache.ctakes.core.util.DocumentIDAnnotationUtil;
 import org.apache.ctakes.typesystem.type.structured.DocumentIdPrefix;
 import org.apache.log4j.Logger;

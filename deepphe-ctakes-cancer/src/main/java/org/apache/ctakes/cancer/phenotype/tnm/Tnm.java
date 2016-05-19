@@ -1,6 +1,6 @@
 package org.apache.ctakes.cancer.phenotype.tnm;
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.phenotype.property.DefaultProperty;
 import org.apache.ctakes.cancer.phenotype.property.SpannedType;
 import org.apache.ctakes.cancer.phenotype.property.SpannedValue;
@@ -19,7 +19,7 @@ final class Tnm extends DefaultProperty<TnmType, TnmValue> {
    static private final Logger LOGGER = Logger.getLogger( "Tnm" );
 
    //   static final String TNM_URI = OwlOntologyConceptUtil.CANCER_OWL + "#TNMClassification";
-   static final String TNM_URI = OwlOntologyConceptUtil.CANCER_OWL + "#TNM_Staging_System";
+   static final String TNM_URI = OwlConstants.CANCER_OWL + "#TNM_Staging_System";
 
    Tnm( final SpannedType<TnmType> tnmType, final SpannedValue<TnmValue> tnmValue ) {
       super( tnmType, tnmValue );
