@@ -128,7 +128,7 @@ final public class ConceptInstance {
    static private final String TEST_QUADRANT_URI = null;
 
    public String getQuadrantUri() {
-      final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().get();
+      final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().orElse( null );
       if ( firstAnatomical == null ) {
          return TEST_QUADRANT_URI;
       }
@@ -143,7 +143,7 @@ final public class ConceptInstance {
    static private final String TEST_BODY_SIDE = null;
 
    public String getBodySideUri() {
-      final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().get();
+      final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().orElse( null );
       if ( firstAnatomical == null ) {
          return TEST_BODY_SIDE;
       }
@@ -158,7 +158,7 @@ final public class ConceptInstance {
    static private final String TEST_CLOCKWISE = null;
 
    public String getClockwiseUri() {
-      final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().get();
+      final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().orElse( null );
       if ( firstAnatomical == null ) {
          return TEST_CLOCKWISE;
       }
