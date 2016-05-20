@@ -1,5 +1,7 @@
 package org.apache.ctakes.cancer.concept.instance;
 
+import org.apache.ctakes.cancer.location.LocationModifier;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.owl.OwlUriUtil;
 import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
 import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
@@ -11,6 +13,7 @@ import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 
 import javax.annotation.concurrent.Immutable;
+
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -124,8 +127,8 @@ final public class ConceptInstance {
       return false;
    }
 
-   //   static private final String TEST_QUADRANT_URI = LocationModifier.Quadrant.LOWER_OUTER.getUri();
-   static private final String TEST_QUADRANT_URI = null;
+   static private final String TEST_QUADRANT_URI = LocationModifier.Quadrant.LOWER_OUTER.getUri();
+   //static private final String TEST_QUADRANT_URI = null;
 
    public String getQuadrantUri() {
       final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().orElse( null );
@@ -139,8 +142,8 @@ final public class ConceptInstance {
             .orElse( TEST_QUADRANT_URI );
    }
 
-   //   static private final String TEST_BODY_SIDE = OwlConstants.CANCER_OWL + "#Left";
-   static private final String TEST_BODY_SIDE = null;
+   static private final String TEST_BODY_SIDE = OwlConstants.CANCER_OWL + "#Left";
+   //static private final String TEST_BODY_SIDE = null;
 
    public String getBodySideUri() {
       final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().orElse( null );
@@ -154,8 +157,8 @@ final public class ConceptInstance {
             .orElse( TEST_BODY_SIDE );
    }
 
-   //   static private final String TEST_CLOCKWISE = OwlConstants.BREAST_CANCER_OWL + "#4_o_clock_position";
-   static private final String TEST_CLOCKWISE = null;
+   static private final String TEST_CLOCKWISE = OwlConstants.BREAST_CANCER_OWL + "#4_o_clock_position";
+   //static private final String TEST_CLOCKWISE = null;
 
    public String getClockwiseUri() {
       final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().orElse( null );

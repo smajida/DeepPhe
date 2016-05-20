@@ -121,22 +121,17 @@ public class FactFactory {
 	 */
 	public static ValueFact createFact(Quantity q){
 		URI uri = FHIRConstants.QUANTITY_URI;
-		String name;
-		try {
-			name = uri.toURL().getRef();
-		} catch (MalformedURLException e) {
-			throw new Error(e);
-		}
-		
+		String name = FHIRConstants.QUANTITY;;
 		double value = q.getValue().doubleValue();
 		String units = q.getUnit();
+		String label = (value+" "+units).trim(); 
 		
 		ValueFact fact = new ValueFact();
 		fact.setName(name);
-		fact.setLabel(name);
+		fact.setLabel(label);
 		fact.setUri(""+uri);
 		fact.setType(name);
-		fact.setIdentifier((name.toUpperCase()+"_"+value+" "+units).trim());
+		fact.setIdentifier(name.toUpperCase()+"_"+label);
 		
 		fact.setValue(value);
 		fact.setUnit(units);
@@ -152,17 +147,25 @@ public class FactFactory {
 	public static ObservationFact createFact(Observation ob) {
 		ObservationFact fact = (ObservationFact) createFact(ob,new ObservationFact());
 		if(FHIRUtils.hasConceptURI(ob.getInterpretation())){
-			fact.setInterpretation(createFact(ob.getInterpretation()));
+			Fact f = createFact(ob.getInterpretation());
+			f.setType(FHIRConstants.ORDINAL_INTERPRETATION);
+			f.setCategory(FHIRConstants.HAS_INTERPRETATION);
+			fact.setInterpretation(f);
 		}
 		if(ob.getValue() != null && ob.getValue() instanceof Quantity){
 			try {
-				fact.setValue(createFact(ob.getValueQuantity()));
+				Fact f = createFact(ob.getValueQuantity());
+				f.setCategory(FHIRConstants.HAS_NUM_VALUE);
+				fact.setValue(f);
 			} catch (Exception e) {
 				throw new Error(e);
 			}
 		}
 		if(FHIRUtils.hasConceptURI(ob.getMethod())){
-			fact.setMethod(createFact(ob.getMethod()));
+			Fact f = createFact(ob.getMethod());
+			f.setType(FHIRConstants.PROCEDURE);
+			f.setCategory(FHIRConstants.HAS_METHOD);
+			fact.setMethod(f);
 		}
 		return fact;
 	}
@@ -202,13 +205,18 @@ public class FactFactory {
 	public static BodySiteFact createFact(AnatomicalSite location) {
 		BodySiteFact fact = (BodySiteFact) createFact(location,new BodySiteFact());
 		for(CodeableConcept cc: location.getModifier()){
-			fact.addModifier(createFact(cc));
+			Fact modifier = createFact(cc);
+			modifier.setCategory(FHIRConstants.HAS_BODY_MODIFIER);
+			modifier.setType(isBodySide(modifier)?FHIRConstants.BODY_SIDE:FHIRConstants.BODY_MODIFIER);
+			fact.addModifier(modifier);
 		}
 		return fact;
 	}
 	
-	
-	
+	private static boolean isBodySide(Fact modifier) {
+		return FHIRConstants.BODY_SIDE_LIST.contains(modifier.getName());
+	}
+
 	/**
 	 * create empty fact of a given type
 	 * @param type

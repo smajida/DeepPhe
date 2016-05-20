@@ -244,7 +244,7 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 			if(entryClass.equals(value.getName())){
 				b.append("True"+FS);
 			}else{
-				b.append(value.getSummaryText()+FS);
+				b.append(value.getName()+FS);
 			}
 		}
 		// remove last field separator
