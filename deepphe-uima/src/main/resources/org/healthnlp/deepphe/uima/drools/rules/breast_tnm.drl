@@ -8,30 +8,53 @@ import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.FHIRConstants;
+
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
+import org.healthnlp.deepphe.fhir.fact.FactHelper;
+
+import org.healthnlp.deepphe.fhir.summary.*;
+import org.healthnlp.deepphe.uima.drools.*;
 
 /*
-* If there is an instance of M1, then create instance of tumor with tumor type = "metastasis". 
-* ==
-*M1(?m1), Tumor(?tumor), DistantRecurrence(?met), swrlx:makeOWLThing(?m1, ?tumor, ?met) -> hasTumorType(?tumor, ?met) 
-*/
-rule "TNM_M1-1"
+
+rule "create-TNMClassification-CP"
+	salience 7779
 	no-loop true
 	when
-		//$fact : Fact(category == "hasMClassification", name matches ".*M1.*")
-		
-		$tFact : Fact(summaryType == "TumorSummary", name=="Distant", $summaryType : summaryType, $summaryId : summaryId,
-					rulesApplied not contains "TNM_M1-1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M1.*", 
-			containerIdentifier contains "aaa")
+		$record : MedicalRecord()
+		$tFact : Fact(category == "hasTClassification",  documentType != "Surgical Pathology Report", $tname : name, $patientId : patientIdentifier,
+			$documentId : documentId)
+		$nFact : Fact(category == "hasNClassification",  documentType != "Surgical Pathology Report", $nname : name, patientIdentifier==$patientId,
+			 documentId==$documentId)
+		$mFact : Fact(category == "hasMClassification",  documentType != "Surgical Pathology Report", $mname : name, patientIdentifier==$patientId,
+			 documentId==$documentId)
+		$domain : Domain($domainName : domainName)
+		$cFact : Fact(summaryType == "CancerSummary", documentType == "RecordSummary", 
+					 $cancer_bs_name : name, $cSummaryId : summaryId, 
+					$cancer_ancestors: ancestors, ($cancer_bs_name==$domainName || $cancer_ancestors contains $domainName))
+		not(
+			Fact(summaryType == "CancerPhenotype", documentType == "RecordSummary", $tSummaryId : summaryId, containerIdentifier contains $cSummaryId)
+		)
 		
 	then 
-		System.out.println("TNM_M1-1 fired");
-		System.out.println(" ***** FOUND METASTASIS facts "+$mFact);
-		System.out.println(" ***** FOUND METASTASIS tumor "+$tFact);
-		// add TS and with addRulesApplied("TNM_M1-1")
+		modify($mFact){	addRulesApplied("genericT-1.1") }
+	// create cPhe fact
+		Fact tf = FactFactory.createFact($tumor1_f, $tumor1_f.getType(), OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#"+$tumor1_name, "RecordSummary");
+		tf.addContainerIdentifier($cancerSummaryId);
+		String newId = "TumorSummary-"+$tumor1_f.getType()+"-"+$tumor1_name;
+		tf.setIdentifier(newId);
+		tf.addProvenanceFact($tumor1_f);
+		tf.addContainerIdentifier($cSummaryFact.getSummaryId());
+		insert(new idMapper($tumor1_identifier, newId, $documentType, $tumor1_f.getSummaryId(), tf.getSummaryId()));
+		insert(tf);
+		FactHelper.addFactToSummary($tumor1_f, $record.getCancerSummary(), newId, OwlOntologyConceptUtil.BREAST_CANCER_OWL);
+		
  end
  
-
+*/
 
 /*
 * If there is an instance of pN1, then create an instance of positive lymph node. 

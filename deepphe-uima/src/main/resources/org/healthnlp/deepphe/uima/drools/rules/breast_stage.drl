@@ -20,7 +20,7 @@ import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 /*
 //If Tis, N0, M0 then Stage 0 Breast Cancer 
 rule "Stage0-1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -50,15 +50,15 @@ end
 
 //If T1, N0, M0, then Stage IA Breast Cancer 
 rule "Stage1A-1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage1A-1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage1A-1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage1A-1")
 	then
 
@@ -79,15 +79,15 @@ end
 
 //If T0, N1mi, M0, then Stage IB Breast Cancer  
 rule "Stage1B-1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T0.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT0.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage1B-1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N1mi.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN1mi.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage1B-1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage1B-1")
 	then
 
@@ -109,15 +109,15 @@ end
 
 //If T1, N1mi, M0, then Stage IB Breast Cancer  
 rule "Stage1B-2"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage1B-2")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N1mi.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN1mi.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage1B-2")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage1B-2")
 	then
 
@@ -138,15 +138,15 @@ end
 
 //If T0, N1, M0, then Stage IIA Breast Cancer  
 rule "Stage2A-1.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T0.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT0.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage2A-1.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage2A-1.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage2A-1.1")
 	then
 
@@ -167,15 +167,15 @@ end
 
 //If T1, N1, M0, then Stage IIA Breast Cancer   
 rule "Stage2A-2.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage2A-2.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage2A-2.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage2A-2.1")
 	then
 
@@ -196,15 +196,15 @@ end
 
 //If T2, N0, M0, then Stage IIA Breast Cancer  
 rule "Stage2A-3.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T2.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT2.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage2A-3.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage2A-3.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage2A-3.1")
 	then
 
@@ -220,21 +220,21 @@ rule "Stage2A-3.1"
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
-				
+	
 		System.out.println("*** Stage2A-3.1 for MR");
 end
 
 //If T2, N1, M0, then Stage IIB Breast Cancer 
 rule "Stage2B-1.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T2.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT2.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage2B-1.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage2B-1.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage2B-1.1")
 	then
 
@@ -256,15 +256,15 @@ end
 
 //If T3, N0, M0, then Stage IIB Breast Cancer 
 rule "Stage2B-2.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T3.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT3.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage2B-2.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage2B-2.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage2B-2.1")
 	then
 
@@ -286,15 +286,15 @@ end
 
 //If T0, N2, M0, then Stage IIIA Breast Cancer 
 rule "Stage3A-1.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T0.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT0.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3A-1.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3A-1.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3A-1.1")
 	then
 
@@ -316,15 +316,15 @@ end
 
 //If T1, N2, M0, then Stage IIIA Breast Cancer 
 rule "Stage3A-2.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3A-2.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3A-2.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3A-2.1")
 	then
 
@@ -346,15 +346,15 @@ end
 
 //If T2, N2, M0, then Stage IIIA Breast Cancer 
 rule "Stage3A-3.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T2.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT2.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3A-3.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3A-3.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3A-3.1")
 	then
 
@@ -376,15 +376,15 @@ end
 
 //If T3, N1, M0, then Stage IIIA Breast Cancer 
 rule "Stage3A-4.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T3.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT3.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3A-4.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3A-4.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3A-4.1")
 	then
 
@@ -406,15 +406,15 @@ end
 
 //If T3, N2, M0, then Stage IIIA Breast Cancer 
 rule "Stage3A-5.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T3.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT3.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3A-5.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3A-5.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3A-5.1")
 	then
 
@@ -436,15 +436,15 @@ end
 
 //If T4, N0, M0, then Stage IIIB Breast Cancer 
 rule "Stage3B-1.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T4.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT4.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3B-1.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3B-1.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3B-1.1")
 	then
 
@@ -466,15 +466,15 @@ end
 
 //If T4, N1, M0, then Stage IIIB Breast Cancer 
 rule "Stage3B-2.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T4.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT4.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3B-2.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3B-2.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3B-2.1")
 	then
 
@@ -496,15 +496,15 @@ end
 
 //If T4, N2, M0, then Stage IIIB Breast Cancer 
 rule "Stage3B-3.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*T4.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
+		$tFact : Fact(category == "hasTClassification", $uri:uri, name matches ".*cT4.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3B-3.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3B-3.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3B-3.1")
 	then
 
@@ -526,15 +526,15 @@ end
 
 //If any T value, N3, M0, then Stage IIIC Breast Cancer 
 rule "Stage3C-1.1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
 		$tFact : Fact(category == "hasTClassification", $uri:uri, $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3C-1.1")
-		$nFact : Fact(category == "hasNClassification", name matches ".*N3.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$nFact : Fact(category == "hasNClassification", name matches ".*cN3.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3C-1.1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage3C-1.1")
 	then
 
@@ -556,7 +556,7 @@ end
 
 //If any T value, any N value, M1, then Stage IV Breast Cancer  
 rule "Stage4-1"
-	salience 9999999
+	salience 9999999100
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -564,7 +564,7 @@ rule "Stage4-1"
 					rulesApplied not contains "Stage4-1")
 		$nFact : Fact(category == "hasNClassification", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage4-1")
-		$mFact : Fact(category == "hasMClassification", name matches ".*M1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
+		$mFact : Fact(category == "hasMClassification", name matches ".*cM1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
 					rulesApplied not contains "Stage4-1")
 	then
 

@@ -236,8 +236,51 @@ public class FactFactory {
 		return createFact(FHIRUtils.getCodeableConcept(URI.create(uri)),createFact(type));
 	}
 	
+	/**
+	 * create fact and copy most of the parameters from the old one
+	 * @param oldF
+	 * @param type
+	 * @param uri
+	 * @return
+	 */
+	public static Fact createFact(Fact oldFact, String type, String uri, String newDocType){
+		Fact newFact = createFact(FHIRUtils.getCodeableConcept(URI.create(uri)),createFact(type));
+		newFact.setAncestors(oldFact.getAncestors());
+		newFact.setCategory(oldFact.getCategory());
+		newFact.setPatientIdentifier(oldFact.getPatientIdentifier());
+		newFact.setSummaryType(oldFact.getSummaryType());
+		newFact.setSummaryId(oldFact.getSummaryType()+"_"+oldFact.getName());
+		newFact.setDocumentType(newDocType);
+		
+		return newFact;
+	}
+	
 	public static String createIdentifier(Fact fact){
 		return fact.getType()+"_"+fact.getName().replaceAll("\\W+","_")+"_"+Math.abs(fact.getProvenanceMentions().hashCode());
+	}
+	
+	public static Fact cretaeTumorFactModifier(String uri, Fact tSummaryF, Fact  cSummaryF, String summaryType, 
+			String category, String documentType, String type){
+		Fact f =  FactFactory.createFact(FHIRConstants.MODIFIER, uri);
+		
+		f.addProvenanceFact(cSummaryF);
+		f.addProvenanceFact(tSummaryF);
+		
+		f.addContainerIdentifier(cSummaryF.getSummaryId());
+		f.addContainerIdentifier(tSummaryF.getSummaryId());
+		
+		
+		f.setCategory(category);
+		f.setPatientIdentifier(tSummaryF.getPatientIdentifier());
+		f.setSummaryType(summaryType);
+		f.setType(type);
+		
+		String name = f.getName();
+		f.setSummaryId(tSummaryF.getSummaryId()+"_"+name);
+		f.setIdentifier(tSummaryF.getIdentifier()+"-"+name);
+		f.setDocumentType(documentType);
+		
+		return f;
 	}
 	
 }

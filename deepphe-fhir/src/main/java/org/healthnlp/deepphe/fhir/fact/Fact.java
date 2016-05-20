@@ -31,7 +31,7 @@ public class Fact {
 	}
 	
 	private String name,uri,identifier,label,category,type = getClass().getSimpleName();
-	private String summaryType, summaryId, summaryFullId;
+	private String summaryType, summaryId;
 	private Set<String> ancestors;
 	private Set<String> rulesApplied;
 	private List<Fact> provenanceFacts;
@@ -41,14 +41,6 @@ public class Fact {
 	
 	private transient String documentIdentifier, patientIdentifier, documentType;
 	private transient Set<String> containerIdentifier;
-
-	public String getSummaryFullId(){
-		return summaryType+"_"+summaryId;
-	}
-	
-	public void setSummaryFullId(String summaryFullId){
-		this.summaryFullId = summaryFullId;
-	}
 	
 	public String getName() {
 		return name;
@@ -83,10 +75,12 @@ public class Fact {
 		return provenanceFacts;
 	}
 	public void addProvenanceFact(Fact fact) {
-		getProvenanceFacts().add(fact);
+		if(!getProvenanceFacts().contains(fact))
+			provenanceFacts.add(fact);
 	}
 	public void addProvenanceFacts(List<Fact> facts) {
-		getProvenanceFacts().addAll(facts);
+		for(Fact f:facts)
+			addProvenanceFact(f);
 		facts.clear();
 		facts = null;
 	}
@@ -125,6 +119,11 @@ public class Fact {
 			ancestors = new LinkedHashSet<String>();
 		return ancestors;
 	}
+	
+	public void setAncestors(Set<String> ancestors){
+		getAncestors().addAll(ancestors);
+	}
+	
 	public void addAncestor(String a) {
 		getAncestors().add(a);
 	}
@@ -200,7 +199,6 @@ public class Fact {
 		b.append("document type: "+getDocumentType()+"|");
 		b.append("summary type: "+getSummaryType()+"|");
 		b.append("summary id: "+getSummaryId()+"|");
-		b.append("summary full id: "+getSummaryFullId()+"|");
 		b.append("container ids: "+getContainerIdentifier()+"|");
 		//b.append("rulesApplied: "+getRulesApplied()+"|");
 		b.append("ancestors: "+getAncestors()+"\n");
@@ -234,7 +232,7 @@ public class Fact {
 	}
 	
 	/**
-	 * convinience method to add all contained facts
+	 * convenience method to add all contained facts
 	 * @param facts
 	 * @param fact
 	 * @return

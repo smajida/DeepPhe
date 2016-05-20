@@ -9,102 +9,167 @@ import org.healthnlp.deepphe.util.FHIRConstants;
 
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactFactory;
+import org.healthnlp.deepphe.fhir.fact.FactHelper;
 
 import org.healthnlp.deepphe.fhir.summary.*;
-import org.healthnlp.deepphe.uima.drools.Summarizer;
+import org.healthnlp.deepphe.uima.drools.*;
+
 
 import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 
-declare updateFactContainer
-	oldContainer : String
-	newContainer : String
+declare idMapper
+	oldId 			: String
+	newId 			: String
+	oldDocumantType : String
+	oldSummaryId 	: String
+	newSummaryId	: String
 end
 
-
-/**
-* Rename to deepest all tumor summaries if they have the same ancestors
+/*
+* Add Breast BodySite to CancerSummary if exists
+* use a bit higher salience than for Tumors
 */
-rule "rename_all_tumors_to_deepest_value"
+rule "add-create_BreastToCancerSummary"
+	salience 100000
+	no-loop true
+	when
+		$record : MedicalRecord()
+		$domain : Domain($domainName : domainName)
+		$cFact : Fact(summaryType == "CancerSummary", documentType != "RecordSummary", 
+					 category == "hasBodySite", $cancer_bs_name : name, $cancerId : identifier, $patientId : patientIdentifier,
+					$cancer_ancestors: ancestors, ($cancer_bs_name==$domainName || $cancer_ancestors contains $domainName))
+		not(Fact(this != $cFact, summaryType == "CancerSummary", category == "hasBodySite", documentType == "RecordSummary",
+						patientIdentifier==$patientId))
+		not(idMapper (oldId == $cancerId))
+	then
+		String newId = "CancerSummary-"+$cFact.getType()+"-"+$domainName;
+		Fact cf = FactFactory.createFact($cFact, $cFact.getType(), OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Breast", "RecordSummary");
+		cf.setIdentifier(newId);
+		cf.addProvenanceFact($cFact);
+		modify($record) {
+			getCancerSummary().setResourceIdentifier(newId)
+		}
+		insert(cf);
+		insert(new idMapper($cancerId, newId, $cFact.getDocumentType(), $cFact.getSummaryId(), cf.getSummaryId()));
+		FactHelper.addFactToSummary($cFact, $record.getCancerSummary(), newId, OwlOntologyConceptUtil.BREAST_CANCER_OWL);
+		
+		System.out.println("add-create_BreastToCancerSummary newCS: "+cf.getInfo());
+end
+
+/*
+* Same as add-create_BreastToCancerSummary, but without creation creation here
+*/
+rule "addOtherBreastToCancerSummary"
+	salience 100000
+	no-loop true
+	when
+		$record : MedicalRecord()
+		$domain : Domain($domainName : domainName)
+		$cFact : Fact(summaryType == "CancerSummary", documentType != "RecordSummary", 
+					 category == "hasBodySite", $cancer_bs_name : name, $cancerId : identifier, $patientId : patientIdentifier,
+					$cancer_ancestors: ancestors, ($cancer_bs_name==$domainName || $cancer_ancestors contains $domainName))
+		$summaryFact : Fact(summaryType == "CancerSummary", category == "hasBodySite", documentType == "RecordSummary",
+						patientIdentifier==$patientId, $newId : identifier)
+		not(idMapper (oldId == $cancerId))
+	then
+		
+		$summaryFact.addProvenanceFact($cFact);
+		insert(new idMapper($cancerId, $newId, $cFact.getDocumentType(), $cFact.getSummaryId(), $summaryFact.getSummaryId()));
+
+		System.out.println("addOtherBreastToCancerSummary newCS: "+$cFact.getInfo());
+end
+
+/*
+* Create tumors by location with deepest location name.
+* ATTENTION: this should be re-written for multple cancers
+* now all the tumors are going into one domain cancer
+*/
+rule "createTumor-location"
 	salience 99999
 	no-loop true
 	when	
 		$record : MedicalRecord()
-		$cancer_f : Fact(summaryType=="CancerSummary", $cancer_fullId : summaryFullId, $patientId :patientIdentifier,
-						$cancer_ancestors: ancestors)
-		$tumor1_f : Fact(summaryType=="TumorSummary", $category1 : category, patientIdentifier==$patientId, $tumor1_identifier : identifier, 
-						containerIdentifier contains $cancer_fullId,
-						$tumor1_name : name, $tumor1_uri : uri)			
-		$tumor2_f : Fact(summaryType=="TumorSummary", category==$category1 , patientIdentifier==$patientId, 
-						containerIdentifier contains $cancer_fullId, identifier != $tumor1_identifier,
-						ancestors contains  $tumor1_name, $tumor2_name : name, $tumor2_name != $tumor1_name, $tumor2_uri : uri)
+		$domain : Domain($domainName : domainName)
+		$cSummaryFact : Fact(summaryType == "CancerSummary", category == "hasBodySite", documentType == "RecordSummary", $cancerSummaryId : summaryId)
+		$tumor1_f : Fact(summaryType == "TumorSummary", category == "hasBodySite", $documentType : documentType, $documentType != "RecordSummary", 
+				$patientId : patientIdentifier, $tumor1_identifier : identifier, $tumor1_name : name,$tSummaryId : summaryId)		
+		not(exists (Fact(this != $tumor1_f, summaryType == "TumorSummary", category == "hasBodySite", documentType != "RecordSummary",
+						patientIdentifier==$patientId, ancestors contains  $tumor1_name)))
+		not(idMapper (oldId == $tumor1_identifier, oldSummaryId == $tSummaryId))
 	then
-		System.out.println("*** rename_ALL_tumors_to_deepest_value: from "+$tumor1_name+" to "+$tumor2_name);
-		modify($tumor1_f){
-			setName($tumor2_name),
-			setUri($tumor2_uri)		
+		
+		Fact tf = FactFactory.createFact($tumor1_f, "BodySite", OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#"+$tumor1_name, "RecordSummary");
+		tf.addContainerIdentifier($cancerSummaryId);
+		String newId = "TumorSummary-"+$tumor1_f.getType()+"-"+$tumor1_name;
+		tf.setIdentifier(newId);
+		tf.addProvenanceFact($tumor1_f);
+		tf.addContainerIdentifier($cSummaryFact.getSummaryId());
+		insert(new idMapper($tumor1_identifier, newId, $documentType, $tumor1_f.getSummaryId(), tf.getSummaryId()));
+		insert(tf);
+		FactHelper.addFactToSummary($tumor1_f, $record.getCancerSummary(), newId, OwlOntologyConceptUtil.BREAST_CANCER_OWL);
+		
+		String bodySide = "";
+		if($tumor1_name.startsWith("Left_"))
+			bodySide = "Left";
+		else if ($tumor1_name.startsWith("Right_"))
+			bodySide = "Right";
+		//create body side modifier if any
+		if(!"".equals(bodySide)){
+		
+		Fact bodySideF = FactFactory.cretaeTumorFactModifier(OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#"+bodySide,
+					tf, $cSummaryFact, "TumorSummary", "hasBodySide", "RecordSummary-Modifier", "BodySide");
+			insert(bodySideF);
+System.out.println("Create Tumor at Cancer location: BOdySide: "+bodySideF.getInfo());
 		}
-		
-		//modify($record){
-			Fact f = $record.getCancerSummary().getTumorSummaryByUuid($tumor1_identifier).getFactByCategoryID($category1, $tumor1_identifier);
-			System.out.println("BEFORE: name: "+f.getName());
-		//}
-	
-		
+
+		System.out.println("Create Tumor at Cancer location: newF: "+tf.getInfo());
 end
 
-
-/**
-* For each cancer change name, URI to the deepest value in cancer for the same catogory
-* IF there is no other bodySite for the same tumor
-*/
-
-rule "rename_cancer_to_deepest_tumor"
-	salience 99998
-	no-loop true
-	when	
-		$cancer_f : Fact(summaryType=="CancerSummary", $category: category, $patientId : patientIdentifier, $cancer_fullId : summaryFullId, 
-						$cancer_container : containerIdentifier,
-						$cancer_ancestors: ancestors, $cancer_name : name, $cancer_uri : uri)
-		$tumor_f : Fact(summaryType=="TumorSummary", category==$category, patientIdentifier==$patientId, $tumor_identifier : identifier, 
-						containerIdentifier contains $cancer_fullId,
-						$tumor_name : name, $tumor_name != $cancer_name, $tumor_uri : uri, ancestors contains  $cancer_name )			
-		not Fact(summaryType=="TumorSummary", category==$category, patientIdentifier==$patientId, 
-						containerIdentifier contains $cancer_fullId, identifier != $tumor_identifier,
-						ancestors contains  $cancer_name, $tumor_name2 : name, $tumor_name2 != $cancer_name, $tumor_name2 != $tumor_name)
-	then
-		System.out.println("*** rename_cancer_to_deepest_tumor: from "+$cancer_name+" to "+$tumor_name);
-end
-		
-
-
-/**
-* Merge the facts from different type of documents
-*/
-
-//merge cancer summaries for the same disease name, Pathology Report prevails 
 /*
-rule "leave_PR_with the lowestID"
-	salience 99999910
+* Add provinance facts for 
+*/
+rule "aggregateSummaries"
+	salience 99999
 	no-loop true
-	when	
-		$fact_1 : Fact(category == "wasDerivedFrom", name : $name, $patientId : patientIdentifier, summaryType=="Pathology Report",
-					type=="Condition", summaryType=="CancerSummary", $summaryId_1 : summaryId) 
-	    $fact_2 : Fact(category == "wasDerivedFrom", name==$name, $patientId==patientIdentifier, summaryType=="Pathology Report",
-					type=="Condition", summaryType=="CancerSummary", $summaryId_2 : summaryId, $summaryId_2 >$summaryId_1)
-					
+	when
+		$record : MedicalRecord()
+		$docFact : Fact($documentType : documentType, $documentType != "RecordSummary", $oldId : identifier, $summaryType : summaryType, 
+					  $category : category, $nameF : name, $summaryId : summaryId)
+		$summaryF : Fact(documentType == "RecordSummary", $newId : identifier, summaryType == $summaryType, category == $category,
+						(name == $nameF || ancestors contains $nameF))
+		not(idMapper (oldId == $oldId, oldSummaryId == $summaryId))
 	then
-		System.out.println("*** leave_PR_with the lowestID. RETRACTING: "+$fact_2.getInfo());
-		modify($fact_1){addProvenanceFact($fact_2) }
-		retract($fact_2)
-		insert(new updateFactContainer("CancerSummary_"+$summaryId_2,"CancerSummary_"+$summaryId_1))
+		modify($summaryF) { addProvenanceFact($docFact)}
+		insert(new idMapper($oldId, $newId, $documentType, $docFact.getSummaryId(), $summaryF.getSummaryId()));
 		
+		System.out.println("aggregateTumors2 : About to add oldId: "+$docFact.getInfo());
 end
 
 
-rule "updateContainer"
-	salience 1000
-	no-loop true
-	updateFactContainer( $oldContainer :oldContainer, $newContainer : newContainer)
-	$fact(
 
-*/
+rule "test-idMap"
+	no-loop true
+	when 
+		$m :idMapper()
+	then
+		System.out.println("idMapper oldId: "+$m.getOldId()+" newId: "+$m.getNewId()+" oldDocumantType: "+$m.getOldDocumantType()
+		+" oldSummaryId: "+$m.getOldSummaryId()+" newSummaryId: "+$m.getNewSummaryId());
+end	
+
+rule "debug-RecordSummary"
+	salience 2
+	no-loop true
+	when 
+		$summaryF : Fact(documentType == "RecordSummary")
+	then
+		System.out.println("* RecordSummary: "+$summaryF.getInfo());
+end	
+
+rule "debug-RecordSummary-Modifier"
+	salience 1
+	no-loop true
+	when 
+		$summaryF : Fact(documentType == "RecordSummary-Modifier")
+	then
+		System.out.println("*** RecordSummary-MODIFIER: "+$summaryF.getInfo());
+end	

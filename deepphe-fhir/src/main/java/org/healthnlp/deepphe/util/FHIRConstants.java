@@ -54,6 +54,7 @@ public class FHIRConstants {
 	
 	
 	public static final String HAS_BODY_SITE = "hasBodySite";
+	public static final String HAS_BODY_SIDE = "hasBodySide";
 	public static final String HAS_TREATMENT = "hasTreatment";
 	public static final String HAS_OUTCOME = "hasOutcome";
 	public static final String HAS_CANCER_STAGE = "hasCancerStage";

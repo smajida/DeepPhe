@@ -11,35 +11,69 @@ import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.uima.drools.Summarizer;
 
-
+/*
 
 rule "getTNMClassificationStatus"
-	salience 99999999
+	salience 99999999101
 	no-loop true
 	when
 		$record : MedicalRecord()		
-		$tFact : Fact(category == "hasTClassification", $tUri : uri, $patientId : patientIdentifier, $docId : documentIdentifier, rulesApplied not contains "getTNMClassificationStatus")
-		$nFact : Fact(category == "hasNClassification", $nUri : uri, patientIdentifier==$patientId, documentIdentifier==$docId, rulesApplied not contains "getTNMClassificationStatus")
-		$mFact : Fact(category == "hasMClassification", $mUri : uri, patientIdentifier==$patientId, documentIdentifier==$docId, rulesApplied not contains "getTNMClassificationStatus")
+		$tFact : Fact(category == "hasTClassification", $tname : name, $patientId : patientIdentifier, $docType : documentType, $docType != "Summary",
+				$docId : documentIdentifier, rulesApplied not contains "getTNMClassificationStatus")
+		$nFact : Fact(category == "hasNClassification", $nname : name, patientIdentifier==$patientId, documentIdentifier==$docId, rulesApplied not contains "getTNMClassificationStatus")
+		$mFact : Fact(category == "hasMClassification", $mname : name, patientIdentifier==$patientId, documentIdentifier==$docId, rulesApplied not contains "getTNMClassificationStatus")
 	then
-
 		modify($tFact){	addRulesApplied("getTNMClassificationStatus") }
 		modify($nFact){	addRulesApplied("getTNMClassificationStatus") }
 		modify($mFact){	addRulesApplied("getTNMClassificationStatus") }
 		
-		Fact tf = FactFactory.createFact($tFact.getType(), $tUri);
+		String prefix = "";
+		if($tname.startsWith("p") || $nname.startsWith("p") || $mname.startsWith("p"))
+			prefix = "p";
+		else if($tname.startsWith("c") || $nname.startsWith("c") || $mname.startsWith("c"))
+			prefix = "c";
+		else if ($docType.equalsIgnoreCase("Pathology Report"))
+			prefix = "p";
+		else 
+			prefix = "c";
+	// check if prefix exists
+		if(!$tname.startsWith(prefix))
+			$tname = prefix+$tname;
+		if(!$nname.startsWith(prefix))
+			$nname = prefix+$nname;
+		if(!$mname.startsWith(prefix))
+			$mname = prefix+$mname;
+		
+		Fact tf = FactFactory.createFact($tFact.getType(), OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#"+$tname);
 		tf.addProvenanceFact($tFact);
-		Fact nf = FactFactory.createFact($nFact.getType(), $nUri);
+		tf.setCategory("hasTClassification");
+		tf.setPatientIdentifier($patientId);
+		tf.setDocumentType("Summary");
+		
+		Fact nf = FactFactory.createFact($nFact.getType(), OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#"+$nname);
 		nf.addProvenanceFact($nFact);
-		Fact mf = FactFactory.createFact($mFact.getType(), $mUri);
+		nf.setCategory("hasNClassification");
+		nf.setPatientIdentifier($patientId);
+		nf.setDocumentType("Summary");
+		
+		Fact mf = FactFactory.createFact($mFact.getType(), OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#"+$mname);
 		mf.addProvenanceFact($mFact);
+		mf.setCategory("hasMClassification");
+		mf.setPatientIdentifier($patientId);
+		mf.setDocumentType("Summary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact($tFact.getCategory(), tf),
 			getCancerSummary().getPhenotype().addFact($nFact.getCategory(), nf),
 			getCancerSummary().getPhenotype().addFact($mFact.getCategory(), mf)
 		}
+		
+		insert(tf);
+		insert(nf);
+		insert(mf);
 			
 		System.out.println("*** setTNMClassification for MR");
 
 end
+
+*/

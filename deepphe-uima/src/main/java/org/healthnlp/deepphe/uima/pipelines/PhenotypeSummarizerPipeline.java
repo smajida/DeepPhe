@@ -73,8 +73,8 @@ final public class PhenotypeSummarizerPipeline {
 		
 		
 		// run the damn pipeline
-		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE, cancerSummarizerAE, summaryAE, xmiWriter, transmartAE,graphDBConsumerAE);
-		//SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE,cancerSummarizerAE,xmiWriter);
+		//SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE, cancerSummarizerAE, summaryAE, xmiWriter, transmartAE,graphDBConsumerAE);
+		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE,cancerSummarizerAE,summaryAE,xmiWriter);
 
 	}
 
