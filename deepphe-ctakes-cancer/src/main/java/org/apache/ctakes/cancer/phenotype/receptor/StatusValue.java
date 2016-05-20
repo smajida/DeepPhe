@@ -33,7 +33,7 @@ enum StatusValue implements Value {
    }
 
    public String getUri() {
-      return OwlConstants.BREAST_CANCER_OWL + "#" + _uri;
+      return OwlConstants.CANCER_OWL + "#" + _uri;
    }
 
    public Matcher getMatcher( final CharSequence lookupWindow ) {
