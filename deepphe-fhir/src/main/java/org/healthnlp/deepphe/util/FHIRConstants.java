@@ -1,6 +1,8 @@
 package org.healthnlp.deepphe.util;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * list of misc FHIR and ontology related constants
@@ -50,8 +52,13 @@ public class FHIRConstants {
 	public static final String TREATMENT = "Treatment";
 	public static final String MANIFISTATION = "ManifestationOfDisease";
 	public static final String MEDICAL_RECORD = "MedicalRecord";
+	public static final String BODY_MODIFIER = "BodyModifier";
+	public static final String BODY_SIDE = "BodySide";
+	public static final String ORDINAL_INTERPRETATION = "OrdinalInterpretation";
+	
 	
 	public static final String HAS_BODY_SITE = "hasBodySite";
+	public static final String HAS_BODY_MODIFIER = "hasBodySiteModifier";
 	public static final String HAS_TREATMENT = "hasTreatment";
 	public static final String HAS_OUTCOME = "hasOutcome";
 	public static final String HAS_CANCER_STAGE = "hasCancerStage";
@@ -114,6 +121,10 @@ public class FHIRConstants {
 	public static final String PROGRESS_NOTE_URI = null;*/
 	public static final URI QUANTITY_URI = URI.create("http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity");
 	public static final URI GENERIC_TNM = URI.create(MODEL_CANCER_URL+"#TNM_Staging_System");
+
+	public static final List<String> BODY_SIDE_LIST = Arrays.asList("Right","Left","Bilateral");
+	
+
 
 
 
