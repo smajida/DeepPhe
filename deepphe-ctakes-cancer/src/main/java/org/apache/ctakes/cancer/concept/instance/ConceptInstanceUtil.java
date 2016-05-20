@@ -2,6 +2,7 @@ package org.apache.ctakes.cancer.concept.instance;
 
 import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
 import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
+import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.jcas.JCas;
@@ -235,6 +236,125 @@ final public class ConceptInstanceUtil {
       return createConceptInstances(
             PhenotypeAnnotationUtil.getLocations( jcas, locatable.getIdentifiedAnnotation() ) );
    }
+
+
+   //   static private final String TEST_QUADRANT_URI = LocationModifier.Quadrant.LOWER_OUTER.getUri();
+   static private final String TEST_QUADRANT_URI = null;
+
+   @Deprecated
+   static public String getQuadrantUri( final ConceptInstance locatable ) {
+      return PhenotypeAnnotationUtil.getLocations( locatable.getIdentifiedAnnotation() ).stream()
+            .map( PhenotypeAnnotationUtil::getQuadrants )
+            .flatMap( Collection::stream )
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .findAny()
+            .orElse( TEST_QUADRANT_URI );
+   }
+
+   //   static private final String TEST_BODY_SIDE = OwlConstants.CANCER_OWL + "#Left";
+   static private final String TEST_BODY_SIDE = null;
+
+   @Deprecated
+   static public String getBodySideUri( final ConceptInstance locatable ) {
+      return PhenotypeAnnotationUtil.getLocations( locatable.getIdentifiedAnnotation() ).stream()
+            .map( PhenotypeAnnotationUtil::getBodySides )
+            .flatMap( Collection::stream )
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .findAny()
+            .orElse( TEST_BODY_SIDE );
+   }
+
+   //   static private final String TEST_CLOCKWISE = OwlConstants.BREAST_CANCER_OWL + "#4_o_clock_position";
+   static private final String TEST_CLOCKWISE = null;
+
+   @Deprecated
+   static public String getClockwiseUri( final ConceptInstance locatable ) {
+      return PhenotypeAnnotationUtil.getLocations( locatable.getIdentifiedAnnotation() ).stream()
+            .map( PhenotypeAnnotationUtil::getClockwises )
+            .flatMap( Collection::stream )
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .findAny()
+            .orElse( TEST_CLOCKWISE );
+   }
+
+//   static public String getQuadrantUri( final ConceptInstance location ) {
+//      final IdentifiedAnnotation annotation = location.getIdentifiedAnnotation();
+//      if ( !( annotation instanceof AnatomicalSiteMention) ) {
+//         return getLocationQuadrantUri( location );
+//      }
+//      return PhenotypeAnnotationUtil.getQuadrants( annotation ).stream()
+//            .map( OwlOntologyConceptUtil::getUris )
+//            .flatMap( Collection::stream )
+//            .findAny()
+//            .orElse( TEST_QUADRANT_URI );
+//   }
+//
+//   static public String getBodySideUri( final ConceptInstance location ) {
+//      final IdentifiedAnnotation annotation = location.getIdentifiedAnnotation();
+//      if ( !( annotation instanceof AnatomicalSiteMention) ) {
+//         return getLocationBodySideUri( location );
+//      }
+//      return PhenotypeAnnotationUtil.getBodySides( annotation ).stream()
+//            .map( OwlOntologyConceptUtil::getUris )
+//            .flatMap( Collection::stream )
+//            .findAny()
+//            .orElse( TEST_BODY_SIDE );
+//   }
+//
+//   static public String getClockwiseUri( final ConceptInstance location ) {
+//      final IdentifiedAnnotation annotation = location.getIdentifiedAnnotation();
+//      if ( !( annotation instanceof AnatomicalSiteMention) ) {
+//         return getLocationClockwiseUri( location );
+//      }
+//      return PhenotypeAnnotationUtil.getClockwises( annotation ).stream()
+//            .map( OwlOntologyConceptUtil::getUris )
+//            .flatMap( Collection::stream )
+//            .findAny()
+//            .orElse( TEST_CLOCKWISE );
+//   }
+
+
+   static public Collection<String> getQuadrantUris( final ConceptInstance location ) {
+      final IdentifiedAnnotation annotation = location.getIdentifiedAnnotation();
+      if ( !(annotation instanceof AnatomicalSiteMention) ) {
+         return Collections.emptyList();
+      }
+      return PhenotypeAnnotationUtil.getQuadrants( annotation ).stream()
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .distinct()
+            .collect( Collectors.toList() );
+   }
+
+   static public Collection<String> getBodySideUris( final ConceptInstance location ) {
+      final IdentifiedAnnotation annotation = location.getIdentifiedAnnotation();
+      if ( !(annotation instanceof AnatomicalSiteMention) ) {
+         return Collections.emptyList();
+      }
+      return PhenotypeAnnotationUtil.getBodySides( annotation ).stream()
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .distinct()
+            .collect( Collectors.toList() );
+   }
+
+   static public Collection<String> getClockwiseUris( final ConceptInstance location ) {
+      final IdentifiedAnnotation annotation = location.getIdentifiedAnnotation();
+      if ( !(annotation instanceof AnatomicalSiteMention) ) {
+         return Collections.emptyList();
+      }
+      return PhenotypeAnnotationUtil.getClockwises( annotation ).stream()
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .distinct()
+            .collect( Collectors.toList() );
+   }
+
+
+
 
 
    static public Collection<ConceptInstance> getPhenotypeValues( final ConceptInstance phenotype ) {

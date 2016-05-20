@@ -458,16 +458,13 @@ final public class DocumentResourceFactory {
 		anatomicalSite.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
 
 		// add anatomical sites modifiers
-		String quadrant = conceptInstance.getQuadrantUri();
-		if(quadrant != null){
+		for(String quadrant : ConceptInstanceUtil.getQuadrantUris( conceptInstance )){
 			anatomicalSite.addModifier(FHIRUtils.getCodeableConcept(URI.create(quadrant)));
 		}
-		String clock = conceptInstance.getClockwiseUri();
-		if(clock != null){
+		for(String clock :  ConceptInstanceUtil.getClockwiseUris( conceptInstance )){
 			anatomicalSite.addModifier(FHIRUtils.getCodeableConcept(URI.create(clock)));
 		}
-		String side = conceptInstance.getBodySideUri();
-		if(side != null){
+		for(String side : ConceptInstanceUtil.getBodySideUris( conceptInstance )){
 			anatomicalSite.addModifier(FHIRUtils.getCodeableConcept(URI.create(side)));
 		}
 		

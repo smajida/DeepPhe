@@ -101,9 +101,8 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
                OwlConstants.BREAST_CANCER_OWL + "#Triple_Negative_Breast_Carcinoma" );
          writeTnmBsv( jcas, getOutputDir( "TnmClassification" ), fileName, TnmPropertyUtil.getParentUri() );
          writeDisorderBsv( jcas, getOutputDir( "Disorder" ), fileName );
-         writeMultiLocationBsv( jcas, getOutputDir( "Metastasis" ), fileName,
-               OwlConstants.BREAST_CANCER_OWL + "#Metastasis",
-               OwlConstants.BREAST_CANCER_OWL + "#Metastatic_Neoplasm" );
+         writeMultiLocationBsv( jcas, getOutputDir( "Metastasis" ), fileName, OwlConstants.BREAST_CANCER_OWL
+                                                                              + "#Metastatic_Neoplasm" );
       } catch ( IOException ioE ) {
          throw new AnalysisEngineProcessException( ioE );
       }
@@ -216,9 +215,6 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
                writer.write( "\n" );
             } else {
                for ( IdentifiedAnnotation location : locations ) {
-                  LOGGER.info( "Quadrant " + conceptInstance.getQuadrantUri() );
-                  LOGGER.info( "Body Side " + conceptInstance.getBodySideUri() );
-                  LOGGER.info( "Clockwise " + conceptInstance.getClockwiseUri() );
                   // DocName| standard line
                   writer.write( sourceFilename + "|" );
                   writer.write( createMultiLocationLine( conceptInstance, location ) );
@@ -299,16 +295,16 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       // Uncertain_value|Uncertain_span|
       sb.append( getAttributeTextYN( conceptInstance.isUncertain() ) );
       // Course_value|Course_span|
-      sb.append( "unmarked|NULL|" );
+      sb.append( "NULL|unmarked|" );
       // Severity_value|Severity_span|
-      sb.append( "unmarked|NULL|" );
+      sb.append( "NULL|unmarked|" );
       // Cond_value|Cond_span|
       sb.append( getAttributeTextTF( conceptInstance.isConditional() ) );
       // Generic_value|Generic_span|
       sb.append( getAttributeTextTF( conceptInstance.isHypothetical() ) );
       // Bodyloc_value|Bodyloc_span|
       sb.append( getCuiSpannedText( PhenotypeAnnotationUtil
-            .getLocations( conceptInstance.getIdentifiedAnnotation() ), "null" ) );
+            .getLocations( conceptInstance.getIdentifiedAnnotation() ), "unmarked" ) );
       // DocTimeRel|DocTimeRelSpan|
       sb.append( getAttributeText( conceptInstance.getDocTimeRel(), "unmarked" ) );
       return sb.toString();
@@ -324,15 +320,15 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       // Uncertain_value|Uncertain_span|
       sb.append( getAttributeTextYN( conceptInstance.isUncertain() ) );
       // Course_value|Course_span|
-      sb.append( "unmarked|NULL|" );
+      sb.append( "NULL|unmarked|" );
       // Severity_value|Severity_span|
-      sb.append( "unmarked|NULL|" );
+      sb.append( "NULL|unmarked|" );
       // Cond_value|Cond_span|
       sb.append( getAttributeTextTF( conceptInstance.isConditional() ) );
       // Generic_value|Generic_span|
       sb.append( getAttributeTextTF( conceptInstance.isHypothetical() ) );
       // Bodyloc_value|Bodyloc_span|
-      sb.append( getNormalizedCuiText( location ) + '|' + getSpanText( location, "null" ) + '|' );
+      sb.append( getNormalizedCuiText( location ) + '|' + getSpanText( location, "unmarked" ) + '|' );
       // DocTimeRel|DocTimeRelSpan|
       sb.append( getAttributeText( conceptInstance.getDocTimeRel(), "unmarked" ) );
       return sb.toString();
@@ -361,17 +357,17 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
 
    static private String getAttributeTextYN( final boolean isAttributePositive ) {
       final String value = isAttributePositive ? "yes" : "no";
-      return value + "|NULL|";
+      return value + "|unmarked|";
    }
 
    static private String getAttributeTextTF( final boolean isAttributePositive ) {
       final String value = isAttributePositive ? "true" : "false";
-      return value + "|NULL|";
+      return value + "|unmarked|";
    }
 
    static private String getAttributeText( final String attributeValue, final String defaultText ) {
       final String value = attributeValue.isEmpty() ? defaultText : attributeValue;
-      return value + "|NULL|";
+      return value + "|unmarked|";
    }
 
 //   public static AnalysisEngineDescription createAnnotatorDescription() throws ResourceInitializationException {
@@ -411,7 +407,7 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
 
    static private String getNormalizedCuiText( final IdentifiedAnnotation annotation ) {
       final String cuiValue = getCuiValue( annotation );
-      return cuiValue == null ? "unmarked" : getNormalizedCuiText( cuiValue );
+      return cuiValue == null ? "NULL" : getNormalizedCuiText( cuiValue );
    }
 
    static private String getNormalizedCuiText( final String cui ) {

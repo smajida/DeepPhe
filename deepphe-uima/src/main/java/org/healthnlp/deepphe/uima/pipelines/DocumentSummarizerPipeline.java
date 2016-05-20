@@ -1,9 +1,8 @@
 package org.healthnlp.deepphe.uima.pipelines;
 
-import java.io.IOException;
-
-import javax.annotation.concurrent.Immutable;
-
+import com.lexicalscope.jewel.cli.CliFactory;
+import com.lexicalscope.jewel.cli.Option;
+import org.apache.ctakes.cancer.concept.instance.ToyAE;
 import org.apache.ctakes.cancer.pipeline.CancerPipelineFactory;
 import org.apache.uima.UIMAException;
 import org.apache.uima.analysis_engine.AnalysisEngine;
@@ -14,8 +13,8 @@ import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.uima.ae.DocumentSummarizerAE;
 import org.healthnlp.deepphe.uima.ae.IClassExtractor;
 
-import com.lexicalscope.jewel.cli.CliFactory;
-import com.lexicalscope.jewel.cli.Option;
+import javax.annotation.concurrent.Immutable;
+import java.io.IOException;
 
 @Immutable
 final public class DocumentSummarizerPipeline {
@@ -23,21 +22,21 @@ final public class DocumentSummarizerPipeline {
    private DocumentSummarizerPipeline() {
    }
 
-   static interface Options{
+   interface Options {
       @Option(
             shortName = "i",
             description = "specify the path to the directory containing the clinical notes to be processed" )
-      public String getInputDirectory();
+      String getInputDirectory();
 
       @Option(
             shortName = "o",
             description = "specify the path to the directory where the output xmi files are to be saved" )
-      public String getOutputDirectory();
+      String getOutputDirectory();
 
       @Option(
             shortName = "m",
             description = "specify the path to the model ontology file to be used." )
-      public String getOntologyPath();
+      String getOntologyPath();
    }
 
 
@@ -49,9 +48,11 @@ final public class DocumentSummarizerPipeline {
       final AnalysisEngine iClassExtractor
             = AnalysisEngineFactory
             .createEngine( IClassExtractor.class, DocumentSummarizerAE.PARAM_ONTOLOGY_PATH, ontologyPath );
-      
+
+      final AnalysisEngine toyAE = AnalysisEngineFactory.createEngine( ToyAE.class );
+
       final AnalysisEngine docSummarizer = createDocSummarizerAE( outputDirectory, ontologyPath );
-      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, iClassExtractor, docSummarizer);
+      SimplePipeline.runPipeline( collectionReader, ctakesCancerEngine, iClassExtractor, toyAE, docSummarizer );
    }
 
 
@@ -68,7 +69,6 @@ final public class DocumentSummarizerPipeline {
    public static void main( final String... args ) throws UIMAException, IOException {
 	      final Options options = CliFactory.parseArguments( Options.class, args );
 	      runDocumentSummarizerPipeline( options.getInputDirectory(), options.getOutputDirectory(), options.getOntologyPath());
-//      CancerPipelineRunner.runCancerPipeline( options.getInputDirectory(), options.getOutputDirectory() );
 	   }
 
 

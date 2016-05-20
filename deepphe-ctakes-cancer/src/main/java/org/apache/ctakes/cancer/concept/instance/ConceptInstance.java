@@ -1,21 +1,13 @@
 package org.apache.ctakes.cancer.concept.instance;
 
-import org.apache.ctakes.cancer.location.LocationModifier;
-import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.owl.OwlUriUtil;
-import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
-import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.refsem.Event;
 import org.apache.ctakes.typesystem.type.refsem.EventProperties;
-import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
 import org.apache.ctakes.typesystem.type.textsem.EventMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 
 import javax.annotation.concurrent.Immutable;
-
-import java.util.Collection;
-import java.util.stream.Stream;
 
 /**
  * @author SPF , chip-nlp
@@ -90,7 +82,8 @@ final public class ConceptInstance {
    public String getDocTimeRel() {
       final EventProperties properties = getEventProperties();
       if ( properties != null ) {
-         return properties.getDocTimeRel();
+         final String dtr = properties.getDocTimeRel();
+         return dtr == null ? "" : dtr;
       }
       return "";
    }
@@ -101,7 +94,8 @@ final public class ConceptInstance {
    public String getModality() {
       final EventProperties properties = getEventProperties();
       if ( properties != null ) {
-         return properties.getContextualModality();
+         final String cm = properties.getContextualModality();
+         return cm == null ? "" : cm;
       }
       return "";
    }
@@ -127,52 +121,6 @@ final public class ConceptInstance {
       return false;
    }
 
-   static private final String TEST_QUADRANT_URI = LocationModifier.Quadrant.LOWER_OUTER.getUri();
-   //static private final String TEST_QUADRANT_URI = null;
-
-   public String getQuadrantUri() {
-      final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().orElse( null );
-      if ( firstAnatomical == null ) {
-         return TEST_QUADRANT_URI;
-      }
-      return PhenotypeAnnotationUtil.getQuadrants( firstAnatomical ).stream()
-            .map( OwlOntologyConceptUtil::getUris )
-            .flatMap( Collection::stream )
-            .findAny()
-            .orElse( TEST_QUADRANT_URI );
-   }
-
-   static private final String TEST_BODY_SIDE = OwlConstants.CANCER_OWL + "#Left";
-   //static private final String TEST_BODY_SIDE = null;
-
-   public String getBodySideUri() {
-      final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().orElse( null );
-      if ( firstAnatomical == null ) {
-         return TEST_BODY_SIDE;
-      }
-      return PhenotypeAnnotationUtil.getBodySides( firstAnatomical ).stream()
-            .map( OwlOntologyConceptUtil::getUris )
-            .flatMap( Collection::stream )
-            .findAny()
-            .orElse( TEST_BODY_SIDE );
-   }
-
-   static private final String TEST_CLOCKWISE = OwlConstants.BREAST_CANCER_OWL + "#4_o_clock_position";
-   //static private final String TEST_CLOCKWISE = null;
-
-   public String getClockwiseUri() {
-      final IdentifiedAnnotation firstAnatomical = getAnatomicalSites().findFirst().orElse( null );
-      if ( firstAnatomical == null ) {
-         return TEST_CLOCKWISE;
-      }
-      return PhenotypeAnnotationUtil.getQuadrants( firstAnatomical ).stream()
-            .map( OwlOntologyConceptUtil::getUris )
-            .flatMap( Collection::stream )
-            .findAny()
-            .orElse( TEST_CLOCKWISE );
-
-   }
-
 
    private EventProperties getEventProperties() {
       if ( !EventMention.class.isInstance( _annotation ) ) {
@@ -185,12 +133,28 @@ final public class ConceptInstance {
       return null;
    }
 
-   private Stream<AnatomicalSiteMention> getAnatomicalSites() {
-      return PhenotypeAnnotationUtil.getLocations( _annotation ).stream()
-            .filter( AnatomicalSiteMention.class::isInstance )
-            .map( a -> (AnatomicalSiteMention)a );
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public String toString() {
+      final StringBuilder sb = new StringBuilder();
+      sb.append( "ConceptInstance: " )
+            .append( getIdentifiedAnnotation().getCoveredText() )
+            .append( " " ).append( getUri() )
+            .append( "\tis a " ).append( getIdentifiedAnnotation().getClass().getName() )
+            .append( isNegated() ? "\tnegated" : "" )
+            .append( isUncertain() ? "\tuncertain" : "" )
+            .append( isConditional() ? "\tconditional" : "" )
+            .append( isHypothetical() ? "\thypothetical" : "" )
+            .append( isPermanent() ? "\tpermanent" : "" )
+            .append( isIntermittent() ? "\tintermittent" : "" )
+            .append( inPatientHistory() ? "\tpatient history" : "" )
+            .append( getSubject().isEmpty() ? "" : "\t" + getSubject() )
+            .append( getDocTimeRel().isEmpty() ? "" : "\t" + getDocTimeRel() )
+            .append( getModality().isEmpty() ? "" : "\t" + getModality() );
+      return sb.toString();
    }
-
-
 
 }
