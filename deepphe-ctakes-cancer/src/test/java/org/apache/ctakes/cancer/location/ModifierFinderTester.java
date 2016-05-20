@@ -18,27 +18,49 @@ public class ModifierFinderTester {
 
    static private final String[] UPPER_INNER_SENTENCES = { "Tumor in the upper inner quadrant",
                                                            "Tumor in the upper-inner quadrant",
+                                                           "Tumor in the inner upper quadrant",
+                                                           "Tumor in the inner-upper quadrant",
                                                            "Tumor at breast upper-inner area." };
-   static private final int[] UPPER_INNER_BEGINS = { 13, 13, 16 };
-   static private final int[] UPPER_INNER_ENDS = { 33, 33, 27 };
+   static private final int[] UPPER_INNER_BEGINS = { 13, 13, 13, 13, 16 };
+   static private final int[] UPPER_INNER_ENDS = { 33, 33, 33, 33, 27 };
+
+
+   static private final String[] UPPER_LOWER_INNER_SENTENCES = { "Tumor at breast upper/lower inner quadrant.",
+                                                                 "Tumor at breast upper/lower-inner quadrant." };
+   static private final int[] UPPER_LOWER_INNER_BEGINS = { 16, 16 };
+   static private final int[] UPPER_LOWER_INNER_ENDS = { 42, 42 };
+
+
+   static private final String[] UPPER_LOWER_OUTER_SENTENCES = { "Tumor at breast upper/lower outer quadrant.",
+                                                                 "Tumor at breast upper/lower-outer quadrant." };
+   static private final int[] UPPER_LOWER_OUTER_BEGINS = { 16, 16 };
+   static private final int[] UPPER_LOWER_OUTER_ENDS = { 42, 42 };
+
+
 
    static private final String[] LOWER_INNER_SENTENCES = { "Tumor in the lower inner quadrant",
                                                            "Tumor in the lower-inner quadrant",
+                                                           "Tumor in the inner lower quadrant",
+                                                           "Tumor in the inner-lower quadrant",
                                                            "Tumor at breast lower-inner area." };
-   static private final int[] LOWER_INNER_BEGINS = { 13, 13, 16 };
-   static private final int[] LOWER_INNER_ENDS = { 33, 33, 27 };
+   static private final int[] LOWER_INNER_BEGINS = { 13, 13, 13, 13, 16 };
+   static private final int[] LOWER_INNER_ENDS = { 33, 33, 33, 33, 27 };
 
    static private final String[] UPPER_OUTER_SENTENCES = { "Tumor in the upper outer quadrant",
                                                            "Tumor in the upper-outer quadrant",
+                                                           "Tumor in the outer upper quadrant",
+                                                           "Tumor in the outer-upper quadrant",
                                                            "Tumor at breast upper-outer area." };
-   static private final int[] UPPER_OUTER_BEGINS = { 13, 13, 16 };
-   static private final int[] UPPER_OUTER_ENDS = { 33, 33, 27 };
+   static private final int[] UPPER_OUTER_BEGINS = { 13, 13, 13, 13, 16 };
+   static private final int[] UPPER_OUTER_ENDS = { 33, 33, 33, 33, 27 };
 
    static private final String[] LOWER_OUTER_SENTENCES = { "Tumor in the lower outer quadrant",
                                                            "Tumor in the lower-outer quadrant",
+                                                           "Tumor in the outer lower quadrant",
+                                                           "Tumor in the outer-lower quadrant",
                                                            "Tumor at breast lower-outer area." };
-   static private final int[] LOWER_OUTER_BEGINS = { 13, 13, 16 };
-   static private final int[] LOWER_OUTER_ENDS = { 33, 33, 27 };
+   static private final int[] LOWER_OUTER_BEGINS = { 13, 13, 13, 13, 16 };
+   static private final int[] LOWER_OUTER_ENDS = { 33, 33, 33, 33, 27 };
 
    static private final String LEFT_SENTENCE = "Patient has left breast cancer.";
    static private final String RIGHT_SENTENCE = "Patient has right breast cancer.";
@@ -48,7 +70,7 @@ public class ModifierFinderTester {
 
 
    @Test
-   public void testQuadrants() {
+   public void testOneQuadrant() {
       for ( int i = 0; i < UPPER_INNER_SENTENCES.length; i++ ) {
          final List<SpannedModifier> quadrants = ModifierFinder
                .findModifiers( UPPER_INNER_SENTENCES[ i ], LocationModifier.Quadrant.values() );
@@ -78,6 +100,31 @@ public class ModifierFinderTester {
                .get( 0 ), LOWER_OUTER_SENTENCES[ i ], LOWER_OUTER_BEGINS[ i ], LOWER_OUTER_ENDS[ i ], LocationModifier.Quadrant.LOWER_OUTER );
       }
    }
+
+   @Test
+   public void testTwoQuadrants() {
+      for ( int i = 0; i < UPPER_LOWER_INNER_SENTENCES.length; i++ ) {
+         final List<SpannedModifier> quadrants = ModifierFinder
+               .findModifiers( UPPER_LOWER_INNER_SENTENCES[ i ], LocationModifier.Quadrant.values() );
+         assertEquals( "Expect two quadrants in " + UPPER_LOWER_INNER_SENTENCES[ i ], 2, quadrants.size() );
+         testModifier( quadrants
+               .get( 0 ), UPPER_LOWER_INNER_SENTENCES[ i ], UPPER_LOWER_INNER_BEGINS[ i ], UPPER_LOWER_INNER_ENDS[ i ], LocationModifier.Quadrant.UPPER_INNER );
+         testModifier( quadrants
+               .get( 1 ), UPPER_LOWER_INNER_SENTENCES[ i ],
+               UPPER_LOWER_INNER_BEGINS[ i ] + 6, UPPER_LOWER_INNER_ENDS[ i ], LocationModifier.Quadrant.LOWER_INNER );
+      }
+      for ( int i = 0; i < UPPER_LOWER_OUTER_SENTENCES.length; i++ ) {
+         final List<SpannedModifier> quadrants = ModifierFinder
+               .findModifiers( UPPER_LOWER_OUTER_SENTENCES[ i ], LocationModifier.Quadrant.values() );
+         assertEquals( "Expect two quadrants in " + UPPER_LOWER_OUTER_SENTENCES[ i ], 2, quadrants.size() );
+         testModifier( quadrants
+               .get( 0 ), UPPER_LOWER_OUTER_SENTENCES[ i ], UPPER_LOWER_OUTER_BEGINS[ i ], UPPER_LOWER_OUTER_ENDS[ i ], LocationModifier.Quadrant.UPPER_OUTER );
+         testModifier( quadrants
+               .get( 1 ), UPPER_LOWER_OUTER_SENTENCES[ i ],
+               UPPER_LOWER_OUTER_BEGINS[ i ] + 6, UPPER_LOWER_OUTER_ENDS[ i ], LocationModifier.Quadrant.LOWER_OUTER );
+      }
+   }
+
 
    @Test
    public void testBodySides() {

@@ -32,7 +32,7 @@ public class MetastasisRelocator extends JCasAnnotator_ImplBase {
    static private final Logger LOGGER = Logger.getLogger( "MetastasisRelocator" );
 
    /**
-    * Grabs the document time from the header
+    * Removes Metastasis to breast locations
     * {@inheritDoc}
     */
    @Override
