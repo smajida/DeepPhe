@@ -69,6 +69,22 @@ public class ModifierFinderTester {
    static private final String LEFT_RIGHT_SENTENCE = "Patient has left and right breast cancer.";
 
 
+   static private final String[] ONE_OCLOCK_SENTENCES = { "Patient has tumor at left breast, 1 o'clock.",
+                                                          "Patient has tumor at left breast, 1 o'clock position.",
+                                                          "Patient has tumor at left breast, 1 o' clock position.",
+                                                          "Patient has tumor at left breast, 1 o clock position.",
+                                                          "Patient has tumor at left breast, 1 oclock position." };
+   static private final int[] ONE_OCLOCK_BEGINS = { 34, 34, 34, 34, 34 };
+   static private final int[] ONE_OCLOCK_ENDS = { 43, 52, 53, 52, 51 };
+
+   static private final String[] ONE_THIRTY_SENTENCES = { "Patient has tumor at left breast, 1:30 o'clock.",
+                                                          "Patient has tumor at left breast, 1.30 o'clock position.",
+                                                          "Patient has tumor at left breast, 1:30 o' clock position.",
+                                                          "Patient has tumor at left breast, 1.30 o clock position.",
+                                                          "Patient has tumor at left breast, 1:30 oclock position." };
+   static private final int[] ONE_THIRTY_BEGINS = { 34, 34, 34, 34, 34 };
+   static private final int[] ONE_THIRTY_ENDS = { 46, 55, 56, 55, 54 };
+
    @Test
    public void testOneQuadrant() {
       for ( int i = 0; i < UPPER_INNER_SENTENCES.length; i++ ) {
@@ -143,6 +159,26 @@ public class ModifierFinderTester {
       final List<SpannedModifier> leftRight = ModifierFinder.findBodySides( LEFT_RIGHT_SENTENCE );
       assertEquals( "Expect one side in " + LEFT_RIGHT_SENTENCE, 1, leftRight.size() );
       testModifier( leftRight.get( 0 ), LEFT_RIGHT_SENTENCE, 12, 26, LocationModifier.BodySide.BILATERAL );
+   }
+
+   @Test
+   public void testClockwise() {
+      for ( int i = 0; i < ONE_OCLOCK_SENTENCES.length; i++ ) {
+         final List<SpannedModifier> clockwises = ModifierFinder
+               .findModifiers( ONE_OCLOCK_SENTENCES[ i ], LocationModifier.Clockwise.values() );
+         assertEquals( "Expect one quadrant in " + ONE_OCLOCK_SENTENCES[ i ], 1, clockwises.size() );
+         testModifier( clockwises
+                     .get( 0 ), ONE_OCLOCK_SENTENCES[ i ], ONE_OCLOCK_BEGINS[ i ], ONE_OCLOCK_ENDS[ i ],
+               LocationModifier.Clockwise.values()[ 0 ] );
+      }
+      for ( int i = 0; i < ONE_THIRTY_SENTENCES.length; i++ ) {
+         final List<SpannedModifier> clockwises = ModifierFinder
+               .findModifiers( ONE_THIRTY_SENTENCES[ i ], LocationModifier.Clockwise.values() );
+         assertEquals( "Expect one quadrant in " + ONE_THIRTY_SENTENCES[ i ], 1, clockwises.size() );
+         testModifier( clockwises
+                     .get( 0 ), ONE_THIRTY_SENTENCES[ i ], ONE_THIRTY_BEGINS[ i ], ONE_THIRTY_ENDS[ i ],
+               LocationModifier.Clockwise.values()[ 1 ] );
+      }
    }
 
 

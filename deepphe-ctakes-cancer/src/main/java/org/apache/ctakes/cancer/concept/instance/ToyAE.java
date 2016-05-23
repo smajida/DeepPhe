@@ -32,7 +32,7 @@ final public class ToyAE extends JCasAnnotator_ImplBase {
    @Override
    public void process( final JCas jcas ) throws AnalysisEngineProcessException {
 
-      LOGGER.info( jcas.getDocumentText() );
+//      LOGGER.info( jcas.getDocumentText() );
       getAllNeoplasms( jcas ).forEach( n -> LOGGER.info( getNeoplasmDescription( n ) ) );
 
    }
