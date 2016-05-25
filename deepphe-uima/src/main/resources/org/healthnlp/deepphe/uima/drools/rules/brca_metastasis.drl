@@ -1,0 +1,218 @@
+package org.healthnlp.deepphe.uima.drools;
+
+import java.lang.Object;
+import java.util.List;
+import java.util.ArrayList;
+
+import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.FHIRConstants;
+
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
+import org.healthnlp.deepphe.fhir.fact.FactHelper;
+
+import org.healthnlp.deepphe.fhir.summary.*;
+import org.healthnlp.deepphe.uima.drools.*;
+
+import org.apache.ctakes.cancer.owl.OwlConstants;
+
+/*
+* primaryTumor-2 :
+* Olga: create tumor here AND:
+* If tumors are on the same side and hitologicType is ductal or there is histologic type specified = >combine them as one "primary"
+* Tumors that are intraductal or ductal and Paget Disease are a single primary => 
+* If you have two tumors that are located within the same breast and both tumors have HistologicalType=Ductal 
+* and one or both of the tumors have Paget's Disease as a diagnosis, then you can merge the two tumors into one tumor with tumor type= "Primary".
+*/
+rule "primaryTumor-2"
+	salience 88889
+	no-loop true
+	when
+		$record : MedicalRecord()	
+		$domain : Domain($domainName : domainName)	
+		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+						$newSummaryId : summaryId)  
+	    IdMapper($c_summaryId : oldSummaryId, newSummaryId == $newSummaryId)
+		$site_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType != "RecordSummary",
+					$t_summaryId: summaryId, (name==$domainName || ancestors contains $domainName), containerIdentifier contains $c_summaryId)
+		$side_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType != "RecordSummary",
+					$sideName : name, containerIdentifier contains $t_summaryId)
+		$hist_tFact : Fact(summaryType=="TumorPhenotype", category == "hasHistologicType", name=="Ductal", documentType != "RecordSummary",
+					containerIdentifier contains $t_summaryId)
+					
+		$tl_1 : TumorLocator( docTumorId == $t_summaryId, bodySite == $domainName, bodySide == $sideName)
+		not (Fact (summaryType=="TumorSummary", documentType == "RecordSummary", provenanceFacts contains $site_tFact))
+		
+		$sameTumor : List()
+      	from collect( TumorLocator(bodySite ==  $domainName, bodySide == bodySide) )
+		
+	then
+System.out.println("&&7 PR2");
+		for(Object t : $sameTumor)
+		System.out.println("$sameTumor : "+((TumorLocator)t).getInfo());
+	
+end
+
+
+
+/* 
+*primaryTumor :
+* If you have a tumor located in the same organ (breast) as the cancer, then tumor type = "primary". 
+* ALSO secondPrimary1-1 :
+* If tumor 1 is located on the right side of the body and tumor 2 is on the left, then tumor 2 has tumor type primary tumor. 
+* ALSO secondPrimary1-2 : 
+* If tumor 1 is located on the left side of the body and tumor 2 is on the right, then tumor 2 has tumor type primary tumor. 
+*/
+rule "primaryTumor"
+	salience 88888
+	no-loop true
+	when
+		$record : MedicalRecord()	
+		$domain : Domain($domainName : domainName)	
+		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+						$summaryId : summaryId)
+		$tumorFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", $tumor_bs_name :name, documentType == "RecordSummary",
+					$tumor_id : identifier, rulesApplied not contains "primaryTumor", $tumor_ancestors : ancestors,
+					($tumor_bs_name==$domainName || $tumor_ancestors contains $domainName), containerIdentifier contains $summaryId)
+	then
+
+		modify($tumorFact){	addRulesApplied("primaryTumor") }
+		
+		Fact tumorTypeF = FactFactory.cretaeTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#PrimaryTumor", $tumorFact, 
+														$cancerFact, "TumorSummary", "hasTumorType", "RecordSummary", "TumorType");
+		
+		modify($record){
+			getCancerSummary().getTumorSummaryByIdentifier($tumor_id).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF)
+		}	
+
+		insert (tumorTypeF);
+		System.out.println("*** primaryTumor for "+$tumor_id+" name: "+$tumor_bs_name);
+		System.out.println("*** primaryTumor for tumorTypeF: "+tumorTypeF.getInfo());
+		
+		//TODO:
+		//Add bodySide modifier for primary
+end
+
+
+/*
+* localRecurrence5:
+* If tumor has body location = "thoracic wall" or its children, then tumor type = LocalRecurrence. 
+* (Breast Cancer tumor in ipsilateral thoracic wall is a local recurrence (excluding LCIS, Phyloides tumor)) 
+* MC check on exclusion criteria. 
+*/
+
+
+/*
+* regionalRecurrence1-1 :
+* If there is a tumor located in the axillary lymph node or children located on the same side of the body as the primary tumor, 
+* then the tumor(s) in the axillary lymph nodes have a tumor type of regional recurrences 
+* OLGA: any tumor in domain location (e.g. "Breast") is primary
+*/
+rule "regionalRecurrence1-1-Axillary_Lymph_Node"
+	salience 88888
+	no-loop true
+	when
+		$record : MedicalRecord()
+		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", $summaryId : summaryId)
+		$recTumor : Fact(summaryType=="TumorSummary", category == "hasBodySite", $recTumorName : name, $rectAncestors : ancestors,
+						($recTumorName == "Axillary_Lymph_Node" || $rectAncestors contains "Axillary_Lymph_Node"), $recSummaryId : summaryId,
+						rulesApplied not contains "regionalRecurrence1-1-Axillary_Lymph_Node", containerIdentifier contains $summaryId)
+		Fact(category == "hasBodySide", $sideName: name, documentType == "RecordSummary-Modifier", containerIdentifier contains $recSummaryId)
+		$tumorFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType == "RecordSummary", $primSummaryId : summaryId)
+		Fact(documentType == "RecordSummary", category == "hasTumorType", containerIdentifier contains $primSummaryId)
+		Fact(documentType == "RecordSummary-Modifier", category == "hasBodySide", name == $sideName, containerIdentifier contains $primSummaryId)
+		
+	then
+
+		modify($recTumor){	addRulesApplied("regionalRecurrence1-1-Axillary_Lymph_Node") }
+		
+		
+		
+		Fact tumorTypeF = FactFactory.cretaeTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#RegionalRecurrence", $recTumor, 
+														$cancerFact, "TumorSummary", "hasTumorType","RecordSummary", "TumorType");
+		modify($record){
+			getCancerSummary().getTumorSummaryByIdentifier($recTumor.getIdentifier()).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF)
+		}	
+
+		insert (tumorTypeF);		
+		
+		System.out.println("*** regionalRecurrence1-1-Axillary_Lymph_Node ");
+
+end
+
+
+/*
+* regionalRecurrence1-2 :
+* If there is a tumor located in the infraclavicular lymph node or children located on the same side of the body as the primary tumor, 
+* then the tumor(s) in the infraclavicular lymph nodes have a tumor type of regional recurrences 
+*/
+rule "regionalRecurrence1-2-Infraclavicular_Lymph_Node"
+	salience 88888
+	no-loop true
+	when
+		$record : MedicalRecord()
+		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", $summaryId : summaryId)
+		$recTumor : Fact(summaryType=="TumorSummary", category == "hasBodySite", $recTumorName : name, $rectAncestors : ancestors,
+						($recTumorName == "Infraclavicular_Lymph_Node" || $rectAncestors contains "Infraclavicular_Lymph_Node"), $recSummaryId : summaryId,
+						rulesApplied not contains "regionalRecurrence1-2-Infraclavicular_Lymph_Node", containerIdentifier contains $summaryId)
+		Fact(category == "hasBodySide", $sideName: name, documentType == "RecordSummary-Modifier", containerIdentifier contains $recSummaryId)
+		$tumorFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType == "RecordSummary", $primSummaryId : summaryId)
+		Fact(documentType == "RecordSummary", category == "hasTumorType", containerIdentifier contains $primSummaryId)
+		Fact(documentType == "RecordSummary-Modifier", category == "hasBodySide", name == $sideName, containerIdentifier contains $primSummaryId)
+		
+	then
+
+		modify($recTumor){	addRulesApplied("regionalRecurrence1-2-Infraclavicular_Lymph_Node") }
+		
+		
+		
+		Fact tumorTypeF = FactFactory.cretaeTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#RegionalRecurrence", $recTumor, 
+														$cancerFact, "TumorSummary", "hasTumorType","RecordSummary", "TumorType");
+		modify($record){
+			getCancerSummary().getTumorSummaryByIdentifier($recTumor.getIdentifier()).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF)
+		}	
+
+		insert (tumorTypeF);		
+		
+		System.out.println("*** regionalRecurrence1-1-Axillary_Lymph_Node ");
+
+end
+
+
+/*
+* regionalRecurrence1-3 :
+* If there is a tumor located in the supraclavicular internal mammary/parasternal lymph node or children located on the same side of the body 
+* as the primary tumor, then the tumor(s) in the supraclavicular internal mammary/parasternal lymph nodes 
+* have a tumor type of regional recurrences 
+*/
+rule "regionalRecurrence1-3-XXX"
+	salience 88888
+	no-loop true
+	when
+		$record : MedicalRecord()
+		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", $summaryId : summaryId)
+		$recTumor : Fact(summaryType=="TumorSummary", category == "hasBodySite", $recTumorName : name, $rectAncestors : ancestors,
+						($recTumorName == "XXX" || $rectAncestors contains "XXX"), $recSummaryId : summaryId,
+						rulesApplied not contains "regionalRecurrence1-3-", containerIdentifier contains $summaryId)
+		Fact(category == "hasBodySide", $sideName: name, documentType == "RecordSummary-Modifier", containerIdentifier contains $recSummaryId)
+		$tumorFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType == "RecordSummary", $primSummaryId : summaryId)
+		Fact(documentType == "RecordSummary", category == "hasTumorType", containerIdentifier contains $primSummaryId)
+		Fact(documentType == "RecordSummary-Modifier", category == "hasBodySide", name == $sideName, containerIdentifier contains $primSummaryId)
+		
+	then
+
+		modify($recTumor){	addRulesApplied("regionalRecurrence1-3-XXX") }
+		
+		
+		
+		Fact tumorTypeF = FactFactory.cretaeTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#RegionalRecurrence", $recTumor, 
+														$cancerFact, "TumorSummary", "hasTumorType","RecordSummary", "TumorType");
+		modify($record){
+			getCancerSummary().getTumorSummaryByIdentifier($recTumor.getIdentifier()).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF)
+		}	
+
+		insert (tumorTypeF);		
+		
+		System.out.println("*** regionalRecurrence1-3-XXX ");
+
+end
