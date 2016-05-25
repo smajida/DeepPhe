@@ -1,7 +1,7 @@
 package org.apache.ctakes.cancer.phenotype.metastasis;
 
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
-import org.apache.ctakes.cancer.util.FinderUtil;
+import org.apache.ctakes.core.util.AnnotationUtil;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.uima.jcas.JCas;
@@ -66,7 +66,7 @@ public class MetastasisPhenotypeFactory {
                                                     final String typeTitle,
                                                     final Iterable<IdentifiedAnnotation> neoplasms ) {
       final IdentifiedAnnotation closestNeoplasm
-            = FinderUtil.getClosestAnnotation( typeBegin, typeEnd, neoplasms );
+            = AnnotationUtil.getClosestAnnotation( typeBegin, typeEnd, neoplasms );
       if ( closestNeoplasm != null ) {
          final String relationName = typeTitle.replace( ' ', '_' ) + "_of";
          createEventMentionNeoplasm( jCas, metastasis, closestNeoplasm, relationName );

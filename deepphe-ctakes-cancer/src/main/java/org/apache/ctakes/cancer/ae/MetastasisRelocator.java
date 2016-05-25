@@ -1,8 +1,10 @@
 package org.apache.ctakes.cancer.ae;
 
 
+import org.apache.ctakes.cancer.location.LocationModifier;
 import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
+import org.apache.ctakes.typesystem.type.relation.BinaryTextRelation;
 import org.apache.ctakes.typesystem.type.relation.LocationOfTextRelation;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
@@ -13,11 +15,14 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.TOP;
 import org.apache.uima.jcas.tcas.Annotation;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
- * Removes Metastasis to breast locations
+ * Removes Metastasis to breast locations and location modifier to non-breast locations
  * In the future this will need to be modified so that other cancer types can have such exclusions,
  * but running on patients with more than one primary type will be hazardous
  * and running full-EMR will probably never be possible without a
@@ -31,6 +36,31 @@ public class MetastasisRelocator extends JCasAnnotator_ImplBase {
 
    static private final Logger LOGGER = Logger.getLogger( "MetastasisRelocator" );
 
+   static private final Collection<String> BREAST_URIS
+         = OwlOntologyConceptUtil.getUriBranchStream( OwlConstants.BREAST_CANCER_OWL + "#Breast" )
+         .collect( Collectors.toSet() );
+
+   static private final Predicate<BinaryTextRelation> breastLocation = r -> {
+      final Annotation site = r.getArg2().getArgument();
+      if ( !IdentifiedAnnotation.class.isInstance( site ) ) {
+         return true;
+      }
+      final Collection<String> uris = OwlOntologyConceptUtil.getUris( (IdentifiedAnnotation)site );
+      uris.removeAll( BREAST_URIS );
+      return uris.isEmpty();
+   };
+
+   static private final BiPredicate<BinaryTextRelation, Collection<String>> wantedLocatable = ( r, c ) -> {
+      final Annotation locatable = r.getArg1().getArgument();
+      if ( !IdentifiedAnnotation.class.isInstance( locatable ) ) {
+         return false;
+      }
+      final Collection<String> uris = OwlOntologyConceptUtil.getUris( (IdentifiedAnnotation)locatable );
+      uris.removeAll( c );
+      return uris.isEmpty();
+   };
+
+
    /**
     * Removes Metastasis to breast locations
     * {@inheritDoc}
@@ -38,43 +68,41 @@ public class MetastasisRelocator extends JCasAnnotator_ImplBase {
    @Override
    public void process( final JCas jcas ) throws AnalysisEngineProcessException {
       LOGGER.info( "Starting Processing" );
-      // breasts
-      final Collection<IdentifiedAnnotation> breasts = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas,
-            OwlConstants.BREAST_CANCER_OWL + "#Breast" );
-      if ( breasts.isEmpty() ) {
-         LOGGER.info( "Finished Processing" );
-         return;
-      }
-      // Metastases
-      final Collection<IdentifiedAnnotation> metastases
-            = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, OwlConstants.BREAST_CANCER_OWL
-                                                                      + "#Metastatic_Neoplasm" );
-      if ( metastases.isEmpty() ) {
-         LOGGER.info( "Finished Processing" );
-         return;
-      }
-      // location relations
-      final Collection<LocationOfTextRelation> locations = JCasUtil.select( jcas, LocationOfTextRelation.class );
-      if ( locations == null || locations.isEmpty() ) {
-         LOGGER.info( "Finished Processing" );
-         return;
-      }
-      final Collection<LocationOfTextRelation> unwantedRelations = new ArrayList<>();
-      for ( LocationOfTextRelation relation : locations ) {
-         // Arg1 is locatable (metastasis?), arg2 is location (breast?)
-         final Annotation locatable = relation.getArg1().getArgument();
-         if ( !(locatable instanceof IdentifiedAnnotation) || !metastases.contains( locatable ) ) {
-            continue;
-         }
-         final Annotation location = relation.getArg2().getArgument();
-         if ( !(location instanceof IdentifiedAnnotation) || !breasts.contains( location ) ) {
-            continue;
-         }
-         unwantedRelations.add( relation );
-      }
-      unwantedRelations.forEach( TOP::removeFromIndexes );
+      // metastases
+      final Collection<String> metastasisUris
+            = OwlOntologyConceptUtil.getUriBranchStream( OwlConstants.BREAST_CANCER_OWL + "#Metastatic_Neoplasm" )
+            .collect( Collectors.toList() );
+      getBreastRelations( jcas, metastasisUris ).forEach( TOP::removeFromIndexes );
+      // modifiers
+      getNonBreastRelations( jcas, getModifierUris( LocationModifier.Quadrant.values() ) )
+            .forEach( TOP::removeFromIndexes );
+      getNonBreastRelations( jcas, getModifierUris( LocationModifier.BodySide.values() ) )
+            .forEach( TOP::removeFromIndexes );
+      getNonBreastRelations( jcas, getModifierUris( LocationModifier.Clockwise.values() ) )
+            .forEach( TOP::removeFromIndexes );
       LOGGER.info( "Finished Processing" );
    }
 
+   static private Collection<LocationOfTextRelation> getBreastRelations( final JCas jCas,
+                                                                         final Collection<String> locatableUris ) {
+      return JCasUtil.select( jCas, LocationOfTextRelation.class ).stream()
+            .filter( r -> wantedLocatable.test( r, locatableUris ) )
+            .filter( breastLocation )
+            .collect( Collectors.toList() );
+   }
+
+   static private Collection<LocationOfTextRelation> getNonBreastRelations( final JCas jCas,
+                                                                            final Collection<String> locatableUris ) {
+      return JCasUtil.select( jCas, LocationOfTextRelation.class ).stream()
+            .filter( r -> wantedLocatable.test( r, locatableUris ) )
+            .filter( breastLocation.negate() )
+            .collect( Collectors.toList() );
+   }
+
+   static private Collection<String> getModifierUris( final LocationModifier[] modifiers ) {
+      return Arrays.stream( modifiers )
+            .map( LocationModifier::getUri )
+            .collect( Collectors.toList() );
+   }
 
 }

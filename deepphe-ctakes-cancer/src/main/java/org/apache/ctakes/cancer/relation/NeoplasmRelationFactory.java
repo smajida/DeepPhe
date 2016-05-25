@@ -1,6 +1,7 @@
 package org.apache.ctakes.cancer.relation;
 
 
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.phenotype.AbstractPhenotypeFactory;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
@@ -9,6 +10,8 @@ import org.apache.log4j.Logger;
 import org.apache.uima.jcas.JCas;
 
 import javax.annotation.concurrent.Immutable;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * A Neoplasm Relation is a special relation that links a neoplasm annotation with a property annotation.
@@ -25,6 +28,12 @@ final public class NeoplasmRelationFactory {
    }
 
    static private final Logger LOGGER = Logger.getLogger( "NeoplasmRelationFactory" );
+
+   static public Collection<String> getNeoplasmUris() {
+      return Arrays.asList( OwlConstants.CANCER_OWL + "#Neoplasm",
+            OwlConstants.BREAST_CANCER_OWL + "#Carcinoma",
+            OwlConstants.CANCER_OWL + "#CancerType" );
+   }
 
    /**
     * @param jCas          ye olde ...

@@ -7,6 +7,7 @@ import org.apache.ctakes.cancer.phenotype.receptor.StatusFinder;
 import org.apache.ctakes.cancer.phenotype.size.SizeFinder;
 import org.apache.ctakes.cancer.phenotype.stage.StageFinder;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmFinder;
+import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
 import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
@@ -22,6 +23,7 @@ import org.apache.uima.jcas.tcas.DocumentAnnotation;
 import org.apache.uima.resource.ResourceInitializationException;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 
 /**
@@ -50,19 +52,17 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
 
       final Collection<? extends Annotation> lookupWindows = JCasUtil.select( jcas, _lookupWindowType );
       for ( Annotation lookupWindow : lookupWindows ) {
+         // All Neoplasms
+         final Collection<IdentifiedAnnotation> breastNeoplasms = new HashSet<>();
+         NeoplasmRelationFactory.getNeoplasmUris().forEach(
+               u -> breastNeoplasms
+                     .addAll( OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow, u ) ) );
+         // Metastases are under neoplasm, but for now we do not want them as we are interested in primary neoplasms
          // Metastases
          final Collection<IdentifiedAnnotation> metastases
                = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, OwlConstants.BREAST_CANCER_OWL
                                                                          + "#Metastatic_Neoplasm" );
-         // All Neoplasms
-         final Collection<IdentifiedAnnotation> breastNeoplasms
-               = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow,
-               OwlConstants.CANCER_OWL + "#Neoplasm" );
-         // Metastases are under neoplasm, but for now we do not want them as we are interested in primary neoplasms
          breastNeoplasms.removeAll( metastases );
-         // Cancers are not under neoplasm, but we do want them as primaries
-         breastNeoplasms.addAll( OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow,
-               OwlConstants.CANCER_OWL + "#Cancer" ) );
          // Find neoplasm location modifiers before adding phenotypes and metastases
          ModifierFinder.addLocationModifiers( jcas, lookupWindow );
          // Neoplasm phenotypes
@@ -80,11 +80,11 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
             // Metastases
             MetastasisFinder.addMetastases( jcas, lookupWindow, breastNeoplasms, metastases );
          }
-         // want all neoplasms - metastatic and primary
-         metastases.addAll( breastNeoplasms );
-         if ( !metastases.isEmpty() ) {
+         // want sizes for all neoplasms - metastatic and primary
+         breastNeoplasms.addAll( metastases );
+         if ( !breastNeoplasms.isEmpty() ) {
             // sizes
-            SizeFinder.addSizes( jcas, lookupWindow, metastases );
+            SizeFinder.addSizes( jcas, lookupWindow, breastNeoplasms );
          }
       }
       LOGGER.info( "Finished processing" );

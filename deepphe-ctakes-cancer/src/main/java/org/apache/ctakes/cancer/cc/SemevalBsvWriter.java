@@ -96,7 +96,7 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
       }
       final String fileName = DocumentIDAnnotationUtil.getDocumentIdForFile( jcas ) + ".pipe";
       try {
-         writePhenotypeBsv( jcas, getOutputDir( "CancerStage" ), fileName, StagePropertyUtil.getParentUri() );
+         writeExactPhenotypeBsv( jcas, getOutputDir( "CancerStage" ), fileName, StagePropertyUtil.getParentUri() );
          writePhenotypeBsv( jcas, getOutputDir( "ReceptorStatus" ), fileName, StatusPropertyUtil.getParentUri(),
                OwlConstants.BREAST_CANCER_OWL + "#Triple_Negative_Breast_Carcinoma" );
          writeTnmBsv( jcas, getOutputDir( "TnmClassification" ), fileName, TnmPropertyUtil.getParentUri() );
@@ -120,6 +120,22 @@ public class SemevalBsvWriter extends CasConsumer_ImplBase {
             .flatMap( Collection::stream )
             .filter( ci -> getCuiValue( ci ) != null );
    }
+
+   static private Stream<ConceptInstance> getExactConceptInstanceStream( final JCas jCas, final String... uris ) {
+      return Arrays.stream( uris )
+            .map( uri -> ConceptInstanceUtil.getExactConceptInstances( jCas, uri ) )
+            .flatMap( Collection::stream )
+            .filter( ci -> getCuiValue( ci ) != null );
+   }
+
+   static private void writeExactPhenotypeBsv( final JCas jCas, final File outputDir, final String fileName,
+                                               final String uri )
+         throws IOException {
+      final Collection<ConceptInstance> conceptInstances = getExactConceptInstanceStream( jCas, uri )
+            .collect( Collectors.toList() );
+      writeBsv( conceptInstances, new File( outputDir, fileName ) );
+   }
+
 
    static private void writePhenotypeBsv( final JCas jCas, final File outputDir, final String fileName,
                                           final String... uris )

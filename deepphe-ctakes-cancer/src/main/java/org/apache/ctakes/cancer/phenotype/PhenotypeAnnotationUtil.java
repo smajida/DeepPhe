@@ -9,7 +9,7 @@ import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmType;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
 import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
-import org.apache.ctakes.typesystem.type.relation.BinaryTextRelation;
+import org.apache.ctakes.core.util.RelationUtil;
 import org.apache.ctakes.typesystem.type.relation.DegreeOfTextRelation;
 import org.apache.ctakes.typesystem.type.relation.IndicatesTextRelation;
 import org.apache.ctakes.typesystem.type.relation.LocationOfTextRelation;
@@ -78,7 +78,7 @@ final public class PhenotypeAnnotationUtil {
       if ( relations == null || relations.isEmpty() ) {
          return Collections.emptyList();
       }
-      return getSecondArguments( relations, phenotype );
+      return RelationUtil.getSecondArguments( relations, phenotype );
    }
 
    /**
@@ -103,7 +103,7 @@ final public class PhenotypeAnnotationUtil {
       if ( relations == null || relations.isEmpty() ) {
          return Collections.emptyList();
       }
-      return getFirstArguments( relations, neoplasm );
+      return RelationUtil.getFirstArguments( relations, neoplasm );
    }
 
    /**
@@ -241,7 +241,7 @@ final public class PhenotypeAnnotationUtil {
       if ( uriAnnotations == null || uriAnnotations.isEmpty() ) {
          return Collections.emptyList();
       }
-      return getFirstArguments( relations, neoplasm );
+      return RelationUtil.getFirstArguments( relations, neoplasm );
    }
 
    static public Collection<IdentifiedAnnotation> getDiagnosticTests( final IdentifiedAnnotation testable ) {
@@ -257,7 +257,7 @@ final public class PhenotypeAnnotationUtil {
       if ( relations == null || relations.isEmpty() ) {
          return Collections.emptyList();
       }
-      return getFirstArguments( relations, testable );
+      return RelationUtil.getFirstArguments( relations, testable );
    }
 
    static public Collection<IdentifiedAnnotation> getLocations( final IdentifiedAnnotation locatable ) {
@@ -273,7 +273,7 @@ final public class PhenotypeAnnotationUtil {
       if ( relations == null || relations.isEmpty() ) {
          return Collections.emptyList();
       }
-      return getSecondArguments( relations, locatable );
+      return RelationUtil.getSecondArguments( relations, locatable );
    }
 
 
@@ -294,7 +294,7 @@ final public class PhenotypeAnnotationUtil {
             .map( Quadrant::getUri ).collect( Collectors.toList() );
       final Predicate<IdentifiedAnnotation> isQuadrant
             = a -> OwlOntologyConceptUtil.getUris( a ).stream().anyMatch( quadrantUris::contains );
-      return getFirstArguments( relations, anatomical ).stream()
+      return RelationUtil.getFirstArguments( relations, anatomical ).stream()
             .filter( isQuadrant )
             .collect( Collectors.toList() );
    }
@@ -316,7 +316,7 @@ final public class PhenotypeAnnotationUtil {
             .map( BodySide::getUri ).collect( Collectors.toList() );
       final Predicate<IdentifiedAnnotation> isBodySide
             = a -> OwlOntologyConceptUtil.getUris( a ).stream().anyMatch( bodySideUris::contains );
-      return getFirstArguments( relations, anatomical ).stream()
+      return RelationUtil.getFirstArguments( relations, anatomical ).stream()
             .filter( isBodySide )
             .collect( Collectors.toList() );
    }
@@ -340,7 +340,7 @@ final public class PhenotypeAnnotationUtil {
             .collect( Collectors.toList() );
       final Predicate<IdentifiedAnnotation> isClockwise
             = a -> OwlOntologyConceptUtil.getUris( a ).stream().anyMatch( clockUris::contains );
-      return getFirstArguments( relations, anatomical ).stream()
+      return RelationUtil.getFirstArguments( relations, anatomical ).stream()
             .filter( isClockwise )
             .collect( Collectors.toList() );
    }
@@ -379,7 +379,7 @@ final public class PhenotypeAnnotationUtil {
       if ( relations == null || relations.isEmpty() ) {
          return Collections.emptyList();
       }
-      return getSecondArguments( relations, property );
+      return RelationUtil.getSecondArguments( relations, property );
    }
 
 
@@ -401,28 +401,6 @@ final public class PhenotypeAnnotationUtil {
          LOGGER.error( casE.getMessage() );
       }
       return null;
-   }
-
-   static private Collection<IdentifiedAnnotation> getFirstArguments(
-         final Collection<? extends BinaryTextRelation> relations,
-         final IdentifiedAnnotation identifiedAnnotation ) {
-      return relations.stream()
-            .filter( r -> r.getArg2().getArgument().equals( identifiedAnnotation ) )
-            .map( r -> r.getArg1().getArgument() )
-            .filter( IdentifiedAnnotation.class::isInstance )
-            .map( a -> (IdentifiedAnnotation)a )
-            .collect( Collectors.toList() );
-   }
-
-   static private Collection<IdentifiedAnnotation> getSecondArguments(
-         final Collection<? extends BinaryTextRelation> relations,
-         final IdentifiedAnnotation identifiedAnnotation ) {
-      return relations.stream()
-            .filter( r -> r.getArg1().getArgument().equals( identifiedAnnotation ) )
-            .map( r -> r.getArg2().getArgument() )
-            .filter( IdentifiedAnnotation.class::isInstance )
-            .map( a -> (IdentifiedAnnotation)a )
-            .collect( Collectors.toList() );
    }
 
 
