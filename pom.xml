@@ -29,6 +29,7 @@
       <module>deepphe-uima</module>
       <module>deepphe-viz</module>      
       <module>deepphe-distribution</module>
+      <module>provcare</module>
    </modules>
 
    <repositories>

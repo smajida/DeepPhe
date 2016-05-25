@@ -15,9 +15,9 @@ import java.util.regex.Pattern;
  */
 enum TnmPrefix implements Test {
    C( "Classification given by clinical examination",
-         OwlConstants.SCHEMA_OWL + "#" + "DiagnosticProcedure", "c" ),
+         OwlConstants.CANCER_OWL + "#" + "c_modifier", "c" ),
    P( "Classification given by pathologic examination",
-         OwlConstants.SCHEMA_OWL + "#" + "DiagnosticProcedure", "p" ),
+         OwlConstants.CANCER_OWL + "#" + "p_modifier", "p" ),
    Y( "Classification assessed after chemotherapy and/or radiation",
          OwlConstants.SCHEMA_OWL + "#" + "DiagnosticProcedure", "y" ),
    R( "Classification for a recurrent tumor",

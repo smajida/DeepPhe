@@ -4,6 +4,7 @@ import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.phenotype.receptor.StatusPropertyUtil;
 import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
+import org.apache.ctakes.cancer.relation.NeoplasmRelationFactory;
 import org.apache.ctakes.core.util.OntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
@@ -14,6 +15,7 @@ import org.apache.uima.jcas.JCas;
 import javax.annotation.concurrent.Immutable;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,7 +45,10 @@ final public class ToyAE extends JCasAnnotator_ImplBase {
     * @return all neoplasms in the cas
     */
    static private Collection<ConceptInstance> getAllNeoplasms( final JCas jCas ) {
-      return ConceptInstanceUtil.getBranchConceptInstances( jCas, OwlConstants.CANCER_OWL + "#Neoplasm" );
+      final Collection<ConceptInstance> breastNeoplasms = new HashSet<>();
+      NeoplasmRelationFactory.getNeoplasmUris().forEach(
+            u -> breastNeoplasms.addAll( ConceptInstanceUtil.getBranchConceptInstances( jCas, u ) ) );
+      return breastNeoplasms;
    }
 
    /**
