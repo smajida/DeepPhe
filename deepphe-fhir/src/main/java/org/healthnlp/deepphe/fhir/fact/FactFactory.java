@@ -108,7 +108,10 @@ public class FactFactory {
 	private static Fact createTNMFact(Finding tnm) {
 		TNMFact fact = (TNMFact) createFact(tnm,new TNMFact());
 		for(String mod: FHIRUtils.getExtensions(tnm,FHIRUtils.TNM_MODIFIER_URL)){
-			fact.setPrefix(createFact(FHIRUtils.getCodeableConcept(URI.create(mod))));
+			Fact f = createFact(FHIRUtils.getCodeableConcept(URI.create(mod)));
+			f.setType(FHIRConstants.TNM_MODIFIER);
+			f.setCategory(FHIRConstants.HAS_TNM_PREFIX);
+			fact.setPrefix(f);
 		}
 		return fact;
 	}
@@ -190,7 +193,10 @@ public class FactFactory {
 	public static ConditionFact createFact(Condition condition) {
 		ConditionFact fact = (ConditionFact) createFact(condition,new ConditionFact());
 		for(CodeableConcept cc: condition.getBodySite()){
-			fact.getBodySite().add(createFact(cc));
+			Fact f = createFact(cc);
+			f.setType(FHIRConstants.BODY_SITE);
+			f.setCategory(FHIRConstants.HAS_BODY_SITE);
+			fact.getBodySite().add(f);
 		}
 		return fact;
 	}
@@ -204,7 +210,10 @@ public class FactFactory {
 	public static ProcedureFact createFact(Procedure condition) {
 		ProcedureFact fact = (ProcedureFact) createFact(condition,new ProcedureFact());
 		for(CodeableConcept cc: condition.getBodySite()){
-			fact.getBodySite().add(createFact(cc));
+			Fact f = createFact(cc);
+			f.setType(FHIRConstants.BODY_SITE);
+			f.setCategory(FHIRConstants.HAS_BODY_SITE);
+			fact.getBodySite().add(f);
 		}
 		//TODO: handle method
 		return fact;

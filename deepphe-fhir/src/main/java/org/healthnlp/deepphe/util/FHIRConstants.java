@@ -59,6 +59,7 @@ public class FHIRConstants {
 	public static final String QUADRANT = "Quadrant";
 	public static final String CLOCKFACE_POSITION = "Clockface_position";
 	public static final String UNIT = "Unit";
+	public static final String TNM_MODIFIER = "TNM_Modifier";
 	
 	
 	public static final String HAS_BODY_SITE = "hasBodySite";
