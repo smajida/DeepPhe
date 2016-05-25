@@ -8,6 +8,7 @@ import java.util.List;
 import org.healthnlp.deepphe.fhir.AnatomicalSite;
 import org.healthnlp.deepphe.fhir.Condition;
 import org.healthnlp.deepphe.fhir.Element;
+import org.healthnlp.deepphe.fhir.Finding;
 import org.healthnlp.deepphe.fhir.Observation;
 import org.healthnlp.deepphe.fhir.Procedure;
 import org.healthnlp.deepphe.fhir.Stage;
@@ -92,6 +93,8 @@ public class FactFactory {
 			return createFact((Observation)resource);
 		if(resource instanceof AnatomicalSite)
 			return createFact((AnatomicalSite)resource);
+		if(resource instanceof Finding && OntologyUtils.hasInstance() && OntologyUtils.getInstance().hasSuperClass(resource,FHIRConstants.TNM_STAGE))
+			return createTNMFact((Finding)resource);
 		if(resource instanceof Condition)
 			return createFact((Condition)resource);
 		if(resource instanceof Procedure)
@@ -100,6 +103,14 @@ public class FactFactory {
 			return createFact((Quantity)resource);
 		
 		return createFact(resource,new Fact());
+	}
+
+	private static Fact createTNMFact(Finding tnm) {
+		TNMFact fact = (TNMFact) createFact(tnm,new TNMFact());
+		for(String mod: FHIRUtils.getExtensions(tnm,FHIRUtils.TNM_MODIFIER_URL)){
+			fact.setPrefix(createFact(FHIRUtils.getCodeableConcept(URI.create(mod))));
+		}
+		return fact;
 	}
 
 	private static Fact createFact(Element resource,Fact fact) {
