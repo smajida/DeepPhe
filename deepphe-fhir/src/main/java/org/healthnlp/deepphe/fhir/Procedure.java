@@ -35,7 +35,7 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 
 	public String getSummaryText() {
 		StringBuffer st = new StringBuffer();
-		st.append("Procedure:\t"+getDisplayText());
+		st.append(getClass().getSimpleName()+":\t"+getDisplayText());
 		for(CodeableConcept l: getBodySite()){
 			st.append(" | location: "+l.getText());
 		}

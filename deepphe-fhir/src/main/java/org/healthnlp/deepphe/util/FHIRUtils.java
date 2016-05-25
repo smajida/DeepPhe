@@ -42,6 +42,7 @@ public class FHIRUtils {
 	public static final String DOCUMENT_HEADER_PATIENT_NAME = "Patient Name";
 	public static final String MENTION_URL = "http://hl7.org/fhir/mention";
 	public static final String STAGE_URL = "http://hl7.org/fhir/stage";
+	public static final String TNM_MODIFIER_URL = "http://hl7.org/fhir/TNM_modifier";
 	
 	public static final String LANGUAGE_ASPECT_MODALITY_URL = "http://hl7.org/fhir/modality";
 	public static final String LANGUAGE_ASPECT_DOC_TIME_REL_URL = "http://hl7.org/fhir/doc_time_rel"; 
@@ -738,6 +739,18 @@ public class FHIRUtils {
 		}
 		return mentions;
 	}
+	
+	public static List<String> getExtensions(DomainResource r,String URL){
+		List<String> mentions = new ArrayList<String>();
+		for(Extension e: r.getExtension()){
+			if(URL.equals(e.getUrl())){
+				mentions.add(((StringType)e.getValue()).getValue());
+			}
+		}
+		return mentions;
+	}
+	
+	
 	public static int [] getMentionSpan(String text){
 		int [] s = new int [2];
 		Matcher m = Pattern.compile(".* \\[(\\d+):(\\d+)\\]").matcher(text);

@@ -9,6 +9,7 @@ import java.util.Date;
 
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
+import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.Quantity;
@@ -37,7 +38,14 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 	}
 
 	public String getSummaryText() {
-		return "Observation:\t"+getDisplayText()+" | value: "+getObservationValue();
+		StringBuffer st = new StringBuffer();
+		st.append(getClass().getSimpleName()+":\t"+getDisplayText());
+		st.append(" | value: "+getObservationValue());
+		if(method != null)
+			st.append(" | method: "+method.getText());
+		
+		return st.toString();
+		
 	}
 	
 	public Resource getResource() {

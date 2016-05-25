@@ -43,7 +43,7 @@ final public class ToyAE extends JCasAnnotator_ImplBase {
     * @return all neoplasms in the cas
     */
    static private Collection<ConceptInstance> getAllNeoplasms( final JCas jCas ) {
-      return ConceptInstanceUtil.getBranchConceptInstances( jCas, OwlConstants.BREAST_CANCER_OWL + "#Neoplasm" );
+      return ConceptInstanceUtil.getBranchConceptInstances( jCas, OwlConstants.CANCER_OWL + "#Neoplasm" );
    }
 
    /**

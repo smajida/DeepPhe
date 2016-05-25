@@ -8,7 +8,6 @@ import java.util.Set;
 
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.neo4j.ogm.annotation.GraphId;
-import org.neo4j.ogm.annotation.NodeEntity;
 
 
 /**
@@ -47,6 +46,11 @@ public class Fact {
 	public String getName() {
 		return name;
 	}
+	
+	public String getFullName() {
+		return getName();
+	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -85,6 +89,7 @@ public class Fact {
 		facts = null;
 	}
 	
+
 	public List<TextMention> getProvenanceText() {
 		if(provenanceText == null)
 			provenanceText = new ArrayList<TextMention>();

@@ -71,7 +71,7 @@ final public class PhenotypeSummarizerPipeline {
 		final AnalysisEngine cancerSummarizerAE = AnalysisEngineFactory.createEngine(PhenotypeCancerSummaryAE.class,
 				PhenotypeCancerSummaryAE.PARAM_ONTOLOGY_PATH, ontologyPath);
 		final AnalysisEngine xmiWriter = AnalysisEngineFactory.createEngine(XMIWriter.class, XMIWriter.PARAM_OUTPUTDIR,
-				outputDirectory + File.separator + "TYPE");
+				new File(outputDirectory).getAbsolutePath() + File.separator + "TYPE");
 		final AnalysisEngine summaryAE = AnalysisEngineFactory.createEngine(SummaryTextOutput.class,SummaryTextOutput.PARAM_OUTPUTDIR,outputDirectory); 
 		
 		final AnalysisEngine graphDBConsumerAE = AnalysisEngineFactory.createEngine(GraphDBPhenotypeConsumerAE.class,
@@ -85,7 +85,7 @@ final public class PhenotypeSummarizerPipeline {
 		
 		
 		// run the damn pipeline
-		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE, cancerSummarizerAE, summaryAE, xmiWriter, transmartAE,evaluateAE); //,graphDBConsumerAE
+		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE, cancerSummarizerAE, xmiWriter,summaryAE, transmartAE,evaluateAE); //,graphDBConsumerAE //
 		//SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE,cancerSummarizerAE,xmiWriter);
 
 	}

@@ -15,6 +15,7 @@ import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.OntologyUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
@@ -48,6 +49,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		super.initialize(aContext);
 		try {
 			ontology = OOntology.loadOntology((String) aContext.getConfigParameterValue(PARAM_ONTOLOGY_PATH));
+			OntologyUtils.getInstance(ontology);
 		} catch (IOntologyException e) {
 			throw new ResourceInitializationException(e);
 		}
@@ -286,10 +288,9 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	
 	
 	private void addAncestors(Fact fact){
-		org.healthnlp.deepphe.uima.fhir.OntologyUtils ou = new org.healthnlp.deepphe.uima.fhir.OntologyUtils(ontology);
-		ou.addAncestors(fact);
+		OntologyUtils.getInstance().addAncestors(fact);
 		for(Fact f:	fact.getContainedFacts()){
-			ou.addAncestors(f);
+			OntologyUtils.getInstance().addAncestors(f);
 		}
 	}
 	

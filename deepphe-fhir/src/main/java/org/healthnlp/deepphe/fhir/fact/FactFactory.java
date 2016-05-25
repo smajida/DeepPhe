@@ -13,6 +13,7 @@ import org.healthnlp.deepphe.fhir.Procedure;
 import org.healthnlp.deepphe.fhir.Stage;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.OntologyUtils;
 import org.hl7.fhir.instance.model.BodySite;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
@@ -109,7 +110,7 @@ public class FactFactory {
 			TextMention mention = createTextMention(m);
 			fact.addProvenanceText(mention);
 		}
-		
+			
 		return fact;
 	}
 	
@@ -213,7 +214,10 @@ public class FactFactory {
 		return fact;
 	}
 	
-	private static boolean isBodySide(Fact modifier) {
+	public static boolean isBodySide(Fact modifier) {
+		if(OntologyUtils.hasInstance()){
+			return OntologyUtils.getInstance().hasSuperClass(modifier,FHIRConstants.BODY_SIDE);
+		}
 		return FHIRConstants.BODY_SIDE_LIST.contains(modifier.getName());
 	}
 
