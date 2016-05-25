@@ -1,0 +1,20 @@
+*cancer ID		
+*patient ID		
+*body location	Breast_Cancer	hasBodySite
+body location laterality	BodySite	hasBodySide
+clinical stage	BreastCancerPhenotype	hasClinicalStage
+clinical T classification	BreastCancerPhenotype	hasClinicalTClassification
+clinical N classification	BreastCancerPhenotype	hasClinicalNClassification
+clinical M classification	BreastCancerPhenotype	hasClinicalMClassification
+clinical prefix		
+clinical suffix		
+pathologic T classification	BreastCancerPhenotype	hasPathologicTClassification
+pathologic N classification	BreastCancerPhenotype	hasPathologicNClassification
+pathologic M classification	BreastCancerPhenotype	hasPathologicMClassification
+pathologic prefix		
+pathologic suffix		
+generic T classification	BreastCancerPhenotype	hasGenericTClassification
+generic N classification	BreastCancerPhenotype	hasGenericNClassification
+generic M classification	BreastCancerPhenotype	hasGenericMClassification
+generic prefix		
+generic suffix		

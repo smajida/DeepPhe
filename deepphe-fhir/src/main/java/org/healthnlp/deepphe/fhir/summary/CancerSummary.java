@@ -1,5 +1,6 @@
 package org.healthnlp.deepphe.fhir.summary;
 
+import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
@@ -26,6 +27,14 @@ public class CancerSummary extends Summary {
 		getPhenotype().setReport(r);
 		for(TumorSummary ts: getTumors()){
 			ts.setReport(r);
+		}
+	}
+	
+	public void setPatient(Patient r){
+		super.setPatient(r);
+		getPhenotype().setPatient(r);
+		for(TumorSummary ts: getTumors()){
+			ts.setPatient(r);
 		}
 	}
 		
@@ -80,6 +89,7 @@ public class CancerSummary extends Summary {
 	}
 	public void addTumor(TumorSummary tumor) {
 		tumor.setAnnotationType(getAnnotationType());
+		tumor.setCancerSummary(this);
 		getTumors().add(tumor);
 	}
 	

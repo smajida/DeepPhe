@@ -1,6 +1,6 @@
 package org.apache.ctakes.cancer.phenotype.stage;
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.phenotype.property.Type;
 import org.apache.ctakes.cancer.phenotype.property.Value;
 
@@ -38,7 +38,7 @@ enum StageType implements Type {
     */
    @Override
    public String getUri() {
-      return OwlOntologyConceptUtil.CANCER_OWL + "#" + _uri;
+      return OwlConstants.CANCER_OWL + "#" + _uri;
    }
 
    /**

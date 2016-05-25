@@ -201,6 +201,7 @@ public class Fact {
 		b.append("summary id: "+getSummaryId()+"|");
 		b.append("container ids: "+getContainerIdentifier()+"|");
 		//b.append("rulesApplied: "+getRulesApplied()+"|");
+		b.append("recordDate: "+getRecordedDate()+"|");	
 		b.append("ancestors: "+getAncestors()+"\n");
 	   
 		return b.toString();

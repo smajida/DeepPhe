@@ -1,11 +1,8 @@
 package org.healthnlp.deepphe.uima.pipelines;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.annotation.concurrent.Immutable;
-
-import org.apache.ctakes.cancer.ae.XMIWriter;
+import com.lexicalscope.jewel.cli.CliFactory;
+import com.lexicalscope.jewel.cli.Option;
+import org.apache.ctakes.core.ae.XMIWriter;
 import org.apache.uima.UIMAException;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.collection.CollectionReader;
@@ -14,14 +11,16 @@ import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.fit.pipeline.SimplePipeline;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.uima.ae.CompositionCancerSummaryAE;
+import org.healthnlp.deepphe.uima.ae.EvaluationOutput;
 import org.healthnlp.deepphe.uima.ae.GraphDBPhenotypeConsumerAE;
 import org.healthnlp.deepphe.uima.ae.PhenotypeCancerSummaryAE;
 import org.healthnlp.deepphe.uima.ae.SummaryTextOutput;
 import org.healthnlp.deepphe.uima.ae.TranSMART_Output;
 import org.healthnlp.deepphe.uima.cr.FHIRCollectionReader;
 
-import com.lexicalscope.jewel.cli.CliFactory;
-import com.lexicalscope.jewel.cli.Option;
+import javax.annotation.concurrent.Immutable;
+import java.io.File;
+import java.io.IOException;
 
 @Immutable
 final public class PhenotypeSummarizerPipeline {
@@ -48,14 +47,24 @@ final public class PhenotypeSummarizerPipeline {
 		
 		@Option(shortName = "p", description = "TCGA name mapping file", defaultToNull = true)
 		public String getTCGANameMappingFile();
+		
+		@Option(shortName = "c", description = "Evaluation cancer mapping file")
+		public String getEvaluationCancerMappingFile();
+		
+		@Option(shortName = "u", description = "Evaluation tumor mapping file")
+		public String getEvaluationTumorMappingFile();
 	}
 
 	public static void main(final String... args) throws UIMAException, IOException {
 		final Options options = CliFactory.parseArguments(Options.class, args);
-		runPhenotypeSummarizerPipeline(options.getInputDirectory(), options.getOntologyPath(),options.getOutputDirectory(),options.getTransmartMappingFile(),options.getTCGANameMappingFile());
+		runPhenotypeSummarizerPipeline(options.getInputDirectory(), options.getOntologyPath(),options.getOutputDirectory(),
+					options.getTransmartMappingFile(),options.getTCGANameMappingFile(),
+					options.getEvaluationCancerMappingFile(),options.getEvaluationTumorMappingFile());
 	}
 
-	public static void runPhenotypeSummarizerPipeline(final String inputDirectory, final String ontologyPath, final String outputDirectory, final String mappingFile, final String tcgaMap) throws UIMAException, IOException {
+	public static void runPhenotypeSummarizerPipeline(final String inputDirectory, final String ontologyPath, final String outputDirectory,
+			final String mappingFile, final String tcgaMap, 
+			final String cancerFile, final String tumorFile) throws UIMAException, IOException {
 		final CollectionReader collectionReader = createCollectionReader(inputDirectory);
 		final AnalysisEngine compositionSummarizerAE = AnalysisEngineFactory.createEngine(
 				CompositionCancerSummaryAE.class, CompositionCancerSummaryAE.PARAM_ONTOLOGY_PATH, ontologyPath);
@@ -71,10 +80,13 @@ final public class PhenotypeSummarizerPipeline {
 		final AnalysisEngine transmartAE = AnalysisEngineFactory.createEngine(TranSMART_Output.class,TranSMART_Output.PARAM_TRANSMART_MAP_FILE,mappingFile,
 													TranSMART_Output.PARAM_TCGA_ID_MAP_FILE,tcgaMap,TranSMART_Output.PARAM_OUTPUTDIR,outputDirectory); 
 		
+		final AnalysisEngine evaluateAE = AnalysisEngineFactory.createEngine(EvaluationOutput.class,EvaluationOutput.PARAM_EVALUATION_CANCER_MAP_FILE,cancerFile,
+				EvaluationOutput.PARAM_EVALUATION_TUMOR_MAP_FILE,tumorFile,TranSMART_Output.PARAM_OUTPUTDIR,outputDirectory); 
+		
 		
 		// run the damn pipeline
-		//SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE, cancerSummarizerAE, summaryAE, xmiWriter, transmartAE,graphDBConsumerAE);
-		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE,cancerSummarizerAE,summaryAE,xmiWriter);
+		SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE, cancerSummarizerAE, summaryAE, xmiWriter); //, transmartAE,evaluateAE); //,graphDBConsumerAE
+		//SimplePipeline.runPipeline(collectionReader, compositionSummarizerAE,cancerSummarizerAE,xmiWriter);
 
 	}
 

@@ -99,11 +99,13 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		// check ancestors
 		checkAncestors(record.getReportLevelFacts());
 
-		/*for(Fact f: record.getReportLevelFacts()){
+		for(Fact f: record.getReportLevelFacts()){
 			System.out.println(f.getInfo());
 		}
-*/
+
 	
+		
+		
 		//long stT = System.currentTimeMillis();
 		
 		//insert record into drools
@@ -116,9 +118,13 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			droolsSession.insert(new Domain("Breast"));
 			droolsSession.insert(record);					
 			for(Fact f: record.getReportLevelFacts()){
+				try{
 				if(!f.getCategory().equalsIgnoreCase("wasDerivedFrom")){
 				//	System.out.println(f.getInfo());
 					droolsSession.insert(f);
+				}
+				}catch (NullPointerException e){
+				//	System.err.println("NO Category for F: "+f.getInfo());
 				}
 			}		
 			droolsSession.fireAllRules();
@@ -147,6 +153,16 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 				ou.addAncestors(f);
 		}
 	}
-
+	
+	
+	/**
+	 * should this restriction be used for summarization
+	 * @param r
+	 * @return
+	 */
+	/*
+	
+	}
+	*/
 
 }

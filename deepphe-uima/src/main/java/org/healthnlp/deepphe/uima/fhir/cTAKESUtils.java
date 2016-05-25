@@ -5,12 +5,13 @@ import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 import org.apache.ctakes.cancer.concept.instance.ConceptInstance;
 import org.apache.ctakes.cancer.concept.instance.ConceptInstanceUtil;
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
 import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.core.util.OntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.refsem.Time;
@@ -29,17 +30,17 @@ import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.cas.TOP;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.jcas.tcas.DocumentAnnotation;
+import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.Extension;
-import org.healthnlp.deepphe.fhir.Element;
+
 import java.net.URI;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class cTAKESUtils {
 
@@ -194,7 +195,7 @@ public class cTAKESUtils {
 	 */
 	public static String getConceptURI(IdentifiedAnnotation ia){
 		// TODO - can use OwlOntologyConceptUtil.getUris( ia );
-		return OwlOntologyConceptUtil.getUris( ia ).stream().findFirst().orElse( OwlOntologyConceptUtil.UNKNOWN_URI );
+		return OwlOntologyConceptUtil.getUris( ia ).stream().findFirst().orElse( OwlConstants.UNKNOWN_URI );
 //		String cui = null;
 //		for(int i=0;i<ia.getOntologyConceptArr().size();i++){
 //			OntologyConcept c = ia.getOntologyConceptArr(i);

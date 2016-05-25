@@ -47,12 +47,12 @@ final public class BsvParserUtil {
          final File owlParent = FileLocator.locateFile( owlFilePath );
          owlDir = owlParent.getParentFile();
       } catch ( IOException ioE ) {
-         return Collections.emptyList();
+         return new HashSet<>();
       }
       final FilenameFilter bsvFilter = ( dir, name ) -> name.toLowerCase().endsWith( ".bsv" );
       final File[] bsvFiles = owlDir.listFiles( bsvFilter );
       if ( bsvFiles == null || bsvFiles.length == 0 ) {
-         return Collections.emptyList();
+         return new HashSet<>();
       }
       LOGGER.info( "Loading Dictionary BSV Files in " + owlDir.getPath() + ":" );
       final Collection<RareWordTermMapCreator.CuiTerm> cuiTerms = new HashSet<>();
@@ -83,7 +83,7 @@ final public class BsvParserUtil {
             .getAsStream( bsvFilePath ) ) ) ) {
          String line = reader.readLine();
          while ( line != null ) {
-            if ( ValidTextUtil.isCommentLine( line ) ) {
+            if ( ValidTextUtil.isCommentLine( line ) || line.trim().isEmpty() ) {
                line = reader.readLine();
                continue;
             }
@@ -111,7 +111,7 @@ final public class BsvParserUtil {
          return null;
       }
       final String uri = columns[ 3 ].trim();
-      if ( OwlParserUtil.isPhenotypeUri( uri ) ) {
+      if ( OwlParserUtil.getInstance().isUnwantedUri( uri ) ) {
          return EMPTY_CUI_TERM;
       }
       final String text = columns[ 1 ].trim().toLowerCase();
@@ -136,12 +136,12 @@ final public class BsvParserUtil {
          final File owlParent = FileLocator.locateFile( owlFilePath );
          owlDir = owlParent.getParentFile();
       } catch ( IOException ioE ) {
-         return Collections.emptyMap();
+         return new HashMap<>();
       }
       final FilenameFilter bsvFilter = ( dir, name ) -> name.toLowerCase().endsWith( ".bsv" );
       final File[] bsvFiles = owlDir.listFiles( bsvFilter );
       if ( bsvFiles == null || bsvFiles.length == 0 ) {
-         return Collections.emptyMap();
+         return new HashMap<>();
       }
       final Map<Long, Concept> bsvConcepts = new HashMap<>();
       LOGGER.info( "Loading Concept BSV Files in " + owlDir.getPath() + ":" );
@@ -159,7 +159,7 @@ final public class BsvParserUtil {
       final Collection<CuiTuiUriTerm> cuiTuiTerms = parseCuiTuiUriTermFile( bsvFilePath );
       final Map<Long, Concept> conceptMap = new HashMap<>( cuiTuiTerms.size() );
       for ( CuiTuiUriTerm cuiTuiTerm : cuiTuiTerms ) {
-         if ( OwlParserUtil.isPhenotypeUri( cuiTuiTerm.getUri() ) ) {
+         if ( OwlParserUtil.getInstance().isUnwantedUri( cuiTuiTerm.getUri() ) ) {
             continue;
          }
          final CollectionMap<String, String, ? extends Collection<String>> codes
@@ -189,7 +189,7 @@ final public class BsvParserUtil {
                   = new BufferedReader( new InputStreamReader( FileLocator.getAsStream( bsvFilePath ) ) ) ) {
          String line = reader.readLine();
          while ( line != null ) {
-            if ( ValidTextUtil.isCommentLine( line ) ) {
+            if ( ValidTextUtil.isCommentLine( line ) || line.trim().isEmpty() ) {
                line = reader.readLine();
                continue;
             }
@@ -221,7 +221,7 @@ final public class BsvParserUtil {
          return EMPTY_CUI_TUI_URI_TERM;
       }
       final String uri = columns[ 3 ].trim();
-      if ( OwlParserUtil.isPhenotypeUri( uri ) ) {
+      if ( OwlParserUtil.getInstance().isUnwantedUri( uri ) ) {
          return EMPTY_CUI_TUI_URI_TERM;
       }
       final String cui = columns[ 0 ];

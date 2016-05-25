@@ -13,7 +13,7 @@ import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.uima.drools.Summarizer;
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 
 
 // There is no Breast Stage 0
@@ -36,7 +36,7 @@ rule "Stage0-1"
 		modify($nFact){	addRulesApplied("Stage0-1") }
 		modify($mFact){	addRulesApplied("Stage0-1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_0");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_0");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -66,7 +66,7 @@ rule "Stage1A-1"
 		modify($nFact){	addRulesApplied("Stage1A-1") }
 		modify($mFact){	addRulesApplied("Stage1A-1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IA_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -96,7 +96,7 @@ rule "Stage1B-1"
 		modify($nFact){	addRulesApplied("Stage1B-1") }
 		modify($mFact){	addRulesApplied("Stage1B-1") }
 				
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IB_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -125,7 +125,7 @@ rule "Stage1B-2"
 		modify($nFact){	addRulesApplied("Stage1B-2") }
 		modify($mFact){	addRulesApplied("Stage1B-2") }
 			
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IB_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -154,7 +154,7 @@ rule "Stage2A-1.1"
 		modify($nFact){	addRulesApplied("Stage2A-1.1") }
 		modify($mFact){	addRulesApplied("Stage2A-1.1") }
 				
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIA_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -183,7 +183,7 @@ rule "Stage2A-2.1"
 		modify($nFact){	addRulesApplied("Stage2A-2.1") }
 		modify($mFact){	addRulesApplied("Stage2A-2.1") }
 				
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIA_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -212,7 +212,7 @@ rule "Stage2A-3.1"
 		modify($nFact){	addRulesApplied("Stage2A-3.1") }
 		modify($mFact){	addRulesApplied("Stage2A-3.1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIA_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -242,7 +242,7 @@ rule "Stage2B-1.1"
 		modify($nFact){	addRulesApplied("Stage2B-1.1") }
 		modify($mFact){	addRulesApplied("Stage2B-1.1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIB_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -272,7 +272,7 @@ rule "Stage2B-2.1"
 		modify($nFact){	addRulesApplied("Stage2B-2.1") }
 		modify($mFact){	addRulesApplied("Stage2B-2.1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIB_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -302,7 +302,7 @@ rule "Stage3A-1.1"
 		modify($nFact){	addRulesApplied("Stage3A-1.1") }
 		modify($mFact){	addRulesApplied("Stage3A-1.1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -332,7 +332,7 @@ rule "Stage3A-2.1"
 		modify($nFact){	addRulesApplied("Stage3A-2.1") }
 		modify($mFact){	addRulesApplied("Stage3A-2.1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -362,7 +362,7 @@ rule "Stage3A-3.1"
 		modify($nFact){	addRulesApplied("Stage3A-3.1") }
 		modify($mFact){	addRulesApplied("Stage3A-3.1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -392,7 +392,7 @@ rule "Stage3A-4.1"
 		modify($nFact){	addRulesApplied("Stage3A-4.1") }
 		modify($mFact){	addRulesApplied("Stage3A-4.1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -422,7 +422,7 @@ rule "Stage3A-5.1"
 		modify($nFact){	addRulesApplied("Stage3A-5.1") }
 		modify($mFact){	addRulesApplied("Stage3A-5.1") }
 			
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -452,7 +452,7 @@ rule "Stage3B-1.1"
 		modify($nFact){	addRulesApplied("Stage3B-1.1") }
 		modify($mFact){	addRulesApplied("Stage3B-1.1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIB_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -482,7 +482,7 @@ rule "Stage3B-2.1"
 		modify($nFact){	addRulesApplied("Stage3B-2.1") }
 		modify($mFact){	addRulesApplied("Stage3B-2.1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIB_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -512,7 +512,7 @@ rule "Stage3B-3.1"
 		modify($nFact){	addRulesApplied("Stage3B-3.1") }
 		modify($mFact){	addRulesApplied("Stage3B-3.1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIB_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -542,7 +542,7 @@ rule "Stage3C-1.1"
 		modify($nFact){	addRulesApplied("Stage3C-1.1") }
 		modify($mFact){	addRulesApplied("Stage3C-1.1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IIIC_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIC_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);
@@ -572,7 +572,7 @@ rule "Stage4-1"
 		modify($nFact){	addRulesApplied("Stage4-1") }
 		modify($mFact){	addRulesApplied("Stage4-1") }
 		
-		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#Stage_IV_Breast_Cancer");
+		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IV_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
 		stageF.addProvenanceFacts(provFacts);

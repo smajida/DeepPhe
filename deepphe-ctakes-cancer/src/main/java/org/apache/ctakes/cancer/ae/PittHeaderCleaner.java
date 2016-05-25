@@ -6,6 +6,7 @@ import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.component.JCasAnnotator_ImplBase;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
+import org.apache.uima.jcas.cas.TOP;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,9 +46,7 @@ final public class PittHeaderCleaner extends JCasAnnotator_ImplBase {
       for ( Class<? extends IdentifiedAnnotation> unwantedClass : UNWANTED_ANNOTATION_CLASSES ) {
          unwantedAnnotations.addAll( JCasUtil.selectCovered( jcas, unwantedClass, 0, endIndex ) );
       }
-      for ( IdentifiedAnnotation unwantedAnnotation : unwantedAnnotations ) {
-         unwantedAnnotation.removeFromIndexes();
-      }
+      unwantedAnnotations.forEach( TOP::removeFromIndexes );
       LOGGER.info( "Finished processing" );
    }
 

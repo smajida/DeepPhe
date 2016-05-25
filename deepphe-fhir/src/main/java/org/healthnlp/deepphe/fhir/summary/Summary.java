@@ -201,7 +201,8 @@ public abstract class Summary extends List_  implements Element {
 		String reportId = report != null?report.getResourceIdentifier():null;
 		String reportType = report != null?(report.getType() == null?null:report.getType().getText()):null;
 		String patientId = patient != null?patient.getResourceIdentifier():null;
-		fact.setCategory(category);
+		if(category != null)
+			fact.setCategory(category);
 		fact.setDocumentIdentifier(reportId);
 		fact.setDocumentType(reportType);
 		fact.setPatientIdentifier(patientId);
@@ -225,8 +226,7 @@ public abstract class Summary extends List_  implements Element {
 				addIdentifiersToFact(fact, category);
 				list.add(fact);
 				for(Fact f: fact.getContainedFacts()){
-					addIdentifiersToFact(f, category);
-					
+					addIdentifiersToFact(f,null);
 					list.add(f);
 				}
 			}

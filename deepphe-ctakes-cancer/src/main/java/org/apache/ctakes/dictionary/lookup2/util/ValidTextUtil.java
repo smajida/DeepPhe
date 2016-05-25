@@ -54,7 +54,7 @@ final public class ValidTextUtil {
    }
 
    /**
-    * Gets rid of ~4,000 body sided anatomical sites
+    * Gets rid of 4 breast quadrants
     *
     * @param text -
     * @return true if the text contains a body side

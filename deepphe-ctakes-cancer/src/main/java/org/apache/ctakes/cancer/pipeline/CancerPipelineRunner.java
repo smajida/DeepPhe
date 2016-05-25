@@ -2,7 +2,7 @@ package org.apache.ctakes.cancer.pipeline;
 
 import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
-import org.apache.ctakes.core.cc.SemevalBsvWriter;
+import org.apache.ctakes.cancer.cc.SemevalBsvWriter;
 import org.apache.ctakes.core.cc.pretty.plaintext.PrettyTextWriterFit;
 import org.apache.ctakes.core.cc.property.plaintext.PropertyTextWriterFit;
 import org.apache.uima.UIMAException;

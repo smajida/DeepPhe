@@ -1,5 +1,6 @@
 package org.healthnlp.deepphe.uima.fhir;
 
+import org.apache.commons.collections.FactoryUtils;
 import org.apache.uima.cas.FeatureStructure;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
@@ -326,6 +327,17 @@ public class PhenotypeResourceFactory {
 			annotation.setEnd(m.getEnd()+annotation.getHasDocumentOffset());
 			break;
 		}
+
+		// set provinence facts
+		List<FeatureStructure> vals = new ArrayList<FeatureStructure>();
+		for(Fact p: fact.getProvenanceFacts()){
+			Annotation a = getAnnotationByIdentifier(jcas,p.getIdentifier());
+			if(a != null)
+				vals.add(a);
+		}
+		if(!vals.isEmpty())
+			annotation.setHasProvenanceFacts(getValues(jcas, vals));
+		
 		
 		if(!fact.getAncestors().isEmpty())
 			annotation.setHasAncestors(getStringValues(jcas, fact.getAncestors()));
@@ -538,7 +550,7 @@ public class PhenotypeResourceFactory {
 		}else if(e instanceof org.healthnlp.deepphe.fhir.Patient){
 			el = savePatient((org.healthnlp.deepphe.fhir.Patient)e,jcas);
 		}else if(e instanceof org.healthnlp.deepphe.fhir.AnatomicalSite){
-			el = saveAnatomicalSite((AnatomicalSite)e,jcas);
+			el = saveBodySite((AnatomicalSite)e,jcas);
 		}
 		
 		// do common things
@@ -701,9 +713,13 @@ public class PhenotypeResourceFactory {
 		return t;
 	}
 
-	private static BodySite saveAnatomicalSite(AnatomicalSite e, JCas jcas) {
+	private static BodySite saveBodySite(AnatomicalSite e, JCas jcas) {
 		Annotation a = getAnnotationByIdentifier(jcas,e.getResourceIdentifier());
 		BodySite t = (a == null)? new  BodySite(jcas):(BodySite)a;
+		
+		// save modifiers
+		t.setHasBodySiteModifier(getValues(jcas, getFactList(jcas,e.getModifier())));
+		
 		return t;
 	}
 	
@@ -879,6 +895,21 @@ public class PhenotypeResourceFactory {
 		return sites;
 	}
 	
+	
+	/**
+	 * get a list of BodySites from 
+	 * @param jcas
+	 * @param bodySites
+	 * @return
+	 */
+	private static List<FeatureStructure> getFactList(JCas jcas, Collection<CodeableConcept> facts){
+		List<FeatureStructure> sites = new ArrayList<FeatureStructure>();
+		for(CodeableConcept cc: facts){
+			sites.add(saveFact(cc, jcas));
+		}
+		return sites;
+	}
+	
 
 	public static Element loadElement(org.healthnlp.deepphe.uima.types.Fact e){
 		Element el = null;
@@ -903,6 +934,12 @@ public class PhenotypeResourceFactory {
 	private static AnatomicalSite loadBodySite(BodySite e) {
 		AnatomicalSite ob = new AnatomicalSite();
 		ob.setCode(getCodeableConcept(e));
+		
+		// add modifiers
+		for(int i=0;i<getSize(e.getHasBodySiteModifier());i++){
+			ob.addModifier(FactFactory.createCodeableConcept(loadFact(e.getHasBodySiteModifier(i))));
+		}
+				
 		addMention(ob,e);
 		FHIRUtils.createIdentifier(ob.addIdentifier(),e.getHasIdentifier());
 		return ob;

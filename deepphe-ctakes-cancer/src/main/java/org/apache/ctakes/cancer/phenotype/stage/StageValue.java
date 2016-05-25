@@ -1,6 +1,6 @@
 package org.apache.ctakes.cancer.phenotype.stage;
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.phenotype.property.Value;
 
 import java.util.regex.Matcher;
@@ -65,7 +65,7 @@ enum StageValue implements Value {
     */
    @Override
    public String getUri() {
-      return OwlOntologyConceptUtil.CANCER_OWL + "#" + _uri;
+      return OwlConstants.CANCER_OWL + "#" + _uri;
    }
 
    /**
