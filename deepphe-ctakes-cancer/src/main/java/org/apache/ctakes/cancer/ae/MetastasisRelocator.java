@@ -73,11 +73,10 @@ public class MetastasisRelocator extends JCasAnnotator_ImplBase {
             = OwlOntologyConceptUtil.getUriBranchStream( OwlConstants.BREAST_CANCER_OWL + "#Metastatic_Neoplasm" )
             .collect( Collectors.toList() );
       getBreastRelations( jcas, metastasisUris ).forEach( TOP::removeFromIndexes );
-      // modifiers
+      // remove quadrant locations that are not breasts
       getNonBreastRelations( jcas, getModifierUris( LocationModifier.Quadrant.values() ) )
             .forEach( TOP::removeFromIndexes );
-      getNonBreastRelations( jcas, getModifierUris( LocationModifier.BodySide.values() ) )
-            .forEach( TOP::removeFromIndexes );
+      // remove clockwise locations that are not breasts
       getNonBreastRelations( jcas, getModifierUris( LocationModifier.Clockwise.values() ) )
             .forEach( TOP::removeFromIndexes );
       LOGGER.info( "Finished Processing" );
