@@ -57,7 +57,7 @@ public class CancerPropertiesAnnotator extends JCasAnnotator_ImplBase {
          // All Neoplasms
          final Collection<IdentifiedAnnotation> breastNeoplasms
                = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, lookupWindow,
-               OwlConstants.BREAST_CANCER_OWL + "#Neoplasm" );
+               OwlConstants.CANCER_OWL + "#Neoplasm" );
          // Metastases are under neoplasm, but for now we do not want them as we are interested in primary neoplasms
          breastNeoplasms.removeAll( metastases );
          // Cancers are not under neoplasm, but we do want them as primaries

@@ -1,6 +1,5 @@
 package org.healthnlp.deepphe.uima.fhir;
 
-import org.apache.commons.collections.FactoryUtils;
 import org.apache.uima.cas.FeatureStructure;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.FSArray;
@@ -1302,9 +1301,13 @@ public class PhenotypeResourceFactory {
 
 	public static List<Report>  loadReports(JCas cas){
 		List<Report> reports = new ArrayList<Report>();
+		Set<Annotation> list = new HashSet<Annotation>();
 		for(Annotation a: getAnnotations(cas,Composition.type)){
-			Report r = loadReport((Composition) a);
-			reports.add(r);
+			if(!list.contains(a)){
+				Report r = loadReport((Composition) a);
+				reports.add(r);
+				list.add(a);
+			}
 		}
 		return reports;
 	}

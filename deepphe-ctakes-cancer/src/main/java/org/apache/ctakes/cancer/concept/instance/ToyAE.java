@@ -32,7 +32,7 @@ final public class ToyAE extends JCasAnnotator_ImplBase {
    @Override
    public void process( final JCas jcas ) throws AnalysisEngineProcessException {
 
-      LOGGER.info( jcas.getDocumentText() );
+//      LOGGER.info( jcas.getDocumentText() );
       getAllNeoplasms( jcas ).forEach( n -> LOGGER.info( getNeoplasmDescription( n ) ) );
 
    }
@@ -43,7 +43,7 @@ final public class ToyAE extends JCasAnnotator_ImplBase {
     * @return all neoplasms in the cas
     */
    static private Collection<ConceptInstance> getAllNeoplasms( final JCas jCas ) {
-      return ConceptInstanceUtil.getBranchConceptInstances( jCas, OwlConstants.BREAST_CANCER_OWL + "#Neoplasm" );
+      return ConceptInstanceUtil.getBranchConceptInstances( jCas, OwlConstants.CANCER_OWL + "#Neoplasm" );
    }
 
    /**
@@ -99,32 +99,16 @@ final public class ToyAE extends JCasAnnotator_ImplBase {
          forEachText( sb, "BodySideUris", ConceptInstanceUtil.getBodySideUris( location ) );
          forEachText( sb, "ClockwiseUris", ConceptInstanceUtil.getClockwiseUris( location ) );
       }
-      for ( ConceptInstance t : ConceptInstanceUtil.getNeoplasmT( neoplasm ) ) {
-         sb.append( "\tConceptInstanceUtil.getNeoplasmT(^) " ).append( t.toString() ).append( "\n" );
-         forEachText( sb, "PropertyValues", ConceptInstanceUtil.getPropertyValues( t ) );
-         forEachText( sb, "DiagnosticTests", ConceptInstanceUtil.getDiagnosticTests( t ) );
-      }
-      for ( ConceptInstance n : ConceptInstanceUtil.getNeoplasmN( neoplasm ) ) {
-         sb.append( "\tConceptInstanceUtil.getNeoplasmN(^) " ).append( n.toString() ).append( "\n" );
-         forEachText( sb, "PropertyValues", ConceptInstanceUtil.getPropertyValues( n ) );
-         forEachText( sb, "DiagnosticTests", ConceptInstanceUtil.getDiagnosticTests( n ) );
-      }
-      for ( ConceptInstance m : ConceptInstanceUtil.getNeoplasmM( neoplasm ) ) {
-         sb.append( "\tConceptInstanceUtil.getNeoplasmM(^) " ).append( m.toString() ).append( "\n" );
-         forEachText( sb, "PropertyValues", ConceptInstanceUtil.getPropertyValues( m ) );
-         forEachText( sb, "DiagnosticTests", ConceptInstanceUtil.getDiagnosticTests( m ) );
-      }
-      for ( ConceptInstance stage : ConceptInstanceUtil.getNeoplasmStage( neoplasm ) ) {
-         sb.append( "\tConceptInstanceUtil.getNeoplasmStage(^) " ).append( stage.toString() ).append( "\n" );
-         forEachText( sb, "PropertyValues", ConceptInstanceUtil.getPropertyValues( stage ) );
-         forEachText( sb, "DiagnosticTests", ConceptInstanceUtil.getDiagnosticTests( stage ) );
-      }
-      for ( ConceptInstance receptor : ConceptInstanceUtil.getNeoplasmReceptorStatus( neoplasm ) ) {
-         sb.append( "\tConceptInstanceUtil.getNeoplasmReceptorStatus(^) " ).append( receptor.toString() )
-               .append( "\n" );
-         forEachText( sb, "PropertyValues", ConceptInstanceUtil.getPropertyValues( receptor ) );
-         forEachText( sb, "DiagnosticTests", ConceptInstanceUtil.getDiagnosticTests( receptor ) );
-      }
+      ConceptInstanceUtil.getNeoplasmT( neoplasm )
+            .forEach( t -> forEachConcept( sb, "NeoplasmT", t ) );
+      ConceptInstanceUtil.getNeoplasmN( neoplasm )
+            .forEach( n -> forEachConcept( sb, "NeoplasmN", n ) );
+      ConceptInstanceUtil.getNeoplasmM( neoplasm )
+            .forEach( m -> forEachConcept( sb, "NeoplasmM", m ) );
+      ConceptInstanceUtil.getNeoplasmStage( neoplasm )
+            .forEach( s -> forEachConcept( sb, "NeoplasmStage", s ) );
+      ConceptInstanceUtil.getNeoplasmReceptorStatus( neoplasm )
+            .forEach( r -> forEachConcept( sb, "NeoplasmReceptorStatus", r ) );
       for ( ConceptInstance size : ConceptInstanceUtil.getNeoplasmSizes( neoplasm ) ) {
          sb.append( "\tConceptInstanceUtil.getNeoplasmSizes(^) " ).append( size.toString() ).append( "\n" );
 //         ConceptInstanceUtil.getPropertyValues( size ).forEach( sb::append );
@@ -134,6 +118,14 @@ final public class ToyAE extends JCasAnnotator_ImplBase {
       return sb.toString();
    }
 
+   static private void forEachConcept( final StringBuilder sb, final String getter,
+                                       final ConceptInstance conceptInstance ) {
+      sb.append( "\tConceptInstanceUtil.get" ).append( getter ).append( "(^) " )
+            .append( conceptInstance.toString() ).append( "\n" );
+      forEachText( sb, "PropertyValues", ConceptInstanceUtil.getPropertyValues( conceptInstance ) );
+      forEachText( sb, "DiagnosticTests", ConceptInstanceUtil.getDiagnosticTests( conceptInstance ) );
+
+   }
 
    static private void forEachText( final StringBuilder sb, final String getter,
                                     final Collection<? extends Object> collection ) {

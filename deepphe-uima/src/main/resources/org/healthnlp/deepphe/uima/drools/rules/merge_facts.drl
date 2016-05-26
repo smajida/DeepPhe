@@ -151,6 +151,7 @@ rule "collect-locations"
 				List listObj = (List)$sideMap.get(key);
 				for(Object ff:listObj){
 					TumorLocator tl = new TumorLocator();
+					tl.setTumorSiteFact($tumor1_f);
 					tl.setDocTumorId($tSummaryId);
 					tl.setBodySite($tumor1_name);
 					tl.setBodySide((String)key);
@@ -163,6 +164,7 @@ rule "collect-locations"
 				List listObj = (List)$quadMap.get(key);
 				for(Object ff:listObj){
 					TumorLocator tl = new TumorLocator();
+					tl.setTumorSiteFact($tumor1_f);
 					tl.setDocTumorId($tSummaryId);
 					tl.setBodySite($tumor1_name);
 					tl.setQuadrant((String)key);
@@ -175,6 +177,7 @@ rule "collect-locations"
 				List listObj = (List)$clockMap.get(key);
 				for(Object ff:listObj){
 					TumorLocator tl = new TumorLocator();
+					tl.setTumorSiteFact($tumor1_f);
 					tl.setDocTumorId($tSummaryId);
 					tl.setBodySite($tumor1_name);
 					tl.setClockFacePos((String)key);
@@ -246,7 +249,6 @@ rule "createTumor-location-with-modifiers"
 		String newId = "TumorSummary-"+$tumor1_f.getType()+"-"+$tumor1_name;
 		tf.setIdentifier(newId);
 		tf.addProvenanceFact($tumor1_f);
-		tf.addContainerIdentifier($cSummaryFact.getSummaryId());
 		insert(new IdMapper($tumor1_identifier, newId, $documentType, $tumor1_f.getSummaryId(), tf.getSummaryId()));
 		insert(tf);
 		FactHelper.addFactToSummary($tumor1_f, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);

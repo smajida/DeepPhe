@@ -43,12 +43,24 @@ rule "primaryTumor-2"
 		$tl_1 : TumorLocator( docTumorId == $t_summaryId, bodySite == $domainName, bodySide == $sideName)
 		not (Fact (summaryType=="TumorSummary", documentType == "RecordSummary", provenanceFacts contains $site_tFact))
 		
-		$sameTumor : List()
-      	from collect( TumorLocator(bodySite ==  $domainName, bodySide == bodySide) )
+		$sameTumors : List()
+      	from collect( TumorLocator(docTumorId != $t_summaryId, bodySite == $domainName, bodySide == bodySide) )
 		
 	then
-System.out.println("&&7 PR2");
-		for(Object t : $sameTumor)
+	
+	//	modify($record){
+	//	Fact tf = FactFactory.createFact($site_tFact, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$tumor1_name, "RecordSummary");
+	//	tf.addContainerIdentifier($newSummaryId);
+	//	String newId = "TumorSummary-"+$site_tFact.getType()+"-"+$site_tFact.getName()+"-"+$tl_1.getSide();
+	//	tf.setIdentifier(newId);
+	//	tf.addProvenanceFact($site_tFact);
+	//	insert(new IdMapper($site_tFact.getIdentifier(), newId, $site_tFact.getDocumentType(), $tumor1_f.getSummaryId(), tf.getSummaryId()));
+	//	insert(tf);
+	//	FactHelper.addFactToSummary($tumor1_f, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+	//	}
+		
+System.out.println("CANCER_RES: "+$record.getCancerSummary().getResourceIdentifier());
+		for(Object t : $sameTumors)
 		System.out.println("$sameTumor : "+((TumorLocator)t).getInfo());
 	
 end

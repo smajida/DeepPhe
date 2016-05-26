@@ -1,20 +1,38 @@
 *cancer ID		
 *patient ID		
-*body location	Breast_Cancer	hasBodySite
+body location	Breast_Cancer	hasBodySite
 body location laterality	BodySite	hasBodySide
+-documents for	BodySite	wasDerivedFrom
+Temporality		
 clinical stage	BreastCancerPhenotype	hasClinicalStage
+-documents for clinical stage	CancerStage	wasDerivedFrom
 clinical T classification	BreastCancerPhenotype	hasClinicalTClassification
+-documents for clinical T classification	Breast_Cancer_Clinical_Primary_Tumor_TNM_Finding_v7	wasDerivedFrom
 clinical N classification	BreastCancerPhenotype	hasClinicalNClassification
+-documents for clinical N classification	Breast_Cancer_Clinical_Regional_Lymph_Nodes_TNM_Finding_v7	wasDerivedFrom
 clinical M classification	BreastCancerPhenotype	hasClinicalMClassification
+-documents for clinical M classification	Breast_Cancer_Clinical_Distant_Metastasis_TNM_Finding	wasDerivedFrom
 clinical prefix		
+-documents for clinical prefix		
 clinical suffix		
+-documents for clinical suffix		
 pathologic T classification	BreastCancerPhenotype	hasPathologicTClassification
+-documents for pathologic T classification	Breast_Cancer_Pathologic_Primary_Tumor_TNM_Finding_v7	wasDerivedFrom
 pathologic N classification	BreastCancerPhenotype	hasPathologicNClassification
+-documents for pathologic N classification	Breast_Cancer_Pathologic_Regional_Lymph_Nodes_TNM_Finding_v7	wasDerivedFrom
 pathologic M classification	BreastCancerPhenotype	hasPathologicMClassification
+-documents for pathologic M classification	Breast_Cancer_Pathologic_Distant_Metastasis_TNM_Finding	wasDerivedFrom
 pathologic prefix		
+-documents for pathologic prefix		
 pathologic suffix		
+-documents for pathologic suffix		
 generic T classification	BreastCancerPhenotype	hasGenericTClassification
+-documents for generic T classification	Generic_Primary_Tumor_TNM_Finding	wasDerivedFrom
 generic N classification	BreastCancerPhenotype	hasGenericNClassification
+-documents for generic N classification	Generic_Regional_Lymph_Nodes_TNM_Finding	wasDerivedFrom
 generic M classification	BreastCancerPhenotype	hasGenericMClassification
+-documents for generic M classification	Generic_Distant_Metastasis_TNM_Finding	wasDerivedFrom
 generic prefix		
+-documents for generic prefix		
 generic suffix		
+-documents for generic suffix		

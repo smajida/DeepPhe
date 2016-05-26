@@ -45,6 +45,10 @@ final public class CancerPipelineRunner {
       final AnalysisEngine semevalBsvWriter = createSemevalBsvWriter( outputDirectory );
       SimplePipeline
             .runPipeline( collectionReader, ctakesCancerEngine, prettyTextWriter, propertyTextWriter, xmiWriter, semevalBsvWriter );
+
+//      final AnalysisEngine toyAE = AnalysisEngineFactory.createEngine( ToyAE.class );
+//      SimplePipeline
+//            .runPipeline( collectionReader, ctakesCancerEngine, toyAE );
    }
 
 

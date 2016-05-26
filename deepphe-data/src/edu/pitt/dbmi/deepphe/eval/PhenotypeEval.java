@@ -297,6 +297,8 @@ public class PhenotypeEval {
 		BufferedReader reader = new BufferedReader(new FileReader(file));
 		boolean headerLine = true;
 		for(String l=reader.readLine();l != null; l = reader.readLine()){
+			if(l.trim().length() == 0)
+				continue;
 			if(headerLine){
 				Record.loadHeaders(l);
 				headerLine = false;
@@ -353,6 +355,12 @@ public class PhenotypeEval {
 		for(String id: goldAnnotations.keySet()){
 			Record gold = goldAnnotations.get(id);
 			Record candidate = candidateAnnotations.get(id);
+			
+			// did we actually annotate that patient?
+			if(!isAnnotatedRecord(gold,candidateAnnotations))
+				continue;
+			
+			
 			// if we have a candidate with the same (like the same span), we have a TP
 			if(candidate != null){
 				gold.setConfusion(ConfusionLabel.TP);
@@ -361,7 +369,6 @@ public class PhenotypeEval {
 				
 				// calculate stats per attribute
 				append(attributeConfusions,gold.getAttributeConfusionMatricies());
-			
 			// if we don't have a candidate, then we have a FN	
 			}else{
 				gold.setConfusion(ConfusionLabel.FN);
@@ -403,6 +410,17 @@ public class PhenotypeEval {
 	
 		}
 	
+	}
+
+
+	private boolean isAnnotatedRecord(Record gold, Map<String, Record> candidateAnnotations) {
+		final String patientID = "*patient ID";
+		List<String> vals  = gold.getValues(patientID);
+		for(Record r: candidateAnnotations.values()){
+			if(vals.containsAll(r.getValues(patientID)))
+				return true;
+		}
+		return false;
 	}
 
 }

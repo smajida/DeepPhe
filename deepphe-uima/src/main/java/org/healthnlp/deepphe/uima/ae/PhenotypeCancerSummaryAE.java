@@ -16,6 +16,7 @@ import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.DefaultFactList;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
+import org.healthnlp.deepphe.fhir.fact.TextMention;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
@@ -26,6 +27,7 @@ import org.healthnlp.deepphe.uima.drools.Domain;
 import org.healthnlp.deepphe.uima.drools.DroolsEngine;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
+import org.healthnlp.deepphe.util.OntologyUtils;
 import org.kie.api.runtime.KieSession;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
@@ -50,7 +52,12 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 	public void initialize(UimaContext aContext) throws ResourceInitializationException {
 		super.initialize(aContext);
 		try {
-			ontology = OOntology.loadOntology((String) aContext.getConfigParameterValue(PARAM_ONTOLOGY_PATH));
+			if(!OntologyUtils.hasInstance()){
+				ontology = OOntology.loadOntology((String) aContext.getConfigParameterValue(PARAM_ONTOLOGY_PATH));
+				OntologyUtils.getInstance(ontology);
+			}else{
+				ontology = OntologyUtils.getInstance().getOntology();
+			}
 		} catch (IOntologyException e) {
 			throw new ResourceInitializationException(e);
 		}
@@ -58,24 +65,27 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
 		
 		// for now, lets assume there is only one cancer summary
-		Patient patient = PhenotypeResourceFactory.loadPatient(jcas);
+		MedicalRecord record = PhenotypeResourceFactory.loadMedicalRecord(jcas);
+		Patient patient = record.getPatient();
+		
 		PatientSummary patientSummary = new PatientSummary();
 		patientSummary.setAnnotationType(FHIRConstants.ANNOTATION_TYPE_RECORD);
 		
 		CancerSummary cancerSummary =  new CancerSummary(patient.getPatientName());
 		cancerSummary.setAnnotationType(FHIRConstants.ANNOTATION_TYPE_RECORD);
 		
+System.out.println("&&: "+cancerSummary.getResourceIdentifier());
+		
 		// record to load into drools
-		MedicalRecord record = new MedicalRecord();
-		record.setPatient(patient);
 		record.setPatientSummary(patientSummary);
 		record.setCancerSummary(cancerSummary);
 		
-		// merte stuff around
-		for(Report report: PhenotypeResourceFactory.loadReports(jcas)){
-			record.addReport(report);
+		// merge stuff around
+		/*
+		for(Report report: record.getReports()){
 
-			/*PatientSummary p = report.getPatientSummary();
+			PatientSummary p = report.getPatientSummary();
+
 			if(p != null && patientSummary.isAppendable(p)){
 				patientSummary.append(p);
 			}
@@ -92,21 +102,25 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			//append tumor summaries that are by themselves
 			for(TumorSummary ts: report.getTumorSummaries()){
 				cancerSummary.append(ts);
-			}*/
+			}
 
 		}
+		*/
 		
 		// check ancestors
 		checkAncestors(record.getReportLevelFacts());
 
-		for(Fact f: record.getReportLevelFacts()){
+		/*for(Fact f: record.getReportLevelFacts()){
 			System.out.println(f.getInfo());
-		}
+		}*/
 
-	
-		
-		
-		//long stT = System.currentTimeMillis();
+
+		//Olga: for TMN and Stage testing empty *Classification and Cancer stage
+		/*record.getCancerSummary().getPhenotype().clearFactList(FHIRConstants.HAS_CANCER_STAGE);
+		record.getCancerSummary().getPhenotype().clearFactList(FHIRConstants.HAS_T_CLASSIFICATION);
+		record.getCancerSummary().getPhenotype().clearFactList(FHIRConstants.HAS_N_CLASSIFICATION);
+		record.getCancerSummary().getPhenotype().clearFactList(FHIRConstants.HAS_M_CLASSIFICATION);*/
+
 		
 		//insert record into drools
 		DroolsEngine de = new DroolsEngine();
@@ -120,7 +134,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			for(Fact f: record.getReportLevelFacts()){
 				try{
 				if(!f.getCategory().equalsIgnoreCase("wasDerivedFrom")){
-				//	System.out.println(f.getInfo());
+					System.out.println(f.getInfo());
 					droolsSession.insert(f);
 				}
 				}catch (NullPointerException e){
@@ -138,7 +152,6 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	
 		//this is where you save your work back to CAS
 
@@ -147,10 +160,9 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 	}
 
 	public void checkAncestors(Collection<Fact> facts){
-		org.healthnlp.deepphe.uima.fhir.OntologyUtils ou = new org.healthnlp.deepphe.uima.fhir.OntologyUtils(ontology);
 		for(Fact f:	facts){
 			if(f.getAncestors().isEmpty())
-				ou.addAncestors(f);
+				OntologyUtils.getInstance().addAncestors(f);
 		}
 	}
 	

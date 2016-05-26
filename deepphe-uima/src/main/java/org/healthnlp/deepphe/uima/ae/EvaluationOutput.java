@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
@@ -23,14 +25,16 @@ import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.fact.DefaultFactList;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
+import org.healthnlp.deepphe.fhir.fact.TextMention;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.fhir.summary.TumorSummary;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 
+import edu.pitt.dbmi.nlp.noble.ontology.IClass;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.OntologyUtils;
-
 
 public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 	private static final String I = "|";
@@ -45,6 +49,8 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 	public static final String ENTRY_LABEL = "Label";
 	public static final String ENTRY_CLASS = "Class";
 	public static final String ENTRY_PROPERTY = "Property";
+	public static final String ENTRY_PROVENANCE = "wasDerivedFrom";
+	public static final List<String> NORMALIZATION_EXPRESSIONS = Arrays.asList(".*([pc]?[TNM]\\w{1,4})_(Stage|TNM)_Finding");
 
 	
 	private List<Map<String,String>> cancerMapping, tumorMapping;
@@ -99,7 +105,7 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 
 	
 	private String getPatientIdentifier(Patient patient){
-		return patient.getPatientName();
+		return patient.getPatientName().toLowerCase();
 	}
 	
 	private String getCancerIdentifier(CancerSummary cancer){
@@ -108,7 +114,7 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 		b.append(getPatientIdentifier(cancer.getPatient())+"_");
 		b.append(temporality+"_");
 		for(Fact site: cancer.getBodySite()){
-			b.append(site.getName()+"_");
+			b.append(site.getFullName()+"_");
 		}
 		b.replace(b.length()-1,b.length(),"");
 		return b.toString(); 
@@ -118,6 +124,7 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 	private void writeDataFile(List<Map<String,String>> mapping, File dataFile, CancerSummary cancer) throws AnalysisEngineProcessException {
 		StringBuffer buffer = new StringBuffer();
 
+		FactList valueFacts = null;
 		for(Map<String,String> map: mapping){
 			String dataLabel = map.get(ENTRY_LABEL);
 			String entryClass = map.get(ENTRY_CLASS);
@@ -129,10 +136,13 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 				value = getPatientIdentifier(cancer.getPatient());
 			}else if(dataLabel.startsWith("*") && dataLabel.contains("cancer")){
 				value = getCancerIdentifier(cancer);
+			}else if(dataLabel.startsWith("-") && ENTRY_PROVENANCE.equals(entryProperty)){
+				value = getProvenance(valueFacts);
 			}else{
-				value = getSummaryFactValue(cancer, entryClass, entryProperty);
-				if(value.length() == 0)
-					value = getSummaryFactValue(cancer.getPhenotype(), entryClass, entryProperty);
+				valueFacts = getSummaryFactValue(cancer, entryClass, entryProperty);
+				if(valueFacts.isEmpty())
+					valueFacts = getSummaryFactValue(cancer.getPhenotype(), entryClass, entryProperty);
+				value = getFactValue(valueFacts,entryClass,entryProperty);
 			}
 			buffer.append(value).append(I);
 
@@ -148,9 +158,22 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 		}
 	}
 	
+	private String getProvenance(FactList valueFacts) {
+		if(valueFacts == null)
+			return "";
+		StringBuffer b = new StringBuffer();
+		for(Fact f: valueFacts){
+			if(f.getDocumentIdentifier() != null)
+				b.append(f.getDocumentIdentifier()+FS);
+		}
+		return b.toString();
+	}
+
+
+
 	private void writeDataFile(List<Map<String,String>> mapping, File dataFile, List<TumorSummary> tumors) throws AnalysisEngineProcessException {
 		StringBuffer buffer = new StringBuffer();
-
+		FactList valueFacts = null;
 		for(TumorSummary tumor : tumors){
 			for(Map<String,String> map: mapping){
 				String dataLabel = map.get(ENTRY_LABEL);
@@ -163,17 +186,23 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 					value = getPatientIdentifier(tumor.getPatient());
 				}else if(dataLabel.startsWith("*") && dataLabel.contains("cancer")){
 					value = getCancerIdentifier(tumor.getCancerSummary());
+				}else if(dataLabel.startsWith("-") && ENTRY_PROVENANCE.equals(entryProperty)){
+					value = getProvenance(valueFacts);
 				}else{
-					value = getSummaryFactValue(tumor, entryClass, entryProperty);
-					if(value.length() == 0)
-						value = getSummaryFactValue(tumor.getPhenotype(), entryClass, entryProperty);
+					valueFacts = getSummaryFactValue(tumor, entryClass, entryProperty);
+					if(valueFacts.isEmpty())
+						valueFacts = getSummaryFactValue(tumor.getPhenotype(), entryClass, entryProperty);
+					value = getFactValue(valueFacts,entryClass,entryProperty);
 				}
 				buffer.append(value).append(I);
 	
 			}
 			buffer.append("\n");
 		}
-
+		// remove last newline
+		if(buffer.toString().endsWith("\n"))
+			buffer.replace(buffer.length()-1,buffer.length(),"");
+		
 		// save to file
 		try {
 			saveText(buffer.toString(),dataFile,true);
@@ -191,23 +220,24 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 	 * @return
 	 */
 	
-	private String getSummaryFactValue(Summary summary, String entryClass,String entryProperty){
+	private FactList getSummaryFactValue(Summary summary, String entryClass,String entryProperty){
 		if(summary == null || entryClass == null || entryClass.length() == 0)
-			return "";
+			return new DefaultFactList();
 		
 		// are we getting simple info from summary?
 		entryClass = OntologyUtils.toResourceName(entryClass);
 		
 		FactList list = summary.getFacts(entryProperty);
 		if(list != null){
-			return list.isEmpty()?"":getFactValue(list,entryClass,"");
+			return list;
+			//return list.isEmpty()?"":getFactValue(list,entryClass,"");
 		}
 		// no such category exists in summary, lookup on the class
 		list = new DefaultFactList();
 		for(FactList factList : summary.getContent().values()){
 			for(Fact fact: factList){
 				// we found a class, awesome
-				if(fact.getName().equals(entryClass)){
+				if(isType(fact,entryClass)){
 					if(!list.contains(fact))
 						list.add(fact);
 					// lets check restriction and if it is satisfied 
@@ -215,13 +245,25 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 				}
 			}
 		}
-		if(!list.isEmpty())
-			return getFactValue(list,entryClass,entryProperty);
+		//if(!list.isEmpty())
+		//	return getFactValue(list,entryClass,entryProperty);
 				
-		return "";
+		return list;
 	}
 	
 	
+	
+	
+	private boolean isType(Fact fact, String entryClass){
+		if(fact.getName().equals(entryClass))
+			return true;
+		// check sub-classes
+		if(org.healthnlp.deepphe.util.OntologyUtils.hasInstance()){
+			return org.healthnlp.deepphe.util.OntologyUtils.getInstance().hasSuperClass(fact,entryClass);
+		}
+		
+		return false;
+	}
 	
 	
 
@@ -244,7 +286,7 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 			if(entryClass.equals(value.getName())){
 				b.append("True"+FS);
 			}else{
-				b.append(value.getName()+FS);
+				b.append(getNormalizedValue(value)+FS);
 			}
 		}
 		// remove last field separator
@@ -254,6 +296,17 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 		return  b.toString();
 	}
 
+	
+	private String getNormalizedValue(Fact val){
+		// take care of reg/ex
+		for(String re: NORMALIZATION_EXPRESSIONS){
+			Matcher m = Pattern.compile(re).matcher(val.getName());
+			if(m.matches())
+				return m.group(1);
+		}
+		return val.getName();
+	}
+	
 
 
 	private boolean isRestrictionSatisfied(Fact fact, String entryRestriction) {

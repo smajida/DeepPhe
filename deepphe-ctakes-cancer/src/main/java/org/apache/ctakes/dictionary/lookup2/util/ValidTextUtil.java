@@ -57,7 +57,7 @@ final public class ValidTextUtil {
     * Gets rid of 4 breast quadrants
     *
     * @param text -
-    * @return true if the text contains a body side
+    * @return true if the text contains a quadrant
     */
    static private boolean hasQuadrant( final String text ) {
       return text.contains( "quadrant" );

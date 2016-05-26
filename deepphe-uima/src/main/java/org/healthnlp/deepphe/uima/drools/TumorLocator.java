@@ -5,7 +5,10 @@ import org.healthnlp.deepphe.fhir.fact.Fact;
 public class TumorLocator {
 	private String bodySite, docTumorId, recordId, bodySide, quadrant="", clockFacePos="";
 	private String histologicType = "";
-	private Fact provenanceFact;
+	private Fact provenanceFact; //BodySide, Quadrant, ClockfacePosition - so, all the modifiers go here
+	private Fact tumorSiteFact;
+
+	
 	public String getBodySite() {
 		return bodySite;
 	}
@@ -62,10 +65,15 @@ public class TumorLocator {
 		b.append("bodySide: "+getBodySide()+"|");
 		b.append("Quadrant: "+getQuadrant()+"|");
 		b.append("clockFacePos: "+getClockFacePos()+"\n");
+		b.append("tumorSiTTFact: "+tumorSiteFact.getInfo()+"\n");
 		b.append("ProvenanceFact: "+provenanceFact.getInfo()+"\n");
 		return b.toString();
 	}
-	
-	
+	public Fact getTumorSiteFact() {
+		return tumorSiteFact;
+	}
+	public void setTumorSiteFact(Fact tumorSiteFact) {
+		this.tumorSiteFact = tumorSiteFact;
+	}
 
 }

@@ -31,6 +31,7 @@ final public class ModifierFactory {
             windowStartOffset + spannedModifier.getStartOffset(),
             windowStartOffset + spannedModifier.getEndOffset() );
       modifierMention.setTypeID( CONST.NE_TYPE_ID_FINDING );
+      modifierMention.setDiscoveryTechnique( CONST.NE_DISCOVERY_TECH_DICT_LOOKUP );  // not really true
       // Main Umls Concept
       final UmlsConcept umlsConcept
             = UriAnnotationFactory.createUmlsConcept( jcas, spannedModifier.getModifier().getUri() );
@@ -47,6 +48,7 @@ final public class ModifierFactory {
       final SignSymptomMention modifierMention
             = new SignSymptomMention( jcas, annotation.getBegin(), annotation.getEnd() );
       modifierMention.setTypeID( CONST.NE_TYPE_ID_FINDING );
+      modifierMention.setDiscoveryTechnique( CONST.NE_DISCOVERY_TECH_DICT_LOOKUP );  // not really true
       final FSArray ontologyConcepts = annotation.getOntologyConceptArr();
       if ( ontologyConcepts != null ) {
          modifierMention.setOntologyConceptArr( ontologyConcepts );
