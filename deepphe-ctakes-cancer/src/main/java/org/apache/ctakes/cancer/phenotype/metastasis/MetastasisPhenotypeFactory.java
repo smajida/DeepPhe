@@ -66,7 +66,7 @@ public class MetastasisPhenotypeFactory {
                                                     final String typeTitle,
                                                     final Iterable<IdentifiedAnnotation> neoplasms ) {
       final IdentifiedAnnotation closestNeoplasm
-            = AnnotationUtil.getClosestAnnotation( typeBegin, typeEnd, neoplasms );
+            = AnnotationUtil.getPrecedingOrAnnotation( typeBegin, typeEnd, neoplasms );
       if ( closestNeoplasm != null ) {
          final String relationName = typeTitle.replace( ' ', '_' ) + "_of";
          createEventMentionNeoplasm( jCas, metastasis, closestNeoplasm, relationName );

@@ -90,7 +90,7 @@ public class PastSentenceLocator extends JCasAnnotator_ImplBase {
                                               final IdentifiedAnnotation locatable,
                                               final Collection<IdentifiedAnnotation> sites ) {
       final IdentifiedAnnotation closestSite
-            = AnnotationUtil.getClosestAnnotation( locatable.getBegin(), locatable.getEnd(), sites );
+            = AnnotationUtil.getPrecedingOrAnnotation( locatable.getBegin(), locatable.getEnd(), sites );
       if ( closestSite != null ) {
          createLocationRelation( jCas, locatable, closestSite );
       }
