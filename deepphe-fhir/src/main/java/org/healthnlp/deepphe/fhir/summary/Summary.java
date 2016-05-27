@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.fhir.summary;
 import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.fact.BodySiteFact;
 import org.healthnlp.deepphe.fhir.fact.DefaultFactList;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactFactory;
@@ -359,5 +360,24 @@ public abstract class Summary extends List_  implements Element {
 		}
 		return list;
 	}
+	
+	
+	public static 	String createLocationIdentifier(BodySiteFact site) {
+		StringBuffer b = new StringBuffer();
+		if(site.getBodySide() != null)
+			b.append(site.getBodySide().getName()+"_");
+		b.append(site.getName());
+		List<String> modifiers = new ArrayList<String>();
+		for(Fact mod: site.getModifiers()){
+			if(!FactFactory.isBodySide(mod))
+				modifiers.add(mod.getName());
+		}
+		Collections.sort(modifiers,Collections.reverseOrder());
+		for(String s: modifiers){
+			b.append("_"+s);
+		}
+		return b.toString();
+	}
+	
 	
 }

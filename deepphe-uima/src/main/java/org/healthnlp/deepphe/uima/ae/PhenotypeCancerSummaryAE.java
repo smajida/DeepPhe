@@ -101,9 +101,9 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		// check ancestors
 		checkAncestors(record.getRecordLevelFacts());
 
-		for(Fact f: record.getReportLevelFacts()){
+		/*for(Fact f: record.getReportLevelFacts()){
 			System.out.println(f.getInfo());
-		}
+		}*/
 	
 		/*
 		 * 	System.out.println("--------------------");
