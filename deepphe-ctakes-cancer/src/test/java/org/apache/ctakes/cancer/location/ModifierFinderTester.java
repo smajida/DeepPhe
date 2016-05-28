@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author SPF , chip-nlp
@@ -23,6 +24,12 @@ public class ModifierFinderTester {
    static private final String[] RIGHT_SENTENCES = { "Tumor on the right breast.", "Tumor: breast, right",
                                                      "Tumor: breast, right.", "Tumor dextro mastis.",
                                                      "Breast (right)", "Breast (rt)." };
+
+   static private final String[] NON_SENTENCES = { "The nasty piratest fired on our port side.",
+                                                   "There is no escaping the machinations of that Duddley Doright this night.",
+                                                   "Halt!",
+                                                   "Harry shouted \"Spectro Leftonum!\" and the creature laughed.",
+                                                   "My favorite G.I. Joey was that weapons buyer Dextros." };
 
 
    static private final String[] UPPER_INNER_SENTENCES = { "Tumor in the upper inner quadrant",
@@ -116,6 +123,15 @@ public class ModifierFinderTester {
          assertEquals( "Expect left side in " + RIGHT_SENTENCES[ i ],
                LocationModifier.BodySide.RIGHT.getUri(),
                sides.get( 0 ).getModifier().getUri() );
+      }
+   }
+
+   @Test
+   public void testNoSide() {
+      for ( String sentence : NON_SENTENCES ) {
+         final List<SpannedModifier> sides = ModifierFinder
+               .findModifiers( sentence, LocationModifier.BodySide.values() );
+         assertTrue( "Expect no side in " + sentence, sides.isEmpty() );
       }
    }
 
