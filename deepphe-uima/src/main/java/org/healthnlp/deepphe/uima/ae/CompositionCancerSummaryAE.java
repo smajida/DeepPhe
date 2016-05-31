@@ -123,9 +123,9 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			}
 		}
 		// now lets look at it
-		for(BodySiteFact f: map.keySet()){
+		/*for(BodySiteFact f: map.keySet()){
 			System.err.println("\t"+f.getSummaryText()+"\t\t -> \t"+map.get(f).getSummaryText());
-		}
+		}*/
 		
 		return map;
 	}
