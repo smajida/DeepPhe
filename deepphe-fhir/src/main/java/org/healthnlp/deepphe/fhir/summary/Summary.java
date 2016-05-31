@@ -5,11 +5,18 @@ import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.DefaultFactList;
 import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.fact.FactList;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.OntologyUtils;
 import org.hl7.fhir.instance.model.List_;
 import org.hl7.fhir.instance.model.Resource;
+
+import edu.pitt.dbmi.nlp.noble.ontology.IClass;
+import edu.pitt.dbmi.nlp.noble.ontology.ILogicExpression;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
+import edu.pitt.dbmi.nlp.noble.ontology.IRestriction;
 
 import java.io.File;
 import java.net.URI;
@@ -93,9 +100,10 @@ public abstract class Summary extends List_  implements Element {
 		FactList list =  getContent().get(category);
 		if(list == null){
 			list = new DefaultFactList( category );
-//			list.setCategory(category);
+			//list.setCategory(category);
 			getContent().put(category,list);
 		}
+		fact.setCategory(category);
 		list.add(fact);
 	}
 	
@@ -232,6 +240,134 @@ public abstract class Summary extends List_  implements Element {
 			}
 		}
 		
+		return list;
+	}
+	
+	/**
+	 * load template based on the ontology
+	 * @param summary
+	 * @param uri
+	 */
+	public void loadTemplate(){
+		loadTemplate(OntologyUtils.getInstance().getOntology());
+	}
+	
+	/**
+	 * load template based on the ontology
+	 * @param summary
+	 * @param uri
+	 */
+	public void loadTemplate(IOntology ontology){
+		IClass summaryClass = ontology.getClass(""+getConceptURI());
+		if(summaryClass != null){
+			// see if there is a more specific
+			for(IClass cls: summaryClass.getDirectSubClasses()){
+				summaryClass = cls;
+				break;
+			}
+			
+			// now lets pull all of the properties
+			for(Object o: summaryClass.getNecessaryRestrictions()){
+				if(o instanceof IRestriction){
+					IRestriction r = (IRestriction) o;
+					if(isSummarizableRestriction(r)){
+						if(!getContent().containsKey(r.getProperty().getName())){
+							FactList facts = new DefaultFactList();
+							facts.setCategory(r.getProperty().getName());
+							facts.setTypes(getClassNames(r.getParameter()));
+							getContent().put(r.getProperty().getName(),facts);
+						}else{
+							for(String type: getClassNames(r.getParameter())){
+								getContent().get(r.getProperty().getName()).getTypes().add(type);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * load fact categories from the template
+	 * @param summary
+	 * @param report
+	 */
+	public void loadElementsFromReport(Report report){
+		loadElementsFromReport(report,OntologyUtils.getInstance().getOntology());
+	}
+	
+	/**
+	 * load fact categories from the template
+	 * @param summary
+	 * @param report
+	 */
+	public void loadElementsFromReport(Report report, IOntology ontology){
+		for(String category: getFactCategories()){
+			for(String name: getFacts(category).getTypes()){
+				IClass cls = ontology.getClass(name);
+				if(cls != null){
+					int n = 1;
+					for(Element e: report.getReportElements()){
+						URI uri  = FHIRUtils.getConceptURI(e.getCode());
+
+						if(uri != null){
+							IClass c = ontology.getClass(""+uri);
+							if(c != null){
+								if(c.equals(cls) || c.hasSuperClass(cls)){
+									Fact fact = FactFactory.createFact(e);
+									addTemporality(fact,e, report.getDate(),n++);
+									addAncestors(ontology,fact);
+									addFact(category,fact);
+								}
+							}
+						}
+					}
+				}
+			}
+		}	
+	}
+	
+	private void addTemporality(Fact fact, Element  el, Date dt, int i) {
+		if(dt != null)
+			fact.setRecordedDate(dt);
+		fact.setTemporalOrder(FHIRUtils.createTemporalOrder(el, i));
+		
+	}
+	
+	private void addAncestors(IOntology ontology, Fact fact){
+		OntologyUtils.getInstance(ontology).addAncestors(fact);
+		for(Fact f:	fact.getContainedFacts()){
+			OntologyUtils.getInstance(ontology).addAncestors(f);
+		}
+	}
+	
+	/**
+	 * should this restriction be used for summarization
+	 * @param r
+	 * @return
+	 */
+	private boolean isSummarizableRestriction(IRestriction r){
+		IOntology ontology = r.getOntology();
+		IClass bs = ontology.getClass(FHIRConstants.BODY_SITE);
+		IClass event = ontology.getClass(FHIRConstants.EVENT);
+	
+		if(r.getProperty().isObjectProperty()){
+			for(String name : getClassNames(r.getParameter())){
+				IClass cls = ontology.getClass(name);
+				return cls.hasSuperClass(event) || cls.equals(bs) || cls.hasSuperClass(bs);
+			}
+		}
+		return false;
+	}
+	
+
+	private List<String> getClassNames(ILogicExpression exp){
+		List<String> list = new ArrayList<String>();
+		for(Object o: exp){
+			if(o instanceof IClass){
+				list.add(((IClass)o).getName());
+			}
+		}
 		return list;
 	}
 	

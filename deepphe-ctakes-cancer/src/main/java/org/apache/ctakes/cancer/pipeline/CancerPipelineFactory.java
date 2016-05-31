@@ -180,12 +180,16 @@ final public class CancerPipelineFactory {
 //                  DegreeOfRelationExtractorAnnotator.class,
 //                  GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
 //                  getModelPath( "relationextractor/models/degree_of" ) ) );
+      // ml location_of misses everything not in same sentence, which is a majority for breast cancer
       addLoggedEngine( aggregateBuilder,
             AnalysisEngineFactory.createEngineDescription(
                   LocationOfRelationExtractorAnnotator.class,
                   GenericJarClassifierFactory.PARAM_CLASSIFIER_JAR_PATH,
                   CTAKES_DIR_PREFIX + "relation/extractor/location_of.jar" ) );
+      // remove metastases from breasts, remove breast modifiers from non-breasts
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( MetastasisRelocator.class ) );
+      // add neoplasms and location modifiers to breasts
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( PastSentenceLocator.class ) );
    }
 
    private static void addCorefEngines( final AggregateBuilder aggregateBuilder )

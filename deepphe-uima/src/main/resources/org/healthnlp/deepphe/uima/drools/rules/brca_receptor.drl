@@ -1,3 +1,35 @@
+package org.healthnlp.deepphe.uima.drools;
+
+import java.lang.Object;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Date;
+
+import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.FHIRConstants;
+
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
+import org.healthnlp.deepphe.fhir.fact.FactHelper;
+
+import org.healthnlp.deepphe.fhir.summary.*;
+import org.healthnlp.deepphe.uima.drools.*;
+
+
+import org.apache.ctakes.cancer.owl.OwlConstants;
+
+declare Flag
+   mostRecentDocId  : String
+   regex			: String
+   value			: String
+   categoryOrig		: String
+   categoryNew		: String
+   method			: String
+   methodIsSet		: boolean
+end
 
 
 /* Rule for paper
@@ -21,3 +53,477 @@ rule "receptor-ISM-beforeFISH"
 		}			
 end
 */
+
+rule "testDate"
+	no-loop true
+	when
+	 $f1 : Fact(type == "BodySite", documentType != "RecordSummary", $recordedDate : recordedDate)
+	 not(Fact (this != $f1, type == "BodySite", documentType != "RecordSummary", recordedDate > $recordedDate))
+	then
+		System.out.println("$$$$$$ $f1: "+$f1.getInfo());
+end
+
+/*
+* ReceptorStatus-1:
+* If there are multiple instances of a receptor status (ER, PR, Her2/Neu) across several reports which include one or more pathology reports, 
+* use the receptor status from the most recent pathology report. 
+*/
+rule "latest-doc-FISH-ER"
+	salience 66668
+	no-loop true
+	when
+		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
+		$fact : Fact($summaryId : summaryId, $summaryId == $oldSummaryId, category == "hasMethod", name == "Fluorescence_In_Situ_Hybridization", summaryType == "TumorPhenotype",
+				containerIdentifier contains $oldSummaryId, $docId : documentIdentifier)
+		not(Fact(documentType == "RecordSummary", category == "hasERStatus", summaryId == $newId))
+		
+		$PRMentions :List()
+		from collect(Fact(documentType == "Pathology Report", category == "hasInterpretation", summaryId == $summaryId,
+			containerIdentifier.toString() matches ".*Estrogen_Receptor_Status.*", documentIdentifier == $docId))
+		$OtherMentions :List()
+		from collect(Fact($dType: documentType, $dType != "RecordSummary", summaryId == $summaryId,
+			category == "hasInterpretation", containerIdentifier.toString() matches ".*Estrogen_Receptor_Status.*", documentIdentifier == $docId))
+		
+		
+		then
+			String documentId = "";
+			if($PRMentions.size() > 0){
+				Date mostRecent = (Date)((Fact)$PRMentions.get(0)).getRecordedDate();
+				documentId = (String)((Fact)$PRMentions.get(0)).getDocumentIdentifier();
+				for(Object obj : $PRMentions){
+					if(mostRecent.before((Date)((Fact)obj).getRecordedDate())){
+						mostRecent = (Date)((Fact)obj).getRecordedDate();
+						documentId = (String)((Fact)obj).getDocumentIdentifier();
+					}
+				}
+			} 
+			else if ($OtherMentions.size() > 0){
+				Date mostRecent = (Date)((Fact)$OtherMentions.get(0)).getRecordedDate();
+				documentId = (String)((Fact)$OtherMentions.get(0)).getDocumentIdentifier();
+				for(Object obj : $OtherMentions){
+					if(mostRecent.before((Date)((Fact)obj).getRecordedDate())){
+						mostRecent = (Date)((Fact)obj).getRecordedDate();
+						documentId = (String)((Fact)obj).getDocumentIdentifier();
+					}
+				}
+			}
+			if(!"".equals(documentId)){
+				Flag f = new Flag(documentId, ".*Estrogen_Receptor_Status.*", "Estrogen_Receptor_Status","hasInterpretation", 
+					"hasERStatus", "Fluorescence_In_Situ_Hybridization", true);
+		   		insert(f);
+			}
+		
+end	
+
+rule "latest-doc-FISH-Her2"
+	salience 66668
+	no-loop true
+	when
+		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
+		$fact : Fact($summaryId : summaryId, $summaryId == $oldSummaryId, category == "hasMethod", name == "Fluorescence_In_Situ_Hybridization", summaryType == "TumorPhenotype",
+				containerIdentifier contains $oldSummaryId, $docId : documentIdentifier)
+		not(Fact(documentType == "RecordSummary", category == "hasHerStatus", summaryId == $newId))
+		
+		$PRMentions :List()
+		from collect(Fact(documentType == "Pathology Report", category == "hasInterpretation", summaryId == $summaryId,
+			containerIdentifier.toString() matches ".*HER2_Neu_Status.*", documentIdentifier == $docId))
+		$OtherMentions :List()
+		from collect(Fact($dType: documentType, $dType != "RecordSummary", summaryId == $summaryId,
+			category == "hasInterpretation", containerIdentifier.toString() matches ".*HER2_Neu_Status.*", documentIdentifier == $docId))
+		
+		
+		then
+			String documentId = "";
+			if($PRMentions.size() > 0){
+				Date mostRecent = (Date)((Fact)$PRMentions.get(0)).getRecordedDate();
+				documentId = (String)((Fact)$PRMentions.get(0)).getDocumentIdentifier();
+				for(Object obj : $PRMentions){
+					if(mostRecent.before((Date)((Fact)obj).getRecordedDate())){
+						mostRecent = (Date)((Fact)obj).getRecordedDate();
+						documentId = (String)((Fact)obj).getDocumentIdentifier();
+					}
+				}
+			} 
+			else if ($OtherMentions.size() > 0){
+				Date mostRecent = (Date)((Fact)$OtherMentions.get(0)).getRecordedDate();
+				documentId = (String)((Fact)$OtherMentions.get(0)).getDocumentIdentifier();
+				for(Object obj : $OtherMentions){
+					if(mostRecent.before((Date)((Fact)obj).getRecordedDate())){
+						mostRecent = (Date)((Fact)obj).getRecordedDate();
+						documentId = (String)((Fact)obj).getDocumentIdentifier();
+					}
+				}
+			}
+			if(!"".equals(documentId)){
+				Flag f = new Flag(documentId, ".*HER2_Neu_Status.*", "HER2_Neu_Status","hasInterpretation", "hasHerStatus",
+					"Fluorescence_In_Situ_Hybridization", true);
+		   		insert(f);
+			}
+		
+end	
+
+
+rule "latest-doc-FISH-PR"
+	salience 66668
+	no-loop true
+	when
+		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
+		$fact : Fact($summaryId : summaryId, $summaryId == $oldSummaryId, category == "hasMethod", name == "Fluorescence_In_Situ_Hybridization", 
+				summaryType == "TumorPhenotype", containerIdentifier contains $oldSummaryId, $docId : documentIdentifier)
+		not(Fact(documentType == "RecordSummary", category == "hasPRStatus", summaryId == $newId))
+		
+		$PRMentions :List()
+		from collect(Fact(documentType == "Pathology Report", category == "hasInterpretation", summaryId == $summaryId,
+			containerIdentifier.toString() matches ".*Progesterone_Receptor_Status.*", documentIdentifier == $docId))
+		$OtherMentions :List()
+		from collect(Fact($dType: documentType, $dType != "RecordSummary", summaryId == $summaryId,
+			category == "hasInterpretation", containerIdentifier.toString() matches ".*Progesterone_Receptor_Status.*", documentIdentifier == $docId))
+		
+		
+		then
+			String documentId = "";
+			if($PRMentions.size() > 0){
+				Date mostRecent = (Date)((Fact)$PRMentions.get(0)).getRecordedDate();
+				documentId = (String)((Fact)$PRMentions.get(0)).getDocumentIdentifier();
+				for(Object obj : $PRMentions){
+					if(mostRecent.before((Date)((Fact)obj).getRecordedDate())){
+						mostRecent = (Date)((Fact)obj).getRecordedDate();
+						documentId = (String)((Fact)obj).getDocumentIdentifier();
+					}
+				}
+			} 
+			else if ($OtherMentions.size() > 0){
+				Date mostRecent = (Date)((Fact)$OtherMentions.get(0)).getRecordedDate();
+				documentId = (String)((Fact)$OtherMentions.get(0)).getDocumentIdentifier();
+				for(Object obj : $OtherMentions){
+					if(mostRecent.before((Date)((Fact)obj).getRecordedDate())){
+						mostRecent = (Date)((Fact)obj).getRecordedDate();
+						documentId = (String)((Fact)obj).getDocumentIdentifier();
+					}
+				}
+			}
+			if(!"".equals(documentId)){
+				Flag f = new Flag(documentId, ".*Progesterone_Receptor_Status.*", "Progesterone_Receptor_Status","hasInterpretation", "hasPRStatus",
+					"Fluorescence_In_Situ_Hybridization", true);
+		   		insert(f);
+			}
+		
+end	
+
+
+
+rule "latest-doc-ER"
+	salience 66666
+	no-loop true
+	when
+		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
+		not(Fact($summaryId : summaryId, $summaryId == $oldSummaryId, category == "hasMethod", name == "Fluorescence_In_Situ_Hybridization", 
+				summaryType == "TumorPhenotype",containerIdentifier contains $oldSummaryId, $docId : documentIdentifier))
+		not(Fact(documentType == "RecordSummary", category == "hasERStatus", summaryId == $newId))
+		
+		$PRMentions :List()
+		from collect(Fact(documentType == "Pathology Report", category == "hasInterpretation", containerIdentifier contains $oldSummaryId,
+			containerIdentifier.toString() matches ".*Estrogen_Receptor_Status.*"))
+		$OtherMentions :List()
+		from collect(Fact($dType: documentType, ($dType != "Pathology Report" && $dType != "RecordSummary"), category == "hasInterpretation", 
+			containerIdentifier.toString() matches ".*Estrogen_Receptor_Status.*", containerIdentifier contains $oldSummaryId))
+
+	then
+		String documentId = "";
+		if($PRMentions.size() > 0){
+			Date mostRecent = (Date)((Fact)$PRMentions.get(0)).getRecordedDate();
+			documentId = (String)((Fact)$PRMentions.get(0)).getDocumentIdentifier();
+			for(Object obj : $PRMentions){
+				if(mostRecent.before((Date)((Fact)obj).getRecordedDate())){
+					mostRecent = (Date)((Fact)obj).getRecordedDate();
+					documentId = (String)((Fact)obj).getDocumentIdentifier();
+				}
+			}
+		} 
+		else if ($OtherMentions.size() > 0){
+			Date mostRecent = (Date)((Fact)$OtherMentions.get(0)).getRecordedDate();
+			documentId = (String)((Fact)$OtherMentions.get(0)).getDocumentIdentifier();
+			for(Object obj : $OtherMentions){
+				if(mostRecent.before((Date)((Fact)obj).getRecordedDate())){
+					mostRecent = (Date)((Fact)obj).getRecordedDate();
+					documentId = (String)((Fact)obj).getDocumentIdentifier();
+				}
+			}
+		}
+		if(!"".equals(documentId)){
+			Flag f = new Flag(documentId, ".*Estrogen_Receptor_Status.*", "Estrogen_Receptor_Status","hasInterpretation", "hasERStatus", "", false);
+	   		insert(f);
+		}
+		
+end	
+
+rule "latest-doc-Her2"
+	salience 66666
+	no-loop true
+	when
+		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
+		not(Fact($summaryId : summaryId, $summaryId == $oldSummaryId, category == "hasMethod", name == "Fluorescence_In_Situ_Hybridization", 
+				summaryType == "TumorPhenotype",containerIdentifier contains $oldSummaryId, $docId : documentIdentifier))
+		not(Fact(documentType == "RecordSummary", category == "hasHerStatus", summaryId == $newId))
+		
+		$PRMentions :List()
+		from collect(Fact(documentType == "Pathology Report", category == "hasInterpretation", containerIdentifier contains $oldSummaryId,
+			containerIdentifier.toString() matches ".*HER2_Neu_Status.*"))
+		$OtherMentions :List()
+		from collect(Fact($dType: documentType, ($dType != "Pathology Report" && $dType != "RecordSummary"), category == "hasInterpretation", 
+			containerIdentifier.toString() matches ".*HER2_Neu_Status.*", containerIdentifier contains $oldSummaryId))
+
+	then
+		String documentId = "";
+		if($PRMentions.size() > 0){
+			Date mostRecent = (Date)((Fact)$PRMentions.get(0)).getRecordedDate();
+			documentId = (String)((Fact)$PRMentions.get(0)).getDocumentIdentifier();
+			for(Object obj : $PRMentions){
+				if(mostRecent.before((Date)((Fact)obj).getRecordedDate())){
+					mostRecent = (Date)((Fact)obj).getRecordedDate();
+					documentId = (String)((Fact)obj).getDocumentIdentifier();
+				}
+			}
+		} 
+		else if ($OtherMentions.size() > 0){
+			Date mostRecent = (Date)((Fact)$OtherMentions.get(0)).getRecordedDate();
+			documentId = (String)((Fact)$OtherMentions.get(0)).getDocumentIdentifier();
+			for(Object obj : $OtherMentions){
+				if(mostRecent.before((Date)((Fact)obj).getRecordedDate())){
+					mostRecent = (Date)((Fact)obj).getRecordedDate();
+					documentId = (String)((Fact)obj).getDocumentIdentifier();
+				}
+			}
+		}
+		if(!"".equals(documentId)){
+			Flag f = new Flag(documentId, ".*HER2_Neu_Status.*", "HER2_Neu_Status","hasInterpretation", "hasHerStatus", "", false);
+	   		insert(f);
+		}
+		
+end	
+
+//start
+rule "latest-doc-PR"
+	salience 66666
+	no-loop true
+	when
+		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
+		not(Fact($summaryId : summaryId, $summaryId == $oldSummaryId, category == "hasMethod", name == "Fluorescence_In_Situ_Hybridization", 
+				summaryType == "TumorPhenotype",containerIdentifier contains $oldSummaryId, $docId : documentIdentifier))
+		not(Fact(documentType == "RecordSummary", category == "hasHPRStatus", summaryId == $newId))
+		
+		$PRMentions :List()
+		from collect(Fact(documentType == "Pathology Report", category == "hasInterpretation", containerIdentifier contains $oldSummaryId,
+			containerIdentifier.toString() matches ".*Progesterone_Receptor_Status.*"))
+		$OtherMentions :List()
+		from collect(Fact($dType: documentType, ($dType != "Pathology Report" && $dType != "RecordSummary"), category == "hasInterpretation", 
+			containerIdentifier.toString() matches ".*Progesterone_Receptor_Status.*", containerIdentifier contains $oldSummaryId))
+
+	then
+		String documentId = "";
+		if($PRMentions.size() > 0){
+			Date mostRecent = (Date)((Fact)$PRMentions.get(0)).getRecordedDate();
+			documentId = (String)((Fact)$PRMentions.get(0)).getDocumentIdentifier();
+			for(Object obj : $PRMentions){
+				if(mostRecent.before((Date)((Fact)obj).getRecordedDate())){
+					mostRecent = (Date)((Fact)obj).getRecordedDate();
+					documentId = (String)((Fact)obj).getDocumentIdentifier();
+				}
+			}
+		} 
+		else if ($OtherMentions.size() > 0){
+			Date mostRecent = (Date)((Fact)$OtherMentions.get(0)).getRecordedDate();
+			documentId = (String)((Fact)$OtherMentions.get(0)).getDocumentIdentifier();
+			for(Object obj : $OtherMentions){
+				if(mostRecent.before((Date)((Fact)obj).getRecordedDate())){
+					mostRecent = (Date)((Fact)obj).getRecordedDate();
+					documentId = (String)((Fact)obj).getDocumentIdentifier();
+				}
+			}
+		}
+		if(!"".equals(documentId)){
+			Flag f = new Flag(documentId, ".*Progesterone_Receptor_Status.*", "Progesterone_Receptor_Status","hasInterpretation", "hasPRStatus", "", false);
+	   		insert(f);
+		}
+		
+end	
+//end
+
+rule "setMethod"
+	salience 66666
+	no-loop true
+	when 
+		$flag : Flag($mostRecentDocId : mostRecentDocId, $categoryNew : categoryNew, $value : value, methodIsSet == false)
+				
+		$domain : Domain($domainName : domainName)	
+		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+						$newSummaryId : summaryId)  
+						
+		
+		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
+		
+		$recepFact : Fact($identifier : identifier, name == $value, containerIdentifier contains $oldSummaryId, category == "hasReceptorStatus")
+		
+		$hasMethod : List()
+		from collect(Fact(documentIdentifier == $mostRecentDocId, category == "hasMethod", 
+					documentType!= "RecordSummary", containerIdentifier contains $identifier))
+		then
+			if($hasMethod.size() == 0){
+				$flag.setMethodIsSet(true);
+				update($flag);
+			}
+			else {
+				String method = "Immunohistochemical_Test";
+				for(Object obj : $hasMethod){
+					if(((Fact)obj).getName().equals("Fluorescence_In_Situ_Hybridization"))
+						method = "Fluorescence_In_Situ_Hybridization";
+				}
+				$flag.setMethod(method);	
+				$flag.setMethodIsSet(true);
+				update($flag);
+			}
+end
+				
+				
+rule "setReceptorStatus-no-method"
+	salience 66655
+	no-loop true
+	when
+		$flag : Flag($mostRecentDocId : mostRecentDocId, $regex : regex, $categoryOrig : categoryOrig, 
+				$categoryNew : categoryNew, $value : value, method == "", methodIsSet == true)
+	
+		$record : MedicalRecord()	
+		$domain : Domain($domainName : domainName)	
+		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+						$newSummaryId : summaryId)  
+						
+		
+		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
+		$tF : Fact(summaryType == "TumorSummary", $t_summaryId : summaryId, documentType != "RecordSummary")
+	    $mt : MergedTumor(tumorSiteFactSet contains $tF)
+		
+		$recepFact : Fact($identifier : identifier, name == $value, containerIdentifier contains $t_summaryId, category == "hasReceptorStatus")
+		
+		$fact : Fact(documentIdentifier == $mostRecentDocId, category == $categoryOrig, $summaryId : summaryId,
+					$docType: documentType, $docType != "RecordSummary", 
+					containerIdentifier.toString() matches $regex, $cIds : containerIdentifier, ($cIds contains $oldSummaryId && $cIds contains $identifier))
+		
+		
+		$receptorRecInterpr : List(size > 0)
+		from collect(Fact(documentIdentifier == $mostRecentDocId, category == $categoryOrig, 
+					documentType!= "RecordSummary", containerIdentifier contains $identifier))
+					
+		//$receptorHasRec : List(size > 0)
+	//	from collect(Fact(documentIdentifier == $mostRecentDocId, category == "hasReceptorStatus", 
+		//			documentType != "RecordSummary"))
+					
+		not (Fact (summaryType=="TumorPhenotype", documentType == "RecordSummary", provenanceFacts contains $recepFact, category == "hasReceptorStatus"))
+	then
+		retract($flag);
+		System.out.println("HERE BBB");
+		//hasReceptorStatus
+		String newId = "TumorPhenotype-"+$mt.getMergedTumorId();
+		Fact tf = FactFactory.createFact($recepFact, "Observation", OwlConstants.BREAST_CANCER_OWL+"#"+$recepFact.getName(), "RecordSummary");
+		tf.addContainerIdentifier("TumorSummary-"+$mt.getMergedTumorId());
+		tf.setIdentifier(newId);
+		tf.addContainerIdentifier($cancerFact.getIdentifier());
+		tf.addProvenanceFact($recepFact);
+		insert(tf);
+		insert(new IdMapper($recepFact.getIdentifier(), newId, $recepFact.getDocumentType(), $recepFact.getSummaryId(), tf.getSummaryId()));
+		
+		modify($record){
+			getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+$mt.getMergedTumorId()).getPhenotype().addFact("hasReceptorStatus", tf)
+		}
+		
+		for(Object obj: $receptorRecInterpr){
+			String v = ((Fact)obj).getName();
+			Fact recValueFact = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+v, tf, 
+														$cancerFact, "TumorPhenotype", "hasInterpretation", "RecordSummary", "OrdinalInterpretation");										
+			recValueFact.addContainerIdentifier(newId);
+			modify($record){
+				getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+$mt.getMergedTumorId()).getPhenotype().addFact("hasInterpretation", recValueFact)
+			}	
+			insert (recValueFact);
+	    }
+
+end
+
+rule "setReceptorStatus-with-method"
+	salience 66655
+	no-loop true
+	when
+		$flag : Flag($mostRecentDocId : mostRecentDocId, $regex : regex, $categoryOrig : categoryOrig, 
+				$categoryNew : categoryNew, $value : value, $method :method , $method != "", methodIsSet == true)
+	
+		$record : MedicalRecord()	
+		$domain : Domain($domainName : domainName)	
+		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+						$newSummaryId : summaryId)  
+						
+		
+		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
+		$tF : Fact(summaryType == "TumorSummary", $t_summaryId : summaryId, documentType != "RecordSummary")
+	    $mt : MergedTumor(tumorSiteFactSet contains $tF)
+		
+		$recepFact : Fact($identifier : identifier, name == $value, containerIdentifier contains $t_summaryId, category == "hasReceptorStatus")
+		
+		$fact : Fact(documentIdentifier == $mostRecentDocId, category == $categoryOrig, $summaryId : summaryId,
+					$docType: documentType, $docType != "RecordSummary", 
+					containerIdentifier.toString() matches $regex, $cIds : containerIdentifier, ($cIds contains $oldSummaryId && $cIds contains $identifier))
+		
+		$methodF : Fact(documentIdentifier == $mostRecentDocId, category == "hasMethod", name == $method,
+					documentType != "RecordSummary", containerIdentifier contains $identifier)
+		
+		$receptorRecInterpr : List(size > 0)
+		from collect(Fact(documentIdentifier == $mostRecentDocId, category == $categoryOrig, 
+					documentType!= "RecordSummary", containerIdentifier contains $identifier))
+		
+					
+		not (Fact (summaryType=="TumorPhenotype", documentType == "RecordSummary", provenanceFacts contains $recepFact, category == "hasReceptorStatus"))
+	then
+		retract($flag);
+		System.out.println("HERE CCC");
+		//hasReceptorStatus
+		String newId = "TumorPhenotype-"+$mt.getMergedTumorId();
+		Fact tf = FactFactory.createFact($recepFact, "Observation", OwlConstants.BREAST_CANCER_OWL+"#"+$recepFact.getName(), "RecordSummary");
+		tf.addContainerIdentifier("TumorSummary-"+$mt.getMergedTumorId());
+		tf.setIdentifier(newId);
+		tf.addContainerIdentifier($cancerFact.getIdentifier());
+		tf.addProvenanceFact($recepFact);
+		insert(tf);
+		insert(new IdMapper($recepFact.getIdentifier(), newId, $recepFact.getDocumentType(), $recepFact.getSummaryId(), tf.getSummaryId()));
+		
+		//method
+		Fact mFact = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$method, tf, 
+														$cancerFact, "TumorPhenotype", "hasMethod", "RecordSummary", "DiagnosticProcedure");
+		mFact.addContainerIdentifier(newId);
+		
+		modify($record){
+			getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+$mt.getMergedTumorId()).getPhenotype().addFact("hasReceptorStatus", tf),
+			getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+$mt.getMergedTumorId()).getPhenotype().addFact("hasMethod", mFact)
+		}
+		// interpretation
+		for(Object obj: $receptorRecInterpr){
+			String v = ((Fact)obj).getName();
+			Fact recValueFact = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+v, tf, 
+														$cancerFact, "TumorPhenotype", "hasInterpretation", "RecordSummary", "OrdinalInterpretation");										
+			recValueFact.addContainerIdentifier(newId);
+			modify($record){
+				getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+$mt.getMergedTumorId()).getPhenotype().addFact("hasInterpretation", recValueFact)
+			}	
+			insert (recValueFact);
+	    }
+
+end
+
+
+rule "test-container-match"
+	no-loop true
+	when
+		$f: Fact(containerIdentifier.toString() matches ".*Estrogen_Receptor_Status.*")
+	then
+		System.out.println("FOUND!!! : "+$f.getInfo());
+end
+
+
+	

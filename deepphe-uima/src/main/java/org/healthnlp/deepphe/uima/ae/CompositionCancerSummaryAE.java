@@ -14,6 +14,7 @@ import org.healthnlp.deepphe.fhir.fact.*;
 import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
+import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.healthnlp.deepphe.util.OntologyUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
@@ -80,113 +81,11 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		PhenotypeResourceFactory.saveMedicalRecord(record, jcas);
 	}
 
-	
-	/**
-	 * load template based on the ontology
-	 * @param summary
-	 * @param uri
-	 */
-	private void loadTemplate(Summary summary){
-		IClass summaryClass = ontology.getClass(""+summary.getConceptURI());
-		if(summaryClass != null){
-			// see if there is a more specific
-			for(IClass cls: summaryClass.getDirectSubClasses()){
-				summaryClass = cls;
-				break;
-			}
-			
-			// now lets pull all of the properties
-			for(Object o: summaryClass.getNecessaryRestrictions()){
-				if(o instanceof IRestriction){
-					IRestriction r = (IRestriction) o;
-					if(isSummarizableRestriction(r)){
-						if(!summary.getContent().containsKey(r.getProperty().getName())){
-							FactList facts = new DefaultFactList();
-							facts.setCategory(r.getProperty().getName());
-							facts.setTypes(getClassNames(r.getParameter()));
-							summary.getContent().put(r.getProperty().getName(),facts);
-						}else{
-							for(String type: getClassNames(r.getParameter())){
-								summary.getContent().get(r.getProperty().getName()).getTypes().add(type);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	/**
-	 * should this restriction be used for summarization
-	 * @param r
-	 * @return
-	 */
-	private boolean isSummarizableRestriction(IRestriction r){
-		IClass bs = ontology.getClass(FHIRConstants.BODY_SITE);
-		IClass event = ontology.getClass(FHIRConstants.EVENT);
-	
-		if(r.getProperty().isObjectProperty()){
-			for(String name : getClassNames(r.getParameter())){
-				IClass cls = ontology.getClass(name);
-				return cls.hasSuperClass(event) || cls.equals(bs) || cls.hasSuperClass(bs);
-			}
-		}
-		return false;
-	}
-	
 
-	private List<String> getClassNames(ILogicExpression exp){
-		List<String> list = new ArrayList<String>();
-		for(Object o: exp){
-			if(o instanceof IClass){
-				list.add(((IClass)o).getName());
-			}
-		}
-		return list;
-	}
 	
-	/**
-	 * load fact categories from the template
-	 * @param summary
-	 * @param report
-	 */
-	private void loadElementsFromReport(Summary summary, Report report){
-		for(String category: summary.getFactCategories()){
-			for(String name: summary.getFacts(category).getTypes()){
-				IClass cls = ontology.getClass(name);
-				if(cls != null){
-					int n = 1;
-					for(Element e: report.getReportElements()){
-						URI uri  = FHIRUtils.getConceptURI(e.getCode());
-
-						if(uri != null){
-							IClass c = ontology.getClass(""+uri);
-							if(c != null){
-								if(c.equals(cls) || c.hasSuperClass(cls)){
-									Fact fact = FactFactory.createFact(e);
-									addTemporality(fact,e, report.getDate(),n++);
-									addAncestors(fact);
-									summary.addFact(category,fact);
-								}
-							}
-						}
-					}
-				}
-			}
-		}	
-	}
-	
-	
-	private void addTemporality(Fact fact, Element  el, Date dt, int i) {
-		if(dt != null)
-			fact.setRecordedDate(dt);
-		fact.setTemporalOrder(FHIRUtils.createTemporalOrder(el, i));
-		
-	}
-
 	private PatientSummary createPatientSummary(Patient loadPatient) {
 		PatientSummary ps = new PatientSummary();
-		loadTemplate(ps);
+		ps.loadTemplate(ontology);
 		// TODO: actually fill it out
 		return ps;
 	}
@@ -262,6 +161,10 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	 * @return
 	 */
 	private Fact createFact(CodeableConcept cc){
+		Element e = FHIRRegistry.getInstance().getResource(FHIRUtils.getResourceIdentifer(cc));
+		if(e != null)
+			return FactFactory.createFact(e);
+		
 		Fact fact = null;
 		URI uri = FHIRUtils.getConceptURI(cc);
 		if(uri != null){
@@ -304,9 +207,10 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	private CancerSummary createCancerSummary(Report report, Disease diagnosis){
 		CancerSummary cancer = new CancerSummary(report.getTitle());
 		
-		loadTemplate(cancer);
+		cancer.loadTemplate(ontology);
 		CancerPhenotype phenotype = cancer.getPhenotype();
-		loadTemplate(phenotype);
+		phenotype.loadTemplate(ontology);
+		
 		//cancer.addPhenotype(phenotype);
 		
 		// add body location
@@ -315,10 +219,10 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		}
 		
 		// add TNM stage infromation
-		
 		Stage stage = diagnosis.getStage();
 		if(stage != null){
-			phenotype.addFact(FHIRConstants.HAS_CANCER_STAGE,createFact(stage.getSummary()));
+			if(!FHIRUtils.equals(stage.getSummary(),FHIRConstants.GENERIC_TNM))
+				phenotype.addFact(FHIRConstants.HAS_CANCER_STAGE,createFact(stage.getSummary()));
 			phenotype.addFact(FHIRConstants.HAS_T_CLASSIFICATION,createFact(stage.getPrimaryTumorStageCode()));
 			phenotype.addFact(FHIRConstants.HAS_N_CLASSIFICATION,createFact(stage.getRegionalLymphNodeStageCode()));
 			phenotype.addFact(FHIRConstants.HAS_M_CLASSIFICATION,createFact(stage.getDistantMetastasisStageCode()));
@@ -352,17 +256,19 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,f);
 		}
 		
-		loadElementsFromReport(cancer, report);
-			
+		cancer.loadElementsFromReport(report,ontology);
+		//TODO: temporary disable to account for clinical/pathological/generic oops in the ontology
+		//loadElementsFromReport(phenotype, report);
+		
 		return cancer;
 	}
 	
 	
 	private TumorSummary createTumorSummary(Report report, Condition diagnosis, CancerSummary cancer){
 		TumorSummary tumor = new TumorSummary(report.getTitle()+createTumorId(diagnosis));
-		loadTemplate(tumor);
+		tumor.loadTemplate(ontology);
 		TumorPhenotype phenotype = tumor.getPhenotype();
-		loadTemplate(phenotype);
+		phenotype.loadTemplate(ontology);
 		
 		// create diagnosis fact
 		Fact dx = FactFactory.createFact((Element)diagnosis);
@@ -390,31 +296,9 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		
 		
 		// add treatment (// chemo)
-		loadElementsFromReport(tumor, report);
-		loadElementsFromReport(phenotype, report);
-		
-		
-		
-		// document type RULE
-		// if cancer location is the same as tumor location, then tumor is 'primary'
-		// else tumor type is 'recurrent' if they are not the same
-		// cancer has to be more specific then a tumor, then infer
-		// else can't infer a type
-		//tumor.setTumorType(null);  // primary vs local recurance, distance recurance  infered from rules
-		/*
-		if(cancer != null){
-			URI tumorType = null;
-			if(hasCommonBodySite(cancer.getBodySite(),tumor.getBodySite())){
-				tumorType = FHIRConstants.PRIMARY_TUMOR_URI;
-			}else{
-				tumorType = FHIRConstants.RECURRENT_TUMOR_URI;
-			}
-			if(tumorType != null)
-				tumor.setTumorType(tumor.getTumorType());
-		}
-		*/
-		
-
+		tumor.loadElementsFromReport(report,ontology);
+		phenotype.loadElementsFromReport(report,ontology);
+	
 		return tumor;
 	}
 	

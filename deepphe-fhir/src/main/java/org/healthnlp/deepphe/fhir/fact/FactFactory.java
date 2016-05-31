@@ -8,6 +8,7 @@ import java.util.List;
 import org.healthnlp.deepphe.fhir.AnatomicalSite;
 import org.healthnlp.deepphe.fhir.Condition;
 import org.healthnlp.deepphe.fhir.Element;
+import org.healthnlp.deepphe.fhir.Finding;
 import org.healthnlp.deepphe.fhir.Observation;
 import org.healthnlp.deepphe.fhir.Procedure;
 import org.healthnlp.deepphe.fhir.Stage;
@@ -92,6 +93,8 @@ public class FactFactory {
 			return createFact((Observation)resource);
 		if(resource instanceof AnatomicalSite)
 			return createFact((AnatomicalSite)resource);
+		if(resource instanceof Finding && OntologyUtils.hasInstance() && OntologyUtils.getInstance().hasSuperClass(resource,FHIRConstants.TNM_STAGE))
+			return createTNMFact((Finding)resource);
 		if(resource instanceof Condition)
 			return createFact((Condition)resource);
 		if(resource instanceof Procedure)
@@ -100,6 +103,17 @@ public class FactFactory {
 			return createFact((Quantity)resource);
 		
 		return createFact(resource,new Fact());
+	}
+
+	private static Fact createTNMFact(Finding tnm) {
+		TNMFact fact = (TNMFact) createFact(tnm,new TNMFact());
+		for(String mod: FHIRUtils.getExtensions(tnm,FHIRUtils.TNM_MODIFIER_URL)){
+			Fact f = createFact(FHIRUtils.getCodeableConcept(URI.create(mod)));
+			f.setType(FHIRConstants.TNM_MODIFIER);
+			f.setCategory(FHIRConstants.HAS_TNM_PREFIX);
+			fact.setPrefix(f);
+		}
+		return fact;
 	}
 
 	private static Fact createFact(Element resource,Fact fact) {
@@ -179,7 +193,10 @@ public class FactFactory {
 	public static ConditionFact createFact(Condition condition) {
 		ConditionFact fact = (ConditionFact) createFact(condition,new ConditionFact());
 		for(CodeableConcept cc: condition.getBodySite()){
-			fact.getBodySite().add(createFact(cc));
+			Fact f = createFact(cc);
+			f.setType(FHIRConstants.BODY_SITE);
+			f.setCategory(FHIRConstants.HAS_BODY_SITE);
+			fact.getBodySite().add(f);
 		}
 		return fact;
 	}
@@ -193,7 +210,10 @@ public class FactFactory {
 	public static ProcedureFact createFact(Procedure condition) {
 		ProcedureFact fact = (ProcedureFact) createFact(condition,new ProcedureFact());
 		for(CodeableConcept cc: condition.getBodySite()){
-			fact.getBodySite().add(createFact(cc));
+			Fact f = createFact(cc);
+			f.setType(FHIRConstants.BODY_SITE);
+			f.setCategory(FHIRConstants.HAS_BODY_SITE);
+			fact.getBodySite().add(f);
 		}
 		//TODO: handle method
 		return fact;
@@ -276,7 +296,7 @@ public class FactFactory {
 		return fact.getType()+"_"+fact.getName().replaceAll("\\W+","_")+"_"+Math.abs(fact.getProvenanceMentions().hashCode());
 	}
 	
-	public static Fact cretaeTumorFactModifier(String uri, Fact tSummaryF, Fact  cSummaryF, String summaryType, 
+	public static Fact createTumorFactModifier(String uri, Fact tSummaryF, Fact  cSummaryF, String summaryType, 
 			String category, String documentType, String type){
 		Fact f =  FactFactory.createFact(FHIRConstants.MODIFIER, uri);
 		

@@ -123,9 +123,12 @@ System.out.println("&&: "+cancerSummary.getResourceIdentifier());
 
 		
 		//insert record into drools
+		
 		DroolsEngine de = new DroolsEngine();
 		KieSession droolsSession = null;
 		try {
+			//duplicates care
+			List<String> dupList = new ArrayList<String>();
 			droolsSession = de.getSession();
 			//droolsSession.addEventListener( new DebugAgendaEventListener() );
 			//insert new medical record
@@ -133,7 +136,8 @@ System.out.println("&&: "+cancerSummary.getResourceIdentifier());
 			droolsSession.insert(record);					
 			for(Fact f: record.getReportLevelFacts()){
 				try{
-				if(!f.getCategory().equalsIgnoreCase("wasDerivedFrom")){
+				if(!f.getCategory().equalsIgnoreCase("wasDerivedFrom") && !dupList.contains(f.getInfo())){
+					dupList.add(f.getInfo());
 					System.out.println(f.getInfo());
 					droolsSession.insert(f);
 				}
@@ -143,11 +147,13 @@ System.out.println("&&: "+cancerSummary.getResourceIdentifier());
 			}		
 			droolsSession.fireAllRules();
 			droolsSession.dispose();
-			
+			dupList.clear();
+			dupList = null;
 
 			//System.out.println("DROOLS TIME: "+(System.currentTimeMillis() - stT)/1000+"  sec");
-			
+			System.out.println("**************************");
 			System.out.println("RECORD Summary: "+record.getSummaryText());
+			System.out.println("**************************");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

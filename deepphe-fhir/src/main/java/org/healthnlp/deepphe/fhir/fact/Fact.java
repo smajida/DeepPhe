@@ -82,11 +82,21 @@ public class Fact {
 		if(!getProvenanceFacts().contains(fact))
 			provenanceFacts.add(fact);
 	}
+	
 	public void addProvenanceFacts(List<Fact> facts) {
 		for(Fact f:facts)
 			addProvenanceFact(f);
 		facts.clear();
 		facts = null;
+	}
+	
+	public void addProvenanceFacts(List<Fact> facts, boolean canDelete) {
+		for(Fact f:facts)
+			addProvenanceFact(f);
+		if(canDelete){
+			facts.clear();
+			facts = null;
+		}
 	}
 	
 
@@ -205,7 +215,6 @@ public class Fact {
 		b.append("summary type: "+getSummaryType()+"|");
 		b.append("summary id: "+getSummaryId()+"|");
 		b.append("container ids: "+getContainerIdentifier()+"|");
-		//b.append("rulesApplied: "+getRulesApplied()+"|");
 		b.append("recordDate: "+getRecordedDate()+"|");	
 		b.append("ancestors: "+getAncestors()+"\n");
 	   
@@ -270,5 +279,4 @@ public class Fact {
 	public void setSummaryId(String summaryId) {
 		this.summaryId = summaryId;
 	}
-	
 }

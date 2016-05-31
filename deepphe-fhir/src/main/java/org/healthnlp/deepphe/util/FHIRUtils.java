@@ -446,6 +446,13 @@ public class FHIRUtils {
 		coding.setDisplay(el.getDisplayText());
 		coding.setSystem(SCHEMA_REFERENCE);
 	}
+	
+	public static void addResourceReference(CodeableConcept cc, String name, String id) {
+		Coding coding = cc.addCoding();
+		coding.setCode(id);
+		coding.setDisplay(name);
+		coding.setSystem(SCHEMA_REFERENCE);
+	}
 
 	
 	
@@ -740,6 +747,15 @@ public class FHIRUtils {
 		return mentions;
 	}
 	
+	public static Properties getExtensions(DomainResource r){
+		Properties p = new Properties();
+		for(Extension e: r.getExtension()){
+			p.setProperty(e.getUrl(), ((StringType)e.getValue()).getValue());
+		}
+		return p;
+	}
+	
+	
 	public static List<String> getExtensions(DomainResource r,String URL){
 		List<String> mentions = new ArrayList<String>();
 		for(Extension e: r.getExtension()){
@@ -826,6 +842,11 @@ public class FHIRUtils {
 		return str.replaceAll("([a-z])([A-Z])","$1 $2");
 	}
 
+	
+
+	public static boolean equals(CodeableConcept concept,URI u){
+		return u.equals(getConceptURI(concept));
+	}
 	
 	/**
 	 * create temperal order from given N (mention offset) and DocTimeRel

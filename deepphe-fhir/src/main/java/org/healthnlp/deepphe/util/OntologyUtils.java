@@ -11,6 +11,7 @@ import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.fact.BodySiteFact;
 import org.healthnlp.deepphe.fhir.fact.ConditionFact;
 import org.healthnlp.deepphe.fhir.fact.Fact;
@@ -20,8 +21,10 @@ import org.healthnlp.deepphe.fhir.fact.ProcedureFact;
 import org.hl7.fhir.instance.model.CodeableConcept;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
+import edu.pitt.dbmi.nlp.noble.ontology.ILogicExpression;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
+import edu.pitt.dbmi.nlp.noble.ontology.IRestriction;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 
@@ -110,20 +113,37 @@ public class OntologyUtils {
 	}
 	
 	
+	public boolean hasSuperClass(Element e, String entryClass){
+		return hasSuperClass(""+e.getConceptURI(), entryClass);
+	}
+	
 	public boolean hasSuperClass(Fact fact, String entryClass){
+		return hasSuperClass(fact.getName(), entryClass);
+	}
+	
+	
+	public boolean hasSuperClass(String fact, String entryClass){
 		if(ontology == null)
 			throw new Error("Ontology is not defined");
 		
-		IClass cls = ontology.getClass(fact.getName());
+		IClass cls = ontology.getClass(fact);
 		IClass ent = ontology.getClass(entryClass);
 		return (cls != null && ent != null && cls.hasSuperClass(ent));
 	}
 
+	public boolean hasSubClass(Element fact, String entryClass){
+		return hasSuperClass(""+fact.getConceptURI(), entryClass);
+	}
+	
 	public boolean hasSubClass(Fact fact, String entryClass){
+		return hasSuperClass(fact.getName(), entryClass);
+	}
+	
+	public boolean hasSubClass(String fact, String entryClass){
 		if(ontology == null)
 			throw new Error("Ontology is not defined");
 		
-		IClass cls = ontology.getClass(fact.getName());
+		IClass cls = ontology.getClass(fact);
 		IClass ent = ontology.getClass(entryClass);
 		return (cls != null && ent != null && cls.hasSubClass(ent));
 	}
@@ -251,6 +271,7 @@ public class OntologyUtils {
 			printClass(ch,s+"  ");
 		}
 	}
+	
 	
 
 	public static void main(String [] args) throws Exception{
