@@ -82,11 +82,14 @@ public class Fact {
 	}
 	public void addProvenanceFact(Fact fact) {
 		getProvenanceFacts().add(fact);
+		getProvenanceFacts().addAll(fact.getProvenanceFacts());
 	}
 	public void addProvenanceFacts(List<Fact> facts) {
-		getProvenanceFacts().addAll(facts);
-		facts.clear();
-		facts = null;
+		for(Fact f: facts){
+			addProvenanceFact(f);
+		}
+		//facts.clear();
+		//facts = null;
 	}
 	
 
@@ -154,6 +157,7 @@ public class Fact {
 			t.setDocumentIdentifier(id);
 		}
 	}
+	
 	public String getCategory() {
 		return category;
 	}
@@ -265,4 +269,9 @@ public class Fact {
 		this.summaryId = summaryId;
 	}
 	
+	public boolean equivalent(Fact fact){
+		if(fact == null)
+			return false;
+		return getUri().equals(fact.getUri());
+	}
 }

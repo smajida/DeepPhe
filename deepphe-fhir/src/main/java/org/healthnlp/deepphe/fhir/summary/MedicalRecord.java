@@ -9,6 +9,7 @@ import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.TextMention;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
@@ -135,4 +136,17 @@ public class MedicalRecord implements Element {
 		return list;
 	}
 	
+	
+	public void addProvenanceToRecord(){
+		//Map<String,String> docIds = 
+		getReportLevelFacts();
+		for(Fact fact: getRecordLevelFacts()){
+			for(Fact f: fact.getProvenanceFacts()){
+				for(TextMention t: f.getProvenanceText()){
+					t.setDocumentIdentifier(f.getDocumentIdentifier());
+					t.setDocumentType(f.getDocumentType());
+				}
+			}
+		}
+	}
 }

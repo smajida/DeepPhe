@@ -1,9 +1,6 @@
 package org.healthnlp.deepphe.uima.ae;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
@@ -12,26 +9,17 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
-import org.healthnlp.deepphe.fhir.fact.DefaultFactList;
 import org.healthnlp.deepphe.fhir.fact.Fact;
-import org.healthnlp.deepphe.fhir.fact.FactList;
-import org.healthnlp.deepphe.fhir.fact.TextMention;
 import org.healthnlp.deepphe.fhir.summary.CancerSummary;
 import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.PatientSummary;
-import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.fhir.summary.TumorSummary;
-import org.healthnlp.deepphe.uima.drools.DroolsEngine;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.OntologyUtils;
-import org.kie.api.runtime.KieSession;
 
-import edu.pitt.dbmi.nlp.noble.ontology.IClass;
-import edu.pitt.dbmi.nlp.noble.ontology.ILogicExpression;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
-import edu.pitt.dbmi.nlp.noble.ontology.IRestriction;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 
 /**
@@ -156,67 +144,5 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		}
 	}
 	
-	
-	/**
-	 * load template based on the ontology
-	 * @param summary
-	 */
-	private void loadTemplate(Summary summary){
-		IClass summaryClass = ontology.getClass(""+summary.getConceptURI());
-		if(summaryClass != null){
-			// see if there is a more specific
-			for(IClass cls: summaryClass.getDirectSubClasses()){
-				summaryClass = cls;
-				break;
-			}
-			
-			// now lets pull all of the properties
-			for(Object o: summaryClass.getNecessaryRestrictions()){
-				if(o instanceof IRestriction){
-					IRestriction r = (IRestriction) o;
-					if(isSummarizableRestriction(r)){
-						if(!summary.getContent().containsKey(r.getProperty().getName())){
-							FactList facts = new DefaultFactList();
-							facts.setCategory(r.getProperty().getName());
-							facts.setTypes(getClassNames(r.getParameter()));
-							summary.getContent().put(r.getProperty().getName(),facts);
-						}else{
-							for(String type: getClassNames(r.getParameter())){
-								summary.getContent().get(r.getProperty().getName()).getTypes().add(type);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	/**
-	 * should this restriction be used for summarization
-	 * @param r
-	 * @return
-	 */
-	private boolean isSummarizableRestriction(IRestriction r){
-		IClass bs = ontology.getClass(FHIRConstants.BODY_SITE);
-		IClass event = ontology.getClass(FHIRConstants.EVENT);
-	
-		if(r.getProperty().isObjectProperty()){
-			for(String name : getClassNames(r.getParameter())){
-				IClass cls = ontology.getClass(name);
-				return cls.hasSuperClass(event) || cls.equals(bs) || cls.hasSuperClass(bs);
-			}
-		}
-		return false;
-	}
-	
-	private List<String> getClassNames(ILogicExpression exp){
-		List<String> list = new ArrayList<String>();
-		for(Object o: exp){
-			if(o instanceof IClass){
-				list.add(((IClass)o).getName());
-			}
-		}
-		return list;
-	}
 
 }

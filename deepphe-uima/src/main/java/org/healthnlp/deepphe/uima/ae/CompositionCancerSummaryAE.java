@@ -298,6 +298,10 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		
 		// set Dx, remove what got sucked out from report
 		cancer.clearFactList(FHIRConstants.HAS_DIAGNOSIS);
+		phenotype.clearFactList(FHIRConstants.HAS_HISTOLOGIC_TYPE);
+		phenotype.clearFactList(FHIRConstants.HAS_TUMOR_EXTENT);
+		phenotype.clearFactList(FHIRConstants.HAS_CANCER_TYPE);
+		
 		
 		for(BodySiteFact bodySite: tumors.keySet()){
 			ConditionFact diagnosis = tumors.get(bodySite);
@@ -382,6 +386,9 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		
 		// set Dx, remove what got sucked out from report
 		tumor.clearFactList(FHIRConstants.HAS_DIAGNOSIS);
+		phenotype.clearFactList(FHIRConstants.HAS_HISTOLOGIC_TYPE);
+		phenotype.clearFactList(FHIRConstants.HAS_TUMOR_EXTENT);
+		
 		tumor.addFact(FHIRConstants.HAS_DIAGNOSIS,diagnosis);
 		
 		// infer stuff from Dx

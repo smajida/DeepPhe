@@ -80,7 +80,8 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
 		MedicalRecord record = PhenotypeResourceFactory.loadMedicalRecord(jcas);
-
+		record.addProvenanceToRecord();
+		
 		if(record.getPatient()==null) {
 			throw new AnalysisEngineProcessException(new Exception("Medical Record has no patient attached. Skipping"));
 		}
@@ -115,6 +116,8 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 		b.append(temporality+"_");
 		for(Fact site: cancer.getBodySite()){
 			b.append(site.getFullName()+"_");
+			//TODO: well, we might have multiple sites
+			break; 
 		}
 		b.replace(b.length()-1,b.length(),"");
 		return b.toString(); 
@@ -163,8 +166,11 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 			return "";
 		StringBuffer b = new StringBuffer();
 		for(Fact f: valueFacts){
-			if(f.getDocumentIdentifier() != null)
-				b.append(f.getDocumentIdentifier()+FS);
+			System.err.println(f.getDocumentIdentifier());
+			for(TextMention t: f.getProvenanceText()){
+				System.err.println(t.getDocumentName()+": "+t);
+				b.append(t.getDocumentName()+": "+t+FS);
+			}
 		}
 		return b.toString();
 	}

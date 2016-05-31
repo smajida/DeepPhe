@@ -3,7 +3,7 @@ geographically determined (yes/no)
 *cancer  link		
 *body location	Tumor	hasBodySite
 -document for body location 	BodySite	wasDerivedFrom
-body location laterality	BodySite	hasBodySide
+*body location laterality	BodySite	hasBodySide
 body location clockface position	BodySite	hasClockfacePosition
 -documents for body location clockface position	Clockface_Position	wasDerivedFrom
 body location quadrant	BodySite	hasQuadrant

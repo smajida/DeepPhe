@@ -91,4 +91,15 @@ public class BodySiteFact extends Fact {
 	public Fact getBodySide() {
 		return side;
 	}
+	
+	public boolean equivalent(BodySiteFact fact){
+		if(super.equivalent(fact)){
+			if(getBodySide() != null && fact.getBodySide() != null && getBodySide().equivalent(fact.getBodySide())){
+				//TODO: how far should we compare it?
+				
+				return true;
+			}
+		}
+		return false;
+	}
 }

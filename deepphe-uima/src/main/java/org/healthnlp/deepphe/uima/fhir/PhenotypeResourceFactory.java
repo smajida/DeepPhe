@@ -300,9 +300,86 @@ public class PhenotypeResourceFactory {
 			fact.addAncestor(annotation.getHasAncestors(i));
 		}
 		
+		// add provenance facts
+		for(int i=0;i<getSize(annotation.getHasProvenanceFacts());i++){
+			fact.addProvenanceFact(loadFact(annotation.getHasProvenanceFacts(i)));
+		}
+		
 		return fact;
 	}
 
+	/**
+	 * create saving of fact list
+	 * @param jcas
+	 * @param fact
+	 * @return
+	 */
+	private static org.healthnlp.deepphe.uima.types.Fact saveFact(BodySiteFact fact, org.healthnlp.deepphe.uima.types.BodySite annotation, JCas jcas) {
+		// call original fact save
+		saveFact((Fact)fact,(org.healthnlp.deepphe.uima.types.Fact) annotation,jcas);
+		
+		if(!fact.getModifiers().isEmpty())
+			annotation.setHasBodySiteModifier(getValues(jcas, getFeatureList(jcas,fact.getModifiers())));
+		
+		annotation.addToIndexes();
+		return annotation;
+	}
+	
+	/**
+	 * create saving of fact list
+	 * @param jcas
+	 * @param fact
+	 * @return
+	 */
+	private static org.healthnlp.deepphe.uima.types.Fact saveFact(ProcedureFact fact, org.healthnlp.deepphe.uima.types.Procedure annotation, JCas jcas) {
+		saveFact((Fact)fact,(org.healthnlp.deepphe.uima.types.Fact) annotation,jcas);
+		//TODO: implement further???
+		return annotation;
+	}
+	
+	/**
+	 * create saving of fact list
+	 * @param jcas
+	 * @param fact
+	 * @return
+	 */
+	private static org.healthnlp.deepphe.uima.types.Fact saveFact(ObservationFact fact, org.healthnlp.deepphe.uima.types.Observation annotation, JCas jcas) {
+		// call original fact save
+		saveFact((Fact)fact,(org.healthnlp.deepphe.uima.types.Fact) annotation,jcas);
+	
+		if(fact.getInterpretation() != null)
+			annotation.setHasInterpretation(getValue(jcas,saveFact(fact.getInterpretation(),jcas)));
+		
+		if(fact.getMethod() != null)
+			annotation.setHasMethod(getValue(jcas,saveFact(fact.getMethod(),jcas)));
+		
+		if(fact.getValue() != null)
+			annotation.setHasMethod(getValue(jcas,saveFact(fact.getValue(),jcas)));
+		
+		if(!fact.getBodySite().isEmpty())
+			annotation.setHasBodySite(getValues(jcas,getFeatureList(jcas,fact.getBodySite())));
+	
+		annotation.addToIndexes();
+		
+		return annotation;
+	}
+	
+	
+	private static org.healthnlp.deepphe.uima.types.Fact saveFact(ValueFact fact, org.healthnlp.deepphe.uima.types.Quantity annotation, JCas jcas) {
+		saveFact((Fact)fact,(org.healthnlp.deepphe.uima.types.Fact) annotation,jcas);
+		
+		Fact u = new Fact();
+		u.setName(fact.getUnit());
+		u.setLabel(fact.getUnit());
+		u.setIdentifier(fact.getUnit());
+		
+		annotation.setHasUnit(getValue(jcas,saveFact(u,jcas)));
+		annotation.setHasQuantityValue(fact.getValue());
+	
+		annotation.addToIndexes();
+		return annotation;
+	}
+	
 	
 	/**
 	 * create saving of fact list
@@ -350,27 +427,25 @@ public class PhenotypeResourceFactory {
 		annotation.addToIndexes();
 		return annotation;
 	}
-	
 
-	private static void saveObservationFact(ObservationFact fact,  org.healthnlp.deepphe.uima.types.Observation annotation, JCas jcas) {
-		if(!fact.getBodySite().isEmpty())
-			annotation.setHasBodySite(getValues(jcas,fact.getBodySite().stream().map(f -> saveFact(f, jcas)).collect(Collectors.toList())));
-		
-		if(fact.getInterpretation() != null)
-			annotation.setHasInterpretation(getValue(jcas,saveFact(fact.getInterpretation(),jcas)));
-		
-		if(fact.getValue() != null)
-			annotation.setHasNumValue(getValue(jcas,saveFact(fact.getValue(),jcas)));
-		
-		if(fact.getMethod() != null)
-			annotation.setHasMethod(getValue(jcas,saveFact(fact.getMethod(),jcas)));
-		
-	}
+
 
 	private static org.healthnlp.deepphe.uima.types.Fact saveFact(Fact fact, JCas jcas) {
 		Annotation a = getAnnotationByIdentifier(jcas,fact.getIdentifier());
-		org.healthnlp.deepphe.uima.types.Fact annotation = (a == null)? new org.healthnlp.deepphe.uima.types.Fact(jcas):(org.healthnlp.deepphe.uima.types.Fact) a;
-		return saveFact(fact,annotation,jcas);
+		org.healthnlp.deepphe.uima.types.Fact annotation = null;
+		if(a != null)
+			annotation = saveFact(fact,(org.healthnlp.deepphe.uima.types.Fact) a,jcas);
+		else if ( fact instanceof BodySiteFact)
+			annotation = saveFact((BodySiteFact)fact,new BodySite(jcas),jcas);
+		else if ( fact instanceof ObservationFact)
+			annotation = saveFact((ObservationFact) fact,new org.healthnlp.deepphe.uima.types.Observation(jcas),jcas);
+		else if ( fact instanceof ProcedureFact)
+			annotation = saveFact((ProcedureFact) fact,new org.healthnlp.deepphe.uima.types.Procedure(jcas),jcas);
+		else if ( fact instanceof ValueFact)
+			annotation = saveFact((ValueFact) fact,new org.healthnlp.deepphe.uima.types.Quantity(jcas),jcas);
+		else
+			annotation = saveFact(fact,new org.healthnlp.deepphe.uima.types.Fact(jcas),jcas);
+		return annotation;
 	}
 	
 	
@@ -794,6 +869,12 @@ public class PhenotypeResourceFactory {
 		if(e.getInterpretation() != null && FHIRUtils.getConceptURI(e.getInterpretation()) != null){
 			ob.setHasInterpretation(getValue(jcas,saveFact(e.getInterpretation(),jcas)));
 		}
+		
+		// add interpretation
+		if(e.getMethod() != null && FHIRUtils.getConceptURI(e.getMethod()) != null){
+			ob.setHasMethod(getValue(jcas,saveFact(e.getMethod(),jcas)));
+		}
+		
 		if(e.getValue() != null){
 			
 			//NumericModifier nm = new NumericModifier(jcas);
@@ -928,6 +1009,20 @@ public class PhenotypeResourceFactory {
 		return sites;
 	}
 	
+	/**
+	 * get a list of BodySites from 
+	 * @param jcas
+	 * @param bodySites
+	 * @return
+	 */
+	private static List<FeatureStructure> getFeatureList(JCas jcas, Collection<Fact> facts){
+		List<FeatureStructure> sites = new ArrayList<FeatureStructure>();
+		for(Fact cc: facts){
+			sites.add(saveFact(cc, jcas));
+		}
+		return sites;
+	}
+	
 
 	public static Element loadElement(org.healthnlp.deepphe.uima.types.Fact e){
 		Element el = null;
@@ -1022,6 +1117,9 @@ public class PhenotypeResourceFactory {
 			ob.setInterpretation(getCodeableConcept(e.getHasInterpretation(0)));
 		}
 		
+		if(e.getHasMethod() != null && e.getHasMethod().size() > 0){
+			ob.setMethod(getCodeableConcept(e.getHasMethod(0)));
+		}
 		
 		FHIRUtils.createIdentifier(ob.addIdentifier(),e.getHasIdentifier());
 		return ob;
