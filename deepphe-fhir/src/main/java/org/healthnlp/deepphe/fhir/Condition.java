@@ -110,7 +110,8 @@ public class Condition extends org.hl7.fhir.instance.model.Condition implements 
 			setDateRecorded(d);
 		}
 	}
-	
+
+
 	public URI getConceptURI(){
 		return FHIRUtils.getConceptURI(getCode());
 	}

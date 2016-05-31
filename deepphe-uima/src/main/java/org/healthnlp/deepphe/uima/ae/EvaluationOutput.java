@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,7 +82,6 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
 		MedicalRecord record = PhenotypeResourceFactory.loadMedicalRecord(jcas);
-		//record.addProvenanceToRecord();
 		
 		if(record.getPatient()==null) {
 			throw new AnalysisEngineProcessException(new Exception("Medical Record has no patient attached. Skipping"));
@@ -165,13 +166,17 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 		if(valueFacts == null)
 			return "";
 		StringBuffer b = new StringBuffer();
-		for(Fact f: valueFacts){
+		Set<String> mentions = new LinkedHashSet<String>();
+		for(Fact f : valueFacts){
 			//System.err.println(f.getDocumentIdentifier());
 			for(TextMention t: f.getProvenanceText()){
-				//System.err.println(t.getDocumentName()+": "+t);
-				b.append(t.getDocumentName()+": "+t+FS);
+				mentions.add(f.getDocumentName()+": "+t.toString());
 			}
 		}
+		for(String s: mentions){
+			b.append(s+FS);
+		}
+		
 		return b.toString();
 	}
 

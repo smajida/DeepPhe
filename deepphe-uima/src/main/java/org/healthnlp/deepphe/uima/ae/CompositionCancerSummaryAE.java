@@ -123,9 +123,9 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			}
 		}
 		// now lets look at it
-		/*for(BodySiteFact f: map.keySet()){
+		for(BodySiteFact f: map.keySet()){
 			System.err.println("\t"+f.getSummaryText()+"\t\t -> \t"+map.get(f).getSummaryText());
-		}*/
+		}
 		
 		return map;
 	}
@@ -171,7 +171,10 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	}
 
 	private boolean isSameTime(ConditionFact a, ConditionFact b) {
-		// TODO: implement DocTimeRel comparison
+		String a_time = a.getProperty(FHIRUtils.LANGUAGE_ASPECT_DOC_TIME_REL_URL);
+		String b_time = b.getProperty(FHIRUtils.LANGUAGE_ASPECT_DOC_TIME_REL_URL);
+		
+		//return a_time != null && b_time != null ? a_time.equals(b_time): true;
 		return true;
 	}
 
@@ -224,55 +227,6 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			list.add(cancer);
 		}
 		
-		
-		/*
-		CancerSummary cancer = null;
-		TumorSummary tumor = null;
-		
-		// doc1 - cancer + tumor
-		// doc2 - cancer (for now)
-		// doc3 - cancer (metastatic neoplasm) - tumor (for 
-		
-		// explicit mentions mentions of cancer, carcinoma, any disease under 'malignant breast neoplasm' class "metastatic neoplasm"
-		// If in pathology report, then generate tumor instance as well.
-		//TODO: what to do about multiple diagnosis and tumors
-		Disease cancerDx = null;
-		for(Disease c: report.getDiagnoses()){
-			if(hasTrigger(cancerTriggers,c)){
-				cancerDx = c;
-				break;
-			}
-		}
-
-		// if cancer was found, create a summary
-		if(cancerDx != null){
-			cancer = createCancerSummary(report,cancerDx);
-			list.add(cancer);
-		}
-		
-		
-		// create tumor summary if we talke about cancer in trigger document
-		if(cancer != null && documentTypeTriggers.contains(report.getType())){
-			tumor = createTumorSummary(report,cancerDx,cancer);
-			cancer.addTumor(tumor);
-		}
-		
-		// if tumor not yet defined, try searching for one
-		if(tumor == null){
-			for(Element e: report.getReportElements()){
-				// if we have a tumor trigger
-				if(e instanceof Condition && hasTrigger(tumorTriggers, (Condition)e)){
-					tumor = createTumorSummary(report,(Condition) e,cancer);
-					if(cancer != null) {
-						cancer.addTumor(tumor);
-					}else{
-						list.add(tumor);
-					}
-					break;
-				}
-			}
-		}
-		*/		
 		return list;
 	}
 
@@ -332,39 +286,6 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		}
 		
 		
-		/*// add body location
-		for(CodeableConcept cc: diagnosis.getBodySite()){
-			cancer.addFact(FHIRConstants.HAS_BODY_SITE,FactFactory.createFact(cc));
-		}
-		
-		
-		// create diagnosis fact
-		Fact dx = FactFactory.createFact(diagnosis);
-	
-		// adnecarcionma vs sarcoma
-		CodeableConcept ct = getCancerType(diagnosis);
-		if(ct != null){
-			Fact f = FactFactory.createFact(ct);
-			f.addProvenanceFact(dx);
-			phenotype.addFact(FHIRConstants.HAS_CANCER_TYPE,f);
-		}
-		// insitu vs invasive 
-		CodeableConcept te = getTumorExtent(diagnosis);
-		if(te != null){
-			Fact f = FactFactory.createFact(te);
-			f.addProvenanceFact(dx);
-			phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,f);  
-		}
-		
-		//phenotype.addHistologicType(null); // ductal, lobular infered from DX
-		CodeableConcept ht = getHistologicType(diagnosis);
-		if(ht != null){
-			Fact f = FactFactory.createFact(ht);
-			f.addProvenanceFact(dx);
-			phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,f);
-		}*/
-		
-		
 		return cancer;
 	}
 	
@@ -404,76 +325,10 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,tumorExtent);
 		}
 		
-		/*	// create diagnosis fact
-		Fact dx = FactFactory.createFact((Element)diagnosis);
-		// add body location
-		for(CodeableConcept cc: diagnosis.getBodySite()){
-			tumor.addFact(FHIRConstants.HAS_BODY_SITE,FactFactory.createFact(cc));
-		}
-			
-		//phenotype.addHistologicType(null); // ductal, lobular infered from DX
-		CodeableConcept ht = getHistologicType(diagnosis);
-		if(ht != null){
-			Fact f = FactFactory.createFact(ht);
-			f.addProvenanceFact(dx);
-			phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,f);
-		}
-		// insitu vs invasive 
-		//phenotype.addTumorExtent(null);    // insitu vs invasive
-		CodeableConcept te = getTumorExtent(diagnosis);
-		if(te != null){
-			Fact f = FactFactory.createFact(te);
-			f.addProvenanceFact(dx);
-			phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,f);  
-		}*/
-		
-	
 	
 		return tumor;
 	}
-
 	
-	private String createTumorId(Condition diagnosis) {
-		StringBuffer b = new StringBuffer();
-		for(CodeableConcept cc: diagnosis.getBodySite()){
-			b.append("-"+FHIRUtils.getConceptName(cc));
-		}
-		return b.toString();
-	}
-
-	// ductal, lobular infered from DX
-	private CodeableConcept getHistologicType(Condition diagnosis) {
-		return getLexicalPartValue(diagnosis,""+FHIRConstants.HISTOLOGIC_TYPE_URI);
-	}
-	
-	// adnecarcionma vs sarcoma
-	private CodeableConcept getCancerType(Condition dx){
-		return getLexicalPartValue(dx,""+FHIRConstants.CANCER_TYPE_URI);
-	}
-	
-	// insitu vs invasive 
-	private CodeableConcept getTumorExtent(Condition diagnosis) {
-		return getLexicalPartValue(diagnosis, ""+FHIRConstants.TUMOR_EXTENT_URI);
-	}
-	
-	/**
-	 * get lexical part value
-	 * @param diagnosis
-	 * @param value
-	 * @return
-	 */
-	private CodeableConcept getLexicalPartValue(Condition diagnosis, String value) {
-		// get values from histologictype and search all synonyms up the tree 
-		IClass dx = ontology.getClass(""+FHIRUtils.getConceptURI(diagnosis.getCode()));
-		if(dx != null){
-			for(IClass cls : ontology.getClass(value).getSubClasses()){
-				if(isLexicalPartOf(cls,dx)){
-					return FHIRUtils.getCodeableConcept(cls.getURI());
-				}
-			}
-		}
-		return null;
-	}
 	
 	/**
 	 * get lexical part value
@@ -498,42 +353,6 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		return null;
 	}
 	
-	
-
-	private boolean hasCommonBodySite(List<CodeableConcept> aa, List<CodeableConcept> bb){
-		for(CodeableConcept ca: aa){
-			URI ua = FHIRUtils.getConceptURI(ca);
-			for(CodeableConcept cb: bb){
-				URI ub = FHIRUtils.getConceptURI(cb);
-				// if equal, or first argument is more specific than the second
-				if(ua.equals(ub) || ontology.getClass(ua.toString()).hasSuperClass(ontology.getClass(ub.toString()))){
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
-	private boolean hasCommonBodySite(FactList  aa, FactList bb){
-		try {
-		for(Fact ca: aa){
-			URI ua = new URI(ca.getUri());
-			
-			for(Fact cb: bb){
-				URI ub = new URI(cb.getUri());
-				// if equal, or first argument is more specific than the second
-				if(ua.equals(ub) || ontology.getClass(ua.toString()).hasSuperClass(ontology.getClass(ub.toString()))){
-					return true;
-				}
-			}
-		}
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-		return false;
-	}
 	
 	
 	/**
@@ -568,29 +387,5 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		return false;
 	}
 	
-	/**
-	 * is somethin in a value set
-	 * @param c
-	 * @param classes
-	 * @return
-	 */
-	private boolean isValueSet(CodeableConcept c, List<IClass> classes){
-		IClass cls = ontology.getClass(""+FHIRUtils.getConceptURI(c));
-		if(cls == null)
-			return false;
-		for(IClass parent: classes){
-			if(cls.hasSuperClass(parent))
-				return true;
-		}
-		return false;
-	}
-	/**
-	 * is somethin in a value set
-	 * @param c
-	 * @param classes
-	 * @return
-	 */
-	private boolean isValueSet(CodeableConcept c, IClass parent){
-		return isValueSet(c,Collections.singletonList(parent));
-	}
+
 }

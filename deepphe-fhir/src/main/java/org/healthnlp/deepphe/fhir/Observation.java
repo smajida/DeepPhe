@@ -65,7 +65,7 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 			setIssued(d);
 		}
 	}
-	
+
 	public void setValue(String value, String unit){
 		setValue(Double.parseDouble(value),unit);
 	}

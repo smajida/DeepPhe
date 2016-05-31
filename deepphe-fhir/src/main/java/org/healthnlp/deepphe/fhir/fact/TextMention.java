@@ -18,7 +18,7 @@ public class TextMention {
 		this.objectId = id;
 	}
 	
-	private String text,documentIdentifier,documentType;
+	private String text;
 	private int start, end;
 	public String getText() {
 		return text;
@@ -26,28 +26,7 @@ public class TextMention {
 	public void setText(String text) {
 		this.text = text;
 	}
-	public String getDocumentIdentifier() {
-		return documentIdentifier;
-	}
-	public void setDocumentIdentifier(String documentIdentifier) {
-		this.documentIdentifier = documentIdentifier;
-	}
-	public String getDocumentType() {
-		return documentType;
-	}
-	public void setDocumentType(String documentType) {
-		this.documentType = documentType;
-	}
 	
-	public String getDocumentName() {
-		if(documentIdentifier != null){
-			Matcher m = Pattern.compile("REPORT_(.*)_\\d+").matcher(documentIdentifier);
-			if(m.matches())
-				return m.group(1);
-		}
-		return documentIdentifier;
-	}
-
 	public int getStart() {
 		return start;
 	}
@@ -65,5 +44,11 @@ public class TextMention {
 	}
 	public String getMention(){
 		return text+" ["+start+":"+end+"]";
+	}
+	public boolean equals(Object o){
+		return toString().equals(o.toString());
+	}
+	public int hashCode(){
+		return toString().hashCode();
 	}
 }
