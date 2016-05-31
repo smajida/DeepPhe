@@ -12,6 +12,7 @@ import org.healthnlp.deepphe.util.FHIRUtils;
 import org.healthnlp.deepphe.util.FHIRConstants;
 
 import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.ObservationFact;
 import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.fact.FactHelper;
 
@@ -428,23 +429,22 @@ rule "setReceptorStatus-no-method"
 		tf.setIdentifier(newId);
 		tf.addContainerIdentifier($cancerFact.getIdentifier());
 		tf.addProvenanceFact($recepFact);
-		insert(tf);
-		insert(new IdMapper($recepFact.getIdentifier(), newId, $recepFact.getDocumentType(), $recepFact.getSummaryId(), tf.getSummaryId()));
 		
-		modify($record){
-			getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+$mt.getMergedTumorId()).getPhenotype().addFact("hasReceptorStatus", tf)
-		}
 		
 		for(Object obj: $receptorRecInterpr){
 			String v = ((Fact)obj).getName();
 			Fact recValueFact = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+v, tf, 
 														$cancerFact, "TumorPhenotype", "hasInterpretation", "RecordSummary", "OrdinalInterpretation");										
 			recValueFact.addContainerIdentifier(newId);
-			modify($record){
-				getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+$mt.getMergedTumorId()).getPhenotype().addFact("hasInterpretation", recValueFact)
-			}	
+			((ObservationFact)tf).setInterpretation(recValueFact);
 			insert (recValueFact);
 	    }
+	    insert(tf);
+		insert(new IdMapper($recepFact.getIdentifier(), newId, $recepFact.getDocumentType(), $recepFact.getSummaryId(), tf.getSummaryId()));
+		
+		modify($record){
+			getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+$mt.getMergedTumorId()).getPhenotype().addFact("hasReceptorStatus", tf)
+		}
 
 end
 
@@ -490,29 +490,30 @@ rule "setReceptorStatus-with-method"
 		tf.setIdentifier(newId);
 		tf.addContainerIdentifier($cancerFact.getIdentifier());
 		tf.addProvenanceFact($recepFact);
-		insert(tf);
-		insert(new IdMapper($recepFact.getIdentifier(), newId, $recepFact.getDocumentType(), $recepFact.getSummaryId(), tf.getSummaryId()));
+		
 		
 		//method
 		Fact mFact = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$method, tf, 
 														$cancerFact, "TumorPhenotype", "hasMethod", "RecordSummary", "DiagnosticProcedure");
 		mFact.addContainerIdentifier(newId);
+		((ObservationFact)tf).setMethod(mFact);
 		
-		modify($record){
-			getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+$mt.getMergedTumorId()).getPhenotype().addFact("hasReceptorStatus", tf),
-			getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+$mt.getMergedTumorId()).getPhenotype().addFact("hasMethod", mFact)
-		}
 		// interpretation
 		for(Object obj: $receptorRecInterpr){
 			String v = ((Fact)obj).getName();
 			Fact recValueFact = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+v, tf, 
 														$cancerFact, "TumorPhenotype", "hasInterpretation", "RecordSummary", "OrdinalInterpretation");										
 			recValueFact.addContainerIdentifier(newId);
-			modify($record){
-				getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+$mt.getMergedTumorId()).getPhenotype().addFact("hasInterpretation", recValueFact)
-			}	
+			((ObservationFact)tf).setInterpretation(recValueFact);
 			insert (recValueFact);
 	    }
+	    
+	    modify($record){
+			getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+$mt.getMergedTumorId()).getPhenotype().addFact("hasReceptorStatus", tf)
+		}
+	    
+	    insert(tf);
+		insert(new IdMapper($recepFact.getIdentifier(), newId, $recepFact.getDocumentType(), $recepFact.getSummaryId(), tf.getSummaryId()));
 
 end
 

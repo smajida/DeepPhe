@@ -61,6 +61,63 @@ final public class AnnotationUtil {
     * @param testEndOffset   end offset of the test text span
     * @param annotations     annotations to test for proximity to test text span
     * @param <T>             extension of EventMention
+    * @return the closest preceding T to the test text span or closest following if none preceding
+    */
+   static public <T extends IdentifiedAnnotation> T getPrecedingOrAnnotation( final int testStartOffset,
+                                                                              final int testEndOffset,
+                                                                              final Iterable<T> annotations ) {
+      final T closestPreceding = getPrecedingAnnotation( testStartOffset, annotations );
+      if ( closestPreceding != null ) {
+         return closestPreceding;
+      }
+      return getFollowingAnnotation( testEndOffset, annotations );
+   }
+
+   /**
+    * @param testStartOffset start offset of the test text span
+    * @param annotations     annotations to test for proximity to test text span
+    * @param <T>             extension of EventMention
+    * @return the closest preceding T to the test text span
+    */
+   static public <T extends IdentifiedAnnotation> T getPrecedingAnnotation( final int testStartOffset,
+                                                                            final Iterable<T> annotations ) {
+      T closestPreceding = null;
+      int smallestGap = Integer.MAX_VALUE;
+      for ( T annotation : annotations ) {
+         final int gap = testStartOffset - annotation.getEnd();
+         if ( gap > 0 && gap < smallestGap ) {
+            closestPreceding = annotation;
+            smallestGap = gap;
+         }
+      }
+      return closestPreceding;
+   }
+
+   /**
+    * @param testEndOffset end offset of the test text span
+    * @param annotations   annotations to test for proximity to test text span
+    * @param <T>           extension of EventMention
+    * @return the closest T to the test text span
+    */
+   static public <T extends IdentifiedAnnotation> T getFollowingAnnotation( final int testEndOffset,
+                                                                            final Iterable<T> annotations ) {
+      T closestFollowing = null;
+      int smallestGap = Integer.MAX_VALUE;
+      for ( T annotation : annotations ) {
+         final int gap = annotation.getBegin() - testEndOffset;
+         if ( gap > 0 && gap < smallestGap ) {
+            closestFollowing = annotation;
+            smallestGap = gap;
+         }
+      }
+      return closestFollowing;
+   }
+
+   /**
+    * @param testStartOffset start offset of the test text span
+    * @param testEndOffset   end offset of the test text span
+    * @param annotations     annotations to test for proximity to test text span
+    * @param <T>             extension of EventMention
     * @return the closest T to the test text span
     */
    static public <T extends IdentifiedAnnotation> T getClosestAnnotation( final int testStartOffset,

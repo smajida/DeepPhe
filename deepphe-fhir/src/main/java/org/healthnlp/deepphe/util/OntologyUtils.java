@@ -131,6 +131,7 @@ public class OntologyUtils {
 		return (cls != null && ent != null && cls.hasSuperClass(ent));
 	}
 
+	
 	public boolean hasSubClass(Element fact, String entryClass){
 		return hasSuperClass(""+fact.getConceptURI(), entryClass);
 	}
@@ -147,6 +148,9 @@ public class OntologyUtils {
 		IClass ent = ontology.getClass(entryClass);
 		return (cls != null && ent != null && cls.hasSubClass(ent));
 	}
+	
+	
+	
 	
 	/**
 	 * get class for a given concept code
@@ -286,5 +290,22 @@ public class OntologyUtils {
 		//saveDictionary(ont.getClass("Element"),of);
 		System.out.println("done");
 		//System.out.println(ou.getClass("C0441960"));
+	}
+
+
+	public Fact getSpecificFact(Fact a, Fact b) {
+		if(a == null || b == null)
+			return null;
+		if(a.getName().equals(b.getName()))
+			return a;
+		if(hasSuperClass(a.getName(),b.getName()))
+			return a;
+		if(hasSubClass(a.getName(),b.getName()))
+			return b;
+		return null;
+	}
+	
+	public Fact getGeneralFact(Fact a, Fact b) {
+		return getSpecificFact(b,a);
 	}
 }

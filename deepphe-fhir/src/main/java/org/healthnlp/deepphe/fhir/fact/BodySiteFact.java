@@ -60,7 +60,15 @@ public class BodySiteFact extends Fact {
 		return this;
 	}
 
-	private Fact getClockfacePosition() {
+	public String getSummaryText(){
+		StringBuffer b = new StringBuffer(getName());
+		for(Fact f: getModifiers()){
+			b.append(" | modifier: "+f.getName());
+		}
+		return b.toString();
+	}
+	
+	public Fact getClockfacePosition() {
 		if(OntologyUtils.hasInstance()){
 			for(Fact m: getModifiers()){
 				if(OntologyUtils.getInstance().hasSuperClass(m,FHIRConstants.CLOCKFACE_POSITION))
@@ -70,7 +78,7 @@ public class BodySiteFact extends Fact {
 		return null;
 	}
 
-	private Fact getQuadrant() {
+	public Fact getQuadrant() {
 		if(OntologyUtils.hasInstance()){
 			for(Fact m: getModifiers()){
 				if(OntologyUtils.getInstance().hasSuperClass(m,FHIRConstants.QUADRANT))
@@ -80,7 +88,18 @@ public class BodySiteFact extends Fact {
 		return null;
 	}
 
-	private Fact getBodySide() {
+	public Fact getBodySide() {
 		return side;
+	}
+	
+	public boolean equivalent(BodySiteFact fact){
+		if(super.equivalent(fact)){
+			if(getBodySide() != null && fact.getBodySide() != null && getBodySide().equivalent(fact.getBodySide())){
+				//TODO: how far should we compare it?
+				
+				return true;
+			}
+		}
+		return false;
 	}
 }

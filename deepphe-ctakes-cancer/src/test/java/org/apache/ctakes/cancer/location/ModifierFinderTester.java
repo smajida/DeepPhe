@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author SPF , chip-nlp
@@ -16,13 +17,29 @@ public class ModifierFinderTester {
 
    static private final Logger LOGGER = Logger.getLogger( "ModifierFinderTester" );
 
+   static private final String[] LEFT_SENTENCES = { "Tumor on the left breast.", "Tumor: breast, left",
+                                                    "Tumor: breast, left.", "Tumor levo mastis.",
+                                                    "Breast (left)", "Breast (lt)." };
+
+   static private final String[] RIGHT_SENTENCES = { "Tumor on the right breast.", "Tumor: breast, right",
+                                                     "Tumor: breast, right.", "Tumor dextro mastis.",
+                                                     "Breast (right)", "Breast (rt)." };
+
+   static private final String[] NON_SENTENCES = { "The nasty piratest fired on our port side.",
+                                                   "There is no escaping the machinations of that Duddley Doright this night.",
+                                                   "Halt!",
+                                                   "Harry shouted \"Spectro Leftonum!\" and the creature laughed.",
+                                                   "My favorite G.I. Joey was that weapons buyer Dextros." };
+
+
    static private final String[] UPPER_INNER_SENTENCES = { "Tumor in the upper inner quadrant",
                                                            "Tumor in the upper-inner quadrant",
                                                            "Tumor in the inner upper quadrant",
                                                            "Tumor in the inner-upper quadrant",
+                                                           "Tumor in the inner-upper quadrant.",
                                                            "Tumor at breast upper-inner area." };
-   static private final int[] UPPER_INNER_BEGINS = { 13, 13, 13, 13, 16 };
-   static private final int[] UPPER_INNER_ENDS = { 33, 33, 33, 33, 27 };
+   static private final int[] UPPER_INNER_BEGINS = { 13, 13, 13, 13, 13, 16 };
+   static private final int[] UPPER_INNER_ENDS = { 33, 33, 33, 33, 33, 27 };
 
 
    static private final String[] UPPER_LOWER_INNER_SENTENCES = { "Tumor at breast upper/lower inner quadrant.",
@@ -84,6 +101,39 @@ public class ModifierFinderTester {
                                                           "Patient has tumor at left breast, 1:30 oclock position." };
    static private final int[] ONE_THIRTY_BEGINS = { 34, 34, 34, 34, 34 };
    static private final int[] ONE_THIRTY_ENDS = { 46, 55, 56, 55, 54 };
+
+   @Test
+   public void testLeft() {
+      for ( int i = 0; i < LEFT_SENTENCES.length; i++ ) {
+         final List<SpannedModifier> sides = ModifierFinder
+               .findModifiers( LEFT_SENTENCES[ i ], LocationModifier.BodySide.values() );
+         assertEquals( "Expect one side in " + LEFT_SENTENCES[ i ], 1, sides.size() );
+         assertEquals( "Expect left side in " + LEFT_SENTENCES[ i ],
+               LocationModifier.BodySide.LEFT.getUri(),
+               sides.get( 0 ).getModifier().getUri() );
+      }
+   }
+
+   @Test
+   public void testRight() {
+      for ( int i = 0; i < RIGHT_SENTENCES.length; i++ ) {
+         final List<SpannedModifier> sides = ModifierFinder
+               .findModifiers( RIGHT_SENTENCES[ i ], LocationModifier.BodySide.values() );
+         assertEquals( "Expect one side in " + RIGHT_SENTENCES[ i ], 1, sides.size() );
+         assertEquals( "Expect left side in " + RIGHT_SENTENCES[ i ],
+               LocationModifier.BodySide.RIGHT.getUri(),
+               sides.get( 0 ).getModifier().getUri() );
+      }
+   }
+
+   @Test
+   public void testNoSide() {
+      for ( String sentence : NON_SENTENCES ) {
+         final List<SpannedModifier> sides = ModifierFinder
+               .findModifiers( sentence, LocationModifier.BodySide.values() );
+         assertTrue( "Expect no side in " + sentence, sides.isEmpty() );
+      }
+   }
 
    @Test
    public void testOneQuadrant() {

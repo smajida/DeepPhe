@@ -87,6 +87,7 @@ public class FHIRConstants {
 	public static final String HAS_METHOD = "hasMethod";
 	public static final String HAS_TNM_PREFIX = "hasTNMPrefix";
 	public static final String HAS_TNM_SUFFIX = "hasTNMSuffix";
+	public static final String HAS_DIAGNOSIS = "hasDiagnosis";
 	
 	public static final String T_STAGE = "T_Stage";
 	public static final String M_STAGE = "M_Stage";
@@ -133,6 +134,7 @@ public class FHIRConstants {
 
 	public static final List<String> BODY_SIDE_LIST = Arrays.asList("Right","Left","Bilateral");
 	public static final List<String> TNM_MODIFIER_LIST = Arrays.asList("p","c","y","r","sn");
+	
 
 	
 

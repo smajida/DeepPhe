@@ -8,10 +8,12 @@ import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.core.util.AnnotationUtil;
 import org.apache.ctakes.typesystem.type.relation.LocationOfTextRelation;
 import org.apache.ctakes.typesystem.type.relation.RelationArgument;
+import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.component.JCasAnnotator_ImplBase;
+import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 
 import java.util.Arrays;
@@ -41,7 +43,11 @@ public class PastSentenceLocator extends JCasAnnotator_ImplBase {
    @Override
    public void process( final JCas jcas ) throws AnalysisEngineProcessException {
       LOGGER.info( "Starting Processing" );
-      // breasts
+      // body side is applied to all anatomical sites
+      final Collection<AnatomicalSiteMention> sites = JCasUtil.select( jcas, AnatomicalSiteMention.class );
+      getIsolatedModifiers( jcas, LocationModifier.BodySide.values() )
+            .forEach( s -> createLocationRelation( jcas, s, sites ) );
+      // the other special modifiers are applied only to breasts
       final Collection<IdentifiedAnnotation> breasts
             = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, OwlConstants.BREAST_CANCER_OWL + "#Breast" );
       if ( breasts.isEmpty() ) {
@@ -50,13 +56,13 @@ public class PastSentenceLocator extends JCasAnnotator_ImplBase {
       }
       // neoplasms
       getIsolatedNeoplasms( jcas ).forEach( n -> createLocationRelation( jcas, n, breasts ) );
-      // modifiers
+      // quadrant
       getIsolatedModifiers( jcas, LocationModifier.Quadrant.values() )
             .forEach( q -> createLocationRelation( jcas, q, breasts ) );
-      getIsolatedModifiers( jcas, LocationModifier.BodySide.values() )
-            .forEach( s -> createLocationRelation( jcas, s, breasts ) );
+      // clockwise
       getIsolatedModifiers( jcas, LocationModifier.Clockwise.values() )
             .forEach( c -> createLocationRelation( jcas, c, breasts ) );
+
       LOGGER.info( "Finished Processing" );
    }
 
@@ -88,9 +94,9 @@ public class PastSentenceLocator extends JCasAnnotator_ImplBase {
     */
    static public void createLocationRelation( final JCas jCas,
                                               final IdentifiedAnnotation locatable,
-                                              final Collection<IdentifiedAnnotation> sites ) {
+                                              final Collection<? extends IdentifiedAnnotation> sites ) {
       final IdentifiedAnnotation closestSite
-            = AnnotationUtil.getClosestAnnotation( locatable.getBegin(), locatable.getEnd(), sites );
+            = AnnotationUtil.getPrecedingOrAnnotation( locatable.getBegin(), locatable.getEnd(), sites );
       if ( closestSite != null ) {
          createLocationRelation( jCas, locatable, closestSite );
       }

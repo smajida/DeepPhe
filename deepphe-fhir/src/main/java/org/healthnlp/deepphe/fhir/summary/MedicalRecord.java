@@ -3,12 +3,15 @@ package org.healthnlp.deepphe.fhir.summary;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.healthnlp.deepphe.fhir.Element;
 import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.TextMention;
 import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
@@ -135,4 +138,19 @@ public class MedicalRecord implements Element {
 		return list;
 	}
 	
+	
+	public void addProvenanceToRecord(){
+		Map<String,String> docIds = new HashMap<String,String>();
+		for(Fact f :getReportLevelFacts()){
+			docIds.put(f.getIdentifier(),f.getDocumentIdentifier());
+		}
+		for(Fact fact: getRecordLevelFacts()){
+			for(Fact f: fact.getProvenanceFacts()){
+				for(TextMention t: f.getProvenanceText()){
+					t.setDocumentIdentifier(docIds.get(f.getIdentifier()));
+					//t.setDocumentType(f.getDocumentType());
+				}
+			}
+		}
+	}
 }

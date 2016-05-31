@@ -13,6 +13,7 @@ import org.healthnlp.deepphe.fhir.Observation;
 import org.healthnlp.deepphe.fhir.Procedure;
 import org.healthnlp.deepphe.fhir.Stage;
 import org.healthnlp.deepphe.util.FHIRConstants;
+import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.healthnlp.deepphe.util.OntologyUtils;
 import org.hl7.fhir.instance.model.BodySite;
@@ -20,6 +21,9 @@ import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.Quantity;
+
+import edu.pitt.dbmi.nlp.noble.ontology.IClass;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 
 
 /**
@@ -49,8 +53,45 @@ public class FactFactory {
 	 * create a generic fact based on a codeable concept
 	 */
 	public static Fact createFact(CodeableConcept cc){
-		return createFact(cc,new Fact());
+		// do we have an element of this CC registered, then make a fact based on that
+		Element e = FHIRRegistry.getInstance().getResource(FHIRUtils.getResourceIdentifer(cc));
+		if(e != null)
+			return FactFactory.createFact(e);
+		
+		// else do a default operation
+		Fact fact = new Fact();
+		
+		// unless we have an ontology :)
+		if(OntologyUtils.hasInstance()){
+			URI uri = FHIRUtils.getConceptURI(cc);
+			if(uri != null){
+				IOntology ontology = OntologyUtils.getInstance().getOntology();
+				IClass cls = ontology.getClass(""+uri);
+				if(cls != null){
+					if(cls.hasSuperClass(ontology.getClass(FHIRConstants.OBSERVATION)))
+						fact = new ObservationFact();
+					else if(cls.hasSuperClass(ontology.getClass(FHIRConstants.CONDITION)))
+						fact = new ConditionFact();
+					else if(cls.hasSuperClass(ontology.getClass(FHIRConstants.BODY_SITE)))
+						fact = new BodySiteFact();
+					else if(cls.hasSuperClass(ontology.getClass(FHIRConstants.PROCEDURE)))
+						fact = new ProcedureFact();
+				}
+			}
+		}
+		return createFact(cc,fact);
 	}
+	
+	
+	public static void addAncestors(Fact fact){
+		if(OntologyUtils.hasInstance()) {		
+			OntologyUtils.getInstance().addAncestors(fact);
+			for(Fact f:	fact.getContainedFacts()){
+				OntologyUtils.getInstance().addAncestors(f);
+			}
+		}
+	}
+	
 	
 	/**
 	 * create a generic fact based on a codeable concept
@@ -72,6 +113,8 @@ public class FactFactory {
 		}
 		if(id != null)
 			fact.setIdentifier(id);
+		
+		addAncestors(fact);
 		
 		return fact;
 		
@@ -294,6 +337,21 @@ public class FactFactory {
 	
 	public static String createIdentifier(Fact fact){
 		return fact.getType()+"_"+fact.getName().replaceAll("\\W+","_")+"_"+Math.abs(fact.getProvenanceMentions().hashCode());
+	}
+
+	/**
+	 * create fact from information of a different fact 
+	 * (without cloning provenance or attributes)
+	 * @param f
+	 * @return
+	 */
+	public static Fact createFact(Fact f) {
+		Fact fact = createFact(f.getType()); 
+		fact.setUri(f.getUri());
+		fact.setName(f.getName());
+		fact.setLabel(f.getLabel());
+		fact.setIdentifier("Fact_"+fact.getName()+"_"+System.currentTimeMillis());
+		return fact;
 	}
 	
 	public static Fact createTumorFactModifier(String uri, Fact tSummaryF, Fact  cSummaryF, String summaryType, 

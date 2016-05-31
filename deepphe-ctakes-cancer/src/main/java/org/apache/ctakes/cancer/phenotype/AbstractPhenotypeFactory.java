@@ -341,7 +341,7 @@ abstract public class AbstractPhenotypeFactory<T extends Type, V extends Value, 
                                                     final E eventMention,
                                                     final Iterable<IdentifiedAnnotation> neoplasms ) {
       final IdentifiedAnnotation closestNeoplasm
-            = AnnotationUtil.getClosestAnnotation( typeBegin, typeEnd, neoplasms );
+            = AnnotationUtil.getPrecedingOrAnnotation( typeBegin, typeEnd, neoplasms );
       if ( closestNeoplasm != null ) {
          final String relationName = typeTitle.replace( ' ', '_' ) + "_of";
          createEventMentionNeoplasm( jCas, eventMention, closestNeoplasm, relationName );
@@ -422,7 +422,7 @@ abstract public class AbstractPhenotypeFactory<T extends Type, V extends Value, 
                                                   final E eventMention,
                                                   final Iterable<IdentifiedAnnotation> diagnosticTests ) {
       final IdentifiedAnnotation closestDiagnostic
-            = AnnotationUtil.getClosestAnnotation( typeBegin, typeEnd, diagnosticTests );
+            = AnnotationUtil.getPrecedingOrAnnotation( typeBegin, typeEnd, diagnosticTests );
       if ( closestDiagnostic != null ) {
          createEventMentionIndicator( jCas, closestDiagnostic, eventMention, "Diagnostic_Test_for" );
       }

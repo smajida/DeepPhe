@@ -166,7 +166,7 @@ rule "genericT-1-to-Pathologic"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicTClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
@@ -200,7 +200,7 @@ rule "genericT-2-to-Pathologic"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicTClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
@@ -231,7 +231,7 @@ rule "genericN-1-to-Pathologic"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicNClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
@@ -265,7 +265,7 @@ rule "genericN-2-to-Pathologic"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicNClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
@@ -295,7 +295,7 @@ rule "genericM-1-to-Pathologic-M1"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicMClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
@@ -324,7 +324,7 @@ rule "genericM-1-to-Pathologic-MX"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicMClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
@@ -357,7 +357,7 @@ rule "genericM-2-to-Pathologic-M1"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicNClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
@@ -391,7 +391,7 @@ rule "genericM-2-to-Pathologic-MX"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicNClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
@@ -423,7 +423,7 @@ rule "genericT-3-to-Clinical"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasClinicalTClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
@@ -458,7 +458,7 @@ rule "genericT-4-to-Clinical"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasClinicalTClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
@@ -489,7 +489,7 @@ rule "genericN-3-to-Clinical"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasClinicalNClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
@@ -524,7 +524,7 @@ rule "genericN-4-to-Clinical"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasClinicalNClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
@@ -555,7 +555,7 @@ rule "genericM-3-to-Clinical"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasClinicalMClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
@@ -590,7 +590,7 @@ rule "genericM-4-to-Clinical"
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasClinicalMClassification");
 		cf.setIdentifier(newId);
-		cf.addProvenanceFacts($genericTFact .getProvenanceFacts(), false);
+		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);

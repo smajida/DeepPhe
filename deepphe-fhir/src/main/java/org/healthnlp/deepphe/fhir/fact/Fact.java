@@ -78,27 +78,18 @@ public class Fact {
 			provenanceFacts = new ArrayList<Fact>();
 		return provenanceFacts;
 	}
+	
 	public void addProvenanceFact(Fact fact) {
-		if(!getProvenanceFacts().contains(fact))
-			provenanceFacts.add(fact);
+		if(!getProvenanceFacts().contains(fact)){
+			getProvenanceFacts().add(fact);
+			getProvenanceFacts().addAll(fact.getProvenanceFacts());
+		}
 	}
 	
 	public void addProvenanceFacts(List<Fact> facts) {
 		for(Fact f:facts)
 			addProvenanceFact(f);
-		facts.clear();
-		facts = null;
 	}
-	
-	public void addProvenanceFacts(List<Fact> facts, boolean canDelete) {
-		for(Fact f:facts)
-			addProvenanceFact(f);
-		if(canDelete){
-			facts.clear();
-			facts = null;
-		}
-	}
-	
 
 	public List<TextMention> getProvenanceText() {
 		if(provenanceText == null)
@@ -169,6 +160,7 @@ public class Fact {
 			t.setDocumentIdentifier(id);
 		}
 	}
+	
 	public String getCategory() {
 		return category;
 	}
@@ -278,5 +270,10 @@ public class Fact {
 	}
 	public void setSummaryId(String summaryId) {
 		this.summaryId = summaryId;
+	}
+	public boolean equivalent(Fact fact){
+		if(fact == null)
+			return false;
+		return getUri().equals(fact.getUri());
 	}
 }
