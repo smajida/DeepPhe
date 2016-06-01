@@ -473,9 +473,11 @@ public class FHIRUtils {
 		//xml.compose(new FileOutputStream(file),r, true);
 		//XmlGenerator xml = new XmlGenerator();
 		//xml.generate(r, file);
-		XmlParser xml = new FHIRParser();
-		xml.compose(new FileOutputStream(file),r,true);
 		
+		FileOutputStream ios = new FileOutputStream(file);
+		XmlParser xml = new FHIRParser();
+		xml.compose(ios,r,true);
+		ios.close();
 	}
 	
 	

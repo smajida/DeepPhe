@@ -545,9 +545,14 @@ final public class DocumentResourceFactory {
 		for ( ConceptInstance ci : ConceptInstanceUtil.getLocations( conceptInstance ) ) {
 			CodeableConcept location = dx.addBodySite();
 			cTAKESUtils.setCodeableConcept( location, ci );
-			AnatomicalSite site = (AnatomicalSite) cTAKESUtils.getResource(ci);
+			Element site = cTAKESUtils.getResource(ci);
 			if ( site != null ) {
-				FHIRUtils.addResourceReference( location, site );
+				if(site instanceof AnatomicalSite)
+					FHIRUtils.addResourceReference( location, site );
+				else
+					System.out.println("WARNING: diagnosis: '"+conceptInstance.getIdentifiedAnnotation().getCoveredText()+
+										"' location: '"+ci.getIdentifiedAnnotation().getCoveredText()+
+										"' expected AnatomicalSite, but got "+site.getClass().getSimpleName());
 			}
 		}
 
@@ -701,9 +706,14 @@ final public class DocumentResourceFactory {
 		for ( ConceptInstance ci : ConceptInstanceUtil.getLocations( conceptInstance ) ) {
 			CodeableConcept location = pr.addBodySite();
 			cTAKESUtils.setCodeableConcept(location,ci);
-			AnatomicalSite site = (AnatomicalSite) cTAKESUtils.getResource(ci);
+			Element site = cTAKESUtils.getResource(ci);
 			if(site != null)
-				FHIRUtils.addResourceReference(location,site);
+				if(site instanceof AnatomicalSite )
+					FHIRUtils.addResourceReference(location,site);
+				else
+					System.out.println("WARNING: procedure: '"+conceptInstance.getIdentifiedAnnotation().getCoveredText()+
+										"' location: '"+ci.getIdentifiedAnnotation().getCoveredText()+
+										"' expected AnatomicalSite, but got "+site.getClass().getSimpleName());
 		}
 
 		
@@ -877,9 +887,15 @@ final public class DocumentResourceFactory {
 			CodeableConcept c = cTAKESUtils.getCodeableConcept(ci);
 			
 			// add id to cancer stage
-			Finding f = (Finding) cTAKESUtils.getResource(ci);
+			Element f = cTAKESUtils.getResource(ci);
 			if (f != null) {
-				FHIRUtils.addResourceReference(c, f);
+				if(f instanceof Finding)
+					FHIRUtils.addResourceReference(c, f);
+				else
+					System.out.println("WARNING: neoplasm: '"+neoplasm.getIdentifiedAnnotation().getCoveredText()+
+							"' location: '"+ci.getIdentifiedAnnotation().getCoveredText()+
+							"' expected Finding, but got "+f.getClass().getSimpleName());
+				
 			}
 			// add extension
 			stage.addExtension(cTAKESUtils.createMentionExtension(ci));	
@@ -891,9 +907,14 @@ final public class DocumentResourceFactory {
 			//Collection<ConceptInstance> vi = ConceptInstanceUtil.getPhenotypeValues( ci);
 			// add id to cancer stage
 			//Finding f = (Finding) cTAKESUtils.getResource(!vi.isEmpty()?vi.iterator().next():ci);
-			Finding f = (Finding) cTAKESUtils.getResource(ci);
+			Element f = cTAKESUtils.getResource(ci);
 			if (f != null) {
-				stage.addAssessment(f);
+				if(f instanceof Finding)
+					stage.addAssessment((Finding)f);
+				else
+					System.out.println("WARNING: neoplasm: '"+neoplasm.getIdentifiedAnnotation().getCoveredText()+
+							"' location: '"+ci.getIdentifiedAnnotation().getCoveredText()+
+							"' expected Finding, but got "+f.getClass().getSimpleName());
 			}		
 		}
 		
