@@ -113,8 +113,8 @@ public class XMIWriter extends CasConsumer_ImplBase {
 			 */
 
 			String outFileName = null;
-			if (originalFileName.contains("/")) {
-				outFileName = originalFileName.substring(originalFileName.lastIndexOf("/") + 1);
+			if (originalFileName.contains(File.separator)) {
+				outFileName = originalFileName.substring(originalFileName.lastIndexOf(File.separator) + 1);
 			} else {
 				outFileName = originalFileName;
 			}
