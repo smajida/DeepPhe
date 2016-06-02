@@ -298,7 +298,7 @@ public class FactFactory {
 			fact = new ObservationFact();
 		}else if(FHIRConstants.CONDITION.equals(type)){
 			fact = new ConditionFact();
-		}else if(FHIRConstants.PROCEDURE.equals(type)){
+		}else if(type.endsWith(FHIRConstants.PROCEDURE)){
 			fact = new ProcedureFact();
 		}else if(FHIRConstants.QUANTITY.equals(type)){
 			fact = new ValueFact();

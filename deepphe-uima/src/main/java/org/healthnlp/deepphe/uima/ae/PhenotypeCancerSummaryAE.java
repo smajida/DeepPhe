@@ -70,7 +70,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		CancerSummary cancerSummary = new CancerSummary(patient.getPatientName());
 		cancerSummary.setAnnotationType(FHIRConstants.ANNOTATION_TYPE_RECORD);
 
-		System.out.println("&&: " + cancerSummary.getResourceIdentifier());
+		
 
 		// record to load into drools
 		record.setPatientSummary(patientSummary);
@@ -91,8 +91,12 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		}*/
 		
 		// check ancestors
-		checkAncestors(record.getRecordLevelFacts());
+		List<Fact> reportFacts = record.getReportLevelFacts();
+		checkAncestors(reportFacts);
 
+		System.out.println("PROCESSING phenotype for " + cancerSummary.getResourceIdentifier() +" ..");
+		System.out.println("loading "+reportFacts.size()+" facts into Rules Engine ...");
+		
 		/* for(Fact f: record.getReportLevelFacts()){
 		  System.out.println(f.getInfo()); 
 		  }*/
@@ -111,8 +115,8 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			boolean doWrite = false;
 			FileWriter fw = null;
 			if (doWrite)
-				fw = new FileWriter("/home/opm1/devSrc/deepPhe_Data/DeepPhe/sample/output_frank/droolsInput_02.txt");
-			for (Fact f : record.getReportLevelFacts()) {
+				fw = new FileWriter("/home/opm1/devSrc/deepPhe_Data/DeepPhe/sample/output_frank/droolsInput.txt");
+			for (Fact f : reportFacts) {
 				try {
 					if (!f.getCategory().equalsIgnoreCase("wasDerivedFrom") && !dupList.contains(f.getInfo())) {
 						dupList.add(f.getInfo());
@@ -135,14 +139,16 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 
 			// System.out.println("DROOLS TIME: "+(System.currentTimeMillis() -
 			// stT)/1000+" sec");
-			System.out.println("**************************");
-			System.out.println("RECORD Summary: " + record.getSummaryText());
-			System.out.println("**************************");
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+		System.out.println("**************************");
+		System.out.println("RECORD Summary: " + record.getSummaryText());
+		System.out.println("**************************");
+		
 		// this is where you save your work back to CAS
 
 		PhenotypeResourceFactory.saveMedicalRecord(record, jcas);
