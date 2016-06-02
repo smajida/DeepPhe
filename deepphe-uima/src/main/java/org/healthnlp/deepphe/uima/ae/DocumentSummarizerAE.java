@@ -52,12 +52,12 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 
 		try {
 
-			
-			//for (DocumentID docID : JCasUtil.select(jcas, DocumentID.class)) {
 			Patient patient = DocumentResourceFactory.getPatient(jcas);
 
 			String namedID = patient != null?patient.getPatientName():"unknown";
 			Report report = DocumentResourceFactory.getReport(jcas);
+			
+			System.out.println("PROCESSING patient: " + patient.getDisplayText() +" document: "+report.getTitle()+" ..");
 			
 			// save FHIR related data
 			File patientDir = new File(new File(outputDir, FHIR_TYPE), namedID);
@@ -72,7 +72,7 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 				patientDir.mkdirs();
 			}
 			XMIWriter.writeXmi(jcas.getCas(), new File(patientDir, report.getTitle().replace('/', '_') + ".xmi"));
-			//}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
