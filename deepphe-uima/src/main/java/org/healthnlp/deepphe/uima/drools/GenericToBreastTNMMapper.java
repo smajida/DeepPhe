@@ -1,11 +1,15 @@
 package org.healthnlp.deepphe.uima.drools;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GenericToBreastTNMMapper {
 	
-	static Map <String, String> tGenericToBreast = null;
+	static List <String> tBreast = null;
+	static List <String> nPathologicBreast = null;
 	
 	public static String getBreastTClassification(String prefix, String genericValue, String suffix){
 		String pref = "";
@@ -17,37 +21,42 @@ public class GenericToBreastTNMMapper {
 		if("".equals(pref)) return null;
 		
 		String genV = genericValue.substring(0, genericValue.indexOf("_"));
-		
-		String val = getTMap().get(genV);
-		if(val == null) return null;
+		if(!getTList().contains(genV)) return null;
 		
 		String suff = "";
-		if(suffix.equals("DCIS") || suffix.equals("LCIS") || suffix.equals("Paget"))
+		if(genV.equals("Tis") && (suffix.equals("DCIS") || suffix.equals("LCIS") || suffix.equals("Paget")))
 			 suff = "_"+suffix;
-		return "Breast_Cancer_"+pref+val+suff+"_TNM_Finding";
+		return "Breast_Cancer_"+pref+genV+suff+"_TNM_Finding";
 	}
 	
-	
-	
-	public static Map<String, String> getTMap(){
-		if(tGenericToBreast != null) return tGenericToBreast;
-		tGenericToBreast = new HashMap<String, String>();
+	public static String getBreastNClassification(String prefix, String genericValue, String suffix){
+		String pref = "";
+		if(prefix.equals("p_modifier"))
+			pref = "p";
+		else if(prefix.equals("c_modifier"))
+			pref = "c";
 		
-		tGenericToBreast.put("T0", "T0"); tGenericToBreast.put("T1", "T1");
-		tGenericToBreast.put("T1a", "T1a"); tGenericToBreast.put("T1a2", "T1a");
-		tGenericToBreast.put("T1b", "T1b"); tGenericToBreast.put("T1b1", "T1b");
-		tGenericToBreast.put("T1b2", "T1b"); tGenericToBreast.put("T1c", "T1c");
-		tGenericToBreast.put("T1mic", "T1mic"); tGenericToBreast.put("T2", "T2");
-		tGenericToBreast.put("T2a", "T2"); tGenericToBreast.put("T2b", "T2");
-		tGenericToBreast.put("T2c", "T2"); tGenericToBreast.put("T3", "T3");
-		tGenericToBreast.put("T3a", "T3"); tGenericToBreast.put("T3b", "T3");
-		tGenericToBreast.put("T3c", "T3"); tGenericToBreast.put("T4", "T4");
-		tGenericToBreast.put("T4a", "T4a"); tGenericToBreast.put("T4b", "T4b");
+		if("".equals(pref)) return null;
+		String genV = genericValue.substring(0, genericValue.indexOf("_"));
 		
-		tGenericToBreast.put("T4b", "T4b"); tGenericToBreast.put("T4c", "T4c");
-		tGenericToBreast.put("T4d", "T4d"); tGenericToBreast.put("Tis", "Tis");
-		tGenericToBreast.put("TX", "TX"); 	
-		return tGenericToBreast;
+	
+	    return "";
+	}
+	
+	public static List<String> getTList(){
+		if(tBreast != null) return tBreast;
+		tBreast = new ArrayList<String>();	
+		String[] tBreasArr = new String[] {"T0", "T1", "T1a", "T1b", "T1c", "T1mic","T2", "T3", "T4","T4a", "T4b", "T4c","T4d", "Tis", "TX"};
+		Collections.addAll(tBreast, tBreasArr); 
+		return tBreast;
+	}
+	
+	public static List<String> getPathologicNMap(){
+		if(nPathologicBreast != null) return nPathologicBreast;
+		nPathologicBreast = new ArrayList<String>();
+		String[] tBreasArr = new String[] {"N0", "N1", "N1a", "N1b", "N1c", "N1mic","N2", "N2a", "N2b","N3", "N3a", "N3b", "N3c","NX"};
+		Collections.addAll(nPathologicBreast, tBreasArr); 
+		return nPathologicBreast;
 	}
 
 }
