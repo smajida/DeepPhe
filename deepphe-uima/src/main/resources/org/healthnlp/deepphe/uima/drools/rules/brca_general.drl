@@ -1,0 +1,208 @@
+package org.healthnlp.deepphe.uima.drools;
+
+import java.lang.Object;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.ArrayList;
+
+import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.FHIRConstants;
+
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
+import org.healthnlp.deepphe.fhir.fact.FactHelper;
+
+import org.healthnlp.deepphe.fhir.summary.*;
+import org.healthnlp.deepphe.uima.drools.*;
+
+
+import org.apache.ctakes.cancer.owl.OwlConstants;
+
+/**
+* sets Diagnosis, histologicType, cancerType
+*/
+
+rule "set-Cancer-Tumor-CancerType"
+	salience 55559
+	no-loop true
+	when
+		$record : MedicalRecord()	
+		$domain : Domain($domainName : domainName)	
+		$record_c_Fact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
+						$newSummaryId : summaryId)  
+	    IdMapper($oldSummaryId : oldSummaryId, newSummaryId == $newSummaryId)
+	    $doc_type_Fact : Fact(containerIdentifier contains $oldSummaryId, summaryType=="CancerPhenotype", 
+	    			category == "hasCancerType", documentType != "RecordSummary", $name : name)
+	    not(Fact(documentType == "RecordSummary", summaryType=="CancerPhenotype", category == "hasCancerType"))
+	    $mergedTumors : Set()
+	    from collect (MergedTumor())
+	    
+	then
+System.out.print(".");
+		String parentId = $record_c_Fact.getSummaryId();
+		String newId = "CancerPhenotype-"+parentId.replace("CancerSummary-","");
+		Fact cf = FactFactory.createFact($doc_type_Fact, $doc_type_Fact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+$name, "RecordSummary");
+		cf.setIdentifier(newId);
+		cf.addProvenanceFact($doc_type_Fact);
+		cf.addContainerIdentifier(parentId);
+		insert(cf);
+		insert(new IdMapper($doc_type_Fact.getIdentifier(), newId, $doc_type_Fact.getDocumentType(), $doc_type_Fact.getSummaryId(), newId));
+		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
+		//tumors:
+		for(Object obj : $mergedTumors){
+			MergedTumor mt = (MergedTumor)obj;
+			TumorSummary tSummary = $record.getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+mt.getMergedTumorId());
+			newId = "TumorPhenotype-"+mt.getMergedTumorId();
+			Fact tf = FactFactory.createFact($doc_type_Fact, "Finding", OwlConstants.BREAST_CANCER_OWL+"#"+$name, "RecordSummary");
+			tf.setSummaryType("TumorPhenotype");
+			tf.setSummaryId(newId);
+			tf.addContainerIdentifier(mt.getMergedTumorId());
+			tf.addContainerIdentifier($record_c_Fact.getSummaryId());
+			tf.setIdentifier(newId);
+			tf.addProvenanceFact($doc_type_Fact);
+			
+			tSummary.getPhenotype().addFact(FHIRConstants.HAS_CANCER_TYPE, tf);
+			//modify($record){
+			//	getCancerSummary().getTumorSummaryByIdentifier(TumorPhenotype-"+mt.getMergedTumorId()).getPhenotype().addFact(FHIRConstants.HAS_CANCER_TYPE, tf)
+			//}
+		}
+end   
+
+
+rule  "set-Tumor-Cancer-HistologicType"
+	salience 55558
+	no-loop true
+	when
+		$record : MedicalRecord()	
+		$domain : Domain($domainName : domainName)
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName)
+   
+	    $tpheF : Fact(documentType != "RecordSummary", summaryType == "TumorPhenotype", category == "hasHistologicType", $name : name)
+	    $tF : Fact(summaryType == "TumorSummary", $t_summaryId : summaryId, documentType == "RecordSummary")
+	    
+	    
+	    not(Fact(summaryType=="TumorPhenotype", documentType == "RecordSummary", category == "hasHistologicType", name == $name, 
+	    	containerIdentifier contains $t_summaryId))		
+	    
+	then
+		//tumor level
+		String newId = "TumorPhenotype-"+$t_summaryId;
+		Fact tf = FactFactory.createFact($tpheF, "Condition", OwlConstants.BREAST_CANCER_OWL+"#"+$name, "RecordSummary");
+		tf.setIdentifier(newId);
+		tf.addContainerIdentifier($t_summaryId);
+		tf.addProvenanceFact($tpheF);
+		insert(tf);
+		insert(new IdMapper($tpheF.getIdentifier(), newId, $tpheF.getDocumentType(), $tpheF.getSummaryId(), $t_summaryId));
+		modify($record){
+			getCancerSummary().getTumorSummaryByIdentifier($t_summaryId).getPhenotype().addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE, tf)
+		}
+		
+		//cancer phenotype level
+		Fact ctf = FactFactory.createFact($tpheF, "hasHistologicType", OwlConstants.BREAST_CANCER_OWL+"#"+$tpheF.getName(), "RecordSummary");
+		ctf.setIdentifier($cancerFact.getIdentifier());
+		ctf.addProvenanceFact($tF);
+		ctf.getContainerIdentifier().clear();
+		ctf.addContainerIdentifier($cancerFact.getSummaryId());
+		ctf.setSummaryType("CancerPhenotype");
+		ctf.setSummaryId("CancerPhenotype-"+$cancerFact.getSummaryId());
+		insert(new IdMapper($tF.getIdentifier(), $cancerFact.getIdentifier(), $tF.getDocumentType(), $tF.getSummaryId(), $cancerFact.getSummaryId()));
+		
+		FactHelper.addFactToSummary(ctf, $record.getCancerSummary(), $cancerFact.getIdentifier(), OwlConstants.BREAST_CANCER_OWL);
+		insert(ctf);
+end   
+
+/*
+* Sets the most specific tumor diagnosis across documants
+*/
+
+rule  "set-Tumor-Cancer-Diagnosis"
+	salience 44444
+	no-loop true
+	when
+		$record : MedicalRecord()	
+		$domain : Domain($domainName : domainName)
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName)
+		
+		$tF : Fact(summaryType == "TumorSummary", documentType != "RecordSummary", category == "hasDiagnosis", $deepName : name, $deepOldSummaryId : summaryId)
+	    IdMapper(oldSummaryId == $deepOldSummaryId, $newSummaryId : newSummaryId)
+	    not((Fact(this != $tF, summaryType == "TumorSummary", documentType != "RecordSummary", $name : name, 
+	    		ancestors contains $deepName, $oldSummaryId : summaryId)
+	    	&& IdMapper(oldSummaryId == $oldSummaryId, newSummaryId == $newSummaryId )	    		
+	    	))
+	    $recordTFact : Fact(documentType == "RecordSummary", summaryType == "TumorSummary", summaryId == $newSummaryId)
+	    not(Fact(documentType == "RecordSummary", summaryType == "TumorSummary", category == "hasDiagnosis", provenanceFacts contains $tF))
+
+	then
+		//tumor level
+		Fact tf = FactFactory.createFact($tF, "hasDiagnosis", OwlConstants.BREAST_CANCER_OWL+"#"+$tF.getName(), "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId);
+		tf.setIdentifier(tf.getName()+"-"+$newSummaryId);
+		tf.addProvenanceFact($tF);
+		tf.setSummaryId($newSummaryId);
+		insert(new IdMapper($tF.getIdentifier(), tf.getIdentifier(), $tF.getDocumentType(), $tF.getSummaryId(), tf.getSummaryId()));
+		
+		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), $newSummaryId, OwlConstants.BREAST_CANCER_OWL);
+		
+		insert(tf);
+		
+		//cancer level
+		Fact ctf = FactFactory.createFact($tF, "hasDiagnosis", OwlConstants.BREAST_CANCER_OWL+"#"+$tF.getName(), "RecordSummary");
+		ctf.setIdentifier($cancerFact.getIdentifier());
+		ctf.getContainerIdentifier().clear();
+		ctf.addContainerIdentifier($cancerFact.getSummaryId());
+		ctf.addProvenanceFact($tF);
+		ctf.setSummaryType("CancerSummary");
+		ctf.setSummaryId($cancerFact.getSummaryId());
+		insert(new IdMapper($tF.getIdentifier(), $cancerFact.getIdentifier(), $tF.getDocumentType(), $tF.getSummaryId(), $cancerFact.getSummaryId()));
+		
+		FactHelper.addFactToSummary(ctf, $record.getCancerSummary(), $cancerFact.getIdentifier(), OwlConstants.BREAST_CANCER_OWL);
+		insert(ctf);
+		
+end  
+
+rule  "set-Tumor-Cancer-TumorExtent"
+	salience 44444
+	no-loop true
+	when
+		$record : MedicalRecord()	
+		$domain : Domain($domainName : domainName)
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName)
+   
+	    $tpheF : Fact(documentType != "RecordSummary", summaryType == "TumorPhenotype", category == "hasTumorExtent", $name : name)
+	    $tF : Fact(summaryType == "TumorSummary", $t_summaryId : summaryId, documentType == "RecordSummary")
+	    
+	    
+	    not(Fact(summaryType=="TumorPhenotype", documentType == "RecordSummary", category == "hasTumorExtent", name == $name, 
+	    	containerIdentifier contains $t_summaryId))		
+	    
+	then
+		//tumor level
+		String newId = "TumorPhenotype-"+$t_summaryId;
+		Fact tf = FactFactory.createFact($tpheF, "Condition", OwlConstants.BREAST_CANCER_OWL+"#"+$name, "RecordSummary");
+		tf.setIdentifier(newId);
+		tf.addContainerIdentifier($t_summaryId);
+		tf.addProvenanceFact($tpheF);
+		insert(tf);
+		insert(new IdMapper($tpheF.getIdentifier(), newId, $tpheF.getDocumentType(), $tpheF.getSummaryId(), $t_summaryId));
+		modify($record){
+			getCancerSummary().getTumorSummaryByIdentifier($t_summaryId).getPhenotype().addFact(FHIRConstants.HAS_TUMOR_EXTENT, tf)
+		}
+		
+		//cancer phenotype level
+		Fact ctf = FactFactory.createFact($tpheF, "hasHistologicType", OwlConstants.BREAST_CANCER_OWL+"#"+$tpheF.getName(), "RecordSummary");
+		ctf.setIdentifier($cancerFact.getIdentifier());
+		ctf.addProvenanceFact($tF);
+		ctf.getContainerIdentifier().clear();
+		ctf.addContainerIdentifier($cancerFact.getSummaryId());
+		ctf.setSummaryType("CancerPhenotype");
+		ctf.setSummaryId("CancerPhenotype-"+$cancerFact.getSummaryId());
+		insert(new IdMapper($tF.getIdentifier(), $cancerFact.getIdentifier(), $tF.getDocumentType(), $tF.getSummaryId(), $cancerFact.getSummaryId()));
+		
+		FactHelper.addFactToSummary(ctf, $record.getCancerSummary(), $cancerFact.getIdentifier(), OwlConstants.BREAST_CANCER_OWL);
+		insert(ctf);
+end   
+
+		

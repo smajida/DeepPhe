@@ -102,6 +102,7 @@ public class Fact {
 			provenanceFacts = new ArrayList<Fact>();
 		return provenanceFacts;
 	}
+	
 	public void addProvenanceFact(Fact fact) {
 		if(!getProvenanceFacts().contains(fact)){
 			getProvenanceFacts().add(fact);
@@ -112,8 +113,6 @@ public class Fact {
 		for(Fact f: facts){
 			addProvenanceFact(f);
 		}
-		//facts.clear();
-		//facts = null;
 	}
 	
 	
@@ -125,7 +124,6 @@ public class Fact {
 		}
 		return documentIdentifier;
 	}
-
 	
 
 	public List<TextMention> getProvenanceText() {
@@ -163,6 +161,11 @@ public class Fact {
 			ancestors = new LinkedHashSet<String>();
 		return ancestors;
 	}
+	
+	public void setAncestors(Set<String> ancestors){
+		getAncestors().addAll(ancestors);
+	}
+	
 	public void addAncestor(String a) {
 		getAncestors().add(a);
 	}
@@ -201,6 +204,11 @@ public class Fact {
 			containerIdentifier = new LinkedHashSet<String>();
 		return containerIdentifier;
 	}
+	
+	public void addContainerIdentifiers(Set<String> containers){
+		getContainerIdentifier().addAll(containers);
+	}
+	
 	public void addContainerIdentifier(String containerIdentifier) {
 		getContainerIdentifier().add(containerIdentifier);
 	}
@@ -227,7 +235,7 @@ public class Fact {
 		b.append("summary type: "+getSummaryType()+"|");
 		b.append("summary id: "+getSummaryId()+"|");
 		b.append("container ids: "+getContainerIdentifier()+"|");
-		//b.append("rulesApplied: "+getRulesApplied()+"|");
+		b.append("recordDate: "+getRecordedDate()+"|");	
 		b.append("ancestors: "+getAncestors()+"\n");
 	   
 		return b.toString();
@@ -259,7 +267,7 @@ public class Fact {
 	}
 	
 	/**
-	 * convinience method to add all contained facts
+	 * convenience method to add all contained facts
 	 * @param facts
 	 * @param fact
 	 * @return
@@ -291,7 +299,6 @@ public class Fact {
 	public void setSummaryId(String summaryId) {
 		this.summaryId = summaryId;
 	}
-	
 	public boolean equivalent(Fact fact){
 		if(fact == null)
 			return false;

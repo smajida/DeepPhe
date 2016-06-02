@@ -53,6 +53,7 @@ public class FHIRConstants {
 	public static final String TREATMENT = "Treatment";
 	public static final String MANIFISTATION = "ManifestationOfDisease";
 	public static final String MEDICAL_RECORD = "MedicalRecord";
+	public static final String MODIFIER = "Modifier";
 	public static final String BODY_MODIFIER = "BodyModifier";
 	public static final String BODY_SIDE = "BodySide";
 	public static final String ORDINAL_INTERPRETATION = "OrdinalInterpretation";
@@ -60,8 +61,6 @@ public class FHIRConstants {
 	public static final String CLOCKFACE_POSITION = "Clockface_position";
 	public static final String UNIT = "Unit";
 	public static final String TNM_MODIFIER = "TNM_Modifier";
-	
-	
 	public static final String HAS_BODY_SITE = "hasBodySite";
 	public static final String HAS_BODY_SIDE = "hasBodySide";
 	public static final String HAS_QUADRANT = "hasQuadrant";

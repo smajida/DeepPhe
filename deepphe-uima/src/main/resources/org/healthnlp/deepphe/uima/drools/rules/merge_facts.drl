@@ -1,0 +1,754 @@
+package org.healthnlp.deepphe.uima.drools;
+
+import java.lang.Object;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.ArrayList;
+
+import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.FHIRConstants;
+
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
+import org.healthnlp.deepphe.fhir.fact.FactHelper;
+
+import org.healthnlp.deepphe.fhir.summary.*;
+import org.healthnlp.deepphe.uima.drools.*;
+
+
+import org.apache.ctakes.cancer.owl.OwlConstants;
+
+/*
+* Create cancerfact
+*/
+/*
+rule "createCancerFact"
+	salience 100000
+	no-loop true
+	when
+		$record : MedicalRecord()
+		$domain : Domain($domainName : domainName)
+		$cFact : Fact(summaryType == "CancerSummary", documentType != "RecordSummary", 
+					 category == "hasBodySite", $cancer_bs_name : name, $cancerId : identifier, $cSummaryId : summaryId,
+					$cancer_ancestors: ancestors, ($cancer_bs_name==$domainName || $cancer_ancestors contains $domainName))
+	then
+		String newId = "CancerSummary-"+$domainName;
+		Fact cf = FactFactory.createFact($cFact, $cFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#Breast", "RecordSummary");
+		cf.setIdentifier(newId);
+		cf.addProvenanceFact($cFact);
+		cf.setSummaryId(newId);
+		modify($record) {
+			getCancerSummary().setResourceIdentifier(newId)
+		}
+		insert(cf);
+		insert(new IdMapper($cancerId, newId, $cFact.getDocumentType(), $cFact.getSummaryId(), cf.getSummaryId()));
+		
+end	
+*/
+/*
+* Add Breast BodySite to CancerSummary if exists
+* use a bit higher salience than for Tumors
+*/
+rule "add_create_BreastToCancerSummary"
+	salience 100000
+	no-loop true
+	when
+		$record : MedicalRecord()
+		$domain : Domain($domainName : domainName)
+		$cFact : Fact(summaryType == "CancerSummary", documentType != "RecordSummary", 
+					 category == "hasBodySite", $cancer_bs_name : name, $cancerId : identifier, $patientId : patientIdentifier, $cSummaryId : summaryId,
+					$cancer_ancestors: ancestors, ($cancer_bs_name==$domainName || $cancer_ancestors contains $domainName))
+		not(Fact(this != $cFact, summaryType == "CancerSummary", category == "hasBodySite", documentType == "RecordSummary",
+						patientIdentifier==$patientId))
+		not(IdMapper (oldId == $cancerId, oldSummaryId == $cSummaryId))
+	   
+	then
+		String newId = "CancerSummary-"+$domainName;
+		Fact cf = FactFactory.createFact($cFact, $cFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#Breast", "RecordSummary");
+		cf.setIdentifier(newId);
+		cf.addProvenanceFact($cFact);
+		cf.setSummaryId(newId);
+		modify($record) {
+			getCancerSummary().setResourceIdentifier(newId)
+		}
+		insert(cf);
+		insert(new IdMapper($cancerId, newId, $cFact.getDocumentType(), $cFact.getSummaryId(), cf.getSummaryId()));
+		//FactHelper.addFactToSummary($cFact, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
+		
+		System.out.print(".");
+end
+/*
+* Same as add-create_BreastToCancerSummary, but without creation creation here
+*/
+rule "addOtherBreastToCancerSummary"
+	salience 100000
+	no-loop true
+	when
+		$record : MedicalRecord()
+		$domain : Domain($domainName : domainName)
+		$cFact : Fact(summaryType == "CancerSummary", documentType != "RecordSummary", 
+					 category == "hasBodySite", $cancer_bs_name : name, $cancerId : identifier, $patientId : patientIdentifier,
+					$cSummaryId : summaryId, $cancer_ancestors: ancestors, ($cancer_bs_name==$domainName || $cancer_ancestors contains $domainName))
+		$summaryFact : Fact(summaryType == "CancerSummary", category == "hasBodySite", documentType == "RecordSummary", $documentType : documentType,
+						patientIdentifier==$patientId, $newId : identifier)
+		not(IdMapper (oldId == $cancerId, oldSummaryId == $cSummaryId))
+	then
+		
+		$summaryFact.addProvenanceFact($cFact);
+
+		insert(new IdMapper($cancerId, $newId, $cFact.getDocumentType(), $cSummaryId, $summaryFact.getSummaryId()));
+
+		System.out.print(".");
+end
+
+/**
+* Considering that for each tumorID could be not more than one side, Qadrant or clockFacePos
+* run once
+*/
+rule "collect_locations"
+	salience 99999
+	no-loop true
+	when	
+		$record : MedicalRecord()
+		$domain : Domain($domainName : domainName)
+		$cSummaryFact : Fact(summaryType == "CancerSummary", category == "hasBodySite", documentType == "RecordSummary", $cancerSummaryId : summaryId)
+		$tumor1_f : Fact(summaryType == "TumorSummary", category == "hasBodySite", documentType != "RecordSummary", 
+				$patientId : patientIdentifier, $tumor1_identifier : identifier, $tumor1_name : name, $tSummaryId : summaryId)
+		not(TumorLocator(tumorSiteFact == $tumor1_f))
+		
+		$sideMap : Map()
+		from accumulate ( $fact : Fact(summaryType == "TumorSummary", category == "hasBodySiteModifier", 
+							containerIdentifier contains $tumor1_identifier, $modifName : name, type =="BodySide"),
+			init( HashMap mm = new HashMap(); ),
+			action( if(mm.get($modifName) == null) mm.put($modifName, new ArrayList());
+			((List)mm.get($modifName)).add($fact); ),
+            reverse ( ((List)mm.get($modifName)).remove($fact); ), 
+        	result( mm ) ) 
+        
+       $quadMap : Map()	
+        from accumulate ( $fact : Fact(summaryType == "TumorSummary", category == "hasBodySiteModifier", 
+							containerIdentifier contains $tumor1_identifier, $modifName : name, ancestors contains "Quadrant"),
+			init( HashMap qm = new HashMap(); ),
+			action( if(qm.get($modifName) == null) qm.put($modifName, new ArrayList());
+			((List)qm.get($modifName)).add($fact); ),
+            reverse ( ((List)qm.get($modifName)).remove($fact); ), 
+        	result( qm ) ) 	
+        	
+        $clockMap : Map()	
+        from accumulate ( $fact : Fact(summaryType == "TumorSummary", category == "hasBodySiteModifier", 
+							containerIdentifier contains $tumor1_identifier, $modifName : name, ancestors contains "Clockface_position"),
+			init( HashMap cm = new HashMap(); ),
+			action( if(cm.get($modifName) == null) cm.put($modifName, new ArrayList());
+			((List)cm.get($modifName)).add($fact); ),
+            reverse ( ((List)cm.get($modifName)).remove($fact); ), 
+        	result( cm ) )
+        then
+ //System.out.println("collect_locations START: $sideMap.size(): "+$sideMap.size()+" $quadMap.size(): "+$quadMap.size()+" $clockMap.size(): "+$clockMap.size());
+ System.out.print(".");       	
+  			if($sideMap.size() == 0 && $quadMap.size() == 0 && $clockMap.size() == 0){
+  				TumorLocator tl = new TumorLocator();
+				tl.setTumorSiteFact($tumor1_f);
+				tl.setDocTumorId($tSummaryId);
+				tl.setBodySite($tumor1_name);
+				insert(tl);
+  			}
+  			else if($sideMap.size() == 1){
+  				String firstSideKey = (String)$sideMap.keySet().iterator().next();
+  				Fact sideF = (Fact)((List)$sideMap.get(firstSideKey)).get(0);
+  				String sideName = sideF.getName();
+  				if($quadMap.size() > 0 && $clockMap.size() == 0){
+  					for(Object key : $quadMap.keySet()){
+						List listObj = (List)$quadMap.get(key);
+						for(Object ff:listObj){
+							TumorLocator tl = new TumorLocator();
+							tl.setTumorSiteFact($tumor1_f);
+							tl.setDocTumorId($tSummaryId);
+							tl.setBodySite($tumor1_name);
+							tl.setQuadrant((String)key);
+							tl.setQuadrantFact((Fact)ff);
+							tl.setBodySide(sideName);
+							tl.setBodySideFact(sideF);
+							insert(tl);
+						}
+					}
+  				}
+  				else if($quadMap.size() == 0 && $clockMap.size() > 0){
+  					for(Object key : $clockMap.keySet()){
+						List listObj = (List)$clockMap.get(key);
+						for(Object ff:listObj){
+							TumorLocator tl = new TumorLocator();
+							tl.setTumorSiteFact($tumor1_f);
+							tl.setDocTumorId($tSummaryId);
+							tl.setBodySite($tumor1_name);
+							tl.setClockFacePos((String)key);
+							tl.setClockfacePosFact((Fact)ff);
+							tl.setBodySide(sideName);
+							tl.setBodySideFact(sideF);
+							tl.setQuadrant(TumorLocator.inferQuadrant(sideName, (String)key));
+							insert(tl);
+						}
+					}
+  				}
+  				else if($quadMap.size() > 0 && $clockMap.size() > 0){
+  		
+  					for(Object key : $clockMap.keySet()){
+						List listObj = (List)$clockMap.get(key);
+						for(Object ff:listObj){
+							TumorLocator tl = new TumorLocator();
+							tl.setTumorSiteFact($tumor1_f);
+							tl.setDocTumorId($tSummaryId);
+							tl.setBodySite($tumor1_name);
+							tl.setClockFacePos((String)key);
+							tl.setClockfacePosFact((Fact)ff);
+							tl.setBodySide(sideName);
+							tl.setBodySideFact(sideF);
+							String quadStr = TumorLocator.inferQuadrant(sideName, (String)key);
+							Object qObj = ((List)$quadMap.get(quadStr)).get(0);
+							if(qObj != null){
+								tl.setQuadrant(quadStr);
+								tl.setQuadrantFact((Fact)qObj);
+							}
+							insert(tl);
+System.out.print(".");
+						}
+					}
+  				}
+  				else{
+  					for(Object key : $sideMap.keySet()){
+						List listObj = (List)$sideMap.get(key);
+						for(Object ff:listObj){
+							TumorLocator tl = new TumorLocator();
+							tl.setTumorSiteFact($tumor1_f);
+							tl.setDocTumorId($tSummaryId);
+							tl.setBodySite($tumor1_name);
+							tl.setBodySide((String)key);
+							tl.setBodySideFact((Fact)ff);
+							insert(tl);
+						}
+					}
+  				}
+  				
+  			}
+  			else{
+	        //$sideMap
+	        	for(Object key : $sideMap.keySet()){
+					List listObj = (List)$sideMap.get(key);
+					for(Object ff:listObj){
+						TumorLocator tl = new TumorLocator();
+						tl.setTumorSiteFact($tumor1_f);
+						tl.setDocTumorId($tSummaryId);
+						tl.setBodySite($tumor1_name);
+						tl.setBodySide((String)key);
+						tl.setBodySideFact((Fact)ff);
+						insert(tl);
+					}
+				}
+			//$quadMap	
+				for(Object key : $quadMap.keySet()){
+					List listObj = (List)$quadMap.get(key);
+					for(Object ff:listObj){
+						TumorLocator tl = new TumorLocator();
+						tl.setTumorSiteFact($tumor1_f);
+						tl.setDocTumorId($tSummaryId);
+						tl.setBodySite($tumor1_name);
+						tl.setQuadrant((String)key);
+						tl.setQuadrantFact((Fact)ff);
+						insert(tl);
+					}
+				}
+			//$clockMap	
+				for(Object key : $clockMap.keySet()){
+					List listObj = (List)$clockMap.get(key);
+					for(Object ff:listObj){
+						TumorLocator tl = new TumorLocator();
+						tl.setTumorSiteFact($tumor1_f);
+						tl.setDocTumorId($tSummaryId);
+						tl.setBodySite($tumor1_name);
+						tl.setClockFacePos((String)key);
+						tl.setClockfacePosFact((Fact)ff);
+						insert(tl);
+					}
+				}
+			}
+System.out.print(".");
+  end
+ 
+ /**
+ * Merge the same or create new if not exists
+ */ 
+ rule "merge_tumors_by_location_exact_all_present"
+ 	salience 99888
+	no-loop true
+	when 
+		$record : MedicalRecord()
+		$tlFact  : TumorLocator($bodySite : bodySite, $bodySite != "", $bodySide : bodySide, $bodySide != "",
+						 $quadrant : quadrant, $quadrant != "", $clockFacePos : clockFacePos, $clockFacePos != "", readyForRetraction == false)
+		$sameTumors : Set()
+      	from collect( TumorLocator(this != $tlFact, bodySite == $bodySite, bodySide == bodySide, quadrant == $quadrant,
+      				//clockFacePos == $clockFacePos, 
+      				readyForRetraction == false))
+        not(MergedTumor (tumorSiteFactSet contains $tlFact.getTumorSiteFact()))    	
+	 then
+	 	MergedTumor mt = new MergedTumor();
+	 	mt.setBodySite($bodySite);
+	 	mt.setBodySide($bodySide);
+	 	mt.setQuadrant($quadrant);
+	 	mt.setClockFacePos($clockFacePos);
+	 	$sameTumors.add($tlFact);
+	 	String hystType = "";
+	 	for(Object tObj : $sameTumors){
+	 		TumorLocator tl = (TumorLocator)tObj;
+		 	if(!tl.getHistologicType().equals("") && hystType.equals("")){
+		 		hystType = tl.getHistologicType();
+		 		mt.setHistologicType(hystType);
+		 	}
+		 	mt.addTumorFact(FHIRConstants.BODY_SITE, tl.getTumorSiteFact());
+		 	insert(new IdMapper(tl.getTumorSiteFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getTumorSiteFact().getDocumentType(), tl.getTumorSiteFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 	
+		 	mt.addTumorFact(FHIRConstants.BODY_SIDE, tl.getBodySideFact());
+		 	insert(new IdMapper(tl.getBodySideFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getBodySideFact().getDocumentType(), tl.getBodySideFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		
+		 	mt.addTumorFact(FHIRConstants.QUADRANT, tl.getQuadrantFact());
+		 	insert(new IdMapper(tl.getQuadrantFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getQuadrantFact().getDocumentType(), tl.getQuadrantFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 	
+		 	mt.addTumorFact(FHIRConstants.CLOCKFACE_POSITION, tl.getClockfacePosFact());
+		 	insert(new IdMapper(tl.getClockfacePosFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getClockfacePosFact().getDocumentType(), tl.getClockfacePosFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 	
+		 	tl.setReadyForRetraction(true);
+System.out.print(".");
+			update (tl);
+		}
+		insert(mt);
+System.out.print(".");
+end
+
+/**
+* Merge if the there is one mention of clockface in MergedTumor
+* or
+* create new if not exists
+*/
+rule "merge_tumors_by_location_no_clockface"
+ 	salience 99887
+	no-loop true
+	when 
+		$record : MedicalRecord()
+		$tlFact  : TumorLocator($bodySite : bodySite, $bodySite != "", $bodySide : bodySide, $bodySide != "",
+						 $quadrant : quadrant, $quadrant != "", $clockFacePos : clockFacePos, $clockFacePos == "", readyForRetraction == false)
+		$sameTumors : Set()
+      	from collect( TumorLocator(this != $tlFact, bodySite == $bodySite, bodySide == bodySide, quadrant == $quadrant,
+      				clockFacePos == $clockFacePos, readyForRetraction == false))
+        not(MergedTumor (tumorSiteFactSet contains $tlFact.getTumorSiteFact()))  
+        
+        $withClockMT : Set()
+        from collect ( MergedTumor (bodySite == $bodySite, bodySide == bodySide, quadrant == $quadrant))
+ 
+	 then
+	 // no mentions of clockface
+	 	$sameTumors.add($tlFact);
+	 	if($withClockMT.size() == 0){
+		 	MergedTumor mt = new MergedTumor();
+		 	mt.setBodySite($bodySite);
+		 	mt.setBodySide($bodySide);
+		 	mt.setQuadrant($quadrant);
+
+		 	
+		 	String hystType = "";
+		 	for(Object tObj : $sameTumors){
+		 		TumorLocator tl = (TumorLocator)tObj;
+			 	if(!tl.getHistologicType().equals("") && hystType.equals("")){
+			 		hystType = tl.getHistologicType();
+			 		mt.setHistologicType(hystType);
+			 	}
+			 	mt.addTumorFact(FHIRConstants.BODY_SITE, tl.getTumorSiteFact());
+			 	insert(new IdMapper(tl.getTumorSiteFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getTumorSiteFact().getDocumentType(), tl.getTumorSiteFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		
+			 	mt.addTumorFact(FHIRConstants.BODY_SIDE, tl.getBodySideFact());
+			 	insert(new IdMapper(tl.getBodySideFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getBodySideFact().getDocumentType(), tl.getBodySideFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		
+			 	mt.addTumorFact(FHIRConstants.QUADRANT, tl.getQuadrantFact());
+			 	insert(new IdMapper(tl.getQuadrantFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getQuadrantFact().getDocumentType(), tl.getQuadrantFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 	
+			 	tl.setReadyForRetraction(true);
+				update (tl);
+			}
+			insert(mt);		
+		}
+		// exists one MT with 
+		else if($withClockMT.size() == 1){
+			MergedTumor mt = (MergedTumor)$withClockMT.iterator().next();
+			String hystType = mt.getHistologicType();
+			for(Object tObj : $sameTumors){
+		 		TumorLocator tl = (TumorLocator)tObj;
+			 	if(!tl.getHistologicType().equals("") && hystType.equals("")){
+			 		hystType = tl.getHistologicType();
+			 		mt.setHistologicType(hystType);
+			 	}
+			 	mt.addTumorFact(FHIRConstants.BODY_SITE, tl.getTumorSiteFact());
+			 	insert(new IdMapper(tl.getBodySideFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getBodySideFact().getDocumentType(), tl.getTumorSiteFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		
+			 	mt.addTumorFact(FHIRConstants.BODY_SIDE, tl.getBodySideFact());
+			 	insert(new IdMapper(tl.getBodySideFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getBodySideFact().getDocumentType(), tl.getBodySideFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		
+			 	mt.addTumorFact(FHIRConstants.QUADRANT, tl.getQuadrantFact());
+			 	insert(new IdMapper(tl.getQuadrantFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getQuadrantFact().getDocumentType(), tl.getQuadrantFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+			 	
+			 	tl.setReadyForRetraction(true);
+				update (tl);
+			}
+			update(mt);
+		}
+		else{
+			System.err.println("Cacn't attach tumor: merge-tumors-by-location-no-clockface");
+		}
+end
+
+/**
+* Merge if the there is one mention of clockfae without quadrant in MergedTumor (for 12, 3, 6, 9 o'clock)
+* or
+* create new if not exists
+*/
+rule "merge-tumors-by-location-cant-have-quadrant"
+ 	salience 99886
+	no-loop true
+	when 
+		$tlFact  : TumorLocator($bodySite : bodySite, $bodySite != "", $bodySide : bodySide, $bodySide != "",
+						 $quadrant : quadrant, $quadrant == "", $clockFacePos : clockFacePos, $clockFacePos != "", readyForRetraction == false)
+		$sameTumors : Set()
+      	from collect( TumorLocator(this != $tlFact, bodySite == $bodySite, bodySide == bodySide, clockFacePos == $clockFacePos,
+      				clockFacePos == $clockFacePos, readyForRetraction == false))
+        not(MergedTumor (tumorSiteFactSet contains $tlFact.getTumorSiteFact()))  
+        
+        $withClockMT : Set()
+        from collect ( MergedTumor (bodySite == $bodySite, bodySide == bodySide, clockFacePos == $clockFacePos))
+ 
+	 then	
+	  // no mentions of clockface
+	 	$sameTumors.add($tlFact);
+	 	if($withClockMT.size() == 0){
+		 	MergedTumor mt = new MergedTumor();
+		 	mt.setBodySite($bodySite);
+		 	mt.setBodySide($bodySide);
+		 	mt.setClockFacePos($quadrant);
+
+		 	
+		 	String hystType = "";
+		 	for(Object tObj : $sameTumors){
+		 		TumorLocator tl = (TumorLocator)tObj;
+			 	if(!tl.getHistologicType().equals("") && hystType.equals("")){
+			 		hystType = tl.getHistologicType();
+			 		mt.setHistologicType(hystType);
+			 	}
+			 	mt.addTumorFact(FHIRConstants.BODY_SITE, tl.getTumorSiteFact());
+			 	insert(new IdMapper(tl.getTumorSiteFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getTumorSiteFact().getDocumentType(), tl.getTumorSiteFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		
+			 	mt.addTumorFact(FHIRConstants.BODY_SIDE, tl.getBodySideFact());
+			 	insert(new IdMapper(tl.getBodySideFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getBodySideFact().getDocumentType(), tl.getBodySideFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		
+			 	mt.addTumorFact(FHIRConstants.CLOCKFACE_POSITION, tl.getClockfacePosFact());
+			 	insert(new IdMapper(tl.getClockfacePosFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getClockfacePosFact().getDocumentType(), tl.getClockfacePosFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 	
+			 	tl.setReadyForRetraction(true);
+				update (tl);
+System.out.print(".");
+			}
+			insert(mt);
+System.out.print(".");
+		}
+		// exists one MT with 
+		else if($withClockMT.size() == 1){
+			MergedTumor mt = (MergedTumor)$withClockMT.iterator().next();
+			String hystType = mt.getHistologicType();
+			for(Object tObj : $sameTumors){
+		 		TumorLocator tl = (TumorLocator)tObj;
+			 	if(!tl.getHistologicType().equals("") && hystType.equals("")){
+			 		hystType = tl.getHistologicType();
+			 		mt.setHistologicType(hystType);
+			 	}
+			 	mt.addTumorFact(FHIRConstants.BODY_SITE, tl.getTumorSiteFact());
+			 	insert(new IdMapper(tl.getTumorSiteFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getTumorSiteFact().getDocumentType(), tl.getTumorSiteFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		
+			 	mt.addTumorFact(FHIRConstants.BODY_SIDE, tl.getBodySideFact());
+			 	insert(new IdMapper(tl.getBodySideFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getBodySideFact().getDocumentType(), tl.getBodySideFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		
+			 	mt.addTumorFact(FHIRConstants.CLOCKFACE_POSITION, tl.getClockfacePosFact());
+			 	insert(new IdMapper(tl.getClockfacePosFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getClockfacePosFact().getDocumentType(), tl.getClockfacePosFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+			 	
+			 	tl.setReadyForRetraction(true);
+				update (tl);
+System.out.print(".");
+			}
+			update(mt);
+System.out.print(".");
+		}
+		else{
+			System.err.println("Can't attach tumor: merge-tumors-by-location-cant-have-quadrant");
+		}
+end	 	
+
+/**
+* If no Quadrants and no clockface position
+*/
+rule "merge-tumors-by-location-no-q-clock"
+ 	salience 99885
+	no-loop true
+	when 
+		$tlFact  : TumorLocator($bodySite : bodySite, $bodySite != "", $bodySide : bodySide, $bodySide != "",
+						 $quadrant : quadrant, $quadrant == "", $clockFacePos : clockFacePos, $clockFacePos == "", readyForRetraction == false)
+		$sameTumors : Set()
+      	from collect( TumorLocator(this != $tlFact, bodySite == $bodySite, bodySide == bodySide, clockFacePos == $clockFacePos,
+      				clockFacePos == $clockFacePos, readyForRetraction == false))
+        not(MergedTumor (tumorSiteFactSet contains $tlFact.getTumorSiteFact()))  
+        
+        $withClockMT : Set()
+        from collect ( MergedTumor (bodySite == $bodySite, bodySide == bodySide))
+ 
+	 then	
+	  // no mentions ofbodyside
+	 	$sameTumors.add($tlFact);
+	 	if($withClockMT.size() == 0){
+		 	MergedTumor mt = new MergedTumor();
+		 	mt.setBodySite($bodySite);
+		 	mt.setBodySide($bodySide);
+		 	
+		 	String hystType = "";
+		 	for(Object tObj : $sameTumors){
+		 		TumorLocator tl = (TumorLocator)tObj;
+			 	if(!tl.getHistologicType().equals("") && hystType.equals("")){
+			 		hystType = tl.getHistologicType();
+			 		mt.setHistologicType(hystType);
+			 	}
+			 	mt.addTumorFact(FHIRConstants.BODY_SITE, tl.getTumorSiteFact());
+			 	insert(new IdMapper(tl.getTumorSiteFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getTumorSiteFact().getDocumentType(), tl.getTumorSiteFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		
+			 	mt.addTumorFact(FHIRConstants.BODY_SIDE, tl.getBodySideFact());
+			 	insert(new IdMapper(tl.getBodySideFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getBodySideFact().getDocumentType(), tl.getBodySideFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		
+		 	
+			 	tl.setReadyForRetraction(true);
+				update (tl);
+System.out.print(".");
+			}
+			insert(mt);
+System.out.print(".");
+		}
+		// exists one MT with 
+		else if($withClockMT.size() == 1){
+			MergedTumor mt = (MergedTumor)$withClockMT.iterator().next();
+			String hystType = mt.getHistologicType();
+			for(Object tObj : $sameTumors){
+		 		TumorLocator tl = (TumorLocator)tObj;
+			 	if(!tl.getHistologicType().equals("") && hystType.equals("")){
+			 		hystType = tl.getHistologicType();
+			 		mt.setHistologicType(hystType);
+			 	}
+			 	mt.addTumorFact(FHIRConstants.BODY_SITE, tl.getTumorSiteFact());
+			 	mt.addTumorFact(FHIRConstants.BODY_SIDE, tl.getBodySideFact());
+			 	
+			 	tl.setReadyForRetraction(true);
+				update (tl);
+System.out.print(".");
+			}
+			update(mt);
+System.out.print(".");
+		}
+		else{
+			System.err.println("can't attach tumor: merge-tumors-by-location-no-q-clock");
+		}
+end	 
+
+/**
+* No body side
+*/
+rule "merge-tumors-by-location-no-bodyside"
+ 	salience 99884
+	no-loop true
+	when 
+		$tlFact  : TumorLocator($bodySite : bodySite, $bodySite != "", $bodySide : bodySide, $bodySide == "",
+						 $quadrant : quadrant, $quadrant == "", $clockFacePos : clockFacePos, $clockFacePos == "", readyForRetraction == false)
+		$sameTumors : Set()
+      	from collect( TumorLocator(this != $tlFact, bodySite == $bodySite, bodySide == bodySide, clockFacePos == $clockFacePos,
+      				clockFacePos == $clockFacePos, readyForRetraction == false))
+        not(MergedTumor (tumorSiteFactSet contains $tlFact.getTumorSiteFact()))  
+        
+        $withClockMT : Set()
+        from collect ( MergedTumor (bodySite == $bodySite))
+ 
+	 then	
+	  // no mentions ofbodyside
+	 	$sameTumors.add($tlFact);
+	 	if($withClockMT.size() == 0){
+		 	MergedTumor mt = new MergedTumor();
+		 	mt.setBodySite($bodySite);
+		 	
+		 	String hystType = "";
+		 	for(Object tObj : $sameTumors){
+		 		TumorLocator tl = (TumorLocator)tObj;
+			 	if(!tl.getHistologicType().equals("") && hystType.equals("")){
+			 		hystType = tl.getHistologicType();
+			 		mt.setHistologicType(hystType);
+			 	}
+			 	mt.addTumorFact(FHIRConstants.BODY_SITE, tl.getTumorSiteFact());
+			 	insert(new IdMapper(tl.getTumorSiteFact().getIdentifier(), mt.getMergedTumorId(), 
+		 		tl.getTumorSiteFact().getDocumentType(), tl.getTumorSiteFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 	
+			 	tl.setReadyForRetraction(true);
+				update (tl);
+System.out.print(".");
+			}
+			insert(mt);
+System.out.print(".");
+		}
+		// exists one MT with 
+		else if($withClockMT.size() == 1){
+			MergedTumor mt = (MergedTumor)$withClockMT.iterator().next();
+			String hystType = mt.getHistologicType();
+			for(Object tObj : $sameTumors){
+		 		TumorLocator tl = (TumorLocator)tObj;
+			 	if(!tl.getHistologicType().equals("") && hystType.equals("")){
+			 		hystType = tl.getHistologicType();
+			 		mt.setHistologicType(hystType);
+			 	}
+			 	mt.addTumorFact(FHIRConstants.BODY_SITE, tl.getTumorSiteFact());
+			 	
+			 	tl.setReadyForRetraction(true);
+				update (tl);
+System.out.print(".");
+			}
+			update(mt);
+System.out.print(".");
+		}
+		else{
+			System.err.println("Can't attach tumor: merge-tumors-by-location-no-bodyside");
+		}
+end	 		
+
+
+///**
+//* Adds histologic type to Tumor if any
+//*/  
+rule "add-histologicType"
+  	salience 100000
+	no-loop true
+	when
+		$site_tFact : Fact(summaryType=="TumorSummary",$t_summaryId : summaryId)
+		$tumorf_f : Fact(summaryType == "TumorPhenotype", category == "hasHistologicType", documentType != "RecordSummary", 
+				containerIdentifier contains $t_summaryId, $hist_name : name)
+		$tl : TumorLocator(docTumorId == $t_summaryId, histologicType == "")
+	then
+		modify($tl){
+			setHistologicType($hist_name);
+		}
+end
+	
+
+// this reracts duplicates AFTER the rule fires => 
+ rule "remove-duplicates-TumorLocator"
+  	salience 9999700
+	no-loop true
+	when
+		$f1 : TumorLocator()
+		$f2 : TumorLocator(this != $f1, readyForRetraction == false, this.compareTo($f1))
+	then
+		retract($f2);
+end
+
+
+rule "retract-TumorLocators-other"
+	salience 10
+	no-loop true
+	when
+		$tl : TumorLocator($Id : docTumorId, readyForRetraction == true)
+		$tl2 : TumorLocator(this != $tl,  docTumorId == $Id)
+	then
+		retract($tl2);
+end
+/*
+rule "retract-TumorLocators"
+	salience 9
+	no-loop true
+	when
+		$tl : TumorLocator($Id : docTumorId, readyForRetraction == true)
+	then
+		retract($tl);
+end
+*/
+
+/*
+rule "print-idMap"
+	no-loop true
+	when 
+		$m :IdMapper()
+	then
+		System.out.print("IdMapper oldId: "+$m.getOldId()+" newId: "+$m.getNewId()+" oldDocumantType: "+$m.getOldDocumantType()
+		+" oldSummaryId: "+$m.getOldSummaryId()+" newSummaryId: "+$m.getNewSummaryId());
+end	
+*/
+/*
+rule "print-RecordSummary"
+	salience 3
+	no-loop true
+	when 
+		$summaryF : Fact(documentType == "RecordSummary")
+	then
+		System.out.print("* RecordSummary: "+$summaryF.getInfo());
+end	
+
+rule "print-RecordSummary-Modifier"
+	salience 2
+	no-loop true
+	when 
+		$summaryF : Fact(documentType == "RecordSummary-Modifier")
+	then
+		System.out.print("*** RecordSummary-MODIFIER: "+$summaryF.getInfo());
+end	
+
+rule "print-TumorLocator"
+	salience 1
+	no-loop true
+	when 
+		$f : TumorLocator()
+	then
+		System.out.print("*** TumorLocator: "+$f.getInfo());
+end	
+
+rule "print-MergedTumor"
+	salience 1
+	no-loop true
+	when 
+		$f : MergedTumor()
+	then
+		System.out.print("*** MergedTumor: "+$f.getInfo());
+end	
+*/
+/*
+rule "print-Medical-RecordSummary"
+	no-loop true
+	when 
+		$record : MedicalRecord()
+	then
+	System.out.print("***");
+		System.out.print("PRINT Medical-RecordSummary: "+$record.getSummaryText());
+	System.out.print("***");
+end
+*/
