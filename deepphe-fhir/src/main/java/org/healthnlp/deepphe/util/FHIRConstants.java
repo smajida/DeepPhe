@@ -74,6 +74,14 @@ public class FHIRConstants {
 	public static final String HAS_T_CLASSIFICATION = "hasGenericTClassification";
 	public static final String HAS_N_CLASSIFICATION = "hasGenericNClassification";
 	public static final String HAS_M_CLASSIFICATION = "hasGenericMClassification";
+	
+	public static final String HAS_PATHOLOGIC_T_CLASSIFICATION = "hasPathologicTClassification";
+	public static final String HAS_PATHOLOGIC_N_CLASSIFICATION = "hasPathologicNClassification";
+	public static final String HAS_PATHOLOGIC_M_CLASSIFICATION = "hasPathologicMClassification";
+	public static final String HAS_CLINICAL_T_CLASSIFICATION = "hasClinicalTClassification";
+	public static final String HAS_CLINICAL_N_CLASSIFICATION = "hasClinicalNClassification";
+	public static final String HAS_CLINICAL_M_CLASSIFICATION = "hasClinicalMClassification";
+	
 	public static final String HAS_TUMOR_TYPE = "hasTumorType";
 	public static final String HAS_SEQUENCE_VARIENT = "hasSequenceVarient";
 	public static final String HAS_HISTOLOGIC_TYPE = "hasHistologicType";
@@ -92,6 +100,9 @@ public class FHIRConstants {
 	public static final String T_STAGE = "T_Stage";
 	public static final String M_STAGE = "M_Stage";
 	public static final String N_STAGE = "N_Stage";
+	public static final String P_MODIFIER = "p_modifier";
+	public static final String C_MODIFIER = "c_modifier";
+	
 	
 	// predefined URIs
 	public static final URI PATIENT_SUMMARY_URI = URI.create(MODEL_CANCER_URL+"#"+PATIENT);
@@ -135,6 +146,7 @@ public class FHIRConstants {
 	public static final List<String> BODY_SIDE_LIST = Arrays.asList("Right","Left","Bilateral");
 	public static final List<String> TNM_MODIFIER_LIST = Arrays.asList("p","c","y","r","sn");
 	public static final String BREAST = "Breast";
+
 	
 
 	
