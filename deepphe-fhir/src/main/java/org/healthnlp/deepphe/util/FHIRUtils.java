@@ -747,16 +747,18 @@ public class FHIRUtils {
 		return mentions;
 	}
 	
-	public static Properties getExtensions(DomainResource r){
-		Properties p = new Properties();
+	public static Map<String,String> getProperties(DomainResource r){
+		Map<String,String> p = new LinkedHashMap<String,String>();
 		for(Extension e: r.getExtension()){
-			p.setProperty(e.getUrl(), ((StringType)e.getValue()).getValue());
+			if(!MENTION_URL.equals(e.getUrl())){
+				p.put(e.getUrl(), ((StringType)e.getValue()).getValue());
+			}
 		}
 		return p;
 	}
 	
 	
-	public static List<String> getExtensions(DomainResource r,String URL){
+	public static List<String> getProperty(DomainResource r,String URL){
 		List<String> mentions = new ArrayList<String>();
 		for(Extension e: r.getExtension()){
 			if(URL.equals(e.getUrl())){

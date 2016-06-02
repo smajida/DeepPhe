@@ -17,12 +17,15 @@ public class MergedTumor {
 	private Set<String> tumorSummaryIdSet;
 	private boolean readyForRetraction = false;
 	
+	private Set<String> receptors;
+	
 	public MergedTumor(){
 		setMergedTumorId("MergedTumor-"+hashCode());
 		tumorSiteFactSet = new HashSet<Fact>();
 		bodySideFactSet = new HashSet<Fact>();
 		quadrantFactSet = new HashSet<Fact>();
 		clockfacePosFactSet = new HashSet<Fact>();
+		setReceptors(new HashSet<String>());
 		setTumorSummaryIdSet(new HashSet<String>());
 	}
 	
@@ -111,12 +114,18 @@ public class MergedTumor {
 	
 	public String getInfo(){
 		StringBuffer b = new StringBuffer();
-		b.append("hashcode: "+hashCode()+"|");
+		b.append("mergedTumorId: "+mergedTumorId+"|");
 		b.append("histologicType: "+getHistologicType()+"|");
 		b.append("bodySite: "+getBodySite()+"|");
 		b.append("bodySide: "+getBodySide()+"|");
 		b.append("Quadrant: "+getQuadrant()+"|");
 		b.append("clockFacePos: "+getClockFacePos()+"\n");
+		
+		b.append("Doc TumorSummaryIds: ");
+		for(String s : tumorSummaryIdSet){
+			b.append(s+", ");
+		}
+		b.append("\n");
 		if(bodySideFactSet != null)
 			b.append("bodySideFacts: "+bodySideFactSet.size()+"\n");
 		if(quadrantFactSet != null)
@@ -140,6 +149,18 @@ public class MergedTumor {
 
 	public void setTumorSummaryIdSet(Set<String> tumorSummaryIdSet) {
 		this.tumorSummaryIdSet = tumorSummaryIdSet;
+	}
+
+	public Set<String> getReceptors() {
+		return receptors;
+	}
+
+	public void setReceptors(Set<String> receptors) {
+		this.receptors = receptors;
+	}
+	
+	public void addReceptor(String v){
+		receptors.add(v);
 	}
 	
 }

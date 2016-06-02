@@ -269,6 +269,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 
 	public void setReport(Report r) {
 	}
+	
 
 	public URI getConceptURI(){
 		return URI.create(FHIRUtils.CANCER_URL+"#"+FHIRUtils.COMPOSITION);

@@ -2,9 +2,13 @@ package org.healthnlp.deepphe.fhir.fact;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.neo4j.ogm.annotation.GraphId;
@@ -38,9 +42,29 @@ public class Fact {
 	private Date recordedDate;
 	private int temporalOrder;
 	
-	private transient String documentIdentifier, patientIdentifier, documentType;
+	private String documentIdentifier, patientIdentifier, documentType;
 	private transient Set<String> containerIdentifier;
+	private Map<String,String> properties;
 	
+	
+	public Map<String, String> getProperties() {
+		if(properties == null)
+			properties = new LinkedHashMap<String, String>();
+		return properties;
+	}
+
+	public void setProperties(Map<String, String> properties) {
+		this.properties = properties;
+	}
+	public void addPropety(String key, String val){
+		getProperties().put(key,val);
+	}
+	public String getProperty(String key){
+		return getProperties().get(key);
+	}
+	public void addPropeties(Map<String,String> props){
+		getProperties().putAll(props);
+	}
 	public String getName() {
 		return name;
 	}
@@ -85,11 +109,22 @@ public class Fact {
 			getProvenanceFacts().addAll(fact.getProvenanceFacts());
 		}
 	}
-	
 	public void addProvenanceFacts(List<Fact> facts) {
-		for(Fact f:facts)
+		for(Fact f: facts){
 			addProvenanceFact(f);
+		}
 	}
+	
+	
+	public String getDocumentName() {
+		if(documentIdentifier != null){
+			Matcher m = Pattern.compile("REPORT_(.*)_\\d+").matcher(documentIdentifier);
+			if(m.matches())
+				return m.group(1);
+		}
+		return documentIdentifier;
+	}
+	
 
 	public List<TextMention> getProvenanceText() {
 		if(provenanceText == null)
@@ -104,7 +139,8 @@ public class Fact {
 		return list;
 	}
 	public void addProvenanceText(TextMention mention) {
-		getProvenanceText().add(mention);
+		if(!getProvenanceText().contains(mention))
+			getProvenanceText().add(mention);
 	}
 	public String getLabel() {
 		if(label == null)
@@ -138,27 +174,14 @@ public class Fact {
 		return FactFactory.createCodeableConcept(this);
 	}
 	public String getDocumentType(){
-		if(documentType != null)
-			return documentType;
-		// else search in province text
-		for(TextMention t: getProvenanceText()){
-			if(t.getDocumentType() != null)
-				return t.getDocumentType();
-		}
-		return null;
+		return documentType;
 	}
 	
 	public void setDocumentType(String docType){
 		documentType = docType;
-		for(TextMention t: getProvenanceText()){
-			t.setDocumentType(docType);
-		}
 	}
 	public void setDocumentIdentifier(String id){
 		documentIdentifier = id;
-		for(TextMention t: getProvenanceText()){
-			t.setDocumentIdentifier(id);
-		}
 	}
 	
 	public String getCategory() {
@@ -181,6 +204,11 @@ public class Fact {
 			containerIdentifier = new LinkedHashSet<String>();
 		return containerIdentifier;
 	}
+	
+	public void addContainerIdentifiers(Set<String> containers){
+		getContainerIdentifier().addAll(containers);
+	}
+	
 	public void addContainerIdentifier(String containerIdentifier) {
 		getContainerIdentifier().add(containerIdentifier);
 	}

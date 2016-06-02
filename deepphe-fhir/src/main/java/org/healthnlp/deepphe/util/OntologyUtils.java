@@ -62,7 +62,8 @@ public class OntologyUtils {
 		IClass cls = ontology.getClass(fact.getUri());
 		if(cls == null){
 			cls = ontology.getClass(fact.getName());
-			fact.setUri(cls.getURI().toString());
+			if(cls != null)
+				fact.setUri(cls.getURI().toString());
 		}
 		if(cls != null){
 			Queue<IClass> parents = new LinkedList<IClass>(); 

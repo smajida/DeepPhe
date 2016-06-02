@@ -38,13 +38,13 @@ rule "Stage0-1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_0");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}			
-		System.out.println("*** Stage0-1 for MR");
+		System.out.print(".");
 end
 */
 
@@ -68,13 +68,13 @@ rule "Stage1A-1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF);
 		}			
-		System.out.println("*** Stage1A-1 for MR");
+		System.out.print(".");
 end
 
 //If T0, N1mi, M0, then Stage IB Breast Cancer  
@@ -98,13 +98,13 @@ rule "Stage1B-1"
 				
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF);
 		}			
-		System.out.println("*** Stage1B-1 for MR");
+		System.out.print(".");
 end
 
 //If T1, N1mi, M0, then Stage IB Breast Cancer  
@@ -127,13 +127,13 @@ rule "Stage1B-2"
 			
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF);
 		}			
-		System.out.println("*** Stage1B-2 for MR");
+		System.out.print(".");
 end
 
 //If T0, N1, M0, then Stage IIA Breast Cancer  
@@ -156,13 +156,13 @@ rule "Stage2A-1.1"
 				
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF);
 		}			
-		System.out.println("*** Stage2A-1.1 for MR");
+		System.out.print(".");
 end
 
 //If T1, N1, M0, then Stage IIA Breast Cancer   
@@ -185,13 +185,13 @@ rule "Stage2A-2.1"
 				
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF);
 		}			
-		System.out.println("*** Stage2A-2.1 for MR");
+		System.out.print(".");
 end
 
 //If T2, N0, M0, then Stage IIA Breast Cancer  
@@ -214,14 +214,14 @@ rule "Stage2A-3.1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
 	
-		System.out.println("*** Stage2A-3.1 for MR");
+		System.out.print(".");
 end
 
 //If T2, N1, M0, then Stage IIB Breast Cancer 
@@ -244,14 +244,14 @@ rule "Stage2B-1.1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
 				
-		System.out.println("*** Stage2B-1.1 for MR");
+		System.out.print(".");
 end
 
 //If T3, N0, M0, then Stage IIB Breast Cancer 
@@ -274,14 +274,14 @@ rule "Stage2B-2.1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
 				
-		System.out.println("*** Stage2B-2.1 for MR");
+		System.out.print(".");
 end
 
 //If T0, N2, M0, then Stage IIIA Breast Cancer 
@@ -304,14 +304,14 @@ rule "Stage3A-1.1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
 				
-		System.out.println("*** Stage3A-1.1 for MR");
+		System.out.print(".");
 end
 
 //If T1, N2, M0, then Stage IIIA Breast Cancer 
@@ -334,14 +334,14 @@ rule "Stage3A-2.1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
 				
-		System.out.println("*** Stage3A-2.1 for MR");
+		System.out.print(".");
 end
 
 //If T2, N2, M0, then Stage IIIA Breast Cancer 
@@ -364,14 +364,14 @@ rule "Stage3A-3.1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
 				
-		System.out.println("*** Stage3A-3.1 for MR");
+		System.out.print(".");
 end
 
 //If T3, N1, M0, then Stage IIIA Breast Cancer 
@@ -394,14 +394,14 @@ rule "Stage3A-4.1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
 				
-		System.out.println("*** Stage3A-4.1 for MR");
+		System.out.print(".");
 end
 
 //If T3, N2, M0, then Stage IIIA Breast Cancer 
@@ -424,14 +424,14 @@ rule "Stage3A-5.1"
 			
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
 				
-		System.out.println("*** Stage3A-5.1 for MR");
+		System.out.print(".");
 end
 
 //If T4, N0, M0, then Stage IIIB Breast Cancer 
@@ -454,14 +454,14 @@ rule "Stage3B-1.1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
 				
-		System.out.println("*** Stage3B-1.1 for MR");
+		System.out.print(".");
 end
 
 //If T4, N1, M0, then Stage IIIB Breast Cancer 
@@ -484,14 +484,14 @@ rule "Stage3B-2.1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
 				
-		System.out.println("*** Stage3B-2.1 for MR");
+		System.out.print(".");
 end
 
 //If T4, N2, M0, then Stage IIIB Breast Cancer 
@@ -514,14 +514,14 @@ rule "Stage3B-3.1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIB_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
 				
-		System.out.println("*** Stage3B-3.1 for MR");
+		System.out.print(".");
 end
 
 //If any T value, N3, M0, then Stage IIIC Breast Cancer 
@@ -544,14 +544,14 @@ rule "Stage3C-1.1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IIIC_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
 				
-		System.out.println("*** Stage3C-1.1 for MR");
+		System.out.print(".");
 end
 
 //If any T value, any N value, M1, then Stage IV Breast Cancer  
@@ -574,13 +574,13 @@ rule "Stage4-1"
 		
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IV_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
-		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($nFact);
+		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
 		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 		}
 				
-		System.out.println("*** Stage4-1 for MR");
+		System.out.print(".");
 end
 	

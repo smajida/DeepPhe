@@ -38,7 +38,6 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	 * assign report instance and add appropriate information from there
 	 */
 	public void setReport(Report r) {
-		
 	}
 	
 	

@@ -183,11 +183,22 @@ public class PhenotypeEval {
 			for(String hd: getIgnoredHeaders()){
 				List<String> gold = getValues(hd);
 				List<String> pred = Collections.EMPTY_LIST;
-				if(!gold.isEmpty()){
-					if(getPairedRecord() != null )
-						pred = getPairedRecord().getValues(hd);
-					out.println("\t"+String.format("%1$-"+Record.MAX_ATTRIBUTE_SIZE+"s",hd)+"\t gold: "+PhenotypeEval.toString(gold)+"\t pred: "+PhenotypeEval.toString(pred));
+				switch (getConfusion()) {
+				case TP:
+					pred = getPairedRecord().getValues(hd);
+					break;
+				case FP:
+					gold = Collections.EMPTY_LIST;
+					pred = getValues(hd);
+					break;
+				default:
+					break;
 				}
+				if(!gold.isEmpty())
+					out.println("\t"+String.format("%1$-"+Record.MAX_ATTRIBUTE_SIZE+"s",hd)+"\t gold: "+PhenotypeEval.toString(gold));
+				if(!pred.isEmpty())
+					out.println("\t"+String.format("%1$-"+Record.MAX_ATTRIBUTE_SIZE+"s",hd)+"\t pred: "+PhenotypeEval.toString(pred));
+				
 			}
 			out.println("\t-----------\n");
 			

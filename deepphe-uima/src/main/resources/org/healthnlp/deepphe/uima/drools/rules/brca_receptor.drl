@@ -55,14 +55,6 @@ rule "receptor-ISM-beforeFISH"
 end
 */
 
-rule "testDate"
-	no-loop true
-	when
-	 $f1 : Fact(type == "BodySite", documentType != "RecordSummary", $recordedDate : recordedDate)
-	 not(Fact (this != $f1, type == "BodySite", documentType != "RecordSummary", recordedDate > $recordedDate))
-	then
-		System.out.println("$$$$$$ $f1: "+$f1.getInfo());
-end
 
 /*
 * ReceptorStatus-1:
@@ -77,6 +69,7 @@ rule "latest-doc-FISH-ER"
 		$fact : Fact($summaryId : summaryId, $summaryId == $oldSummaryId, category == "hasMethod", name == "Fluorescence_In_Situ_Hybridization", summaryType == "TumorPhenotype",
 				containerIdentifier contains $oldSummaryId, $docId : documentIdentifier)
 		not(Fact(documentType == "RecordSummary", category == "hasERStatus", summaryId == $newId))
+		not(Flag(value == "Estrogen_Receptor_Status"))
 		
 		$PRMentions :List()
 		from collect(Fact(documentType == "Pathology Report", category == "hasInterpretation", summaryId == $summaryId,
@@ -84,7 +77,6 @@ rule "latest-doc-FISH-ER"
 		$OtherMentions :List()
 		from collect(Fact($dType: documentType, $dType != "RecordSummary", summaryId == $summaryId,
 			category == "hasInterpretation", containerIdentifier.toString() matches ".*Estrogen_Receptor_Status.*", documentIdentifier == $docId))
-		
 		
 		then
 			String documentId = "";
@@ -111,6 +103,7 @@ rule "latest-doc-FISH-ER"
 			if(!"".equals(documentId)){
 				Flag f = new Flag(documentId, ".*Estrogen_Receptor_Status.*", "Estrogen_Receptor_Status","hasInterpretation", 
 					"hasERStatus", "Fluorescence_In_Situ_Hybridization", true);
+System.out.print(".");
 		   		insert(f);
 			}
 		
@@ -124,6 +117,8 @@ rule "latest-doc-FISH-Her2"
 		$fact : Fact($summaryId : summaryId, $summaryId == $oldSummaryId, category == "hasMethod", name == "Fluorescence_In_Situ_Hybridization", summaryType == "TumorPhenotype",
 				containerIdentifier contains $oldSummaryId, $docId : documentIdentifier)
 		not(Fact(documentType == "RecordSummary", category == "hasHerStatus", summaryId == $newId))
+		
+		not(Flag(value == "HER2_Neu_Status"))
 		
 		$PRMentions :List()
 		from collect(Fact(documentType == "Pathology Report", category == "hasInterpretation", summaryId == $summaryId,
@@ -158,6 +153,7 @@ rule "latest-doc-FISH-Her2"
 			if(!"".equals(documentId)){
 				Flag f = new Flag(documentId, ".*HER2_Neu_Status.*", "HER2_Neu_Status","hasInterpretation", "hasHerStatus",
 					"Fluorescence_In_Situ_Hybridization", true);
+System.out.print(".");
 		   		insert(f);
 			}
 		
@@ -172,6 +168,7 @@ rule "latest-doc-FISH-PR"
 		$fact : Fact($summaryId : summaryId, $summaryId == $oldSummaryId, category == "hasMethod", name == "Fluorescence_In_Situ_Hybridization", 
 				summaryType == "TumorPhenotype", containerIdentifier contains $oldSummaryId, $docId : documentIdentifier)
 		not(Fact(documentType == "RecordSummary", category == "hasPRStatus", summaryId == $newId))
+		not(Flag(value == "Progesterone_Receptor_Status"))
 		
 		$PRMentions :List()
 		from collect(Fact(documentType == "Pathology Report", category == "hasInterpretation", summaryId == $summaryId,
@@ -206,6 +203,7 @@ rule "latest-doc-FISH-PR"
 			if(!"".equals(documentId)){
 				Flag f = new Flag(documentId, ".*Progesterone_Receptor_Status.*", "Progesterone_Receptor_Status","hasInterpretation", "hasPRStatus",
 					"Fluorescence_In_Situ_Hybridization", true);
+System.out.print(".");
 		   		insert(f);
 			}
 		
@@ -221,6 +219,7 @@ rule "latest-doc-ER"
 		not(Fact($summaryId : summaryId, $summaryId == $oldSummaryId, category == "hasMethod", name == "Fluorescence_In_Situ_Hybridization", 
 				summaryType == "TumorPhenotype",containerIdentifier contains $oldSummaryId, $docId : documentIdentifier))
 		not(Fact(documentType == "RecordSummary", category == "hasERStatus", summaryId == $newId))
+		not(Flag(value == "Estrogen_Receptor_Status"))
 		
 		$PRMentions :List()
 		from collect(Fact(documentType == "Pathology Report", category == "hasInterpretation", containerIdentifier contains $oldSummaryId,
@@ -253,6 +252,7 @@ rule "latest-doc-ER"
 		}
 		if(!"".equals(documentId)){
 			Flag f = new Flag(documentId, ".*Estrogen_Receptor_Status.*", "Estrogen_Receptor_Status","hasInterpretation", "hasERStatus", "", false);
+System.out.print(".");
 	   		insert(f);
 		}
 		
@@ -266,6 +266,7 @@ rule "latest-doc-Her2"
 		not(Fact($summaryId : summaryId, $summaryId == $oldSummaryId, category == "hasMethod", name == "Fluorescence_In_Situ_Hybridization", 
 				summaryType == "TumorPhenotype",containerIdentifier contains $oldSummaryId, $docId : documentIdentifier))
 		not(Fact(documentType == "RecordSummary", category == "hasHerStatus", summaryId == $newId))
+		not(Flag(value == "HER2_Neu_Status"))
 		
 		$PRMentions :List()
 		from collect(Fact(documentType == "Pathology Report", category == "hasInterpretation", containerIdentifier contains $oldSummaryId,
@@ -298,6 +299,7 @@ rule "latest-doc-Her2"
 		}
 		if(!"".equals(documentId)){
 			Flag f = new Flag(documentId, ".*HER2_Neu_Status.*", "HER2_Neu_Status","hasInterpretation", "hasHerStatus", "", false);
+System.out.print(".");
 	   		insert(f);
 		}
 		
@@ -312,6 +314,7 @@ rule "latest-doc-PR"
 		not(Fact($summaryId : summaryId, $summaryId == $oldSummaryId, category == "hasMethod", name == "Fluorescence_In_Situ_Hybridization", 
 				summaryType == "TumorPhenotype",containerIdentifier contains $oldSummaryId, $docId : documentIdentifier))
 		not(Fact(documentType == "RecordSummary", category == "hasHPRStatus", summaryId == $newId))
+		not(Flag(value == "Progesterone_Receptor_Status"))
 		
 		$PRMentions :List()
 		from collect(Fact(documentType == "Pathology Report", category == "hasInterpretation", containerIdentifier contains $oldSummaryId,
@@ -321,6 +324,7 @@ rule "latest-doc-PR"
 			containerIdentifier.toString() matches ".*Progesterone_Receptor_Status.*", containerIdentifier contains $oldSummaryId))
 
 	then
+
 		String documentId = "";
 		if($PRMentions.size() > 0){
 			Date mostRecent = (Date)((Fact)$PRMentions.get(0)).getRecordedDate();
@@ -344,6 +348,7 @@ rule "latest-doc-PR"
 		}
 		if(!"".equals(documentId)){
 			Flag f = new Flag(documentId, ".*Progesterone_Receptor_Status.*", "Progesterone_Receptor_Status","hasInterpretation", "hasPRStatus", "", false);
+System.out.print(".");
 	   		insert(f);
 		}
 		
@@ -382,6 +387,7 @@ rule "setMethod"
 				$flag.setMethod(method);	
 				$flag.setMethodIsSet(true);
 				update($flag);
+System.out.print(".");				
 			}
 end
 				
@@ -401,11 +407,13 @@ rule "setReceptorStatus-no-method"
 		
 		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
 		$tF : Fact(summaryType == "TumorSummary", $t_summaryId : summaryId, documentType != "RecordSummary")
-	    $mt : MergedTumor(tumorSiteFactSet contains $tF)
 		
-		$recepFact : Fact($identifier : identifier, name == $value, containerIdentifier contains $t_summaryId, category == "hasReceptorStatus")
+		$recepFact : Fact($identifier : identifier, name == $value, containerIdentifier contains $t_summaryId, category == "hasReceptorStatus", 
+			documentType != "RecordSummary")
+			
+		$mt : MergedTumor(tumorSiteFactSet contains $tF, receptors not contains $value)
 		
-		$fact : Fact(documentIdentifier == $mostRecentDocId, category == $categoryOrig, $summaryId : summaryId,
+		$fact : Fact(documentIdentifier == $mostRecentDocId, summaryType == "TumorPhenotype", category == $categoryOrig, $summaryId : summaryId,
 					$docType: documentType, $docType != "RecordSummary", 
 					containerIdentifier.toString() matches $regex, $cIds : containerIdentifier, ($cIds contains $oldSummaryId && $cIds contains $identifier))
 		
@@ -420,8 +428,8 @@ rule "setReceptorStatus-no-method"
 					
 		not (Fact (summaryType=="TumorPhenotype", documentType == "RecordSummary", provenanceFacts contains $recepFact, category == "hasReceptorStatus"))
 	then
-		retract($flag);
-		System.out.println("HERE BBB");
+		//retract($flag);
+System.out.print(".");
 		//hasReceptorStatus
 		String newId = "TumorPhenotype-"+$mt.getMergedTumorId();
 		Fact tf = FactFactory.createFact($recepFact, "Observation", OwlConstants.BREAST_CANCER_OWL+"#"+$recepFact.getName(), "RecordSummary");
@@ -429,6 +437,7 @@ rule "setReceptorStatus-no-method"
 		tf.setIdentifier(newId);
 		tf.addContainerIdentifier($cancerFact.getIdentifier());
 		tf.addProvenanceFact($recepFact);
+		$mt.addReceptor($value);
 		
 		
 		for(Object obj: $receptorRecInterpr){
@@ -463,33 +472,40 @@ rule "setReceptorStatus-with-method"
 		
 		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
 		$tF : Fact(summaryType == "TumorSummary", $t_summaryId : summaryId, documentType != "RecordSummary")
-	    $mt : MergedTumor(tumorSiteFactSet contains $tF)
+	    
 		
-		$recepFact : Fact($identifier : identifier, name == $value, containerIdentifier contains $t_summaryId, category == "hasReceptorStatus")
+		$recepFact : Fact($recepSummary : summaryId, summaryType == "TumorPhenotype", name == $value,  documentType != "RecordSummary",
+				containerIdentifier contains $t_summaryId, category == "hasReceptorStatus")
+				
+		$mt : MergedTumor(tumorSiteFactSet contains $tF, receptors not contains $value)
 		
 		$fact : Fact(documentIdentifier == $mostRecentDocId, category == $categoryOrig, $summaryId : summaryId,
 					$docType: documentType, $docType != "RecordSummary", 
-					containerIdentifier.toString() matches $regex, $cIds : containerIdentifier, ($cIds contains $oldSummaryId && $cIds contains $identifier))
+					containerIdentifier.toString() matches $regex, $cIds : containerIdentifier, ($cIds contains $oldSummaryId && $cIds contains $recepSummary))
 		
 		$methodF : Fact(documentIdentifier == $mostRecentDocId, category == "hasMethod", name == $method,
-					documentType != "RecordSummary", containerIdentifier contains $identifier)
+					documentType != "RecordSummary", containerIdentifier contains $recepSummary)
 		
 		$receptorRecInterpr : List(size > 0)
 		from collect(Fact(documentIdentifier == $mostRecentDocId, category == $categoryOrig, 
-					documentType!= "RecordSummary", containerIdentifier contains $identifier))
-		
-					
-		not (Fact (summaryType=="TumorPhenotype", documentType == "RecordSummary", provenanceFacts contains $recepFact, category == "hasReceptorStatus"))
+					documentType!= "RecordSummary", containerIdentifier contains $recepSummary))
+				
+		not (Fact (summaryType=="TumorPhenotype", documentType == "RecordSummary", category == "hasReceptorStatus", provenanceFacts contains $recepFact, name == $value))
 	then
-		retract($flag);
-		System.out.println("HERE CCC");
+System.out.print(".");
+		//retract($flag);		
 		//hasReceptorStatus
 		String newId = "TumorPhenotype-"+$mt.getMergedTumorId();
 		Fact tf = FactFactory.createFact($recepFact, "Observation", OwlConstants.BREAST_CANCER_OWL+"#"+$recepFact.getName(), "RecordSummary");
 		tf.addContainerIdentifier("TumorSummary-"+$mt.getMergedTumorId());
-		tf.setIdentifier(newId);
+		tf.setIdentifier(tf.getName()+"-"+newId);
+		tf.setSummaryId(newId);
+		tf.setSummaryType("TumorPhenotype");
+		tf.setCategory("hasReceptorStatus");
+		tf.addContainerIdentifier("TumorSummary-"+$mt.getMergedTumorId());
 		tf.addContainerIdentifier($cancerFact.getIdentifier());
 		tf.addProvenanceFact($recepFact);
+		$mt.addReceptor($value);
 		
 		
 		//method
@@ -503,7 +519,7 @@ rule "setReceptorStatus-with-method"
 			String v = ((Fact)obj).getName();
 			Fact recValueFact = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+v, tf, 
 														$cancerFact, "TumorPhenotype", "hasInterpretation", "RecordSummary", "OrdinalInterpretation");										
-			recValueFact.addContainerIdentifier(newId);
+			recValueFact.addContainerIdentifier(tf.getSummaryId());
 			((ObservationFact)tf).setInterpretation(recValueFact);
 			insert (recValueFact);
 	    }
@@ -513,18 +529,12 @@ rule "setReceptorStatus-with-method"
 		}
 	    
 	    insert(tf);
-		insert(new IdMapper($recepFact.getIdentifier(), newId, $recepFact.getDocumentType(), $recepFact.getSummaryId(), tf.getSummaryId()));
+		insert(new IdMapper($recepFact.getIdentifier(), tf.getIdentifier(), $recepFact.getDocumentType(), $recepFact.getSummaryId(), tf.getSummaryId()));
+		
+System.out.print(".");
 
 end
 
-
-rule "test-container-match"
-	no-loop true
-	when
-		$f: Fact(containerIdentifier.toString() matches ".*Estrogen_Receptor_Status.*")
-	then
-		System.out.println("FOUND!!! : "+$f.getInfo());
-end
 
 
 	

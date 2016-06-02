@@ -137,20 +137,5 @@ public class MedicalRecord implements Element {
 			list.addAll(patientSummary.getContainedFacts());
 		return list;
 	}
-	
-	
-	public void addProvenanceToRecord(){
-		Map<String,String> docIds = new HashMap<String,String>();
-		for(Fact f :getReportLevelFacts()){
-			docIds.put(f.getIdentifier(),f.getDocumentIdentifier());
-		}
-		for(Fact fact: getRecordLevelFacts()){
-			for(Fact f: fact.getProvenanceFacts()){
-				for(TextMention t: f.getProvenanceText()){
-					t.setDocumentIdentifier(docIds.get(f.getIdentifier()));
-					//t.setDocumentType(f.getDocumentType());
-				}
-			}
-		}
-	}
+		
 }

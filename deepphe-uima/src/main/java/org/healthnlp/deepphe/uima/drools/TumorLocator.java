@@ -117,9 +117,10 @@ public class TumorLocator {
 	
 	public static String inferQuadrant(String bodySide, String clockfacePos){
 		String toret = "";
-		int clockfacePosNum = 0;
+		float clockfacePosNum = 0;
 		try{
-			clockfacePosNum = Integer.valueOf(clockfacePos.substring(0, clockfacePos.indexOf(" ")));
+			clockfacePosNum = Float.valueOf(clockfacePos.substring(0, clockfacePos.indexOf("_")));
+			
 		} catch (NumberFormatException e){
 			return toret;
 		}

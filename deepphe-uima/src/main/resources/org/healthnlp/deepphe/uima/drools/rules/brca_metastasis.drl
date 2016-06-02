@@ -10,6 +10,7 @@ import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactFactory;
 import org.healthnlp.deepphe.fhir.fact.FactHelper;
+import org.healthnlp.deepphe.fhir.fact.BodySiteFact;
 
 import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.uima.drools.*;
@@ -31,9 +32,9 @@ rule "primaryTumor-2-Ductal"
 	when
 		$record : MedicalRecord()	
 		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
 						$newSummaryId : summaryId)  
-	    IdMapper($c_summaryId : oldSummaryId, newSummaryId == $newSummaryId)
+	    
 		$site_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType != "RecordSummary",
 					$t_summaryId: summaryId, (name==$domainName || ancestors contains $domainName))
 		$side_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType != "RecordSummary",
@@ -52,19 +53,19 @@ rule "primaryTumor-2-Ductal"
 	then
 	//add new tumor
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
-		Fact tf = FactFactory.createFact($site_tFact, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$site_tFact.getName(), "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(newId);
+		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($site_tFact, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$site_tFact.getName(), "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId); tf.setSummaryId(newId);
+		tf.setIdentifier(tf.getName()+"-"+newId);
 		tf.addProvenanceFact($site_tFact);
 		tf.addRulesApplied("primaryTumor");
-		insert(new IdMapper($site_tFact.getIdentifier(), newId, $site_tFact.getDocumentType(), $site_tFact.getSummaryId(), tf.getSummaryId()));
+		insert(new IdMapper($site_tFact.getIdentifier(), tf.getIdentifier(), $site_tFact.getDocumentType(), $site_tFact.getSummaryId(), tf.getSummaryId()));
 		for(Object t : $sameTumors){
 			Fact sameT = ((TumorLocator)t).getTumorSiteFact();
 			tf.addProvenanceFact(sameT);
-			insert(new IdMapper(sameT.getIdentifier(), newId, sameT.getDocumentType(), sameT.getSummaryId(), tf.getSummaryId()));
+			insert(new IdMapper(sameT.getIdentifier(), tf.getIdentifier(), sameT.getDocumentType(), sameT.getSummaryId(), tf.getSummaryId()));
 			insert("removeTumorLocatorID "+sameT.getIdentifier());
 		}
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
 		insert(tf);
 		
 		// set as primary and side
@@ -72,17 +73,48 @@ rule "primaryTumor-2-Ductal"
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_TUMOR_TYPE, "RecordSummary", "TumorType");
 		Fact tumorsideF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$sideName, tf, 
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_SIDE);
-		tumorTypeF.addContainerIdentifier(newId);
-	    tumorsideF.addContainerIdentifier(newId);
+		
+	    tumorTypeF.addContainerIdentifier(tf.getSummaryId());
+		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
+		tumorTypeF.setSummaryId(newId);
+	    
+	    tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF);
+		
+		
+		Set<Fact> qSet = $tl_1.getQuadrantFactSet();
+		for(Fact f : qSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
+		
+		Set<Fact> clockSet = $tl_1.getClockfacePosFactSet();
+		for(Fact f : clockSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
 		
 		modify($record){
 			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_BODY_MODIFIER, tumorsideF)
+			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)
+			
 		}	
 
 		insert (tumorTypeF);
 		insert (tumorsideF);
 		
+		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
 		//remove all the TumorLocator
 		$tl_1.setReadyForRetraction(true);
 
@@ -92,14 +124,8 @@ rule "primaryTumor-2-Ductal"
 			sameTL.setReadyForRetraction(true);
 			update(sameTL);
 		}
-	
-System.out.println("primaryTumor tf : "+tf.getInfo());
-System.out.println("primaryTumor tumorTypeF: "+tumorTypeF.getInfo());
-System.out.println("primaryTumor tumorsideF: "+tumorsideF.getInfo());
-		
-//System.out.println("***");
-//System.out.println("RECORD Summary primaryTumor-2-Ductal: "+$record.getSummaryText());
-//System.out.println("***");	
+System.out.print(".");	
+
 end
 
 rule "primaryTumor-2-Lobular"
@@ -108,9 +134,9 @@ rule "primaryTumor-2-Lobular"
 	when
 		$record : MedicalRecord()	
 		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
 						$newSummaryId : summaryId)  
-	    IdMapper($c_summaryId : oldSummaryId, newSummaryId == $newSummaryId)
+	    
 		$site_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType != "RecordSummary",
 					$t_summaryId: summaryId, (name==$domainName || ancestors contains $domainName))
 		$side_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType != "RecordSummary",
@@ -129,19 +155,19 @@ rule "primaryTumor-2-Lobular"
 	then
 	//add new tumor
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
-		Fact tf = FactFactory.createFact($site_tFact, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$site_tFact.getName(), "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(newId);
+		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($site_tFact, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$site_tFact.getName(), "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId);
+		tf.setIdentifier(tf.getName()+"-"+newId);
 		tf.addProvenanceFact($site_tFact);
 		tf.addRulesApplied("primaryTumor");
 		insert(new IdMapper($site_tFact.getIdentifier(), newId, $site_tFact.getDocumentType(), $site_tFact.getSummaryId(), tf.getSummaryId()));
 		for(Object t : $sameTumors){
 			Fact sameT = ((TumorLocator)t).getTumorSiteFact();
 			tf.addProvenanceFact(sameT);
-			insert(new IdMapper(sameT.getIdentifier(), newId, sameT.getDocumentType(), sameT.getSummaryId(), tf.getSummaryId()));
+			insert(new IdMapper(sameT.getIdentifier(), tf.getIdentifier(), sameT.getDocumentType(), sameT.getSummaryId(), tf.getSummaryId()));
 			insert("removeTumorLocatorID "+sameT.getIdentifier());
 		}
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
 		insert(tf);
 		
 		// set as primary and side
@@ -149,17 +175,47 @@ rule "primaryTumor-2-Lobular"
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_TUMOR_TYPE, "RecordSummary", "TumorType");
 		Fact tumorsideF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$sideName, tf, 
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_SIDE);
-		tumorTypeF.addContainerIdentifier(newId);
-	    tumorsideF.addContainerIdentifier(newId);
+		
+		tumorTypeF.addContainerIdentifier(tf.getSummaryId());
+		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
+		tumorTypeF.setSummaryId(newId);
+	    
+	    tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF);
+		
 		
 		modify($record){
 			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_BODY_MODIFIER, tumorsideF)
+			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)	
 		}	
 
 		insert (tumorTypeF);
 		insert (tumorsideF);
 		
+		Set<Fact> qSet = $tl_1.getQuadrantFactSet();
+		for(Fact f : qSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
+		
+		Set<Fact> clockSet = $tl_1.getClockfacePosFactSet();
+		for(Fact f : clockSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
+		
+		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
 		//remove all the TumorLocator
 		$tl_1.setReadyForRetraction(true);
 
@@ -169,10 +225,7 @@ rule "primaryTumor-2-Lobular"
 			sameTL.setReadyForRetraction(true);
 			update(sameTL);
 		}
-	
-System.out.println("primaryTumor tf : "+tf.getInfo());
-System.out.println("primaryTumor tumorTypeF: "+tumorTypeF.getInfo());
-System.out.println("primaryTumor tumorsideF: "+tumorsideF.getInfo());	
+System.out.print(".");		
 	
 end
 
@@ -191,30 +244,28 @@ rule "primaryTumor"
 	when
 		$record : MedicalRecord()	
 		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
 						$newSummaryId : summaryId)
-		IdMapper($c_summaryId : oldSummaryId, newSummaryId == $newSummaryId)
+		
 		$tumorFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", $tumor_bs_name :name, documentType != "RecordSummary",
 					$tumor_id : identifier, rulesApplied not contains "primaryTumor", $tumor_ancestors : ancestors, $t_summaryId : summaryId,
 					($tumor_bs_name==$domainName || $tumor_ancestors contains $domainName))
 		$side_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType != "RecordSummary",
 					$sideName : name, containerIdentifier contains $t_summaryId)			
-		$tl_1 : MergedTumor(tumorSiteFactSet contains $tumorFact, bodySite == $domainName, bodySide == $sideName, readyForRetraction == false)
+		$tl_1 : MergedTumor(tumorSiteFactSet contains $tumorFact, bodySide == $sideName, readyForRetraction == false)
 		not (Fact (summaryType=="TumorSummary", documentType == "RecordSummary", provenanceFacts contains $tumorFact))
 		
 	then
-
 		modify($tumorFact){	addRulesApplied("primaryTumor") }
 		//add new tumor
-		String newId = "TumorSummary-"+$tumorFact.getType()+"-"+$tl_1.getMergedTumorId();
-		Fact tf = FactFactory.createFact($tumorFact, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$tumorFact.getName(), "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(newId);
+		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
+		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($tumorFact, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$tumorFact.getName(), "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId);
+		tf.setIdentifier($tumorFact.getName()+"-"+newId);
+		tf.setSummaryId(newId);
 		tf.addProvenanceFact($tumorFact);
 		tf.addRulesApplied("primaryTumor");
-		insert(new IdMapper($tumorFact.getIdentifier(), newId, $tumorFact.getDocumentType(), $tumorFact.getSummaryId(), tf.getSummaryId()));
-		
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		insert(new IdMapper($tumorFact.getIdentifier(), tf.getIdentifier(), $tumorFact.getDocumentType(), $tumorFact.getSummaryId(), newId));
 		insert(tf);
 		
 		Fact tumorTypeF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#PrimaryTumor", $tumorFact, 
@@ -223,37 +274,62 @@ rule "primaryTumor"
 		Fact tumorsideF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$sideName, tf, 
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_SIDE);
 														
-		tumorTypeF.addContainerIdentifier(newId);
-	    tumorsideF.addContainerIdentifier(newId);
+		tumorTypeF.addContainerIdentifier(tf.getSummaryId());
+		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
+		tumorTypeF.setSummaryId(newId);
+		
+		tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF);
+
+		Set<Fact> qSet = $tl_1.getQuadrantFactSet();
+		for(Fact f : qSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
+		
+		Set<Fact> clockSet = $tl_1.getClockfacePosFactSet();
+		for(Fact f : clockSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
 	    
 		modify($record){
 			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_BODY_MODIFIER, tumorsideF)
+			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)
 		}	
 
 		insert (tumorTypeF);
 		insert (tumorsideF);
 		
+		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+
+		
 		$tl_1.setReadyForRetraction(true);
 		update ($tl_1);
-		
-		System.out.println("*** primaryTumor for "+$tumor_id+" name: "+$tumor_bs_name);
-		System.out.println("*** primaryTumor for tumorTypeF: "+tumorTypeF.getInfo());
-		
-		//TODO:
-		//Add bodySide modifier for primary
+System.out.print(".");		
 end
 
 
 rule "regionalRecurrence1-1-Axillary_Lymph_Node"
-	salience 88888
+	salience 88887
 	no-loop true
 	when
 		$record : MedicalRecord()
 		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
 						$newSummaryId : summaryId)
-		IdMapper($c_summaryId : oldSummaryId, newSummaryId == $newSummaryId)
+		
 		//rec tumor
 		$recTumor : Fact(summaryType=="TumorSummary", category == "hasBodySite", $recTumorName : name, $rectAncestors : ancestors,documentType != "RecordSummary",
 						($recTumorName == "Axillary_Lymph_Node" || $rectAncestors contains "Axillary_Lymph_Node"), $recSummaryId : summaryId,
@@ -263,25 +339,26 @@ rule "regionalRecurrence1-1-Axillary_Lymph_Node"
 					
 		$tl_1 : MergedTumor(tumorSiteFactSet contains $recTumor, bodySide == $sideName, readyForRetraction == false)
 		//primary tumor			
-		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType == "RecordSummary",
-					$t_summaryId: summaryId, name==$domainName, containerIdentifier contains $newSummaryId)
+		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasTumorType", documentType == "RecordSummary",
+					$t_summaryId: summaryId, name=="PrimaryTumor", containerIdentifier contains $newSummaryId)
 						
-		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType != "RecordSummary",
+		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType == "RecordSummary",
 					name == $sideName, containerIdentifier contains $t_summaryId)
 		not (Fact (summaryType=="TumorSummary", documentType == "RecordSummary", provenanceFacts contains $recTumor))
 		
 	then
-
+System.out.print(".");
 		modify($recTumor){	addRulesApplied("regionalRecurrence1-1-Axillary_Lymph_Node") }
 		//add new tumor
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
-		Fact tf = FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(newId);
+		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId);
+		tf.setSummaryId(newId);
+		tf.setIdentifier(tf.getName()+"-"+newId);
 		tf.addProvenanceFact($recTumor);
-		insert(new IdMapper($recTumor.getIdentifier(), newId, $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
+		insert(new IdMapper($recTumor.getIdentifier(), tf.getIdentifier(), $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
 		
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
 		insert(tf);
 		
 		Fact tumorTypeF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#RegionalRecurrence", $recTumor, 
@@ -290,21 +367,51 @@ rule "regionalRecurrence1-1-Axillary_Lymph_Node"
 		Fact tumorsideF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$sideName, tf, 
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_SIDE);
 														
-		tumorTypeF.addContainerIdentifier(newId);
-	    tumorsideF.addContainerIdentifier(newId);
+		tumorTypeF.addContainerIdentifier(tf.getSummaryId());
+		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
+		tumorTypeF.setSummaryId(newId);
+	    
+	    tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF);
+		
+		
+		Set<Fact> qSet = $tl_1.getQuadrantFactSet();
+		for(Fact f : qSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
+		
+		Set<Fact> clockSet = $tl_1.getClockfacePosFactSet();
+		for(Fact f : clockSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
 	    
 		modify($record){
 			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_BODY_MODIFIER, tumorsideF)
+			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)
+			
 		}	
-		
+
 		insert (tumorTypeF);
 		insert (tumorsideF);
+		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
 		
 		$tl_1.setReadyForRetraction(true);
 		update ($tl_1);
 
-		System.out.println("*** regionalRecurrence1-1-Axillary_Lymph_Node ");
+		System.out.print(".");
 
 end
 
@@ -315,14 +422,14 @@ end
 * then the tumor(s) in the infraclavicular lymph nodes have a tumor type of regional recurrences 
 */
 rule "regionalRecurrence1-2-Infraclavicular_Lymph_Node"
-	salience 88888
+	salience 88887
 	no-loop true
 	when
 		$record : MedicalRecord()
 		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
 						$newSummaryId : summaryId)
-		IdMapper($c_summaryId : oldSummaryId, newSummaryId == $newSummaryId)
+		
 		//rec tumor
 		$recTumor : Fact(summaryType=="TumorSummary", category == "hasBodySite", $recTumorName : name, $rectAncestors : ancestors,documentType != "RecordSummary",
 						($recTumorName == "Infraclavicular_Lymph_Node" || $rectAncestors contains "Infraclavicular_Lymph_Node"), $recSummaryId : summaryId,
@@ -332,10 +439,10 @@ rule "regionalRecurrence1-2-Infraclavicular_Lymph_Node"
 					
 		$tl_1 : MergedTumor(tumorSiteFactSet contains $recTumor, bodySide == $sideName, readyForRetraction == false)
 		//primary tumor			
-		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType == "RecordSummary",
-					$t_summaryId: summaryId, name==$domainName, containerIdentifier contains $newSummaryId)
+		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasTumorType", documentType == "RecordSummary",
+					$t_summaryId: summaryId, name=="PrimaryTumor", containerIdentifier contains $newSummaryId)
 						
-		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType != "RecordSummary",
+		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType == "RecordSummary",
 					name == $sideName, containerIdentifier contains $t_summaryId)
 		not (Fact (summaryType=="TumorSummary", documentType == "RecordSummary", provenanceFacts contains $recTumor))
 		
@@ -344,13 +451,14 @@ rule "regionalRecurrence1-2-Infraclavicular_Lymph_Node"
 		modify($recTumor){	addRulesApplied("regionalRecurrence1-2-Infraclavicular_Lymph_Node") }
 		//add new tumor
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
-		Fact tf = FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(newId);
+		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId);
+		tf.setIdentifier(tf.getName()+"-"+newId);
+		tf.setSummaryId(newId);
 		tf.addProvenanceFact($recTumor);
-		insert(new IdMapper($recTumor.getIdentifier(), newId, $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
+		insert(new IdMapper($recTumor.getIdentifier(), tf.getIdentifier(), $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
 		
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
 		insert(tf);
 		
 		Fact tumorTypeF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#RegionalRecurrence", $recTumor, 
@@ -359,21 +467,51 @@ rule "regionalRecurrence1-2-Infraclavicular_Lymph_Node"
 		Fact tumorsideF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$sideName, tf, 
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_SIDE);
 														
-		tumorTypeF.addContainerIdentifier(newId);
-	    tumorsideF.addContainerIdentifier(newId);
+		tumorTypeF.addContainerIdentifier(tf.getSummaryId());
+		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
+		tumorTypeF.setSummaryId(newId);
+	    
+	    tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF);
+		
+		
+		Set<Fact> qSet = $tl_1.getQuadrantFactSet();
+		for(Fact f : qSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
+		
+		Set<Fact> clockSet = $tl_1.getClockfacePosFactSet();
+		for(Fact f : clockSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
 	    
 		modify($record){
 			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_BODY_MODIFIER, tumorsideF)
+			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)
+			
 		}	
-		
+
 		insert (tumorTypeF);
 		insert (tumorsideF);
+		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
 		
 		$tl_1.setReadyForRetraction(true);
 		update ($tl_1);
 
-		System.out.println("*** regionalRecurrence1-2-Infraclavicular_Lymph_Node ");
+		System.out.print(".");
 
 end
 
@@ -384,14 +522,14 @@ end
 * have a tumor type of regional recurrences 
 */
 rule "regionalRecurrence1-3a"
-	salience 88888
+	salience 88887
 	no-loop true
 	when
 		$record : MedicalRecord()
 		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
 						$newSummaryId : summaryId)
-		IdMapper($c_summaryId : oldSummaryId, newSummaryId == $newSummaryId)
+		
 		//rec tumor
 		$recTumor : Fact(summaryType=="TumorSummary", category == "hasBodySite", $recTumorName : name, $rectAncestors : ancestors,documentType != "RecordSummary",
 						($recTumorName == "Supraclavicular_Lymph_Node" || $rectAncestors contains "Supraclavicular_Lymph_Node"), $recSummaryId : summaryId,
@@ -401,10 +539,10 @@ rule "regionalRecurrence1-3a"
 					
 		$tl_1 : MergedTumor(tumorSiteFactSet contains $recTumor, bodySide == $sideName, readyForRetraction == false)
 		//primary tumor			
-		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType == "RecordSummary",
-					$t_summaryId: summaryId, name==$domainName, containerIdentifier contains $newSummaryId)
+		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasTumorType", documentType == "RecordSummary",
+					$t_summaryId: summaryId, name=="PrimaryTumor", containerIdentifier contains $newSummaryId)
 						
-		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType != "RecordSummary",
+		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType == "RecordSummary",
 					name == $sideName, containerIdentifier contains $t_summaryId)
 		not (Fact (summaryType=="TumorSummary", documentType == "RecordSummary", provenanceFacts contains $recTumor))
 		
@@ -413,13 +551,14 @@ rule "regionalRecurrence1-3a"
 		modify($recTumor){	addRulesApplied("regionalRecurrence1-3a") }
 		//add new tumor
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
-		Fact tf = FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(newId);
+		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId);
+		tf.setIdentifier(tf.getName()+"-"+newId);
+		tf.setSummaryId(newId);
 		tf.addProvenanceFact($recTumor);
-		insert(new IdMapper($recTumor.getIdentifier(), newId, $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
+		insert(new IdMapper($recTumor.getIdentifier(), tf.getIdentifier(), $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
 		
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
 		insert(tf);
 		
 		Fact tumorTypeF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#RegionalRecurrence", $recTumor, 
@@ -428,21 +567,51 @@ rule "regionalRecurrence1-3a"
 		Fact tumorsideF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$sideName, tf, 
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_SIDE);
 														
-		tumorTypeF.addContainerIdentifier(newId);
-	    tumorsideF.addContainerIdentifier(newId);
+		tumorTypeF.addContainerIdentifier(tf.getSummaryId());
+		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
+		tumorTypeF.setSummaryId(newId);
+	    
+	    tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF);
+		
+		
+		Set<Fact> qSet = $tl_1.getQuadrantFactSet();
+		for(Fact f : qSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
+		
+		Set<Fact> clockSet = $tl_1.getClockfacePosFactSet();
+		for(Fact f : clockSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
 	    
 		modify($record){
 			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_BODY_MODIFIER, tumorsideF)
+			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)
+			
 		}	
-		
+
 		insert (tumorTypeF);
 		insert (tumorsideF);
+		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
 		
 		$tl_1.setReadyForRetraction(true);
 		update ($tl_1);
 
-		System.out.println("*** regionalRecurrence1-3a ");
+		System.out.print(".");
 
 end
 
@@ -454,14 +623,14 @@ end
 * have a tumor type of regional recurrences 
 */
 rule "regionalRecurrence1-3b"
-	salience 88888
+	salience 88887
 	no-loop true
 	when
 		$record : MedicalRecord()
 		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
 						$newSummaryId : summaryId)
-		IdMapper($c_summaryId : oldSummaryId, newSummaryId == $newSummaryId)
+		
 		//rec tumor
 		$recTumor : Fact(summaryType=="TumorSummary", category == "hasBodySite", $recTumorName : name, $rectAncestors : ancestors,documentType != "RecordSummary",
 						($recTumorName == "Internal_Mammary_Lymph_Node" || $rectAncestors contains "Internal_Mammary_Lymph_Node"), $recSummaryId : summaryId,
@@ -471,10 +640,10 @@ rule "regionalRecurrence1-3b"
 					
 		$tl_1 : MergedTumor(tumorSiteFactSet contains $recTumor, bodySide == $sideName, readyForRetraction == false)
 		//primary tumor			
-		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType == "RecordSummary",
-					$t_summaryId: summaryId, name==$domainName, containerIdentifier contains $newSummaryId)
+		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasTumorType", documentType == "RecordSummary",
+					$t_summaryId: summaryId, name=="PrimaryTumor", containerIdentifier contains $newSummaryId)
 						
-		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType != "RecordSummary",
+		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType == "RecordSummary",
 					name == $sideName, containerIdentifier contains $t_summaryId)
 		not (Fact (summaryType=="TumorSummary", documentType == "RecordSummary", provenanceFacts contains $recTumor))
 		
@@ -483,13 +652,14 @@ rule "regionalRecurrence1-3b"
 		modify($recTumor){	addRulesApplied("regionalRecurrence1-3b") }
 		//add new tumor
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
-		Fact tf = FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(newId);
+		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId);
+		tf.setIdentifier(tf.getName()+"-"+newId);
+		tf.setSummaryId(newId);
 		tf.addProvenanceFact($recTumor);
-		insert(new IdMapper($recTumor.getIdentifier(), newId, $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
+		insert(new IdMapper($recTumor.getIdentifier(), tf.getIdentifier(), $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
 		
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
 		insert(tf);
 		
 		Fact tumorTypeF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#RegionalRecurrence", $recTumor, 
@@ -498,21 +668,51 @@ rule "regionalRecurrence1-3b"
 		Fact tumorsideF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$sideName, tf, 
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_SIDE);
 														
-		tumorTypeF.addContainerIdentifier(newId);
-	    tumorsideF.addContainerIdentifier(newId);
+		tumorTypeF.addContainerIdentifier(tf.getSummaryId());
+		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
+		tumorTypeF.setSummaryId(newId);
+	    
+	    tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF);
+		
+		
+		Set<Fact> qSet = $tl_1.getQuadrantFactSet();
+		for(Fact f : qSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
+		
+		Set<Fact> clockSet = $tl_1.getClockfacePosFactSet();
+		for(Fact f : clockSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
 	    
 		modify($record){
 			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_BODY_MODIFIER, tumorsideF)
+			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)
+			
 		}	
-		
+
 		insert (tumorTypeF);
 		insert (tumorsideF);
+		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
 		
 		$tl_1.setReadyForRetraction(true);
 		update ($tl_1);
 
-		System.out.println("*** regionalRecurrence1-3b ");
+		System.out.print(".");
 
 end
 
@@ -524,14 +724,14 @@ end
 * as the primary tumor, then the tumor(s) in the intramammary lymph nodes have a tumor type of regional recurrences 
 */
 rule "regionalRecurrence1-4"
-	salience 88888
+	salience 88887
 	no-loop true
 	when
 		$record : MedicalRecord()
 		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
 						$newSummaryId : summaryId)
-		IdMapper($c_summaryId : oldSummaryId, newSummaryId == $newSummaryId)
+		
 		//rec tumor
 		$recTumor : Fact(summaryType=="TumorSummary", category == "hasBodySite", $recTumorName : name, $rectAncestors : ancestors,documentType != "RecordSummary",
 						($recTumorName == "Intramammary_Lymph_Node" || $rectAncestors contains "Intramammary_Lymph_Node"), $recSummaryId : summaryId,
@@ -541,10 +741,10 @@ rule "regionalRecurrence1-4"
 					
 		$tl_1 : MergedTumor(tumorSiteFactSet contains $recTumor, bodySide == $sideName, readyForRetraction == false)
 		//primary tumor			
-		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType == "RecordSummary",
-					$t_summaryId: summaryId, name==$domainName, containerIdentifier contains $newSummaryId)
+		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasTumorType", documentType == "RecordSummary",
+					$t_summaryId: summaryId, name=="PrimaryTumor", containerIdentifier contains $newSummaryId)
 						
-		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType != "RecordSummary",
+		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType == "RecordSummary",
 					name == $sideName, containerIdentifier contains $t_summaryId)
 		not (Fact (summaryType=="TumorSummary", documentType == "RecordSummary", provenanceFacts contains $recTumor))
 		
@@ -553,13 +753,14 @@ rule "regionalRecurrence1-4"
 		modify($recTumor){	addRulesApplied("regionalRecurrence1-4") }
 		//add new tumor
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
-		Fact tf = FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(newId);
+		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId);
+		tf.setIdentifier(tf.getName()+"-"+newId);
+		tf.setSummaryId(newId);
 		tf.addProvenanceFact($recTumor);
-		insert(new IdMapper($recTumor.getIdentifier(), newId, $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
+		insert(new IdMapper($recTumor.getIdentifier(), tf.getIdentifier(), $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
 		
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
 		insert(tf);
 		
 		Fact tumorTypeF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#RegionalRecurrence", $recTumor, 
@@ -568,21 +769,51 @@ rule "regionalRecurrence1-4"
 		Fact tumorsideF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$sideName, tf, 
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_SIDE);
 														
-		tumorTypeF.addContainerIdentifier(newId);
-	    tumorsideF.addContainerIdentifier(newId);
+		tumorTypeF.addContainerIdentifier(tf.getSummaryId());
+		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
+		tumorTypeF.setSummaryId(newId);
+	    
+	    tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF);
+		
+		
+		Set<Fact> qSet = $tl_1.getQuadrantFactSet();
+		for(Fact f : qSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
+		
+		Set<Fact> clockSet = $tl_1.getClockfacePosFactSet();
+		for(Fact f : clockSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
 	    
 		modify($record){
 			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_BODY_MODIFIER, tumorsideF)
+			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)
+			
 		}	
-		
+
 		insert (tumorTypeF);
 		insert (tumorsideF);
+		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
 		
 		$tl_1.setReadyForRetraction(true);
 		update ($tl_1);
 
-		System.out.println("*** regionalRecurrence1-4 ");
+		System.out.print(".");
 
 end
 
@@ -593,14 +824,14 @@ end
 * infraclavicular, supraclavicular internal mammary/parasternal, or intramammary are considered distant metastasis  
 */
 rule "distantRecurrence1"
-	salience 88888
+	salience 88886
 	no-loop true
 	when
 		$record : MedicalRecord()
 		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
 						$newSummaryId : summaryId)
-		IdMapper($c_summaryId : oldSummaryId, newSummaryId == $newSummaryId)
+		
 		//rec tumor
 		$recTumor : Fact(summaryType=="TumorSummary", category == "hasBodySite", $recTumorName : name, $rectAncestors : ancestors,documentType != "RecordSummary",
 						($recTumorName != "Axillary_Lymph_Node" && $rectAncestors not contains "Axillary_Lymph_Node" &&
@@ -614,10 +845,10 @@ rule "distantRecurrence1"
 					
 		$tl_1 : MergedTumor(tumorSiteFactSet contains $recTumor, bodySide == $sideName, readyForRetraction == false)
 		//primary tumor			
-		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType == "RecordSummary",
-					$t_summaryId: summaryId, name==$domainName, containerIdentifier contains $newSummaryId)
+		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasTumorType", documentType == "RecordSummary",
+					$t_summaryId: summaryId, name=="PrimaryTumor", containerIdentifier contains $newSummaryId)
 						
-		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType != "RecordSummary",
+		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType == "RecordSummary",
 					name == $sideName, containerIdentifier contains $t_summaryId)
 		not (Fact (summaryType=="TumorSummary", documentType == "RecordSummary", provenanceFacts contains $recTumor))
 		
@@ -626,13 +857,14 @@ rule "distantRecurrence1"
 		modify($recTumor){	addRulesApplied("distantRecurrence1") }
 		//add new tumor
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
-		Fact tf = FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(newId);
+		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId);
+		tf.setIdentifier(tf.getName()+"-"+newId);
+		tf.setSummaryId(newId);
 		tf.addProvenanceFact($recTumor);
 		insert(new IdMapper($recTumor.getIdentifier(), newId, $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
 		
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
 		insert(tf);
 		
 		Fact tumorTypeF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#DistantRecurrence", $recTumor, 
@@ -641,21 +873,51 @@ rule "distantRecurrence1"
 		Fact tumorsideF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$sideName, tf, 
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_SIDE);
 														
-		tumorTypeF.addContainerIdentifier(newId);
-	    tumorsideF.addContainerIdentifier(newId);
+		tumorTypeF.addContainerIdentifier(tf.getSummaryId());
+		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
+		tumorTypeF.setSummaryId(newId);
+	    
+	    tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF);
+		
+		
+		Set<Fact> qSet = $tl_1.getQuadrantFactSet();
+		for(Fact f : qSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
+		
+		Set<Fact> clockSet = $tl_1.getClockfacePosFactSet();
+		for(Fact f : clockSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
 	    
 		modify($record){
 			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_BODY_MODIFIER, tumorsideF)
+			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)
+			
 		}	
-		
+
 		insert (tumorTypeF);
 		insert (tumorsideF);
+		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
 		
 		$tl_1.setReadyForRetraction(true);
 		update ($tl_1);
 
-		System.out.println("*** distantRecurrence1 ");
+		System.out.print(".");
 
 end
 
@@ -671,9 +933,9 @@ rule "distantRecurrence2-1"
 	when
 		$record : MedicalRecord()
 		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
 						$newSummaryId : summaryId)
-		IdMapper($c_summaryId : oldSummaryId, newSummaryId == $newSummaryId)
+		
 		//rec tumor
 		$recTumor : Fact(summaryType=="TumorSummary", category == "hasBodySite", $recTumorName : name, $rectAncestors : ancestors,documentType != "RecordSummary",
 						($recTumorName == "Lymph_Node" && $rectAncestors contains "Lymph_Node"), 
@@ -683,10 +945,10 @@ rule "distantRecurrence2-1"
 					
 		$tl_1 : MergedTumor(tumorSiteFactSet contains $recTumor, bodySide == $sideName, readyForRetraction == false)
 		//primary tumor			
-		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType == "RecordSummary",
-					$t_summaryId: summaryId, name==$domainName, containerIdentifier contains $newSummaryId)
+		$pSite_tFact : Fact(summaryType=="TumorSummary", category == "hasTumorType", documentType == "RecordSummary",
+					$t_summaryId: summaryId, name=="PrimaryTumor", containerIdentifier contains $newSummaryId)
 						
-		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType != "RecordSummary",
+		$pSide_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType == "RecordSummary",
 					name != $sideName, containerIdentifier contains $t_summaryId)
 		not (Fact (summaryType=="TumorSummary", documentType == "RecordSummary", provenanceFacts contains $recTumor))
 		
@@ -695,13 +957,14 @@ rule "distantRecurrence2-1"
 		modify($recTumor){	addRulesApplied("distantRecurrence2-1") }
 		//add new tumor
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
-		Fact tf = FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(newId);
+		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId);
+		tf.setIdentifier(tf.getName()+"-"+newId);
+		tf.setSummaryId(newId);
 		tf.addProvenanceFact($recTumor);
-		insert(new IdMapper($recTumor.getIdentifier(), newId, $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
+		insert(new IdMapper($recTumor.getIdentifier(), tf.getIdentifier(), $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
 		
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
 		insert(tf);
 		
 		Fact tumorTypeF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#DistantRecurrence", $recTumor, 
@@ -710,28 +973,57 @@ rule "distantRecurrence2-1"
 		Fact tumorsideF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$sideName, tf, 
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_SIDE);
 														
-		tumorTypeF.addContainerIdentifier(newId);
-	    tumorsideF.addContainerIdentifier(newId);
+		tumorTypeF.addContainerIdentifier(tf.getSummaryId());
+		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
+		tumorTypeF.setSummaryId(newId);
+	    
+	    tumorsideF.setSummaryId(tf.getSummaryId()); tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF); 
+		
+		
+		Set<Fact> qSet = $tl_1.getQuadrantFactSet();
+		for(Fact f : qSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
+		
+		Set<Fact> clockSet = $tl_1.getClockfacePosFactSet();
+		for(Fact f : clockSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
 	    
 		modify($record){
 			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_BODY_MODIFIER, tumorsideF)
+			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)
+			
 		}	
-		
+
 		insert (tumorTypeF);
 		insert (tumorsideF);
+		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
 		
 		$tl_1.setReadyForRetraction(true);
 		update ($tl_1);
 
-		System.out.println("*** distantRecurrence2-1 ");
+		System.out.print(".");
 
 end
 
 /*
-* distantRecurrence2-1:
-*  	If there is a tumor located in a lymph node on the opposite side of the body as the primary tumor, 
-* then the tumor located in the lymph node has type distant recurrence.  
+* distantRecurrence3::
+*  If there is tumor located in the Sternal Bone and children, then the tumor has type Distant Recurrence 
 */
 rule "distantRecurrence3"
 	salience 88877
@@ -739,9 +1031,9 @@ rule "distantRecurrence3"
 	when
 		$record : MedicalRecord()
 		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
 						$newSummaryId : summaryId)
-		IdMapper($c_summaryId : oldSummaryId, newSummaryId == $newSummaryId)
+		
 		//rec tumor
 		$recTumor : Fact(summaryType=="TumorSummary", category == "hasBodySite", $recTumorName : name, $rectAncestors : ancestors,documentType != "RecordSummary",
 						$recTumorName == "Sternum", 
@@ -755,30 +1047,50 @@ rule "distantRecurrence3"
 		modify($recTumor){	addRulesApplied("distantRecurrence3") }
 		//add new tumor
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
-		Fact tf = FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(newId);
+		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId);
+		tf.setIdentifier(tf.getName()+"-"+newId);
+		tf.setSummaryId(newId);
 		tf.addProvenanceFact($recTumor);
-		insert(new IdMapper($recTumor.getIdentifier(), newId, $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
+		insert(new IdMapper($recTumor.getIdentifier(), tf.getIdentifier(), $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
 		
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
 		insert(tf);
 		
 		Fact tumorTypeF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#DistantRecurrence", $recTumor, 
 														$cancerFact, "TumorSummary", "hasTumorType", "RecordSummary", "TumorType");
 														
-		tumorTypeF.addContainerIdentifier(newId);
+		tumorTypeF.addContainerIdentifier(tf.getSummaryId());
+		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
+		tumorTypeF.setSummaryId(newId);
+		
 	    
 		modify($record){
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF)
+			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
+			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)
 		}	
 		
 		insert (tumorTypeF);
 		
+		//side if any
+		Set<Fact> qSet = $tl_1.getBodySideFactSet();
+		for(Fact f : qSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_SIDE);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
+		
+		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
 		$tl_1.setReadyForRetraction(true);
 		update ($tl_1);
 
-		System.out.println("*** distantRecurrence3 ");
+		System.out.print(".");
 
 end
 
@@ -797,9 +1109,9 @@ rule "distantRecurrence4a"
 	when
 		$record : MedicalRecord()
 		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
 						$newSummaryId : summaryId)
-		IdMapper($c_summaryId : oldSummaryId, newSummaryId == $newSummaryId)
+		
 		//rec tumor
 		$recTumor : Fact(summaryType=="TumorSummary", category == "hasBodySite", $recTumorName : name, $rectAncestors : ancestors,documentType != "RecordSummary",
 						($recTumorName != "Axillary_Lymph_Node" && $rectAncestors not contains "Axillary_Lymph_Node" &&
@@ -819,13 +1131,14 @@ rule "distantRecurrence4a"
 		modify($recTumor){	addRulesApplied("distantRecurrence4") }
 		//add new tumor
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
-		Fact tf = FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(newId);
+		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId);
+		tf.setIdentifier(tf.getName()+"-"+newId);
+		tf.setSummaryId(newId);
 		tf.addProvenanceFact($recTumor);
-		insert(new IdMapper($recTumor.getIdentifier(), newId, $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
+		insert(new IdMapper($recTumor.getIdentifier(), tf.getIdentifier(), $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
 		
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+		
 		insert(tf);
 		
 		Fact tumorTypeF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#DistantRecurrence", $recTumor, 
@@ -834,21 +1147,50 @@ rule "distantRecurrence4a"
 		Fact tumorsideF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$sideName, tf, 
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_SIDE);
 														
-		tumorTypeF.addContainerIdentifier(newId);
-	    tumorsideF.addContainerIdentifier(newId);
+		tumorTypeF.addContainerIdentifier(tf.getSummaryId());
+		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
+		tumorTypeF.setSummaryId(newId);
+	    
+	    tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF); 
+		
+		
+		Set<Fact> qSet = $tl_1.getQuadrantFactSet();
+		for(Fact f : qSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
+		
+		Set<Fact> clockSet = $tl_1.getClockfacePosFactSet();
+		for(Fact f : clockSet){
+			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+			qf.setAncestors(f.getAncestors());
+			qf.addContainerIdentifier(tf.getSummaryId());
+			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+			qf.setSummaryId(newId);
+			tf.addModifier(qf);
+			insert(qf);
+		}
 	    
 		modify($record){
 			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_BODY_MODIFIER, tumorsideF)
+			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)
 		}	
-		
+
 		insert (tumorTypeF);
 		insert (tumorsideF);
+		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
 		
 		$tl_1.setReadyForRetraction(true);
 		update ($tl_1);
 
-		System.out.println("*** distantRecurrence4a ");
+System.out.print(".");
 
 end
 
@@ -866,7 +1208,7 @@ rule "distantRecurrence4b"
 	when
 		$record : MedicalRecord()
 		$domain : Domain($domainName : domainName)
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
 						$newSummaryId : summaryId)
 		//rec tumor
 		$recTumor : Fact(summaryType=="TumorSummary", category == "hasBodySite", $recTumorName : name, $rectAncestors : ancestors,documentType != "RecordSummary",
@@ -887,11 +1229,12 @@ rule "distantRecurrence4b"
 		modify($recTumor){	addRulesApplied("distantRecurrence4") }
 		//add new tumor
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
-		Fact tf = FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(newId);
+		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($recTumor, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$recTumorName, "RecordSummary");
+		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId);
+		tf.setIdentifier(tf.getName()+"-"+newId);
+		tf.setSummaryId(newId);
 		tf.addProvenanceFact($recTumor);
-		insert(new IdMapper($recTumor.getIdentifier(), newId, $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
+		insert(new IdMapper($recTumor.getIdentifier(), tf.getIdentifier(), $recTumor.getDocumentType(), $recTumor.getSummaryId(), tf.getSummaryId()));
 		
 		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
 		insert(tf);
@@ -902,7 +1245,8 @@ rule "distantRecurrence4b"
 		tumorTypeF.addContainerIdentifier(newId);
 	    
 		modify($record){
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF)
+			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
+			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)
 		}	
 		
 		insert (tumorTypeF);
@@ -910,6 +1254,6 @@ rule "distantRecurrence4b"
 		$tl_1.setReadyForRetraction(true);
 		update ($tl_1);
 
-		System.out.println("*** distantRecurrence4b ");
+		System.out.print(".");
 end
 

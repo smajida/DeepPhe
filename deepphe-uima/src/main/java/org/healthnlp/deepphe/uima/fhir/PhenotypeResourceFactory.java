@@ -289,6 +289,13 @@ public class PhenotypeResourceFactory {
 		fact.setTemporalOrder(annotation.getHasTemporalOrder());
 		if(annotation.getHasRecordedDate() != null)
 			fact.setRecordedDate(TextTools.parseDate(annotation.getHasRecordedDate()));
+		if(annotation.getHasDocumentIdentifier() != null)
+			fact.setDocumentIdentifier(annotation.getHasDocumentIdentifier());
+		if(annotation.getHasDocumentType() != null)
+			fact.setDocumentType(annotation.getHasDocumentType());
+		if(annotation.getHasPatientIdentifier() != null)
+			fact.setPatientIdentifier(annotation.getHasPatientIdentifier());
+		
 		
 		// add provinence
 		for(int i=0;i<getSize(annotation.getHasProvenanceText());i++){
@@ -304,6 +311,9 @@ public class PhenotypeResourceFactory {
 		for(int i=0;i<getSize(annotation.getHasProvenanceFacts());i++){
 			fact.addProvenanceFact(loadFact(annotation.getHasProvenanceFacts(i)));
 		}
+		
+		// load properties
+		fact.setProperties(loadProperties(annotation));
 		
 		return fact;
 	}
@@ -397,6 +407,12 @@ public class PhenotypeResourceFactory {
 		annotation.setHasTemporalOrder(fact.getTemporalOrder());
 		if(fact.getRecordedDate() != null)
 			annotation.setHasRecordedDate(fact.getRecordedDate().toString());
+		if(fact.getDocumentIdentifier() != null)
+			annotation.setHasDocumentIdentifier(fact.getDocumentIdentifier());
+		if(fact.getDocumentType() != null)
+			annotation.setHasDocumentType(fact.getDocumentType());
+		if(fact.getPatientIdentifier() != null)
+			annotation.setHasPatientIdentifier(fact.getPatientIdentifier());
 		
 		// set begin & end if not set prior
 		for(TextMention m: fact.getProvenanceText()){
@@ -409,20 +425,19 @@ public class PhenotypeResourceFactory {
 		List<FeatureStructure> vals = new ArrayList<FeatureStructure>();
 		for(Fact p: fact.getProvenanceFacts()){
 			Annotation a = getAnnotationByIdentifier(jcas,p.getIdentifier());
-			if(a != null)
+			if(a != null && !fact.getIdentifier().equals(((org.healthnlp.deepphe.uima.types.Fact)a).getHasIdentifier()))
 				vals.add(a);
 		}
 		if(!vals.isEmpty())
 			annotation.setHasProvenanceFacts(getValues(jcas, vals));
 		
-		
+		// save ancestors
 		if(!fact.getAncestors().isEmpty())
 			annotation.setHasAncestors(getStringValues(jcas, fact.getAncestors()));
 		
-		// handle different fact types for additional info
-		if(fact instanceof ObservationFact && annotation instanceof org.healthnlp.deepphe.uima.types.Observation){
-			//saveObservationFact((ObservationFact) fact,(org.healthnlp.deepphe.uima.types.Observation)annotation, jcas);
-		}
+		// save properties
+		saveProperties(fact.getProperties(),annotation, jcas);
+		
 		
 		annotation.addToIndexes();
 		return annotation;
@@ -648,7 +663,10 @@ public class PhenotypeResourceFactory {
 	
 
 	private static void saveExtensions(Element e, org.healthnlp.deepphe.uima.types.Fact el, JCas jcas) {
-		Properties props = FHIRUtils.getExtensions((DomainResource)e);
+		saveProperties(FHIRUtils.getProperties((DomainResource)e), el, jcas);
+	}
+	
+	private static void saveProperties(Map<String,String> props, org.healthnlp.deepphe.uima.types.Fact el, JCas jcas) {
 		//deleteAnnotations(el.getHasProperties(), jcas);
 		List<FeatureStructure> list = new ArrayList<FeatureStructure>();
 		for(Object key: props.keySet()){
@@ -657,7 +675,7 @@ public class PhenotypeResourceFactory {
 				continue;
 			Property pp = new Property(jcas);
 			pp.setName(key.toString());
-			pp.setValue(props.getProperty(key.toString()));
+			pp.setValue(props.get(key.toString()));
 			pp.addToIndexes();
 			list.add(pp);
 		}
@@ -665,6 +683,7 @@ public class PhenotypeResourceFactory {
 			el.setHasProperties(getValues(jcas,list));
 		el.addToIndexes();
 	}
+	
 
 	/**
 	 * get set of annotations from cas of a given type
@@ -1144,6 +1163,15 @@ public class PhenotypeResourceFactory {
 			r.addExtension(FHIRUtils.createExtension(p.getName(),p.getValue()));
 		}
 	}
+	
+	private static Map<String,String> loadProperties(org.healthnlp.deepphe.uima.types.Fact e){
+		Map<String,String> props = new LinkedHashMap<String, String>();
+		for(int i=0;i<getSize(e.getHasProperties());i++){
+			Property p = e.getHasProperties(i);
+			props.put(p.getName(),p.getValue());
+		}
+		return props;
+	}
 
 	
 	
@@ -1177,7 +1205,7 @@ public class PhenotypeResourceFactory {
 		
 		// add mention text
 		addMention(dx,e);
-
+		addExtensions(dx,e);
 		
 		FHIRUtils.createIdentifier(dx.addIdentifier(),e.getHasIdentifier());
 		return dx;

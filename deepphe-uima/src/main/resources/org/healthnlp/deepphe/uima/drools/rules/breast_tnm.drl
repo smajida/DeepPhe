@@ -40,8 +40,7 @@ rule "record-setGenercTClassification"
 		then
 			String newId = "CancerPhenotype-"+$newSummaryId.replace("CancerSummary-","");
 			Fact cf = FactFactory.createFact($cPheTclFact, $cPheTclFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+$name, "RecordSummary");
-			cf.setIdentifier(newId);
-			cf.setSummaryId(newId);
+			cf.setIdentifier(newId); cf.setSummaryId(newId);
 			cf.addProvenanceFact($cPheTclFact);
 			cf.addContainerIdentifier($newSummaryId);
 			insert(cf);
@@ -70,7 +69,7 @@ rule "record-setGenercNClassification"
 		then
 			String newId = "CancerPhenotype-"+$newSummaryId.replace("CancerSummary-","");
 			Fact cf = FactFactory.createFact($cPheTclFact, $cPheTclFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+$name, "RecordSummary");
-			cf.setIdentifier(newId);
+			cf.setIdentifier(newId); cf.setSummaryId(newId); 
 			cf.addProvenanceFact($cPheTclFact);
 			cf.addContainerIdentifier($newSummaryId);
 			insert(cf);
@@ -99,7 +98,7 @@ rule "record-setGenercMClassification"
 		then
 			String newId = "CancerPhenotype-"+$newSummaryId.replace("CancerSummary-","");
 			Fact cf = FactFactory.createFact($cPheTclFact, $cPheTclFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+$name, "RecordSummary");
-			cf.setIdentifier(newId);
+			cf.setIdentifier(newId); cf.setSummaryId(newId);
 			cf.addProvenanceFact($cPheTclFact);
 			cf.addContainerIdentifier($newSummaryId);
 			insert(cf);
@@ -133,7 +132,7 @@ rule "record-setTNMPrefix"
 		
 			String newId = "CancerPhenotype-"+$newSummaryId.replace("CancerSummary-","");
 			Fact cf = FactFactory.createFact($tnmPrefFact, $tnmPrefFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+$name, "RecordSummary");
-			cf.setIdentifier(newId);
+			cf.setIdentifier(newId); cf.setSummaryId(newId);
 			cf.addProvenanceFact($tnmPrefFact);
 			cf.addContainerIdentifier($newSummaryId);
 			insert(cf);
@@ -165,7 +164,7 @@ rule "genericT-1-to-Pathologic"
 		String brcaName = "Breast_Cancer_"+"p"+$genericName.replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicTClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
@@ -199,7 +198,7 @@ rule "genericT-2-to-Pathologic"
 		String brcaName = "Breast_Cancer_"+"p"+$genericName.replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicTClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
@@ -230,7 +229,7 @@ rule "genericN-1-to-Pathologic"
 		String brcaName = "Breast_Cancer_"+"p"+$genericName.replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicNClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
@@ -264,7 +263,7 @@ rule "genericN-2-to-Pathologic"
 		String brcaName = "Breast_Cancer_"+"p"+$genericName.replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicNClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
@@ -294,7 +293,7 @@ rule "genericM-1-to-Pathologic-M1"
 		String brcaName = "Breast_Cancer_"+"p"+$genericTFact.getName().replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicMClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
@@ -323,7 +322,7 @@ rule "genericM-1-to-Pathologic-MX"
 		String brcaName = "Breast_Cancer_"+"p"+$genericTFact.getName().replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicMClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
@@ -356,7 +355,7 @@ rule "genericM-2-to-Pathologic-M1"
 		String brcaName = "Breast_Cancer_"+"p"+$genericTFact.getName().replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicNClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
@@ -390,7 +389,7 @@ rule "genericM-2-to-Pathologic-MX"
 		String brcaName = "Breast_Cancer_"+"p"+$genericTFact.getName().replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasPathologicNClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
@@ -422,7 +421,7 @@ rule "genericT-3-to-Clinical"
 		String brcaName = "Breast_Cancer_"+"c"+$genericName.replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasClinicalTClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
@@ -450,14 +449,15 @@ rule "genericT-4-to-Clinical"
 		$genericTFact : Fact(documentType == "RecordSummary", summaryType=="CancerPhenotype", category == "hasGenericTClassification",
 				containerIdentifier contains $newSummaryId, $genericName : name, provenanceFacts contains $origFact)
 			
-	then	
+	then
+System.out.print(".");	
 
 		String newId = "CancerPhenotype-"+$newSummaryId.replace("CancerSummary-","");
 		//modify name
 		String brcaName = "Breast_Cancer_"+"c"+$genericName.replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasClinicalTClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
@@ -488,7 +488,7 @@ rule "genericN-3-to-Clinical"
 		String brcaName = "Breast_Cancer_"+"c"+$genericName.replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasClinicalNClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
@@ -523,7 +523,7 @@ rule "genericN-4-to-Clinical"
 		String brcaName = "Breast_Cancer_"+"c"+$genericName.replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasClinicalNClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
@@ -554,7 +554,7 @@ rule "genericM-3-to-Clinical"
 		String brcaName = "Breast_Cancer_"+"c"+$genericName.replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasClinicalMClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
@@ -589,191 +589,10 @@ rule "genericM-4-to-Clinical"
 		String brcaName = "Breast_Cancer_"+"c"+$genericName.replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
 		cf.setCategory("hasClinicalMClassification");
-		cf.setIdentifier(newId);
+		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
 		insert(cf);
 		FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
 
 end 
-
-
-/**
-* M1-1: - incorrect
-* If there is an instance of M1, then create instance of tumor with tumor type = "distant recurrence". 
-*/
-/*
-rule "M1-1"
-	salience 55559
-	no-loop true
-	when
-		$record : MedicalRecord()
-		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary",  documentType == "RecordSummary", name == $domainName, 
-						$newSummaryId : summaryId)
-		IdMapper($oldSummaryId : oldSummaryId, $newSummaryId == newSummaryId)
-		
-		$cPheFact : Fact(summaryType == "CancerPhenotype", documentType != "RecordSummary", containerIdentifier contains $oldSummaryId, 
-			category == "hasGenericMClassification", name matches ".*M1-1.*", $cPheSummaryId : summaryId)
-			
-			
-		not(Fact(summaryType == "CancerSummary", documentType != "RecordSummary", category == "hasGenericMClassification"))
-		not(Fact(summaryType == "TumorSummary", category == "TumorType", name == "DistantRecurrence", documentType == "RecordSummary"))
-		
-		$tumorFact : Fact(documentType != "RecordSummary", $tumorId : identifier, $tumorSummaryId : summaryId, containerIdentifier contains $cPheSummaryId)
-		then
-		  //??? Location???
-end
-*/
-
-/**
-* pN1-1: - incorect
-* If there is an instance of pN1, then create an instance of tumor with tumor type = "regional recurrence" 
-* and add a location of "lymph node" to the tumor. 
-*/
-/*
-rule "pN1-1"
-	salience 55559
-	no-loop true
-	when
-		$record : MedicalRecord()
-		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", category == "hasBodySite", documentType == "RecordSummary", name == $domainName, 
-						$newSummaryId : summaryId)
-		IdMapper($oldSummaryId : oldSummaryId, $newSummaryId == newSummaryId)
-		
-		$cPheFact : Fact(summaryType == "CancerPhenotype", documentType != "RecordSummary", containerIdentifier contains $oldSummaryId, 
-			category == "hasGenericNClassification", name matches ".*N1-1.*", $cPheSummaryId : summaryId)
-		
-		Fact(documentType != "RecordSummary", category == "hasTNMPrefix", name == "p_modifier", summaryId == $cPheSummaryId)
-			
-		not(Fact(summaryType == "CancerSummary", documentType != "RecordSummary", category == "hasGenericNClassification"))
-		not(Fact(summaryType == "TumorSummary", category == "TumorType", name == "RegionalRecurrence", documentType == "RecordSummary"))
-		
-		$tumorFact : Fact(documentType != "RecordSummary", $tumorId : identifier, $tumorSummaryId : summaryId, containerIdentifier contains $cPheSummaryId)
-		then
-		  //??? Location???
-end
-*/
-		
-
-/*
-rule "create-TNMClassification-CP"
-	salience 7779
-	no-loop true
-	when
-		$record : MedicalRecord()
-		$tFact : Fact(category == "hasTClassification",  documentType != "Pathology Report", $tname : name, $patientId : patientIdentifier,
-			$documentId : documentId)
-		$nFact : Fact(category == "hasNClassification",  documentType != "Pathology Report", $nname : name, patientIdentifier==$patientId,
-			 documentId==$documentId)
-		$mFact : Fact(category == "hasMClassification",  documentType != "Surgical Pathology Report", $mname : name, patientIdentifier==$patientId,
-			 documentId==$documentId)
-		$domain : Domain($domainName : domainName)
-		$cFact : Fact(summaryType == "CancerSummary", documentType == "RecordSummary", 
-					 $cancer_bs_name : name, $cSummaryId : summaryId, 
-					$cancer_ancestors: ancestors, ($cancer_bs_name==$domainName || $cancer_ancestors contains $domainName))
-		not(
-			Fact(summaryType == "CancerPhenotype", documentType == "RecordSummary", $tSummaryId : summaryId, containerIdentifier contains $cSummaryId)
-		)
-		
-	then 
-		modify($mFact){	addRulesApplied("genericT-1.1") }
-	// create cPhe fact
-		Fact tf = FactFactory.createFact($tumor1_f, $tumor1_f.getType(), OwlOntologyConceptUtil.BREAST_CANCER_OWL+"#"+$tumor1_name, "RecordSummary");
-		tf.addContainerIdentifier($cancerSummaryId);
-		String newId = "TumorSummary-"+$tumor1_f.getType()+"-"+$tumor1_name;
-		tf.setIdentifier(newId);
-		tf.addProvenanceFact($tumor1_f);
-		tf.addContainerIdentifier($cSummaryFact.getSummaryId());
-		insert(new idMapper($tumor1_identifier, newId, $documentType, $tumor1_f.getSummaryId(), tf.getSummaryId()));
-		insert(tf);
-		FactHelper.addFactToSummary($tumor1_f, $record.getCancerSummary(), newId, OwlOntologyConceptUtil.BREAST_CANCER_OWL);
-		
- end
- 
-*/
-
-/*
-* If there is an instance of pN1, then create an instance of positive lymph node. 
-* ==
-* pN1(?pn1), Positive(?pos), LymphNodeInvolvement(?lni), Tumor(?tumor), LocalRecurrence(?locrec), 
-* TumorPhenotype(?tumphen), swrlx:makeOWLThing(?pn1, ?lni, ?tumor, ?tumphen) -> 
-* hasInterpretation(?lni, ?pos), hasTumorType(?tumor, ?locrec), hasPhenotype(?tumor, ?tumphen), hasManifestation(?tumphen, ?lni) 
-*/
-/*
-rule "TNM_pN1-1"
-	no-loop true
-	when
-		
-		$tFact : Fact(summaryType == "TumorSummary", name=="Local", $summaryType : summaryType, $summaryId : summaryId,
-					rulesApplied not contains "TNM_pN1-1")
-		$nFact : Fact(category == "hasMClassification", name matches ".*pN1.*", 
-			containerIdentifier contains "aaa")
-		$tphFact : Fact(summaryType == "TumorPhenotype", containerIdentifier contains "aaa")
-		$lymphFact : Fact(category == "hasLymphNodeInvolvement", name matches ".*pN1.*", 
-			containerIdentifier contains "aaa")
-		
-		// Positive(?pos)
-        //hasInterpretation(?lni, ?pos)
-        // hasManifestation(?tumphen, ?lni)
-	
-		
-	then 
-		System.out.println("TNM_pN1-1 fired");
-		//System.out.println(" ***** FOUND positive lymph node "+$mMap);
- end 
- */
-	
-/*
-* If there is an instance of Tis, then create an instance of tumor with tumor type="primary" 
-* that has a tumor phenotype with tumor extent="in-situ". 
-* ==
-* Tis(?tis), Tumor(?tumor), TumorPhenotype(?tumphen), PrimaryTumor(?primary), In-Situ(?insitu), 
-* swrlx:makeOWLThing(?tis, ?tumor, ?tumorphen, ?insitu) -> hasTumorType(?tumor, ?primary), 
-* hasPhenotype(?tumor, ?tumorphen), hasTumorExtent(?tumorphen, ?insitu) 
-*/
-/*
-rule "TNM_Tis-1" 
-	no-loop true
-	when
-	
-		$tFact : Fact(summaryType == "TumorSummary", $summaryType : summaryType, $summaryId : summaryId,
-					rulesApplied not contains "TNM_Tis-1")
-		$tisFact : Fact(category == "hasTClassification", name matches ".*Tis.*",
-				containerIdentifier contains "aaa")
-		$tphFact : Fact(summaryType == "TumorPhenotype", containerIdentifier contains "aaa")
-		$inFact : Fact(name=="In_Situ_Lesion", 	category == "hasTumorExtent", containerIdentifier contains "aaa")	
-		// PrimaryTumor(?primary)
-		
-	then 
-		System.out.println(" ***** FOUND Tis-1 "+$tFact);
-		// hasTumorExtent(?tumorphen, ?insitu) 
- end 
- */
- 
-/*
-* If there is an instance of pN1mi, then create an instance of tumors with 
-* tumor type ="distant recurrence" and body site = "lymph node" 
-* ==
-* pN1mi(?pn), Tumor(?tumor), DistantRecurrence(?distant), 'Lymph Node'(?ln), BreastCancerTumorPhenotype(?tumorphen), 
-* Micrometastasis(?micromet) -> hasTumorType(?tumor, ?distant), 
-* hasPhenotype(?tumor, ?tumorphen), hasManifestation(?tumorphen, ?micromet) 
-*/
-/*
-rule "TNM_pN1m1-1"
-	when
-		$tFact : Fact(summaryType == "TumorSummary", name=="Distant", $summaryType : summaryType, $summaryId : summaryId,
-					rulesApplied not contains "TNM_pN1m1-1")
-		
-		$nmFact : Fact(category == "hasNClassification", name matches ".*pN1m1.*", containerIdentifier contains "aaa")
-		$tphFact : Fact(summaryType == "TumorPhenotype", containerIdentifier contains "aaa")
-		$sFact : Fact(category == "hasBodySite", name=="Lymph Node", containerIdentifier contains "aaa")
-		
-		//Micrometastasis
-	then 
-		System.out.println(" ***** FOUND positive lymph node "+$sFact);
- end  
-
-*/
-    

@@ -1,5 +1,6 @@
 package org.healthnlp.deepphe.uima.ae;
 
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -113,21 +114,32 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			// insert new medical record
 			droolsSession.insert(new Domain("Breast"));
 			droolsSession.insert(record);
+boolean doWrite = false;
+FileWriter fw = null;
+if(doWrite)
+fw = new FileWriter("/home/opm1/devSrc/deepPhe_Data/DeepPhe/sample/output_frank/droolsInput.txt");	
 			for (Fact f : record.getReportLevelFacts()) {
 				try {
 					if (!f.getCategory().equalsIgnoreCase("wasDerivedFrom") && !dupList.contains(f.getInfo())) {
 						dupList.add(f.getInfo());
-						System.out.println(f.getInfo());
+if(doWrite)
+fw.write(f.getInfo());
+	
+						
+						//System.out.println(f.getInfo());
 						droolsSession.insert(f);
 					}
 				} catch (NullPointerException e) {
 					// System.err.println("NO Category for F: "+f.getInfo());
 				}
 			}
-			droolsSession.fireAllRules();
-			droolsSession.dispose();
+if(fw != null)
+fw.close();
 			dupList.clear();
 			dupList = null;
+			droolsSession.fireAllRules();
+			droolsSession.dispose();
+			
 
 			// System.out.println("DROOLS TIME: "+(System.currentTimeMillis() -
 			// stT)/1000+" sec");

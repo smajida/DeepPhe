@@ -150,7 +150,7 @@ public class FactFactory {
 
 	private static Fact createTNMFact(Finding tnm) {
 		TNMFact fact = (TNMFact) createFact(tnm,new TNMFact());
-		for(String mod: FHIRUtils.getExtensions(tnm,FHIRUtils.TNM_MODIFIER_URL)){
+		for(String mod: FHIRUtils.getProperty(tnm,FHIRUtils.TNM_MODIFIER_URL)){
 			Fact f = createFact(FHIRUtils.getCodeableConcept(URI.create(mod)));
 			f.setType(FHIRConstants.TNM_MODIFIER);
 			f.setCategory(FHIRConstants.HAS_TNM_PREFIX);
@@ -167,6 +167,7 @@ public class FactFactory {
 			TextMention mention = createTextMention(m);
 			fact.addProvenanceText(mention);
 		}
+		fact.setProperties(FHIRUtils.getProperties((DomainResource)resource));
 			
 		return fact;
 	}
@@ -351,6 +352,11 @@ public class FactFactory {
 		fact.setName(f.getName());
 		fact.setLabel(f.getLabel());
 		fact.setIdentifier("Fact_"+fact.getName()+"_"+System.currentTimeMillis());
+		fact.addPropeties(f.getProperties());
+		fact.setDocumentIdentifier(f.getDocumentIdentifier());
+		fact.setDocumentType(f.getDocumentType());
+		fact.setPatientIdentifier(f.getPatientIdentifier());
+		
 		return fact;
 	}
 	
