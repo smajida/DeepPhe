@@ -39,6 +39,9 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 		for(CodeableConcept l: getBodySite()){
 			st.append(" | location: "+l.getText());
 		}
+		// add text provenance
+		st.append(" [ "+FHIRUtils.getMentions(this)+" ]");
+		
 		return st.toString();
 	}
 	public Resource getResource() {
