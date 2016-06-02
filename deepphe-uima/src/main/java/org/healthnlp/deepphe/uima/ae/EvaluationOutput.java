@@ -87,9 +87,7 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 		if(record.getPatient()==null) {
 			throw new AnalysisEngineProcessException(new Exception("Medical Record has no patient attached. Skipping"));
 		}
-
-		System.out.println(record.getSummaryText());
-		
+		//System.out.println(record.getSummaryText());
 		writeDataFile(cancerMapping, new File(outputDir,EVAL_CANCER_FILE), record.getCancerSummary());
 		writeDataFile(tumorMapping,  new File(outputDir,EVAL_TUMOR_FILE), record.getCancerSummary().getTumors());
 	}
