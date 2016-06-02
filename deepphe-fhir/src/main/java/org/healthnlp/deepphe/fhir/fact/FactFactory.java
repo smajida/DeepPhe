@@ -362,7 +362,7 @@ public class FactFactory {
 	
 	public static Fact createTumorFactModifier(String uri, Fact tSummaryF, Fact  cSummaryF, String summaryType, 
 			String category, String documentType, String type){
-		Fact f =  FactFactory.createFact(FHIRConstants.MODIFIER, uri);
+		Fact f =  FactFactory.createFact(type, uri);
 		
 		f.addProvenanceFact(cSummaryF);
 		f.addProvenanceFact(tSummaryF);
