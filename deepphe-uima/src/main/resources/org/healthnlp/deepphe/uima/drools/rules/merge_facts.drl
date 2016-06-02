@@ -312,10 +312,12 @@ System.out.print(".");
 		 	mt.addTumorFact(FHIRConstants.BODY_SIDE, tl.getBodySideFact());
 		 	insert(new IdMapper(tl.getBodySideFact().getIdentifier(), mt.getMergedTumorId(), 
 		 		tl.getBodySideFact().getDocumentType(), tl.getBodySideFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
-		 		
-		 	mt.addTumorFact(FHIRConstants.QUADRANT, tl.getQuadrantFact());
-		 	insert(new IdMapper(tl.getQuadrantFact().getIdentifier(), mt.getMergedTumorId(), 
-		 		tl.getQuadrantFact().getDocumentType(), tl.getQuadrantFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 	
+		 	if(	tl.getQuadrantFact() != null){
+			 	mt.addTumorFact(FHIRConstants.QUADRANT, tl.getQuadrantFact());
+			 	insert(new IdMapper(tl.getQuadrantFact().getIdentifier(), mt.getMergedTumorId(), 
+			 		tl.getQuadrantFact().getDocumentType(), tl.getQuadrantFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		}
 		 	
 		 	mt.addTumorFact(FHIRConstants.CLOCKFACE_POSITION, tl.getClockfacePosFact());
 		 	insert(new IdMapper(tl.getClockfacePosFact().getIdentifier(), mt.getMergedTumorId(), 
@@ -374,9 +376,11 @@ rule "merge_tumors_by_location_no_clockface"
 			 	insert(new IdMapper(tl.getBodySideFact().getIdentifier(), mt.getMergedTumorId(), 
 		 		tl.getBodySideFact().getDocumentType(), tl.getBodySideFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
 		 		
-			 	mt.addTumorFact(FHIRConstants.QUADRANT, tl.getQuadrantFact());
-			 	insert(new IdMapper(tl.getQuadrantFact().getIdentifier(), mt.getMergedTumorId(), 
-		 		tl.getQuadrantFact().getDocumentType(), tl.getQuadrantFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		if(	tl.getQuadrantFact() != null){
+				 	mt.addTumorFact(FHIRConstants.QUADRANT, tl.getQuadrantFact());
+				 	insert(new IdMapper(tl.getQuadrantFact().getIdentifier(), mt.getMergedTumorId(), 
+			 		tl.getQuadrantFact().getDocumentType(), tl.getQuadrantFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		}
 		 	
 			 	tl.setReadyForRetraction(true);
 				update (tl);
@@ -401,9 +405,11 @@ rule "merge_tumors_by_location_no_clockface"
 			 	insert(new IdMapper(tl.getBodySideFact().getIdentifier(), mt.getMergedTumorId(), 
 		 		tl.getBodySideFact().getDocumentType(), tl.getBodySideFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
 		 		
-			 	mt.addTumorFact(FHIRConstants.QUADRANT, tl.getQuadrantFact());
-			 	insert(new IdMapper(tl.getQuadrantFact().getIdentifier(), mt.getMergedTumorId(), 
-		 		tl.getQuadrantFact().getDocumentType(), tl.getQuadrantFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+		 		if(	tl.getQuadrantFact() != null){
+				 	mt.addTumorFact(FHIRConstants.QUADRANT, tl.getQuadrantFact());
+				 	insert(new IdMapper(tl.getQuadrantFact().getIdentifier(), mt.getMergedTumorId(), 
+			 		tl.getQuadrantFact().getDocumentType(), tl.getQuadrantFact().getSummaryId(), "TumorSummary-"+mt.getMergedTumorId()));
+			 	}
 			 	
 			 	tl.setReadyForRetraction(true);
 				update (tl);

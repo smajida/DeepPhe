@@ -5,7 +5,7 @@ import org.healthnlp.deepphe.fhir.fact.Fact;
 public class TumorLocator {
 	private String bodySite="", docTumorId, recordId, bodySide="", quadrant="", clockFacePos="";
 	private String histologicType = "";
-	private Fact tumorSiteFact, bodySideFact, quadrantFact, clockfacePosFact;
+	private Fact tumorSiteFact = null, bodySideFact = null, quadrantFact = null, clockfacePosFact = null;
 	
 	private boolean readyForRetraction = false;
 
