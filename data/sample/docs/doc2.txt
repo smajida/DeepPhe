@@ -5,4 +5,4 @@ Record Type...................PGN
 ===================================================================
 
 Patient is a 54 year old female with history of pT2N0M0 left breast cancer with ER-neg, 
-PR-neg, HER2+, now undergoing neoadjuvant chemo with taxotere, carboplatin, Herceptin, and pertuzumab.
+PR-neg, HER2+, performed by IHC now undergoing neoadjuvant chemo with taxotere, carboplatin, Herceptin, and pertuzumab.
