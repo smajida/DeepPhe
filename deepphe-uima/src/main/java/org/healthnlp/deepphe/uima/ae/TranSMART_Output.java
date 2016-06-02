@@ -94,7 +94,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 			for(String l=r.readLine();l != null;l = r.readLine()){
 				String [] parts = l.split(T);
 				if(parts.length==2)
-					nameMap.put(parts[0].trim(),parts[1].trim());
+					nameMap.put(parts[0].trim().toUpperCase(),parts[1].trim());
 			}
 			r.close();
 		}
@@ -157,7 +157,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 			buffer.append(value).append(T);
 
 		}
-		buffer.append("\n");
+		//buffer.append("\n");
 
 
 		// save to file
@@ -204,7 +204,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 
 
 	private String getSubjectId(MedicalRecord record) {
-		String name = record.getPatient().getPatientName();
+		String name = record.getPatient().getPatientName().toUpperCase();
 		return nameMap.containsKey(name)?nameMap.get(name):name;
 	}
 

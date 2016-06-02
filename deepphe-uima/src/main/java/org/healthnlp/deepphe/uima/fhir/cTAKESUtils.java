@@ -3,14 +3,17 @@ package org.healthnlp.deepphe.uima.fhir;
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+
 import org.apache.ctakes.cancer.concept.instance.ConceptInstance;
 import org.apache.ctakes.cancer.concept.instance.ConceptInstanceUtil;
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
+import org.apache.ctakes.cancer.owl.OwlUriUtil;
 import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
 import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.CancerSize;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.core.util.OntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.refsem.Time;
@@ -29,13 +32,15 @@ import org.apache.uima.jcas.cas.FSArray;
 import org.apache.uima.jcas.cas.TOP;
 import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.jcas.tcas.DocumentAnnotation;
+import org.healthnlp.deepphe.fhir.Element;
+import org.healthnlp.deepphe.util.FHIRConstants;
 import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.Extension;
-import org.healthnlp.deepphe.fhir.Element;
+
 import java.net.URI;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -73,15 +78,20 @@ public class cTAKESUtils {
 		StringBuffer b = new StringBuffer(mention.getCoveredText());
 		int st = mention.getBegin();
 		int en = mention.getEnd();
-		
-		for(ConceptInstance v : ConceptInstanceUtil.getPropertyValues(conceptInstance)){
-			b.append(v.getIdentifiedAnnotation().getCoveredText());
-			en = v.getIdentifiedAnnotation().getEnd();
+		if(!equals(conceptInstance,FHIRConstants.QUANTITY_URI)){
+			for(ConceptInstance v : ConceptInstanceUtil.getPropertyValues(conceptInstance)){
+				b.append(v.getIdentifiedAnnotation().getCoveredText());
+				en = v.getIdentifiedAnnotation().getEnd();
+			}
 		}
 		return FHIRUtils.createMentionExtension(b.toString(),st, en );
 	}
 
 
+	public static boolean equals(ConceptInstance conceptInstance,URI u){
+		return u.toString().equals(conceptInstance.getUri());
+	}
+	
 	/**
 	 * get codeblce concept form OntologyConcept annotation
 	 * @param ia -
@@ -194,7 +204,7 @@ public class cTAKESUtils {
 	 */
 	public static String getConceptURI(IdentifiedAnnotation ia){
 		// TODO - can use OwlOntologyConceptUtil.getUris( ia );
-		return OwlOntologyConceptUtil.getUris( ia ).stream().findFirst().orElse( OwlOntologyConceptUtil.UNKNOWN_URI );
+		return OwlOntologyConceptUtil.getUris( ia ).stream().findFirst().orElse( OwlConstants.UNKNOWN_URI );
 //		String cui = null;
 //		for(int i=0;i<ia.getOntologyConceptArr().size();i++){
 //			OntologyConcept c = ia.getOntologyConceptArr(i);
@@ -548,5 +558,23 @@ public class cTAKESUtils {
 			dx.addExtension( FHIRUtils.createExtension( FHIRUtils.LANGUAGE_ASPECT_HISTORICAL_URL,
 					"" + conceptInstance.inPatientHistory() ) );
 		}
+	}
+
+
+	/*
+	 * get TNM modifier extentions for a TNM instnace
+	 */
+	public static Collection<ConceptInstance> getTNM_Modifiers(ConceptInstance conceptInstance) {
+		// only return text that matches a predefined list
+		return ConceptInstanceUtil.getDiagnosticTests(conceptInstance).stream().
+				filter(t -> FHIRConstants.TNM_MODIFIER_LIST.contains(t.getIdentifiedAnnotation().getCoveredText())).
+				collect( Collectors.toList());
+	}
+
+
+	public static Extension createTNM_ModifierExtension(ConceptInstance i) {
+		//TODO: it is a hack, but it is the best I can do for now
+		String mod = i.getIdentifiedAnnotation().getCoveredText();
+		return FHIRUtils.createExtension(FHIRUtils.TNM_MODIFIER_URL, OwlConstants.BREAST_CANCER_OWL+"#"+mod+"_modifier");
 	}
 }

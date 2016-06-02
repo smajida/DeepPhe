@@ -1,6 +1,6 @@
 package org.apache.ctakes.cancer.phenotype.tnm;
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.phenotype.property.Test;
 
 import java.util.regex.Matcher;
@@ -15,19 +15,19 @@ import java.util.regex.Pattern;
  */
 enum TnmPrefix implements Test {
    C( "Classification given by clinical examination",
-         OwlOntologyConceptUtil.SCHEMA_OWL + "#" + "DiagnosticProcedure", "c" ),
+         OwlConstants.CANCER_OWL + "#" + "c_modifier", "c" ),
    P( "Classification given by pathologic examination",
-         OwlOntologyConceptUtil.SCHEMA_OWL + "#" + "DiagnosticProcedure", "p" ),
+         OwlConstants.CANCER_OWL + "#" + "p_modifier", "p" ),
    Y( "Classification assessed after chemotherapy and/or radiation",
-         OwlOntologyConceptUtil.SCHEMA_OWL + "#" + "DiagnosticProcedure", "y" ),
+         OwlConstants.SCHEMA_OWL + "#" + "DiagnosticProcedure", "y" ),
    R( "Classification for a recurrent tumor",
-         OwlOntologyConceptUtil.SCHEMA_OWL + "#" + "DiagnosticProcedure", "r" ),
+         OwlConstants.SCHEMA_OWL + "#" + "DiagnosticProcedure", "r" ),
    A( "Classification determined at autopsy",
-         OwlOntologyConceptUtil.SCHEMA_OWL + "#" + "DiagnosticProcedure", "a" ),
+         OwlConstants.SCHEMA_OWL + "#" + "DiagnosticProcedure", "a" ),
    U( "Classification determined by ultrasound or endosonography",
-         OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + "Endoscopic_Ultrasound", "u" ),
+         OwlConstants.BREAST_CANCER_OWL + "#" + "Endoscopic_Ultrasound", "u" ),
    UNSPECIFIED( "Classification determination unspecified; assume clinical examination",
-         OwlOntologyConceptUtil.SCHEMA_OWL + "#" + "DiagnosticProcedure", "-" );
+         OwlConstants.SCHEMA_OWL + "#" + "DiagnosticProcedure", "-" );
 
 
    static private final String PARENT_URI = "#DiagnosticProcedure";

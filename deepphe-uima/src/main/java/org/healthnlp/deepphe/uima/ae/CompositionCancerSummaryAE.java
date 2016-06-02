@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.uima.ae;
 import edu.pitt.dbmi.nlp.noble.ontology.*;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
@@ -13,8 +14,11 @@ import org.healthnlp.deepphe.fhir.fact.*;
 import org.healthnlp.deepphe.fhir.summary.*;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
+import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.OntologyUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
+
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.ILogicExpression;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
@@ -22,6 +26,8 @@ import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import edu.pitt.dbmi.nlp.noble.ontology.IRestriction;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -45,6 +51,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		super.initialize(aContext);
 		try {
 			ontology = OOntology.loadOntology((String) aContext.getConfigParameterValue(PARAM_ONTOLOGY_PATH));
+			OntologyUtils.getInstance(ontology);
 		} catch (IOntologyException e) {
 			throw new ResourceInitializationException(e);
 		}
@@ -72,108 +79,14 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			//System.out.println(report.getSummaryText());
 		}
 		
-
 		PhenotypeResourceFactory.saveMedicalRecord(record, jcas);
 	}
 
-	
-	/**
-	 * load template based on the ontology
-	 * @param summary
-	 * @param uri
-	 */
-	private void loadTemplate(Summary summary){
-		IClass summaryClass = ontology.getClass(""+summary.getConceptURI());
-		if(summaryClass != null){
-			// see if there is a more specific
-			for(IClass cls: summaryClass.getDirectSubClasses()){
-				summaryClass = cls;
-				break;
-			}
-			
-			// now lets pull all of the properties
-			for(Object o: summaryClass.getNecessaryRestrictions()){
-				if(o instanceof IRestriction){
-					IRestriction r = (IRestriction) o;
-					if(isSummarizableRestriction(r)){
-						if(!summary.getContent().containsKey(r.getProperty().getName())){
-							FactList facts = new DefaultFactList();
-							facts.setCategory(r.getProperty().getName());
-							facts.setTypes(getClassNames(r.getParameter()));
-							summary.getContent().put(r.getProperty().getName(),facts);
-						}else{
-							for(String type: getClassNames(r.getParameter())){
-								summary.getContent().get(r.getProperty().getName()).getTypes().add(type);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	/**
-	 * should this restriction be used for summarization
-	 * @param r
-	 * @return
-	 */
-	private boolean isSummarizableRestriction(IRestriction r){
-		IClass bs = ontology.getClass(FHIRConstants.BODY_SITE);
-		IClass event = ontology.getClass(FHIRConstants.EVENT);
-	
-		if(r.getProperty().isObjectProperty()){
-			for(String name : getClassNames(r.getParameter())){
-				IClass cls = ontology.getClass(name);
-				return cls.hasSuperClass(event) || cls.equals(bs) || cls.hasSuperClass(bs);
-			}
-		}
-		return false;
-	}
-	
 
-	private List<String> getClassNames(ILogicExpression exp){
-		List<String> list = new ArrayList<String>();
-		for(Object o: exp){
-			if(o instanceof IClass){
-				list.add(((IClass)o).getName());
-			}
-		}
-		return list;
-	}
-	
-	/**
-	 * load fact categories from the template
-	 * @param summary
-	 * @param report
-	 */
-	private void loadElementsFromReport(Summary summary, Report report){
-		for(String category: summary.getFactCategories()){
-			for(String name: summary.getFacts(category).getTypes()){
-				IClass cls = ontology.getClass(name);
-				if(cls != null){
-					for(Element e: report.getReportElements()){
-						URI uri  = FHIRUtils.getConceptURI(e.getCode());
-
-						if(uri != null){
-							IClass c = ontology.getClass(""+uri);
-							if(c != null){
-								if(c.equals(cls) || c.hasSuperClass(cls)){
-									Fact fact = FactFactory.createFact(e);
-									addAncestors(fact);
-									summary.addFact(category,fact);
-								}
-							}
-						}
-					}
-				}
-			}
-		}	
-	}
-	
 	
 	private PatientSummary createPatientSummary(Patient loadPatient) {
 		PatientSummary ps = new PatientSummary();
-		loadTemplate(ps);
+		ps.loadTemplate(ontology);
 		// TODO: actually fill it out
 		return ps;
 	}
@@ -189,7 +102,111 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		}
 		return false;
 	}
+
 	
+	/**
+	 * get conditions by locations
+	 * @param report
+	 * @return
+	 */
+	private Map<BodySiteFact,ConditionFact> getConditionsByLocation(Report report){
+		Map<BodySiteFact,ConditionFact> map = new LinkedHashMap<BodySiteFact,ConditionFact>();
+		for(Element e: report.getReportElements()){
+			// if we have a tumor trigger
+			if(e instanceof Condition && hasTrigger(tumorTriggers, (Condition)e)){
+				Condition c = (Condition) e;
+				for(CodeableConcept cc: c.getBodySite()){
+					BodySiteFact site = (BodySiteFact) FactFactory.createFact(cc);
+					//System.err.println(c.getDisplayText()+"\tat\t"+site.getSummaryText());
+					addConditionToMap(site,c,map);
+				}
+			}
+		}
+		// now lets look at it
+		/*for(BodySiteFact f: map.keySet()){
+			System.err.println("\t"+f.getSummaryText()+"\t\t -> \t"+map.get(f).getSummaryText());
+		}*/
+		
+		return map;
+	}
+	
+	
+	/**
+	 * add condition map
+	 * @param site
+	 * @param c
+	 * @param map
+	 */
+	private void addConditionToMap(BodySiteFact site, Condition c, Map<BodySiteFact,ConditionFact> map) {
+		ConditionFact tumor = FactFactory.createFact(c);
+		boolean added = false;
+		for(BodySiteFact s: new HashSet<BodySiteFact>(map.keySet())){
+			BodySiteFact merged_site = mergeFact(site,s);
+			ConditionFact merged_condition = mergeFact(tumor,map.get(s));
+			// if merge was succesfull, then replace the old value in map
+			if(merged_site != null && merged_condition != null){
+				map.remove(s);
+				map.put(merged_site, merged_condition);
+				added = true;
+				break;
+			}
+		}
+		if(!added){
+			map.put(site,tumor);
+		}
+	}
+
+	private ConditionFact mergeFact(ConditionFact a, ConditionFact b) {
+		if(!isSameTime(a,b))
+			return null;
+			
+		ConditionFact specific = (ConditionFact) OntologyUtils.getInstance().getSpecificFact(a,b);
+		if(specific != null){
+			ConditionFact fact = (ConditionFact) FactFactory.createFact(specific);
+			fact.addProvenanceFact(a);
+			fact.addProvenanceFact(b);
+			return fact;
+		}
+		return null;
+	}
+
+	private boolean isSameTime(ConditionFact a, ConditionFact b) {
+		String a_time = a.getProperty(FHIRUtils.LANGUAGE_ASPECT_DOC_TIME_REL_URL);
+		String b_time = b.getProperty(FHIRUtils.LANGUAGE_ASPECT_DOC_TIME_REL_URL);
+		
+		//return a_time != null && b_time != null ? a_time.equals(b_time): true;
+		return true;
+	}
+
+	private BodySiteFact mergeFact(BodySiteFact a, BodySiteFact b) {
+		BodySiteFact specific = (BodySiteFact) OntologyUtils.getInstance().getSpecificFact(a,b);
+		if(specific != null){
+			//TODO: right now check side, but merge the rest of modifiers (will see what happens)
+			Fact side  = getCommonModifier(a.getBodySide(),b.getBodySide());
+			if(side != null || (a.getBodySide() == null && b.getBodySide() == null)){
+				BodySiteFact fact = (BodySiteFact) FactFactory.createFact(specific);
+				for(Fact m: a.getModifiers())
+					fact.addModifier(m);
+				for(Fact m: b.getModifiers())
+					fact.addModifier(m);
+				fact.addProvenanceFact(a);
+				fact.addProvenanceFact(b);
+				
+				return fact;
+			}
+		}
+		return null;
+	}
+
+	private Fact getCommonModifier(Fact a, Fact b) {
+		if(a != null && b != null)
+			return a.getUri().equals(b.getUri())?a:null;
+		else if(a != null)
+			return a;
+		else if(b != null)
+			return b;
+		return null;
+	}
 
 	/**
 	 * create Tumor and Cancer summaries
@@ -198,89 +215,21 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	 */
 	private List<Summary> createSummaries(Report report) {
 		List<Summary> list = new ArrayList<Summary>();
-		CancerSummary cancer = null;
-		TumorSummary tumor = null;
-		
-		// doc1 - cancer + tumor
-		// doc2 - cancer (for now)
-		// doc3 - cancer (metastatic neoplasm) - tumor (for 
-		
-		// explicit mentions mentions of cancer, carcinoma, any disease under 'malignant breast neoplasm' class "metastatic neoplasm"
-		// If in pathology report, then generate tumor instance as well.
-		//TODO: what to do about multiple diagnosis and tumors
-		Disease cancerDx = null;
-		for(Disease c: report.getDiagnoses()){
-			if(hasTrigger(cancerTriggers,c)){
-				cancer = createCancerSummary(report,c);
-				cancerDx = c;
-				list.add(cancer);
-				break;
+	
+		Map<BodySiteFact, ConditionFact> tumors = getConditionsByLocation(report);
+		if(!tumors.isEmpty()){
+			CancerSummary cancer = createCancerSummary(report,tumors);
+			for(BodySiteFact site: tumors.keySet()){
+				ConditionFact condition = tumors.get(site);
+				TumorSummary tumor = createTumorSummary(report,condition,site);
+				cancer.addTumor(tumor);
 			}
+			list.add(cancer);
 		}
 		
-		// create tumor summary if we talke about cancer in trigger document
-		if(cancer != null && documentTypeTriggers.contains(report.getType())){
-			tumor = createTumorSummary(report,cancerDx,cancer);
-			cancer.addTumor(tumor);
-		}
-		
-		// if tumor not yet defined, try searching for one
-		if(tumor == null){
-			for(Element e: report.getReportElements()){
-				// if we have a tumor trigger
-				if(e instanceof Condition && hasTrigger(tumorTriggers, (Condition)e)){
-					tumor = createTumorSummary(report,(Condition) e,cancer);
-					if(cancer != null){
-						cancer.addTumor(tumor);
-					}else{
-						list.add(tumor);
-					}
-					break;
-				}
-			}
-		}
-				
 		return list;
 	}
 
-	/**
-	 * create a fact
-	 * @param cc
-	 * @return
-	 */
-	private Fact createFact(CodeableConcept cc){
-		Fact fact = null;
-		URI uri = FHIRUtils.getConceptURI(cc);
-		if(uri != null){
-			IClass cls = ontology.getClass(""+uri);
-			if(cls != null){
-				fact = new Fact();
-				if(cls.hasSuperClass(ontology.getClass(FHIRConstants.OBSERVATION)))
-					fact = new ObservationFact();
-				else if(cls.hasSuperClass(ontology.getClass(FHIRConstants.CONDITION)))
-					fact = new ConditionFact();
-				else if(cls.hasSuperClass(ontology.getClass(FHIRConstants.BODY_SITE)))
-					fact = new BodySiteFact();
-				else if(cls.hasSuperClass(ontology.getClass(FHIRConstants.PROCEDURE)))
-					fact = new ProcedureFact();
-				fact = FactFactory.createFact(cc,fact);
-				addAncestors(fact);
-				
-			}else{
-				System.err.println("WTF no class; "+cc.getText()+" "+uri);
-			}
-		}
-		return fact;
-	}
-	
-	
-	private void addAncestors(Fact fact){
-		org.healthnlp.deepphe.uima.fhir.OntologyUtils ou = new org.healthnlp.deepphe.uima.fhir.OntologyUtils(ontology);
-		ou.addAncestors(fact);
-		for(Fact f:	fact.getContainedFacts()){
-			ou.addAncestors(f);
-		}
-	}
 	
 	
 	/**
@@ -289,137 +238,97 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	 * @param diagnosis
 	 * @return
 	 */
-	private CancerSummary createCancerSummary(Report report, Disease diagnosis){
-		CancerSummary cancer = new CancerSummary();
-		loadTemplate(cancer);
+	private CancerSummary createCancerSummary(Report report, Map<BodySiteFact,ConditionFact> tumors){
+		CancerSummary cancer = new CancerSummary(report.getTitle());
+		
+		cancer.loadTemplate(ontology);
 		CancerPhenotype phenotype = cancer.getPhenotype();
-		loadTemplate(phenotype);
-		//cancer.addPhenotype(phenotype);
+		phenotype.loadTemplate(ontology);
 		
-		// add body location
-		for(CodeableConcept cc: diagnosis.getBodySite()){
-			cancer.addFact(FHIRConstants.HAS_BODY_SITE,createFact(cc));
-		}
+		//TODO: this will suck out everything, we really only need to add stuff that 
+		// is related to given set of tumors in diagnosis
+		cancer.loadElementsFromReport(report,ontology);
+		phenotype.loadElementsFromReport(report,ontology);
 		
-		// add TNM stage infromation
-		
-		Stage stage = diagnosis.getStage();
-		if(stage != null){
-			phenotype.addFact(FHIRConstants.HAS_CANCER_STAGE,createFact(stage.getSummary()));
-			phenotype.addFact(FHIRConstants.HAS_T_CLASSIFICATION,createFact(stage.getPrimaryTumorStageCode()));
-			phenotype.addFact(FHIRConstants.HAS_N_CLASSIFICATION,createFact(stage.getRegionalLymphNodeStageCode()));
-			phenotype.addFact(FHIRConstants.HAS_M_CLASSIFICATION,createFact(stage.getDistantMetastasisStageCode()));
-		}
+		// set Dx, remove what got sucked out from report
+		cancer.clearFactList(FHIRConstants.HAS_DIAGNOSIS);
+		phenotype.clearFactList(FHIRConstants.HAS_HISTOLOGIC_TYPE);
+		phenotype.clearFactList(FHIRConstants.HAS_TUMOR_EXTENT);
+		phenotype.clearFactList(FHIRConstants.HAS_CANCER_TYPE);
 		
 		
-		// create diagnosis fact
-		Fact dx = FactFactory.createFact(diagnosis);
-		addAncestors(dx);
-		
-		// adnecarcionma vs sarcoma
-		CodeableConcept ct = getCancerType(diagnosis);
-		if(ct != null){
-			Fact f = createFact(ct);
-			f.addProvenanceFact(dx);
-			phenotype.addFact(FHIRConstants.HAS_CANCER_TYPE,f);
-		}
-		// insitu vs invasive 
-		CodeableConcept te = getTumorExtent(diagnosis);
-		if(te != null){
-			Fact f = createFact(te);
-			f.addProvenanceFact(dx);
-			phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,f);  
-		}
-		
-		//phenotype.addHistologicType(null); // ductal, lobular infered from DX
-		CodeableConcept ht = getHistologicType(diagnosis);
-		if(ht != null){
-			Fact f = createFact(ht);
-			f.addProvenanceFact(dx);
-			phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,f);
-		}
-		
-		loadElementsFromReport(cancer, report);
+		for(BodySiteFact bodySite: tumors.keySet()){
+			ConditionFact diagnosis = tumors.get(bodySite);
 			
+			// add body location
+			cancer.addFact(FHIRConstants.HAS_BODY_SITE,bodySite);
+			cancer.addFact(FHIRConstants.HAS_DIAGNOSIS,diagnosis);
+			
+			// infer stuff from Dx
+			Fact histType = getLexicalPartValue(diagnosis,FHIRConstants.HISTOLOGIC_TYPE_URI);
+			if(histType != null){
+				histType.addProvenanceFact(diagnosis);
+				phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,histType);
+			}
+			// insitu vs invasive 
+			Fact tumorExtent = getLexicalPartValue(diagnosis,FHIRConstants.TUMOR_EXTENT_URI);
+			if(tumorExtent != null){
+				tumorExtent.addProvenanceFact(diagnosis);
+				phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,tumorExtent);
+			}
+			
+			// adnecarcionma vs sarcoma
+			Fact cancerType = getLexicalPartValue(diagnosis,FHIRConstants.CANCER_TYPE_URI);
+			if(cancerType != null){
+				cancerType.addProvenanceFact(diagnosis);
+				phenotype.addFact(FHIRConstants.HAS_CANCER_TYPE,cancerType);
+			}
+		}
+		
+		
 		return cancer;
 	}
 	
 	
-	private TumorSummary createTumorSummary(Report report, Condition diagnosis, CancerSummary cancer){
-		TumorSummary tumor = new TumorSummary();
-		loadTemplate(tumor);
+	private TumorSummary createTumorSummary(Report report, ConditionFact diagnosis, BodySiteFact bodySite){
+		TumorSummary tumor = new TumorSummary(report.getTitle()+Summary.createLocationIdentifier(bodySite));
+		tumor.loadTemplate(ontology);
 		TumorPhenotype phenotype = tumor.getPhenotype();
-		loadTemplate(phenotype);
-		
-		if(diagnosis != null){
-			// create diagnosis fact
-			Fact dx = FactFactory.createFact((Element)diagnosis);
-			addAncestors(dx);
-			// add body location
-			for(CodeableConcept cc: diagnosis.getBodySite()){
-				tumor.addFact(FHIRConstants.HAS_BODY_SITE,createFact(cc));
-			}
+		phenotype.loadTemplate(ontology);
 				
-			//phenotype.addHistologicType(null); // ductal, lobular infered from DX
-			CodeableConcept ht = getHistologicType(diagnosis);
-			if(ht != null){
-				Fact f = createFact(ht);
-				f.addProvenanceFact(dx);
-				phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,f);
-			}
-			// insitu vs invasive 
-			//phenotype.addTumorExtent(null);    // insitu vs invasive
-			CodeableConcept te = getTumorExtent(diagnosis);
-			if(te != null){
-				Fact f = createFact(te);
-				f.addProvenanceFact(dx);
-				phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,f);  
-			}
-			
-			
-			// add treatment (// chemo)
-			loadElementsFromReport(tumor, report);
-			loadElementsFromReport(phenotype, report);
-			
-			
-			
-			// document type RULE
-			// if cancer location is the same as tumor location, then tumor is 'primary'
-			// else tumor type is 'recurrent' if they are not the same
-			// cancer has to be more specific then a tumor, then infer
-			// else can't infer a type
-			//tumor.setTumorType(null);  // primary vs local recurance, distance recurance  infered from rules
-			/*
-			if(cancer != null){
-				URI tumorType = null;
-				if(hasCommonBodySite(cancer.getBodySite(),tumor.getBodySite())){
-					tumorType = FHIRConstants.PRIMARY_TUMOR_URI;
-				}else{
-					tumorType = FHIRConstants.RECURRENT_TUMOR_URI;
-				}
-				if(tumorType != null)
-					tumor.setTumorType(tumor.getTumorType());
-			}
-			*/
+		// add everyting for NOW
+		//TODO: this will suck out everything, we really only need to add stuff that 
+		// is related to given set of tumors in diagnosis
+		tumor.loadElementsFromReport(report,ontology);
+		phenotype.loadElementsFromReport(report,ontology);
+		
+		// add body location
+		tumor.addFact(FHIRConstants.HAS_BODY_SITE,bodySite);
+		
+		// set Dx, remove what got sucked out from report
+		tumor.clearFactList(FHIRConstants.HAS_DIAGNOSIS);
+		phenotype.clearFactList(FHIRConstants.HAS_HISTOLOGIC_TYPE);
+		phenotype.clearFactList(FHIRConstants.HAS_TUMOR_EXTENT);
+		
+		tumor.addFact(FHIRConstants.HAS_DIAGNOSIS,diagnosis);
+		
+		// infer stuff from Dx
+		Fact histType = getLexicalPartValue(diagnosis,FHIRConstants.HISTOLOGIC_TYPE_URI);
+		if(histType != null){
+			histType.addProvenanceFact(diagnosis);
+			phenotype.addFact(FHIRConstants.HAS_HISTOLOGIC_TYPE,histType);
 		}
-
+		// insitu vs invasive 
+		Fact tumorExtent = getLexicalPartValue(diagnosis,FHIRConstants.TUMOR_EXTENT_URI);
+		if(tumorExtent != null){
+			tumorExtent.addProvenanceFact(diagnosis);
+			phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,tumorExtent);
+		}
+		
+	
 		return tumor;
 	}
 	
-	// ductal, lobular infered from DX
-	private CodeableConcept getHistologicType(Condition diagnosis) {
-		return getLexicalPartValue(diagnosis,""+FHIRConstants.HISTOLOGIC_TYPE_URI);
-	}
-	
-	// adnecarcionma vs sarcoma
-	private CodeableConcept getCancerType(Condition dx){
-		return getLexicalPartValue(dx,""+FHIRConstants.CANCER_TYPE_URI);
-	}
-	
-	// insitu vs invasive 
-	private CodeableConcept getTumorExtent(Condition diagnosis) {
-		return getLexicalPartValue(diagnosis, ""+FHIRConstants.TUMOR_EXTENT_URI);
-	}
 	
 	/**
 	 * get lexical part value
@@ -427,54 +336,23 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	 * @param value
 	 * @return
 	 */
-	private CodeableConcept getLexicalPartValue(Condition diagnosis, String value) {
+	private Fact getLexicalPartValue(Fact fact, URI value) {
 		// get values from histologictype and search all synonyms up the tree 
-		IClass dx = ontology.getClass(""+FHIRUtils.getConceptURI(diagnosis.getCode()));
+		IClass dx = ontology.getClass(fact.getName());
 		if(dx != null){
-			for(IClass cls : ontology.getClass(value).getSubClasses()){
+			for(IClass cls : ontology.getClass(""+value).getSubClasses()){
 				if(isLexicalPartOf(cls,dx)){
-					return FHIRUtils.getCodeableConcept(cls.getURI());
+					try {
+						return FactFactory.createFact(value.toURL().getRef(),""+cls.getURI());
+					} catch (MalformedURLException e) {
+						throw new Error(e);
+					}
 				}
 			}
 		}
 		return null;
 	}
 	
-
-	private boolean hasCommonBodySite(List<CodeableConcept> aa, List<CodeableConcept> bb){
-		for(CodeableConcept ca: aa){
-			URI ua = FHIRUtils.getConceptURI(ca);
-			for(CodeableConcept cb: bb){
-				URI ub = FHIRUtils.getConceptURI(cb);
-				// if equal, or first argument is more specific than the second
-				if(ua.equals(ub) || ontology.getClass(ua.toString()).hasSuperClass(ontology.getClass(ub.toString()))){
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
-	private boolean hasCommonBodySite(FactList  aa, FactList bb){
-		try {
-		for(Fact ca: aa){
-			URI ua = new URI(ca.getUri());
-			
-			for(Fact cb: bb){
-				URI ub = new URI(cb.getUri());
-				// if equal, or first argument is more specific than the second
-				if(ua.equals(ub) || ontology.getClass(ua.toString()).hasSuperClass(ontology.getClass(ub.toString()))){
-					return true;
-				}
-			}
-		}
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-		return false;
-	}
 	
 	
 	/**
@@ -509,29 +387,5 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		return false;
 	}
 	
-	/**
-	 * is somethin in a value set
-	 * @param c
-	 * @param classes
-	 * @return
-	 */
-	private boolean isValueSet(CodeableConcept c, List<IClass> classes){
-		IClass cls = ontology.getClass(""+FHIRUtils.getConceptURI(c));
-		if(cls == null)
-			return false;
-		for(IClass parent: classes){
-			if(cls.hasSuperClass(parent))
-				return true;
-		}
-		return false;
-	}
-	/**
-	 * is somethin in a value set
-	 * @param c
-	 * @param classes
-	 * @return
-	 */
-	private boolean isValueSet(CodeableConcept c, IClass parent){
-		return isValueSet(c,Collections.singletonList(parent));
-	}
+
 }

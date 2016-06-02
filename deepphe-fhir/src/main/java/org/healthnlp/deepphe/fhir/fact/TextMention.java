@@ -1,5 +1,8 @@
 package org.healthnlp.deepphe.fhir.fact;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.neo4j.ogm.annotation.GraphId;
 
 public class TextMention {
@@ -15,7 +18,7 @@ public class TextMention {
 		this.objectId = id;
 	}
 	
-	private String text,documentIdentifier,documentType;
+	private String text;
 	private int start, end;
 	public String getText() {
 		return text;
@@ -23,18 +26,7 @@ public class TextMention {
 	public void setText(String text) {
 		this.text = text;
 	}
-	public String getDocumentIdentifier() {
-		return documentIdentifier;
-	}
-	public void setDocumentIdentifier(String documentIdentifier) {
-		this.documentIdentifier = documentIdentifier;
-	}
-	public String getDocumentType() {
-		return documentType;
-	}
-	public void setDocumentType(String documentType) {
-		this.documentType = documentType;
-	}
+	
 	public int getStart() {
 		return start;
 	}
@@ -52,5 +44,11 @@ public class TextMention {
 	}
 	public String getMention(){
 		return text+" ["+start+":"+end+"]";
+	}
+	public boolean equals(Object o){
+		return toString().equals(o.toString());
+	}
+	public int hashCode(){
+		return toString().hashCode();
 	}
 }

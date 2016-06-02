@@ -1,7 +1,8 @@
 package org.apache.ctakes.cancer.concept.instance;
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
+import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.jcas.JCas;
@@ -31,10 +32,7 @@ final public class ConceptInstanceUtil {
     * @return collection of instances with the given uri
     */
    static public Collection<ConceptInstance> getExactConceptInstances( final JCas jCas, final String uri ) {
-      return OwlOntologyConceptUtil.getAnnotationsByUri( jCas, uri )
-            .stream()
-            .map( ConceptInstance::new )
-            .collect( Collectors.toList() );
+      return createConceptInstances( OwlOntologyConceptUtil.getAnnotationsByUri( jCas, uri ) );
    }
 
    /**
@@ -235,6 +233,46 @@ final public class ConceptInstanceUtil {
       return createConceptInstances(
             PhenotypeAnnotationUtil.getLocations( jcas, locatable.getIdentifiedAnnotation() ) );
    }
+
+
+   static public Collection<String> getQuadrantUris( final ConceptInstance location ) {
+      final IdentifiedAnnotation annotation = location.getIdentifiedAnnotation();
+      if ( !(annotation instanceof AnatomicalSiteMention) ) {
+         return Collections.emptyList();
+      }
+      return PhenotypeAnnotationUtil.getQuadrants( annotation ).stream()
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .distinct()
+            .collect( Collectors.toList() );
+   }
+
+   static public Collection<String> getBodySideUris( final ConceptInstance location ) {
+      final IdentifiedAnnotation annotation = location.getIdentifiedAnnotation();
+      if ( !(annotation instanceof AnatomicalSiteMention) ) {
+         return Collections.emptyList();
+      }
+      return PhenotypeAnnotationUtil.getBodySides( annotation ).stream()
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .distinct()
+            .collect( Collectors.toList() );
+   }
+
+   static public Collection<String> getClockwiseUris( final ConceptInstance location ) {
+      final IdentifiedAnnotation annotation = location.getIdentifiedAnnotation();
+      if ( !(annotation instanceof AnatomicalSiteMention) ) {
+         return Collections.emptyList();
+      }
+      return PhenotypeAnnotationUtil.getClockwises( annotation ).stream()
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .distinct()
+            .collect( Collectors.toList() );
+   }
+
+
+
 
 
    static public Collection<ConceptInstance> getPhenotypeValues( final ConceptInstance phenotype ) {

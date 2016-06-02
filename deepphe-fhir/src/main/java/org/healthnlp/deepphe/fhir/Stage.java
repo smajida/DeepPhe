@@ -74,7 +74,16 @@ public class Stage extends ConditionStageComponent implements Serializable{
 		if(e == null)
 			return null;
 		String val = ((StringType)e.getValue()).getValue();
-		return (val != null)?FHIRUtils.getCodeableConcept(URI.create(val)):null;
+		if (val != null){
+			CodeableConcept cc = FHIRUtils.getCodeableConcept(URI.create(val));
+			for(Reference r: getAssessment()){
+				if(val.endsWith(r.getDisplay())){
+					FHIRUtils.addResourceReference(cc,r.getDisplay(),r.getReference());
+				}
+			}
+			return cc;
+		}
+		return null;
 	}
 	
 	/**

@@ -27,7 +27,7 @@ public class ConditionFact extends Fact {
 	public void setStage(StageFact stage) {
 		this.stage = stage;
 	}
-	public List<Fact> getContainedFacts(){
+	/*public List<Fact> getContainedFacts(){
 		List<Fact> facts = new ArrayList<Fact>();
 		if(stage != null){
 			addContainedFact(facts,stage);
@@ -36,7 +36,7 @@ public class ConditionFact extends Fact {
 			addContainedFact(facts, fact);
 		}
 		return facts;
-	}
+	}*/
 	public String getSummaryText(){
 		StringBuffer b = new StringBuffer(getLabel());
 		if(!getBodySite().isEmpty())

@@ -1,12 +1,12 @@
 package org.apache.ctakes.cancer.phenotype;
 
-import org.apache.ctakes.cancer.owl.UriAnnotationFactory;
 import org.apache.ctakes.cancer.phenotype.property.*;
 import org.apache.ctakes.cancer.phenotype.receptor.StatusPhenotypeFactory;
 import org.apache.ctakes.cancer.phenotype.stage.StagePhenotypeFactory;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmPhenotypeFactory;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
-import org.apache.ctakes.cancer.util.FinderUtil;
+import org.apache.ctakes.core.ontology.UriAnnotationFactory;
+import org.apache.ctakes.core.util.AnnotationUtil;
 import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.relation.DegreeOfTextRelation;
@@ -341,7 +341,7 @@ abstract public class AbstractPhenotypeFactory<T extends Type, V extends Value, 
                                                     final E eventMention,
                                                     final Iterable<IdentifiedAnnotation> neoplasms ) {
       final IdentifiedAnnotation closestNeoplasm
-            = FinderUtil.getClosestAnnotation( typeBegin, typeEnd, neoplasms );
+            = AnnotationUtil.getPrecedingOrAnnotation( typeBegin, typeEnd, neoplasms );
       if ( closestNeoplasm != null ) {
          final String relationName = typeTitle.replace( ' ', '_' ) + "_of";
          createEventMentionNeoplasm( jCas, eventMention, closestNeoplasm, relationName );
@@ -422,7 +422,7 @@ abstract public class AbstractPhenotypeFactory<T extends Type, V extends Value, 
                                                   final E eventMention,
                                                   final Iterable<IdentifiedAnnotation> diagnosticTests ) {
       final IdentifiedAnnotation closestDiagnostic
-            = FinderUtil.getClosestAnnotation( typeBegin, typeEnd, diagnosticTests );
+            = AnnotationUtil.getPrecedingOrAnnotation( typeBegin, typeEnd, diagnosticTests );
       if ( closestDiagnostic != null ) {
          createEventMentionIndicator( jCas, closestDiagnostic, eventMention, "Diagnostic_Test_for" );
       }

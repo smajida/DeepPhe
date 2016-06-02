@@ -1,13 +1,17 @@
 package org.healthnlp.deepphe.fhir.fact;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.neo4j.ogm.annotation.GraphId;
-import org.neo4j.ogm.annotation.NodeEntity;
 
 
 /**
@@ -35,15 +39,40 @@ public class Fact {
 	private Set<String> rulesApplied;
 	private List<Fact> provenanceFacts;
 	private List<TextMention> provenanceText;
-
-	private transient String documentIdentifier, patientIdentifier, documentType;
+	private Date recordedDate;
+	private int temporalOrder;
+	
+	private String documentIdentifier, patientIdentifier, documentType;
 	private transient Set<String> containerIdentifier;
+	private Map<String,String> properties;
+	
+	
+	public Map<String, String> getProperties() {
+		if(properties == null)
+			properties = new LinkedHashMap<String, String>();
+		return properties;
+	}
 
-	
-	
+	public void setProperties(Map<String, String> properties) {
+		this.properties = properties;
+	}
+	public void addPropety(String key, String val){
+		getProperties().put(key,val);
+	}
+	public String getProperty(String key){
+		return getProperties().get(key);
+	}
+	public void addPropeties(Map<String,String> props){
+		getProperties().putAll(props);
+	}
 	public String getName() {
 		return name;
 	}
+	
+	public String getFullName() {
+		return getName();
+	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -73,15 +102,30 @@ public class Fact {
 			provenanceFacts = new ArrayList<Fact>();
 		return provenanceFacts;
 	}
+	
 	public void addProvenanceFact(Fact fact) {
-		getProvenanceFacts().add(fact);
+		if(!getProvenanceFacts().contains(fact)){
+			getProvenanceFacts().add(fact);
+			getProvenanceFacts().addAll(fact.getProvenanceFacts());
+		}
 	}
 	public void addProvenanceFacts(List<Fact> facts) {
-		getProvenanceFacts().addAll(facts);
-		facts.clear();
-		facts = null;
+		for(Fact f: facts){
+			addProvenanceFact(f);
+		}
 	}
 	
+	
+	public String getDocumentName() {
+		if(documentIdentifier != null){
+			Matcher m = Pattern.compile("REPORT_(.*)_\\d+").matcher(documentIdentifier);
+			if(m.matches())
+				return m.group(1);
+		}
+		return documentIdentifier;
+	}
+	
+
 	public List<TextMention> getProvenanceText() {
 		if(provenanceText == null)
 			provenanceText = new ArrayList<TextMention>();
@@ -95,7 +139,8 @@ public class Fact {
 		return list;
 	}
 	public void addProvenanceText(TextMention mention) {
-		getProvenanceText().add(mention);
+		if(!getProvenanceText().contains(mention))
+			getProvenanceText().add(mention);
 	}
 	public String getLabel() {
 		if(label == null)
@@ -116,6 +161,11 @@ public class Fact {
 			ancestors = new LinkedHashSet<String>();
 		return ancestors;
 	}
+	
+	public void setAncestors(Set<String> ancestors){
+		getAncestors().addAll(ancestors);
+	}
+	
 	public void addAncestor(String a) {
 		getAncestors().add(a);
 	}
@@ -124,28 +174,16 @@ public class Fact {
 		return FactFactory.createCodeableConcept(this);
 	}
 	public String getDocumentType(){
-		if(documentType != null)
-			return documentType;
-		// else search in province text
-		for(TextMention t: getProvenanceText()){
-			if(t.getDocumentType() != null)
-				return t.getDocumentType();
-		}
-		return null;
+		return documentType;
 	}
 	
 	public void setDocumentType(String docType){
 		documentType = docType;
-		for(TextMention t: getProvenanceText()){
-			t.setDocumentType(docType);
-		}
 	}
 	public void setDocumentIdentifier(String id){
 		documentIdentifier = id;
-		for(TextMention t: getProvenanceText()){
-			t.setDocumentIdentifier(id);
-		}
 	}
+	
 	public String getCategory() {
 		return category;
 	}
@@ -166,6 +204,11 @@ public class Fact {
 			containerIdentifier = new LinkedHashSet<String>();
 		return containerIdentifier;
 	}
+	
+	public void addContainerIdentifiers(Set<String> containers){
+		getContainerIdentifier().addAll(containers);
+	}
+	
 	public void addContainerIdentifier(String containerIdentifier) {
 		getContainerIdentifier().add(containerIdentifier);
 	}
@@ -192,12 +235,29 @@ public class Fact {
 		b.append("summary type: "+getSummaryType()+"|");
 		b.append("summary id: "+getSummaryId()+"|");
 		b.append("container ids: "+getContainerIdentifier()+"|");
-		//b.append("rulesApplied: "+getRulesApplied()+"|");
+		b.append("recordDate: "+getRecordedDate()+"|");	
 		b.append("ancestors: "+getAncestors()+"\n");
 	   
 		return b.toString();
 	}
 	
+	
+	public Date getRecordedDate() {
+		return recordedDate;
+	}
+
+	public void setRecordedDate(Date recordedDate) {
+		this.recordedDate = recordedDate;
+	}
+
+	public int getTemporalOrder() {
+		return temporalOrder;
+	}
+
+	public void setTemporalOrder(int temporalOrder) {
+		this.temporalOrder = temporalOrder;
+	}
+
 	/**
 	 * return all facts that are contained within this fact
 	 * @return
@@ -207,7 +267,7 @@ public class Fact {
 	}
 	
 	/**
-	 * convinience method to add all contained facts
+	 * convenience method to add all contained facts
 	 * @param facts
 	 * @param fact
 	 * @return
@@ -239,5 +299,9 @@ public class Fact {
 	public void setSummaryId(String summaryId) {
 		this.summaryId = summaryId;
 	}
-	
+	public boolean equivalent(Fact fact){
+		if(fact == null)
+			return false;
+		return getUri().equals(fact.getUri());
+	}
 }

@@ -1,14 +1,15 @@
 package org.apache.ctakes.cancer.phenotype;
 
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.phenotype.receptor.StatusPropertyUtil;
 import org.apache.ctakes.cancer.phenotype.size.SizePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.stage.StagePropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.phenotype.tnm.TnmType;
 import org.apache.ctakes.cancer.type.relation.NeoplasmRelation;
-import org.apache.ctakes.typesystem.type.relation.BinaryTextRelation;
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
+import org.apache.ctakes.core.util.RelationUtil;
 import org.apache.ctakes.typesystem.type.relation.DegreeOfTextRelation;
 import org.apache.ctakes.typesystem.type.relation.IndicatesTextRelation;
 import org.apache.ctakes.typesystem.type.relation.LocationOfTextRelation;
@@ -20,10 +21,15 @@ import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.TOP;
 
 import javax.annotation.concurrent.Immutable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static org.apache.ctakes.cancer.location.LocationModifier.BodySide;
+import static org.apache.ctakes.cancer.location.LocationModifier.Quadrant;
 
 /**
  * Utility class with methods that can be used to get information about Neoplasm Properties.
@@ -72,7 +78,7 @@ final public class PhenotypeAnnotationUtil {
       if ( relations == null || relations.isEmpty() ) {
          return Collections.emptyList();
       }
-      return getSecondArguments( relations, phenotype );
+      return RelationUtil.getSecondArguments( relations, phenotype );
    }
 
    /**
@@ -97,7 +103,7 @@ final public class PhenotypeAnnotationUtil {
       if ( relations == null || relations.isEmpty() ) {
          return Collections.emptyList();
       }
-      return getFirstArguments( relations, neoplasm );
+      return RelationUtil.getFirstArguments( relations, neoplasm );
    }
 
    /**
@@ -235,7 +241,7 @@ final public class PhenotypeAnnotationUtil {
       if ( uriAnnotations == null || uriAnnotations.isEmpty() ) {
          return Collections.emptyList();
       }
-      return getFirstArguments( relations, neoplasm );
+      return RelationUtil.getFirstArguments( relations, neoplasm );
    }
 
    static public Collection<IdentifiedAnnotation> getDiagnosticTests( final IdentifiedAnnotation testable ) {
@@ -251,7 +257,7 @@ final public class PhenotypeAnnotationUtil {
       if ( relations == null || relations.isEmpty() ) {
          return Collections.emptyList();
       }
-      return getFirstArguments( relations, testable );
+      return RelationUtil.getFirstArguments( relations, testable );
    }
 
    static public Collection<IdentifiedAnnotation> getLocations( final IdentifiedAnnotation locatable ) {
@@ -267,9 +273,77 @@ final public class PhenotypeAnnotationUtil {
       if ( relations == null || relations.isEmpty() ) {
          return Collections.emptyList();
       }
-      return getSecondArguments( relations, locatable );
+      return RelationUtil.getSecondArguments( relations, locatable );
    }
 
+
+   static public Collection<IdentifiedAnnotation> getQuadrants( final IdentifiedAnnotation anatomical ) {
+      return getQuadrants( getJcas( anatomical ), anatomical );
+   }
+
+   static public Collection<IdentifiedAnnotation> getQuadrants( final JCas jcas,
+                                                                final IdentifiedAnnotation anatomical ) {
+      if ( jcas == null ) {
+         return Collections.emptyList();
+      }
+      final Collection<LocationOfTextRelation> relations = JCasUtil.select( jcas, LocationOfTextRelation.class );
+      if ( relations == null || relations.isEmpty() ) {
+         return Collections.emptyList();
+      }
+      final Collection<String> quadrantUris = Arrays.stream( Quadrant.values() )
+            .map( Quadrant::getUri ).collect( Collectors.toList() );
+      final Predicate<IdentifiedAnnotation> isQuadrant
+            = a -> OwlOntologyConceptUtil.getUris( a ).stream().anyMatch( quadrantUris::contains );
+      return RelationUtil.getFirstArguments( relations, anatomical ).stream()
+            .filter( isQuadrant )
+            .collect( Collectors.toList() );
+   }
+
+   static public Collection<IdentifiedAnnotation> getBodySides( final IdentifiedAnnotation anatomical ) {
+      return getBodySides( getJcas( anatomical ), anatomical );
+   }
+
+   static public Collection<IdentifiedAnnotation> getBodySides( final JCas jcas,
+                                                                final IdentifiedAnnotation anatomical ) {
+      if ( jcas == null ) {
+         return Collections.emptyList();
+      }
+      final Collection<LocationOfTextRelation> relations = JCasUtil.select( jcas, LocationOfTextRelation.class );
+      if ( relations == null || relations.isEmpty() ) {
+         return Collections.emptyList();
+      }
+      final Collection<String> bodySideUris = Arrays.stream( BodySide.values() )
+            .map( BodySide::getUri ).collect( Collectors.toList() );
+      final Predicate<IdentifiedAnnotation> isBodySide
+            = a -> OwlOntologyConceptUtil.getUris( a ).stream().anyMatch( bodySideUris::contains );
+      return RelationUtil.getFirstArguments( relations, anatomical ).stream()
+            .filter( isBodySide )
+            .collect( Collectors.toList() );
+   }
+
+
+   static public Collection<IdentifiedAnnotation> getClockwises( final IdentifiedAnnotation anatomical ) {
+      return getClockwises( getJcas( anatomical ), anatomical );
+   }
+
+   static public Collection<IdentifiedAnnotation> getClockwises( final JCas jcas,
+                                                                 final IdentifiedAnnotation anatomical ) {
+      if ( jcas == null ) {
+         return Collections.emptyList();
+      }
+      final Collection<LocationOfTextRelation> relations = JCasUtil.select( jcas, LocationOfTextRelation.class );
+      if ( relations == null || relations.isEmpty() ) {
+         return Collections.emptyList();
+      }
+      final Collection<String> clockUris
+            = OwlOntologyConceptUtil.getUriBranchStream( OwlConstants.BREAST_CANCER_OWL + "#Clockface_position" )
+            .collect( Collectors.toList() );
+      final Predicate<IdentifiedAnnotation> isClockwise
+            = a -> OwlOntologyConceptUtil.getUris( a ).stream().anyMatch( clockUris::contains );
+      return RelationUtil.getFirstArguments( relations, anatomical ).stream()
+            .filter( isClockwise )
+            .collect( Collectors.toList() );
+   }
 
 //   static public Collection<String> getNeoplasmPropertyTypes( final JCas jcas, final IdentifiedAnnotation neoplasm ) {
 //      final Collection<NeoplasmRelation> relations = JCasUtil.select( jcas, NeoplasmRelation.class );
@@ -305,7 +379,7 @@ final public class PhenotypeAnnotationUtil {
       if ( relations == null || relations.isEmpty() ) {
          return Collections.emptyList();
       }
-      return getSecondArguments( relations, property );
+      return RelationUtil.getSecondArguments( relations, property );
    }
 
 
@@ -327,28 +401,6 @@ final public class PhenotypeAnnotationUtil {
          LOGGER.error( casE.getMessage() );
       }
       return null;
-   }
-
-   static private Collection<IdentifiedAnnotation> getFirstArguments(
-         final Collection<? extends BinaryTextRelation> relations,
-         final IdentifiedAnnotation identifiedAnnotation ) {
-      return relations.stream()
-            .filter( r -> r.getArg2().getArgument().equals( identifiedAnnotation ) )
-            .map( r -> r.getArg1().getArgument() )
-            .filter( IdentifiedAnnotation.class::isInstance )
-            .map( a -> (IdentifiedAnnotation)a )
-            .collect( Collectors.toList() );
-   }
-
-   static private Collection<IdentifiedAnnotation> getSecondArguments(
-         final Collection<? extends BinaryTextRelation> relations,
-         final IdentifiedAnnotation identifiedAnnotation ) {
-      return relations.stream()
-            .filter( r -> r.getArg1().getArgument().equals( identifiedAnnotation ) )
-            .map( r -> r.getArg2().getArgument() )
-            .filter( IdentifiedAnnotation.class::isInstance )
-            .map( a -> (IdentifiedAnnotation)a )
-            .collect( Collectors.toList() );
    }
 
 

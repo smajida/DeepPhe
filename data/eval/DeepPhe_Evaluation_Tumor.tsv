@@ -1,0 +1,38 @@
+-geographically determined (yes/no)		
+*patient ID		
+*cancer  link		
+*body location	Tumor	hasBodySite
+-document for body location 	BodySite	wasDerivedFrom
+*body location laterality	BodySite	hasBodySide
+body location clockface position	BodySite	hasClockfacePosition
+-documents for body location clockface position	Clockface_Position	wasDerivedFrom
+body location quadrant	BodySite	hasQuadrant
+-documents for body location quadrant	Quadrant	wasDerivedFrom
+Diagnosis	Tumor	hasDiagnosis
+-document for diagnosis	Condition	wasDerivedFrom
+tumor type	BreastCancerTumorPhenotype	hasTumorType
+-documents for tumor type	Tumor	wasDerivedFrom
+cancer type	BreastCancerTumorPhenotype	hasCancerType
+-documents for cancer type	CancerType	wasDerivedFrom
+histologic type	BreastCancerTumorPhenotype	hasHistologicType
+-documents for histologic type	HistologicType	wasDerivedFrom
+tumor extent	BreastCancerTumorPhenotype	hasTumorExtent
+-documents for extent	TumorExtent	wasDerivedFrom
+er status interpretation	Estrogen_Receptor_Status	hasInterpretation
+-documents for er status interpretation	OrdinalInterpretation	wasDerivedFrom
+-er status numeric value	Estrogen_Receptor_Status	hasNumValue
+-documents for er numeric value	Quantity	wasDerivedFrom
+er status method	Estrogen_Receptor_Status	hasMethod
+-documents for er status method	DiagnosticProcedure	wasDerivedFrom
+pr status interpretation	Progesterone_Receptor_Status	hasInterpretation
+-documents for pr status interpretation	OrdinalInterpretation	wasDerivedFrom
+-pr status numeric value	Progesterone_Receptor_Status	hasNumValue
+-documents for pr numeric value	Quantity	wasDerivedFrom
+pr status method	Progesterone_Receptor_Status	hasMethod
+-documents for pr status method	DiagnosticProcedure	wasDerivedFrom
+her2neu status interpretation	HER2_Neu_Status	hasInterpretation
+-documents for her2neu status interpretation	OrdinalInterpretation	wasDerivedFrom
+-her2neu status numeric value	HER2_Neu_Status	hasNumValue
+-documents for her2neu status numeric value	Quantity	wasDerivedFrom
+her2neu status method	HER2_Neu_Status	hasMethod
+-documents for her2 status method	DiagnosticProcedure	wasDerivedFrom

@@ -23,7 +23,7 @@ public class ValueFact extends Fact {
 	}
 
 	public String getSummaryText(){
-		StringBuffer b = new StringBuffer(String.format("%.4d", getValue()));
+		StringBuffer b = new StringBuffer(String.format("%.4f",getValue()));
 		if(unit != null)
 			b.append(" "+unit);
 		return b.toString();

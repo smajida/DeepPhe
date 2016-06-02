@@ -5,22 +5,23 @@ import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import edu.pitt.dbmi.nlp.noble.ontology.IResource;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
+
 import org.apache.ctakes.cancer.concept.instance.ConceptInstance;
 import org.apache.ctakes.cancer.concept.instance.ConceptInstanceUtil;
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
+import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
 import org.apache.ctakes.cancer.phenotype.size.SizePropertyUtil;
-import org.apache.ctakes.cancer.phenotype.tnm.TnmPropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
 import org.apache.ctakes.core.util.DocumentIDAnnotationUtil;
 import org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
+import org.apache.ctakes.typesystem.type.textsem.SeverityModifier;
 import org.apache.log4j.Logger;
-import org.apache.uima.cas.CASException;
 import org.apache.uima.jcas.JCas;
 import org.healthnlp.deepphe.fhir.*;
 import org.healthnlp.deepphe.util.FHIRConstants;
-import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.OntologyUtils;
 import org.healthnlp.deepphe.util.TextUtils;
 import org.hl7.fhir.instance.model.BodySite;
 import org.hl7.fhir.instance.model.CodeableConcept;
@@ -97,7 +98,7 @@ final public class DocumentResourceFactory {
 
 	public OntologyUtils getOntologyUtils(){
 		if(ontologyUtils == null && ontology != null){
-			ontologyUtils = new OntologyUtils(ontology);
+			ontologyUtils = OntologyUtils.getInstance(ontology);
 		}
 		return ontologyUtils;
 	}
@@ -244,7 +245,7 @@ final public class DocumentResourceFactory {
 	static private <T extends Element> List<T> getElementList( final JCas jcas, final URI uri,
 																				  final Function<ConceptInstance, ? extends T> mapper ) {
 		return ConceptInstanceUtil.getBranchConceptInstanceStream( jcas, uri.toString() )
-				.filter( t -> !t.isNegated() )
+				.filter( t -> !t.isNegated() && !(t.getIdentifiedAnnotation() instanceof SeverityModifier))
 				.map( mapper )
 				.collect( Collectors.toList() );
 	}
@@ -461,6 +462,17 @@ final public class DocumentResourceFactory {
 	public static AnatomicalSite load( AnatomicalSite anatomicalSite, final ConceptInstance conceptInstance ) {
 		anatomicalSite.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
 
+		// add anatomical sites modifiers
+		for(String quadrant : ConceptInstanceUtil.getQuadrantUris( conceptInstance )){
+			anatomicalSite.addModifier(FHIRUtils.getCodeableConcept(URI.create(quadrant)));
+		}
+		for(String clock :  ConceptInstanceUtil.getClockwiseUris( conceptInstance )){
+			anatomicalSite.addModifier(FHIRUtils.getCodeableConcept(URI.create(clock)));
+		}
+		for(String side : ConceptInstanceUtil.getBodySideUris( conceptInstance )){
+			anatomicalSite.addModifier(FHIRUtils.getCodeableConcept(URI.create(side)));
+		}
+		
 		// add language contexts
 		cTAKESUtils.addLanguageContext( conceptInstance, anatomicalSite );
 		
@@ -495,10 +507,16 @@ final public class DocumentResourceFactory {
 			}
 		}
 		
+		// if TNM, take care of suffixes and prefixes
+		for(ConceptInstance i: cTAKESUtils.getTNM_Modifiers(conceptInstance)){
+			finding.addExtension(cTAKESUtils.createTNM_ModifierExtension(i));
+		}
+		
 		cTAKESUtils.addLanguageContext( conceptInstance, finding );
 		
 		// add mention text
 		finding.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
+		
 		
 		// create identifier
 		FHIRUtils.createIdentifier(finding.addIdentifier(),finding);
@@ -527,9 +545,14 @@ final public class DocumentResourceFactory {
 		for ( ConceptInstance ci : ConceptInstanceUtil.getLocations( conceptInstance ) ) {
 			CodeableConcept location = dx.addBodySite();
 			cTAKESUtils.setCodeableConcept( location, ci );
-			AnatomicalSite site = (AnatomicalSite) cTAKESUtils.getResource(ci);
+			Element site = cTAKESUtils.getResource(ci);
 			if ( site != null ) {
-				FHIRUtils.addResourceReference( location, site );
+				if(site instanceof AnatomicalSite)
+					FHIRUtils.addResourceReference( location, site );
+				else
+					System.out.println("WARNING: diagnosis: '"+conceptInstance.getIdentifiedAnnotation().getCoveredText()+
+										"' location: '"+ci.getIdentifiedAnnotation().getCoveredText()+
+										"' expected AnatomicalSite, but got "+site.getClass().getSimpleName());
 			}
 		}
 
@@ -609,30 +632,46 @@ final public class DocumentResourceFactory {
 	 * @return -
 	 */
 	public static Observation load( Observation ob, final ConceptInstance conceptInstance ) {
-		// set some properties
-		ob.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
+		// if we get a quantity as URI, that is a tumor sizeof
+		if(cTAKESUtils.equals(conceptInstance,FHIRConstants.QUANTITY_URI))
+			ob.setCode( FHIRUtils.getCodeableConcept(getResolvedURL(FHIRConstants.TUMOR_SIZE)));	
+		else
+			ob.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
 
+		// add language context
 		cTAKESUtils.addLanguageContext( conceptInstance, ob );
 		
-		// see if there is an ordinal interpretation
-		IdentifiedAnnotation interpretation = cTAKESUtils.getDegreeOf( conceptInstance.getIdentifiedAnnotation() );
-		if(interpretation != null){
-			ob.setInterpretation(cTAKESUtils.getCodeableConcept(interpretation));
-		}
-
-		// TODO - a lot of things got mucked up with the new "stick to ctakes" methods
-		// TODO - what to do with this?  We need measurement and unit.  Can we just split(" ") ?
-		// if cancer size, then use their value
-		//conceptInstance.get
-		
-		//ConceptInstanceUtil.get(phenotype)
-		SizeMeasurement num = cTAKESUtils.getSizeMeasurement( conceptInstance.getIdentifiedAnnotation() );
-		if(num != null){
-			ob.setCode( FHIRUtils.getCodeableConcept(getResolvedURL(FHIRConstants.TUMOR_SIZE)));
-			ob.setValue(num.getValue(),num.getUnit());
+	
+		// is there an ordinal interpretation
+		String number = null, unit = null;
+		for(ConceptInstance i :ConceptInstanceUtil.getPropertyValues(conceptInstance)){
+			if(cTAKESUtils.equals(i,FHIRConstants.NUMERIC_MODIFIER_URI))
+				// see if this is a number
+				number = i.getIdentifiedAnnotation().getCoveredText();
+			else if(i.getUri().contains(FHIRConstants.UNIT))
+				// see if this is a unit
+				unit = i.getIdentifiedAnnotation().getCoveredText();
+			else{
+				// see if there is an ordinal interpretation
+				ob.setInterpretation(cTAKESUtils.getCodeableConcept(i));
+			}
 		}
 		
-
+		// set value of this observation
+		if(number != null){
+			ob.setValue(number, unit);
+		}
+		
+		
+		
+		// set procedure method
+		for(ConceptInstance i: ConceptInstanceUtil.getDiagnosticTests(conceptInstance)){
+			//TODO: work around a bug that puts TNM modifier as a diagnostic test
+			if(!FHIRConstants.TNM_MODIFIER_LIST.contains(i.getIdentifiedAnnotation().getCoveredText()))
+				ob.setMethod(cTAKESUtils.getCodeableConcept(i));
+		}
+		
+	
 		// add mention text
 		ob.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
 		
@@ -667,9 +706,14 @@ final public class DocumentResourceFactory {
 		for ( ConceptInstance ci : ConceptInstanceUtil.getLocations( conceptInstance ) ) {
 			CodeableConcept location = pr.addBodySite();
 			cTAKESUtils.setCodeableConcept(location,ci);
-			AnatomicalSite site = (AnatomicalSite) cTAKESUtils.getResource(ci);
+			Element site = cTAKESUtils.getResource(ci);
 			if(site != null)
-				FHIRUtils.addResourceReference(location,site);
+				if(site instanceof AnatomicalSite )
+					FHIRUtils.addResourceReference(location,site);
+				else
+					System.out.println("WARNING: procedure: '"+conceptInstance.getIdentifiedAnnotation().getCoveredText()+
+										"' location: '"+ci.getIdentifiedAnnotation().getCoveredText()+
+										"' expected AnatomicalSite, but got "+site.getClass().getSimpleName());
 		}
 
 		
@@ -843,9 +887,15 @@ final public class DocumentResourceFactory {
 			CodeableConcept c = cTAKESUtils.getCodeableConcept(ci);
 			
 			// add id to cancer stage
-			Finding f = (Finding) cTAKESUtils.getResource(ci);
+			Element f = cTAKESUtils.getResource(ci);
 			if (f != null) {
-				FHIRUtils.addResourceReference(c, f);
+				if(f instanceof Finding)
+					FHIRUtils.addResourceReference(c, f);
+				else
+					System.out.println("WARNING: neoplasm: '"+neoplasm.getIdentifiedAnnotation().getCoveredText()+
+							"' location: '"+ci.getIdentifiedAnnotation().getCoveredText()+
+							"' expected Finding, but got "+f.getClass().getSimpleName());
+				
 			}
 			// add extension
 			stage.addExtension(cTAKESUtils.createMentionExtension(ci));	
@@ -854,11 +904,17 @@ final public class DocumentResourceFactory {
 		
 		// add other neoplasm assessments
 		for(ConceptInstance ci: ConceptInstanceUtil.getNeoplasmTNM(neoplasm)){
-			Collection<ConceptInstance> vi = ConceptInstanceUtil.getPhenotypeValues( ci);
+			//Collection<ConceptInstance> vi = ConceptInstanceUtil.getPhenotypeValues( ci);
 			// add id to cancer stage
-			Finding f = (Finding) cTAKESUtils.getResource(!vi.isEmpty()?vi.iterator().next():ci);
+			//Finding f = (Finding) cTAKESUtils.getResource(!vi.isEmpty()?vi.iterator().next():ci);
+			Element f = cTAKESUtils.getResource(ci);
 			if (f != null) {
-				stage.addAssessment(f);
+				if(f instanceof Finding)
+					stage.addAssessment((Finding)f);
+				else
+					System.out.println("WARNING: neoplasm: '"+neoplasm.getIdentifiedAnnotation().getCoveredText()+
+							"' location: '"+ci.getIdentifiedAnnotation().getCoveredText()+
+							"' expected Finding, but got "+f.getClass().getSimpleName());
 			}		
 		}
 		

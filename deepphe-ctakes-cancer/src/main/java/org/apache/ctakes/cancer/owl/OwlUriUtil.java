@@ -1,5 +1,6 @@
 package org.apache.ctakes.cancer.owl;
 
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 
@@ -30,12 +31,13 @@ final public class OwlUriUtil {
     * @return a Collection of the most specific uris for all the given annotations
     */
    static public String getSpecificUri( final Collection<IdentifiedAnnotation> annotations ) {
-      return getSpecificUris( annotations ).stream().findFirst().orElse( OwlOntologyConceptUtil.UNKNOWN_URI );
+      return getSpecificUris( annotations ).stream().findFirst().orElse( OwlConstants.UNKNOWN_URI );
    }
 
    /**
     * @return a Collection of the most specific uris for all the given annotations
     */
+   // TODO Implement for most precise; now it returns most broad
    static public Collection<String> getSpecificUris( final Collection<IdentifiedAnnotation> annotations ) {
       if ( annotations == null || annotations.isEmpty() ) {
          return Collections.emptyList();

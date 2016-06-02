@@ -1,6 +1,6 @@
 package org.apache.ctakes.cancer.phenotype.receptor;
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.phenotype.property.Type;
 import org.apache.ctakes.cancer.phenotype.property.Value;
 
@@ -78,7 +78,7 @@ enum StatusType implements Type {
     */
    @Override
    public String getUri() {
-      return OwlOntologyConceptUtil.BREAST_CANCER_OWL + "#" + _uri;
+      return OwlConstants.BREAST_CANCER_OWL + "#" + _uri;
    }
 
    /**

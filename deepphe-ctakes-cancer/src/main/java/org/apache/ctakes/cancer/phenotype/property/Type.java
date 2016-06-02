@@ -2,7 +2,7 @@ package org.apache.ctakes.cancer.phenotype.property;
 
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.dictionary.lookup2.ontology.OwlParserUtil;
 
 import java.util.regex.Matcher;

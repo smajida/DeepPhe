@@ -1,6 +1,8 @@
 package org.healthnlp.deepphe.util;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * list of misc FHIR and ontology related constants
@@ -41,6 +43,7 @@ public class FHIRConstants {
 	public static final String TUMOR_SIZE = "Tumor_Size";
 	public static final String QUANTITY = "Quantity";
 	public static final String STAGE = "Generic_TNM_Finding";
+	public static final String TNM_STAGE = "TNM_Staging_System";
 	public static final String AGE = "Age";
 	public static final String GENDER = "Gender";
 	public static final String PHENOTYPIC_FACTOR = "PhenotypicFactor";
@@ -50,16 +53,27 @@ public class FHIRConstants {
 	public static final String TREATMENT = "Treatment";
 	public static final String MANIFISTATION = "ManifestationOfDisease";
 	public static final String MEDICAL_RECORD = "MedicalRecord";
-	
+	public static final String MODIFIER = "Modifier";
+	public static final String BODY_MODIFIER = "BodyModifier";
+	public static final String BODY_SIDE = "BodySide";
+	public static final String ORDINAL_INTERPRETATION = "OrdinalInterpretation";
+	public static final String QUADRANT = "Quadrant";
+	public static final String CLOCKFACE_POSITION = "Clockface_position";
+	public static final String UNIT = "Unit";
+	public static final String TNM_MODIFIER = "TNM_Modifier";
 	public static final String HAS_BODY_SITE = "hasBodySite";
+	public static final String HAS_BODY_SIDE = "hasBodySide";
+	public static final String HAS_QUADRANT = "hasQuadrant";
+	public static final String HAS_CLOCKFACE = "hasClockfacePosition";
+	public static final String HAS_BODY_MODIFIER = "hasBodySiteModifier";
 	public static final String HAS_TREATMENT = "hasTreatment";
 	public static final String HAS_OUTCOME = "hasOutcome";
 	public static final String HAS_CANCER_STAGE = "hasCancerStage";
 	public static final String HAS_CANCER_TYPE = "hasCancerType";
 	public static final String HAS_TUMOR_EXTENT = "hasTumorExtent";
-	public static final String HAS_T_CLASSIFICATION = "hasTClassification";
-	public static final String HAS_N_CLASSIFICATION = "hasNClassification";
-	public static final String HAS_M_CLASSIFICATION = "hasMClassification";
+	public static final String HAS_T_CLASSIFICATION = "hasGenericTClassification";
+	public static final String HAS_N_CLASSIFICATION = "hasGenericNClassification";
+	public static final String HAS_M_CLASSIFICATION = "hasGenericMClassification";
 	public static final String HAS_TUMOR_TYPE = "hasTumorType";
 	public static final String HAS_SEQUENCE_VARIENT = "hasSequenceVarient";
 	public static final String HAS_HISTOLOGIC_TYPE = "hasHistologicType";
@@ -71,7 +85,9 @@ public class FHIRConstants {
 	public static final String HAS_INTERPRETATION = "hasInterpretation";
 	public static final String HAS_NUM_VALUE = "hasNumValue";
 	public static final String HAS_METHOD = "hasMethod";
-	
+	public static final String HAS_TNM_PREFIX = "hasTNMPrefix";
+	public static final String HAS_TNM_SUFFIX = "hasTNMSuffix";
+	public static final String HAS_DIAGNOSIS = "hasDiagnosis";
 	
 	public static final String T_STAGE = "T_Stage";
 	public static final String M_STAGE = "M_Stage";
@@ -113,7 +129,16 @@ public class FHIRConstants {
 	public static final String DISCHARGE_SUMMARY_URI = null;
 	public static final String PROGRESS_NOTE_URI = null;*/
 	public static final URI QUANTITY_URI = URI.create("http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#Quantity");
+	public static final URI NUMERIC_MODIFIER_URI = URI.create("http://blulab.chpc.utah.edu/ontologies/v2/ConText.owl#NumericModifier");
 	public static final URI GENERIC_TNM = URI.create(MODEL_CANCER_URL+"#TNM_Staging_System");
+
+	public static final List<String> BODY_SIDE_LIST = Arrays.asList("Right","Left","Bilateral");
+	public static final List<String> TNM_MODIFIER_LIST = Arrays.asList("p","c","y","r","sn");
+	public static final String BREAST = "Breast";
+	
+
+	
+
 
 
 

@@ -2,21 +2,28 @@ package org.healthnlp.deepphe.fhir.fact;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 
 import org.healthnlp.deepphe.fhir.AnatomicalSite;
 import org.healthnlp.deepphe.fhir.Condition;
 import org.healthnlp.deepphe.fhir.Element;
+import org.healthnlp.deepphe.fhir.Finding;
 import org.healthnlp.deepphe.fhir.Observation;
 import org.healthnlp.deepphe.fhir.Procedure;
 import org.healthnlp.deepphe.fhir.Stage;
 import org.healthnlp.deepphe.util.FHIRConstants;
+import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
+import org.healthnlp.deepphe.util.OntologyUtils;
 import org.hl7.fhir.instance.model.BodySite;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.Quantity;
+
+import edu.pitt.dbmi.nlp.noble.ontology.IClass;
+import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 
 
 /**
@@ -46,8 +53,45 @@ public class FactFactory {
 	 * create a generic fact based on a codeable concept
 	 */
 	public static Fact createFact(CodeableConcept cc){
-		return createFact(cc,new Fact());
+		// do we have an element of this CC registered, then make a fact based on that
+		Element e = FHIRRegistry.getInstance().getResource(FHIRUtils.getResourceIdentifer(cc));
+		if(e != null)
+			return FactFactory.createFact(e);
+		
+		// else do a default operation
+		Fact fact = new Fact();
+		
+		// unless we have an ontology :)
+		if(OntologyUtils.hasInstance()){
+			URI uri = FHIRUtils.getConceptURI(cc);
+			if(uri != null){
+				IOntology ontology = OntologyUtils.getInstance().getOntology();
+				IClass cls = ontology.getClass(""+uri);
+				if(cls != null){
+					if(cls.hasSuperClass(ontology.getClass(FHIRConstants.OBSERVATION)))
+						fact = new ObservationFact();
+					else if(cls.hasSuperClass(ontology.getClass(FHIRConstants.CONDITION)))
+						fact = new ConditionFact();
+					else if(cls.hasSuperClass(ontology.getClass(FHIRConstants.BODY_SITE)))
+						fact = new BodySiteFact();
+					else if(cls.hasSuperClass(ontology.getClass(FHIRConstants.PROCEDURE)))
+						fact = new ProcedureFact();
+				}
+			}
+		}
+		return createFact(cc,fact);
 	}
+	
+	
+	public static void addAncestors(Fact fact){
+		if(OntologyUtils.hasInstance()) {		
+			OntologyUtils.getInstance().addAncestors(fact);
+			for(Fact f:	fact.getContainedFacts()){
+				OntologyUtils.getInstance().addAncestors(f);
+			}
+		}
+	}
+	
 	
 	/**
 	 * create a generic fact based on a codeable concept
@@ -70,6 +114,8 @@ public class FactFactory {
 		if(id != null)
 			fact.setIdentifier(id);
 		
+		addAncestors(fact);
+		
 		return fact;
 		
 	}
@@ -90,6 +136,8 @@ public class FactFactory {
 			return createFact((Observation)resource);
 		if(resource instanceof AnatomicalSite)
 			return createFact((AnatomicalSite)resource);
+		if(resource instanceof Finding && OntologyUtils.hasInstance() && OntologyUtils.getInstance().hasSuperClass(resource,FHIRConstants.TNM_STAGE))
+			return createTNMFact((Finding)resource);
 		if(resource instanceof Condition)
 			return createFact((Condition)resource);
 		if(resource instanceof Procedure)
@@ -100,6 +148,17 @@ public class FactFactory {
 		return createFact(resource,new Fact());
 	}
 
+	private static Fact createTNMFact(Finding tnm) {
+		TNMFact fact = (TNMFact) createFact(tnm,new TNMFact());
+		for(String mod: FHIRUtils.getProperty(tnm,FHIRUtils.TNM_MODIFIER_URL)){
+			Fact f = createFact(FHIRUtils.getCodeableConcept(URI.create(mod)));
+			f.setType(FHIRConstants.TNM_MODIFIER);
+			f.setCategory(FHIRConstants.HAS_TNM_PREFIX);
+			fact.setPrefix(f);
+		}
+		return fact;
+	}
+
 	private static Fact createFact(Element resource,Fact fact) {
 		fact = createFact(resource.getCode(),fact);
 		fact.setIdentifier(resource.getResourceIdentifier());
@@ -108,7 +167,8 @@ public class FactFactory {
 			TextMention mention = createTextMention(m);
 			fact.addProvenanceText(mention);
 		}
-		
+		fact.setProperties(FHIRUtils.getProperties((DomainResource)resource));
+			
 		return fact;
 	}
 	
@@ -120,22 +180,17 @@ public class FactFactory {
 	 */
 	public static ValueFact createFact(Quantity q){
 		URI uri = FHIRConstants.QUANTITY_URI;
-		String name;
-		try {
-			name = uri.toURL().getRef();
-		} catch (MalformedURLException e) {
-			throw new Error(e);
-		}
-		
+		String name = FHIRConstants.QUANTITY;;
 		double value = q.getValue().doubleValue();
 		String units = q.getUnit();
+		String label = (value+" "+units).trim(); 
 		
 		ValueFact fact = new ValueFact();
 		fact.setName(name);
-		fact.setLabel(name);
+		fact.setLabel(label);
 		fact.setUri(""+uri);
 		fact.setType(name);
-		fact.setIdentifier((name.toUpperCase()+"_"+value+" "+units).trim());
+		fact.setIdentifier(name.toUpperCase()+"_"+label);
 		
 		fact.setValue(value);
 		fact.setUnit(units);
@@ -151,17 +206,25 @@ public class FactFactory {
 	public static ObservationFact createFact(Observation ob) {
 		ObservationFact fact = (ObservationFact) createFact(ob,new ObservationFact());
 		if(FHIRUtils.hasConceptURI(ob.getInterpretation())){
-			fact.setInterpretation(createFact(ob.getInterpretation()));
+			Fact f = createFact(ob.getInterpretation());
+			f.setType(FHIRConstants.ORDINAL_INTERPRETATION);
+			f.setCategory(FHIRConstants.HAS_INTERPRETATION);
+			fact.setInterpretation(f);
 		}
 		if(ob.getValue() != null && ob.getValue() instanceof Quantity){
 			try {
-				fact.setValue(createFact(ob.getValueQuantity()));
+				Fact f = createFact(ob.getValueQuantity());
+				f.setCategory(FHIRConstants.HAS_NUM_VALUE);
+				fact.setValue(f);
 			} catch (Exception e) {
 				throw new Error(e);
 			}
 		}
 		if(FHIRUtils.hasConceptURI(ob.getMethod())){
-			fact.setMethod(createFact(ob.getMethod()));
+			Fact f = createFact(ob.getMethod());
+			f.setType(FHIRConstants.PROCEDURE);
+			f.setCategory(FHIRConstants.HAS_METHOD);
+			fact.setMethod(f);
 		}
 		return fact;
 	}
@@ -174,7 +237,10 @@ public class FactFactory {
 	public static ConditionFact createFact(Condition condition) {
 		ConditionFact fact = (ConditionFact) createFact(condition,new ConditionFact());
 		for(CodeableConcept cc: condition.getBodySite()){
-			fact.getBodySite().add(createFact(cc));
+			Fact f = createFact(cc);
+			f.setType(FHIRConstants.BODY_SITE);
+			f.setCategory(FHIRConstants.HAS_BODY_SITE);
+			fact.getBodySite().add(f);
 		}
 		return fact;
 	}
@@ -188,7 +254,10 @@ public class FactFactory {
 	public static ProcedureFact createFact(Procedure condition) {
 		ProcedureFact fact = (ProcedureFact) createFact(condition,new ProcedureFact());
 		for(CodeableConcept cc: condition.getBodySite()){
-			fact.getBodySite().add(createFact(cc));
+			Fact f = createFact(cc);
+			f.setType(FHIRConstants.BODY_SITE);
+			f.setCategory(FHIRConstants.HAS_BODY_SITE);
+			fact.getBodySite().add(f);
 		}
 		//TODO: handle method
 		return fact;
@@ -200,10 +269,22 @@ public class FactFactory {
 	 */
 	public static BodySiteFact createFact(AnatomicalSite location) {
 		BodySiteFact fact = (BodySiteFact) createFact(location,new BodySiteFact());
+		for(CodeableConcept cc: location.getModifier()){
+			Fact modifier = createFact(cc);
+			modifier.setCategory(FHIRConstants.HAS_BODY_MODIFIER);
+			modifier.setType(isBodySide(modifier)?FHIRConstants.BODY_SIDE:FHIRConstants.BODY_MODIFIER);
+			fact.addModifier(modifier);
+		}
 		return fact;
 	}
 	
-	
+	public static boolean isBodySide(Fact modifier) {
+		if(OntologyUtils.hasInstance()){
+			return OntologyUtils.getInstance().hasSuperClass(modifier,FHIRConstants.BODY_SIDE);
+		}
+		return FHIRConstants.BODY_SIDE_LIST.contains(modifier.getName());
+	}
+
 	/**
 	 * create empty fact of a given type
 	 * @param type
@@ -236,8 +317,71 @@ public class FactFactory {
 		return createFact(FHIRUtils.getCodeableConcept(URI.create(uri)),createFact(type));
 	}
 	
+	/**
+	 * create fact and copy most of the parameters from the old one
+	 * @param oldF
+	 * @param type
+	 * @param uri
+	 * @return
+	 */
+	public static Fact createFact(Fact oldFact, String type, String uri, String newDocType){
+		Fact newFact = createFact(FHIRUtils.getCodeableConcept(URI.create(uri)),createFact(type));
+		newFact.setAncestors(oldFact.getAncestors());
+		newFact.setCategory(oldFact.getCategory());
+		newFact.setPatientIdentifier(oldFact.getPatientIdentifier());
+		newFact.setSummaryType(oldFact.getSummaryType());
+		newFact.setSummaryId(oldFact.getSummaryType()+"_"+oldFact.getName());
+		newFact.setDocumentType(newDocType);
+		
+		return newFact;
+	}
+	
 	public static String createIdentifier(Fact fact){
 		return fact.getType()+"_"+fact.getName().replaceAll("\\W+","_")+"_"+Math.abs(fact.getProvenanceMentions().hashCode());
+	}
+
+	/**
+	 * create fact from information of a different fact 
+	 * (without cloning provenance or attributes)
+	 * @param f
+	 * @return
+	 */
+	public static Fact createFact(Fact f) {
+		Fact fact = createFact(f.getType()); 
+		fact.setUri(f.getUri());
+		fact.setName(f.getName());
+		fact.setLabel(f.getLabel());
+		fact.setIdentifier("Fact_"+fact.getName()+"_"+System.currentTimeMillis());
+		fact.addPropeties(f.getProperties());
+		fact.setDocumentIdentifier(f.getDocumentIdentifier());
+		fact.setDocumentType(f.getDocumentType());
+		fact.setPatientIdentifier(f.getPatientIdentifier());
+		
+		return fact;
+	}
+	
+	public static Fact createTumorFactModifier(String uri, Fact tSummaryF, Fact  cSummaryF, String summaryType, 
+			String category, String documentType, String type){
+		Fact f =  FactFactory.createFact(FHIRConstants.MODIFIER, uri);
+		
+		f.addProvenanceFact(cSummaryF);
+		f.addProvenanceFact(tSummaryF);
+		
+		f.addContainerIdentifier(cSummaryF.getSummaryId());
+		f.addContainerIdentifier(tSummaryF.getSummaryId());
+		
+		
+		f.setCategory(category);
+		f.setPatientIdentifier(tSummaryF.getPatientIdentifier());
+		f.setSummaryType(summaryType);
+		f.setType(type);
+		
+		String name = f.getName();
+		f.setSummaryId(tSummaryF.getSummaryId()+"_"+name);
+		f.setIdentifier(tSummaryF.getIdentifier()+"-"+name);
+		f.setDocumentType(documentType);
+		
+		return f;
 	}
 	
 }

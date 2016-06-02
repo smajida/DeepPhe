@@ -42,6 +42,7 @@ public class FHIRUtils {
 	public static final String DOCUMENT_HEADER_PATIENT_NAME = "Patient Name";
 	public static final String MENTION_URL = "http://hl7.org/fhir/mention";
 	public static final String STAGE_URL = "http://hl7.org/fhir/stage";
+	public static final String TNM_MODIFIER_URL = "http://hl7.org/fhir/TNM_modifier";
 	
 	public static final String LANGUAGE_ASPECT_MODALITY_URL = "http://hl7.org/fhir/modality";
 	public static final String LANGUAGE_ASPECT_DOC_TIME_REL_URL = "http://hl7.org/fhir/doc_time_rel"; 
@@ -445,6 +446,13 @@ public class FHIRUtils {
 		coding.setDisplay(el.getDisplayText());
 		coding.setSystem(SCHEMA_REFERENCE);
 	}
+	
+	public static void addResourceReference(CodeableConcept cc, String name, String id) {
+		Coding coding = cc.addCoding();
+		coding.setCode(id);
+		coding.setDisplay(name);
+		coding.setSystem(SCHEMA_REFERENCE);
+	}
 
 	
 	
@@ -465,9 +473,11 @@ public class FHIRUtils {
 		//xml.compose(new FileOutputStream(file),r, true);
 		//XmlGenerator xml = new XmlGenerator();
 		//xml.generate(r, file);
-		XmlParser xml = new FHIRParser();
-		xml.compose(new FileOutputStream(file),r,true);
 		
+		FileOutputStream ios = new FileOutputStream(file);
+		XmlParser xml = new FHIRParser();
+		xml.compose(ios,r,true);
+		ios.close();
 	}
 	
 	
@@ -738,6 +748,29 @@ public class FHIRUtils {
 		}
 		return mentions;
 	}
+	
+	public static Map<String,String> getProperties(DomainResource r){
+		Map<String,String> p = new LinkedHashMap<String,String>();
+		for(Extension e: r.getExtension()){
+			if(!MENTION_URL.equals(e.getUrl())){
+				p.put(e.getUrl(), ((StringType)e.getValue()).getValue());
+			}
+		}
+		return p;
+	}
+	
+	
+	public static List<String> getProperty(DomainResource r,String URL){
+		List<String> mentions = new ArrayList<String>();
+		for(Extension e: r.getExtension()){
+			if(URL.equals(e.getUrl())){
+				mentions.add(((StringType)e.getValue()).getValue());
+			}
+		}
+		return mentions;
+	}
+	
+	
 	public static int [] getMentionSpan(String text){
 		int [] s = new int [2];
 		Matcher m = Pattern.compile(".* \\[(\\d+):(\\d+)\\]").matcher(text);
@@ -811,6 +844,23 @@ public class FHIRUtils {
 			str = str.substring(3);
 		// insert space into camel back
 		return str.replaceAll("([a-z])([A-Z])","$1 $2");
+	}
+
+	
+
+	public static boolean equals(CodeableConcept concept,URI u){
+		return u.equals(getConceptURI(concept));
+	}
+	
+	/**
+	 * create temperal order from given N (mention offset) and DocTimeRel
+	 * @param e
+	 * @param i
+	 * @return
+	 */
+	public static int createTemporalOrder(Element e, int i) {
+		//TODO: account for DocTimeRel
+		return i;
 	}
 	
 }

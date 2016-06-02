@@ -1,19 +1,13 @@
 package org.apache.ctakes.cancer.concept.instance;
 
 import org.apache.ctakes.cancer.owl.OwlUriUtil;
-import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
-import org.apache.ctakes.typesystem.type.refsem.BodyLaterality;
-import org.apache.ctakes.typesystem.type.refsem.BodySide;
 import org.apache.ctakes.typesystem.type.refsem.Event;
 import org.apache.ctakes.typesystem.type.refsem.EventProperties;
-import org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention;
 import org.apache.ctakes.typesystem.type.textsem.EventMention;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
-import org.apache.ctakes.typesystem.type.textsem.Modifier;
 import org.apache.log4j.Logger;
 
 import javax.annotation.concurrent.Immutable;
-import java.util.stream.Stream;
 
 /**
  * @author SPF , chip-nlp
@@ -88,7 +82,8 @@ final public class ConceptInstance {
    public String getDocTimeRel() {
       final EventProperties properties = getEventProperties();
       if ( properties != null ) {
-         return properties.getDocTimeRel();
+         final String dtr = properties.getDocTimeRel();
+         return dtr == null ? "" : dtr;
       }
       return "";
    }
@@ -99,7 +94,8 @@ final public class ConceptInstance {
    public String getModality() {
       final EventProperties properties = getEventProperties();
       if ( properties != null ) {
-         return properties.getContextualModality();
+         final String cm = properties.getContextualModality();
+         return cm == null ? "" : cm;
       }
       return "";
    }
@@ -125,26 +121,6 @@ final public class ConceptInstance {
       return false;
    }
 
-   public String getLocationLaterality() {
-      return getAnatomicalSites()
-            .map( AnatomicalSiteMention::getBodyLaterality )
-            .map( Modifier::getNormalizedForm )
-            .filter( BodyLaterality.class::isInstance )
-            .map( n -> (BodyLaterality)n )
-            .map( BodyLaterality::getValue )
-            .findFirst().orElse( "" );
-   }
-
-   public String getLocationBodySide() {
-      return getAnatomicalSites()
-            .map( AnatomicalSiteMention::getBodySide )
-            .map( Modifier::getNormalizedForm )
-            .filter( BodySide.class::isInstance )
-            .map( n -> (BodySide)n )
-            .map( BodySide::getValue )
-            .findFirst().orElse( "" );
-   }
-
 
    private EventProperties getEventProperties() {
       if ( !EventMention.class.isInstance( _annotation ) ) {
@@ -157,12 +133,28 @@ final public class ConceptInstance {
       return null;
    }
 
-   private Stream<AnatomicalSiteMention> getAnatomicalSites() {
-      return PhenotypeAnnotationUtil.getLocations( _annotation ).stream()
-            .filter( AnatomicalSiteMention.class::isInstance )
-            .map( a -> (AnatomicalSiteMention)a );
+
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   public String toString() {
+      final StringBuilder sb = new StringBuilder();
+      sb.append( "ConceptInstance: " )
+            .append( getIdentifiedAnnotation().getCoveredText() )
+            .append( " " ).append( getUri() )
+            .append( "\tis a " ).append( getIdentifiedAnnotation().getClass().getName() )
+            .append( isNegated() ? "\tnegated" : "" )
+            .append( isUncertain() ? "\tuncertain" : "" )
+            .append( isConditional() ? "\tconditional" : "" )
+            .append( isHypothetical() ? "\thypothetical" : "" )
+            .append( isPermanent() ? "\tpermanent" : "" )
+            .append( isIntermittent() ? "\tintermittent" : "" )
+            .append( inPatientHistory() ? "\tpatient history" : "" )
+            .append( getSubject().isEmpty() ? "" : "\t" + getSubject() )
+            .append( getDocTimeRel().isEmpty() ? "" : "\t" + getDocTimeRel() )
+            .append( getModality().isEmpty() ? "" : "\t" + getModality() );
+      return sb.toString();
    }
-
-
 
 }

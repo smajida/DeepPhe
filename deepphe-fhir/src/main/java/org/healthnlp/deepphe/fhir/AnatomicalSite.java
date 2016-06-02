@@ -23,7 +23,12 @@ public class AnatomicalSite extends BodySite implements Element{
 	}
 
 	public String getSummaryText() {
-		return getDisplayText();
+		StringBuffer st = new StringBuffer();
+		st.append(getClass().getSimpleName()+":\t"+getDisplayText());
+		for(CodeableConcept l: getModifier()){
+			st.append(" | modifier: "+l.getText());
+		}
+		return st.toString();
 	}
 
 	public Resource getResource() {
@@ -41,7 +46,7 @@ public class AnatomicalSite extends BodySite implements Element{
 			setPatientTarget(p);
 		}
 	}
-
+	
 	public void save(File dir) throws Exception {
 		FHIRUtils.saveFHIR(this,getResourceIdentifier(),dir);
 	}
@@ -73,4 +78,7 @@ public class AnatomicalSite extends BodySite implements Element{
 		this.annotationType = annotationType;
 	}
 	
+	public String toString(){
+		return getSummaryText();
+	}
 }

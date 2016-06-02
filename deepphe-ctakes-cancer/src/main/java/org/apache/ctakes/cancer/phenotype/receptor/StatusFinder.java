@@ -1,7 +1,7 @@
 package org.apache.ctakes.cancer.phenotype.receptor;
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
 import org.apache.ctakes.cancer.util.SpanOffsetComparator;
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 import org.apache.uima.cas.text.AnnotationFS;
@@ -41,11 +41,21 @@ final public class StatusFinder {
                                             + "|(" + SHORT_VALUE + "))";
    static private final Pattern FULL_PATTERN = Pattern.compile( FULL_REGEX, Pattern.CASE_INSENSITIVE );
 
+   static private final String VALUE_TYPE_REGEX = "(strongly |weakly )?" +
+                                                  "(pos(itive)?)|(neg(ative)?)( for)? " +
+                                                  "((Estrogen(,? ?(/|and|or)? ?Progesterone)?(,? ?(/|and|or)? ?HER-?2( ?/ ?neu)?)?)" +
+                                                  "|(ER(,? ?(/|and|or)? ?PR)?(,? ?(/|and|or)? ?HER-?2( ?/ ?neu)?))" +
+                                                  "|(Progesterone|PR)" +
+                                                  "|(HER-?2( ?/ ?neu)?))";
+
+   static private final Pattern VALUE_TYPE_PATTERN = Pattern.compile( "\\b" + VALUE_TYPE_REGEX, Pattern.CASE_INSENSITIVE );
 
    static public void addReceptorStatuses( final JCas jcas, final AnnotationFS lookupWindow,
                                            final Iterable<IdentifiedAnnotation> neoplasms,
                                            final Iterable<IdentifiedAnnotation> diagnostics ) {
       final Collection<Status> statuses = getReceptorStatuses( lookupWindow.getCoveredText() );
+      final Collection<Status> statuses2 = getReceptorStatuses2( lookupWindow.getCoveredText() );
+      statuses.addAll( statuses2 );
       if ( statuses.isEmpty() ) {
          return;
       }
@@ -94,6 +104,39 @@ final public class StatusFinder {
                }
                if ( spannedValue != null ) {
                   statuses.add( new Status( spannedType, spannedValue ) );
+               }
+            }
+         }
+      }
+      Collections.sort( statuses, SpanOffsetComparator.getInstance() );
+      return statuses;
+   }
+
+   static List<Status> getReceptorStatuses2( final String lookupWindow ) {
+      if ( lookupWindow.length() < 3 ) {
+         return Collections.emptyList();
+      }
+      final List<Status> statuses = new ArrayList<>();
+      final Matcher fullMatcher = VALUE_TYPE_PATTERN.matcher( lookupWindow );
+      while ( fullMatcher.find() ) {
+         final String matchWindow = lookupWindow.substring( fullMatcher.start(), fullMatcher.end() );
+         SpannedStatusType spannedType = null;
+         SpannedStatusValue spannedValue = null;
+         for ( StatusValue value : StatusValue.values() ) {
+            final Matcher valueMatcher = value.getMatcher( matchWindow );
+            if ( valueMatcher.find() ) {
+               final int valueStart = fullMatcher.start() + valueMatcher.start();
+               final int valueEnd = fullMatcher.start() + valueMatcher.end();
+               spannedValue = new SpannedStatusValue( value, valueStart, valueEnd );
+               final String typeLookupWindow = matchWindow.substring( valueMatcher.end() );
+               for ( StatusType type : StatusType.values() ) {
+                  final Matcher typeMatcher = type.getMatcher( typeLookupWindow );
+                  if ( typeMatcher.find() ) {
+                     spannedType = new SpannedStatusType( type,
+                           valueEnd + typeMatcher.start(),
+                           valueEnd + typeMatcher.end() );
+                     statuses.add( new Status( spannedType, spannedValue ) );
+                  }
                }
             }
          }

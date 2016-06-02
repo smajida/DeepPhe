@@ -110,13 +110,14 @@ public class Condition extends org.hl7.fhir.instance.model.Condition implements 
 			setDateRecorded(d);
 		}
 	}
-	
+
+
 	public URI getConceptURI(){
 		return FHIRUtils.getConceptURI(getCode());
 	}
 	
 	public String toString(){
-		return getDisplayText();
+		return getSummaryText();
 	}
 
 
@@ -128,5 +129,4 @@ public class Condition extends org.hl7.fhir.instance.model.Condition implements 
 	public void setAnnotationType(String annotationType) {
 		this.annotationType = annotationType;
 	}
-	
 }

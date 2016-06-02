@@ -1,6 +1,6 @@
 package org.apache.ctakes.cancer.phenotype.tnm;
 
-import org.apache.ctakes.cancer.owl.OwlOntologyConceptUtil;
+import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.phenotype.property.Type;
 
 import java.util.regex.Matcher;
@@ -48,7 +48,7 @@ public enum TnmType implements Type {
     */
    @Override
    public String getUri() {
-      return OwlOntologyConceptUtil.CANCER_OWL + "#" + _uri;
+      return OwlConstants.CANCER_OWL + "#" + _uri;
    }
 
    /**

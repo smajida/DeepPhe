@@ -1,5 +1,6 @@
 package org.healthnlp.deepphe.fhir.summary;
 
+import org.healthnlp.deepphe.fhir.Patient;
 import org.healthnlp.deepphe.fhir.Report;
 import org.healthnlp.deepphe.fhir.fact.Fact;
 import org.healthnlp.deepphe.fhir.fact.FactList;
@@ -11,20 +12,39 @@ import java.util.List;
 
 
 public class TumorSummary extends Summary {
+	private CancerSummary cancerSummary;
 	private TumorPhenotype phenotype;
-	
-	private String summaryType = getClass().getSimpleName();
-	private String uuid = String.valueOf(Math.abs(hashCode()));
 	private FactList tumorType;
 	
-	public TumorSummary(){
+	public TumorSummary(String id){
+		setResourceIdentifier(id);
 		phenotype = new TumorPhenotype();
+		phenotype.setResourceIdentifier(id);
 	}
+
 
 	public void setReport(Report r){
 		super.setReport(r);
 		getPhenotype().setReport(r);
 	}
+	public void setPatient(Patient r){
+		super.setPatient(r);
+		getPhenotype().setPatient(r);
+	}
+	
+
+	public CancerSummary getCancerSummary() {
+		return cancerSummary;
+	}
+
+
+
+	public void setCancerSummary(CancerSummary cancerSummary) {
+		this.cancerSummary = cancerSummary;
+	}
+
+
+
 	
 	/**
 	 * return all facts that are contained within this fact
@@ -70,12 +90,7 @@ public class TumorSummary extends Summary {
 	public FactList getBodySite() {
 		return getFactsOrInsert(FHIRConstants.HAS_BODY_SITE);
 	}
-	public String getDisplayText() {
-		return  summaryType;
-	}
-	public String getResourceIdentifier() {
-		return summaryType+"_"+uuid;
-	}
+	
 	public String getSummaryText() {
 		StringBuffer st = new StringBuffer(super.getSummaryText());
 		// add phenotype
@@ -89,21 +104,6 @@ public class TumorSummary extends Summary {
 		return FHIRConstants.TUMOR_SUMMARY_URI;
 	}
 	
-	public String getSummaryType() {
-		return summaryType;
-	}
-
-	public void setSummaryType(String summaryType) {
-		this.summaryType = summaryType;
-	}
-
-	public String getUuid() {
-		return uuid;
-	}
-
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
-	}
 	
 	
 	public boolean isAppendable(Summary s) {
