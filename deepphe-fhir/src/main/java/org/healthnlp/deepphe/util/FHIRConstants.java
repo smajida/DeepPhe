@@ -135,6 +135,7 @@ public class FHIRConstants {
 
 	public static final List<String> BODY_SIDE_LIST = Arrays.asList("Right","Left","Bilateral");
 	public static final List<String> TNM_MODIFIER_LIST = Arrays.asList("p","c","y","r","sn");
+	public static final String BREAST = "Breast";
 	
 
 	

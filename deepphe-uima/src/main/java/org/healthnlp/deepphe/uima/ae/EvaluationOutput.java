@@ -33,6 +33,7 @@ import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
 import org.healthnlp.deepphe.fhir.summary.Summary;
 import org.healthnlp.deepphe.fhir.summary.TumorSummary;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
+import org.healthnlp.deepphe.util.FHIRConstants;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
@@ -52,7 +53,7 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 	public static final String ENTRY_CLASS = "Class";
 	public static final String ENTRY_PROPERTY = "Property";
 	public static final String ENTRY_PROVENANCE = "wasDerivedFrom";
-	public static final List<String> NORMALIZATION_EXPRESSIONS = Arrays.asList(".*([pc]?[TNM]\\w{1,4})_(Stage|TNM)_Finding");
+	//public static final List<String> NORMALIZATION_EXPRESSIONS = Arrays.asList(".*([pc]?[TNM]\\w{1,4})_(Stage|TNM)_Finding");
 
 	
 	private List<Map<String,String>> cancerMapping, tumorMapping;
@@ -114,13 +115,18 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 		String temporality = "Current";
 		StringBuffer b = new StringBuffer("cancer_");
 		b.append(getPatientIdentifier(cancer.getPatient())+"_");
-		b.append(temporality+"_");
+		String bodySite = "";
 		for(Fact site: cancer.getBodySite()){
-			b.append(site.getFullName()+"_");
-			//TODO: well, we might have multiple sites
-			break; 
+			bodySite = site.getFullName()+"_";
+			//TODO: this is bad, I should not hard code this. 
+			// Will fix after demo, perhaps infer organ from ontology name?
+			if(FHIRConstants.BREAST.equals(site.getName())){
+				break;
+			}
 		}
-		b.replace(b.length()-1,b.length(),"");
+		b.append(bodySite);
+		b.append(temporality);
+		//b.replace(b.length()-1,b.length(),"");
 		return b.toString(); 
 	}
 	
@@ -310,11 +316,11 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 	
 	private String getNormalizedValue(Fact val){
 		// take care of reg/ex
-		for(String re: NORMALIZATION_EXPRESSIONS){
+		/*for(String re: NORMALIZATION_EXPRESSIONS){
 			Matcher m = Pattern.compile(re).matcher(val.getName());
 			if(m.matches())
 				return m.group(1);
-		}
+		}*/
 		return val.getName();
 	}
 	
