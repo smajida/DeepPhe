@@ -354,7 +354,7 @@ rule "genericM-2-to-Pathologic-M1"
 		//modify name
 		String brcaName = "Breast_Cancer_"+"p"+$genericTFact.getName().replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
-		cf.setCategory("hasPathologicNClassification");
+		cf.setCategory("hasPathologicMClassification");
 		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
@@ -388,7 +388,7 @@ rule "genericM-2-to-Pathologic-MX"
 		//modify name
 		String brcaName = "Breast_Cancer_"+"p"+$genericTFact.getName().replace("Stage_Finding", "TNM_Finding");
 		Fact cf = FactFactory.createFact($genericTFact, $genericTFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+brcaName, "RecordSummary");
-		cf.setCategory("hasPathologicNClassification");
+		cf.setCategory("hasPathologicMClassification");
 		cf.setIdentifier(newId); cf.setSummaryId(newId);
 		cf.addProvenanceFacts($genericTFact.getProvenanceFacts());
 		cf.addContainerIdentifier($newSummaryId);
