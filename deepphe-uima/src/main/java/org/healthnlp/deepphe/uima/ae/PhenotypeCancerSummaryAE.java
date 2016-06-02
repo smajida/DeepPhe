@@ -139,14 +139,16 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 
 			// System.out.println("DROOLS TIME: "+(System.currentTimeMillis() -
 			// stT)/1000+" sec");
-			System.out.println("**************************");
-			System.out.println("RECORD Summary: " + record.getSummaryText());
-			System.out.println("**************************");
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+		System.out.println("**************************");
+		System.out.println("RECORD Summary: " + record.getSummaryText());
+		System.out.println("**************************");
+		
 		// this is where you save your work back to CAS
 
 		PhenotypeResourceFactory.saveMedicalRecord(record, jcas);
