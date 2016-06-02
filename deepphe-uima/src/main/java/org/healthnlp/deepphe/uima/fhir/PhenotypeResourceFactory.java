@@ -443,7 +443,15 @@ public class PhenotypeResourceFactory {
 		return annotation;
 	}
 
-
+	private Set<Fact> getAllProvenanceFacts(Fact fact,Set<Fact> list){
+		for(Fact f: fact.getProvenanceFacts()){
+			list.add(f);
+			getAllProvenanceFacts(f, list);
+		}
+		return list;
+	}
+	
+	
 
 	private static org.healthnlp.deepphe.uima.types.Fact saveFact(Fact fact, JCas jcas) {
 		Annotation a = getAnnotationByIdentifier(jcas,fact.getIdentifier());

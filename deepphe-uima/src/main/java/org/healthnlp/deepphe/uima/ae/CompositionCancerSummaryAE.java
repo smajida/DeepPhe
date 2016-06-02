@@ -283,11 +283,90 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 				cancerType.addProvenanceFact(diagnosis);
 				phenotype.addFact(FHIRConstants.HAS_CANCER_TYPE,cancerType);
 			}
+			
 		}
 		
+		// upgrade TNM to Clinical or Pathologic
+		inferClinicalPathologicTNM(report, phenotype);
 		
 		return cancer;
 	}
+	
+	
+	private void inferClinicalPathologicTNM(Report report, CancerPhenotype phenotype){
+		// upgrade TNM to Clinical or Pathologic
+		boolean pathologic = report.getType() != null ? FHIRUtils.getDocumentType("SP").getText().equals(report.getType().getText()) : false;
+		boolean clinical = !pathologic;
+		
+		for(Fact fact: phenotype.getFacts(FHIRConstants.HAS_T_CLASSIFICATION)){
+			if(hasTNMModifier(fact,FHIRConstants.P_MODIFIER)){
+				pathologic = true;
+				clinical = !pathologic;
+			}else if(hasTNMModifier(fact,FHIRConstants.C_MODIFIER)){
+				clinical = true;
+				pathologic = !clinical;
+			}
+			
+			if(pathologic){
+				Fact cfact = FactFactory.createFact(FHIRUtils.getCodeableConcept(FHIRUtils.getPathologicalTNM_URI(fact.getName())));
+				if(cfact != null){
+					cfact.addProvenanceFact(fact);
+					phenotype.addFact(FHIRConstants.HAS_PATHOLOGIC_T_CLASSIFICATION,cfact);
+				}
+			}else if(clinical){
+				Fact cfact = FactFactory.createFact(FHIRUtils.getCodeableConcept(FHIRUtils.getClinicalTNM_URI(fact.getName())));
+				if(cfact != null){
+					cfact.addProvenanceFact(fact);
+					phenotype.addFact(FHIRConstants.HAS_CLINICAL_T_CLASSIFICATION,cfact);
+				}
+			}
+		}
+		
+		for(Fact fact: phenotype.getFacts(FHIRConstants.HAS_N_CLASSIFICATION)){
+			if(pathologic){
+				Fact cfact = FactFactory.createFact(FHIRUtils.getCodeableConcept(FHIRUtils.getPathologicalTNM_URI(fact.getName())));
+				if(cfact != null){
+					cfact.addProvenanceFact(fact);
+					phenotype.addFact(FHIRConstants.HAS_PATHOLOGIC_N_CLASSIFICATION,cfact);
+				}
+			}else if(clinical){
+				Fact cfact = FactFactory.createFact(FHIRUtils.getCodeableConcept(FHIRUtils.getClinicalTNM_URI(fact.getName())));
+				if(cfact != null){
+					cfact.addProvenanceFact(fact);
+					phenotype.addFact(FHIRConstants.HAS_CLINICAL_N_CLASSIFICATION,cfact);
+				}
+			}
+		}
+		
+		for(Fact fact: phenotype.getFacts(FHIRConstants.HAS_M_CLASSIFICATION)){
+			if(pathologic){
+				Fact cfact = FactFactory.createFact(FHIRUtils.getCodeableConcept(FHIRUtils.getPathologicalTNM_URI(fact.getName())));
+				if(cfact != null){
+				cfact.addProvenanceFact(fact);
+				phenotype.addFact(FHIRConstants.HAS_PATHOLOGIC_M_CLASSIFICATION,cfact);
+				}
+			}else if(clinical){
+				Fact cfact = FactFactory.createFact(FHIRUtils.getCodeableConcept(FHIRUtils.getClinicalTNM_URI(fact.getName())));
+				if(cfact != null){
+					cfact.addProvenanceFact(fact);
+					phenotype.addFact(FHIRConstants.HAS_CLINICAL_M_CLASSIFICATION,cfact);
+				}
+			}
+		}
+	}
+	
+	
+	private boolean hasTNMModifier(Fact fact, String modifier){
+		if(fact instanceof TNMFact){
+			TNMFact tnm = (TNMFact) fact;
+			if(tnm.getPrefix() != null && modifier.equals(tnm.getPrefix().getName())){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
 	
 	
 	private TumorSummary createTumorSummary(Report report, ConditionFact diagnosis, BodySiteFact bodySite){

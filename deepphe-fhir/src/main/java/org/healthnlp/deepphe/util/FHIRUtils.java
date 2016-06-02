@@ -138,6 +138,8 @@ public class FHIRUtils {
 	}
 	
 	public static CodeableConcept getCodeableConcept(URI uri){
+		if(uri == null)
+			return null;
 		return getCodeableConcept(getConceptName(uri),uri.toString(),SCHEMA_OWL);
 	}
 	
@@ -852,15 +854,30 @@ public class FHIRUtils {
 		return u.equals(getConceptURI(concept));
 	}
 	
-	/**
-	 * create temperal order from given N (mention offset) and DocTimeRel
-	 * @param e
-	 * @param i
-	 * @return
-	 */
-	public static int createTemporalOrder(Element e, int i) {
-		//TODO: account for DocTimeRel
-		return i;
+
+	public static URI getPathologicalTNM_URI(String name) {
+		if(OntologyUtils.hasInstance()){
+			Matcher m = Pattern.compile(".*([pc]?[TNM]\\w{1,4})_(Stage|TNM)_Finding").matcher(name);
+			if(m.matches()){
+				IClass cls = OntologyUtils.getInstance().getOntology().getClass("Breast_Cancer_p"+m.group(1)+"_TNM_Finding");
+				if(cls != null)
+					return cls.getURI();
+			}
+		}
+		return null;
+	}
+
+	
+	public static URI getClinicalTNM_URI(String name) {
+		if(OntologyUtils.hasInstance()){
+			Matcher m = Pattern.compile(".*([pc]?[TNM]\\w{1,4})_(Stage|TNM)_Finding").matcher(name);
+			if(m.matches()){
+				IClass cls = OntologyUtils.getInstance().getOntology().getClass("Breast_Cancer_c"+m.group(1)+"_TNM_Finding");
+				if(cls != null)
+					return cls.getURI();
+			}
+		}
+		return null;
 	}
 	
 }

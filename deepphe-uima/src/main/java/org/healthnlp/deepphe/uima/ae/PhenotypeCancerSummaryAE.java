@@ -77,7 +77,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		record.setCancerSummary(cancerSummary);
 
 		// merge stuff around
-		/*for(Report report: record.getReports()){
+		for(Report report: record.getReports()){
 			PatientSummary p = report.getPatientSummary();
 			if(p != null && patientSummary.isAppendable(p)){
 				patientSummary.append(p); 
@@ -88,7 +88,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 				}
 			}
 			
-		}*/
+		}
 		
 		// check ancestors
 		List<Fact> reportFacts = record.getReportLevelFacts();
@@ -101,7 +101,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		  System.out.println(f.getInfo()); 
 		  }*/
 		
-		// insert record into drools
+		/*// insert record into drools
 		DroolsEngine de = new DroolsEngine();
 		KieSession droolsSession = null;
 		try {
@@ -139,16 +139,16 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 
 			// System.out.println("DROOLS TIME: "+(System.currentTimeMillis() -
 			// stT)/1000+" sec");
-			System.out.println("**************************");
-			System.out.println("RECORD Summary: " + record.getSummaryText());
-			System.out.println("**************************");
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 
 		// this is where you save your work back to CAS
-
+		System.out.println("**************************");
+		System.out.println("RECORD Summary: " + record.getSummaryText());
+		System.out.println("**************************");
 		PhenotypeResourceFactory.saveMedicalRecord(record, jcas);
 
 	}

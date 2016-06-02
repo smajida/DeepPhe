@@ -53,6 +53,9 @@ public class FactFactory {
 	 * create a generic fact based on a codeable concept
 	 */
 	public static Fact createFact(CodeableConcept cc){
+		if(cc == null)
+			return null;
+		
 		// do we have an element of this CC registered, then make a fact based on that
 		Element e = FHIRRegistry.getInstance().getResource(FHIRUtils.getResourceIdentifer(cc));
 		if(e != null)
