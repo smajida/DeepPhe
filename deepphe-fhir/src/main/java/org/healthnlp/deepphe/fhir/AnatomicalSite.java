@@ -28,6 +28,10 @@ public class AnatomicalSite extends BodySite implements Element{
 		for(CodeableConcept l: getModifier()){
 			st.append(" | modifier: "+l.getText());
 		}
+		
+		// add text provenance
+		st.append(" [ "+FHIRUtils.getMentions(this)+" ]");
+		
 		return st.toString();
 	}
 

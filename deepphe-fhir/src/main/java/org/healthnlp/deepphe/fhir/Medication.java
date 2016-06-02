@@ -23,6 +23,8 @@ public class Medication extends org.hl7.fhir.instance.model.Medication implement
 	public String getSummaryText() {
 		StringBuffer st = new StringBuffer();
 		st.append("Medication:\t"+getDisplayText());
+		// add text provenance
+				st.append(" [ "+FHIRUtils.getMentions(this)+" ]");
 		return st.toString();
 	}
 	public Resource getResource() {
