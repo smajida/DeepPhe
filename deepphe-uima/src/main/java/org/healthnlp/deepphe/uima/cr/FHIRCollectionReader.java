@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.uima.cr;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -49,8 +50,10 @@ public class FHIRCollectionReader extends CollectionReader_ImplBase {
 		if(new File(directory,DocumentSummarizerAE.FHIR_TYPE).exists())
 			directory = new File(directory,DocumentSummarizerAE.FHIR_TYPE);
 		
+		File [] files =  directory.listFiles();
+		Arrays.sort(files);
 		//go into directory 
-		for(File f: directory.listFiles()){
+		for(File f: files){
 			if(f.isDirectory()){
 				subjectDirectories.add(f);
 			}

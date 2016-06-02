@@ -331,7 +331,7 @@ public abstract class Summary extends List_  implements Element {
 	private void addTemporality(Fact fact, Element  el, Date dt, int i) {
 		if(dt != null)
 			fact.setRecordedDate(dt);
-		fact.setTemporalOrder(FHIRUtils.createTemporalOrder(el, i));
+		//fact.setTemporalOrder(FHIRUtils.createTemporalOrder(el, i));
 		
 	}
 	
