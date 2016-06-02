@@ -44,6 +44,9 @@ public class Observation extends org.hl7.fhir.instance.model.Observation impleme
 		if(method != null)
 			st.append(" | method: "+method.getText());
 		
+		// add text provenance
+		st.append(" [ "+FHIRUtils.getMentions(this)+" ]");
+		
 		return st.toString();
 		
 	}

@@ -740,6 +740,26 @@ public class FHIRUtils {
 	}
 	
 	
+	public static String getMentions(Condition c){
+		StringBuffer b = new StringBuffer();
+		b.append(getMentions((DomainResource)c)+", ");
+		for(CodeableConcept cc: c.getBodySite()){
+			Element e = FHIRRegistry.getInstance().getResource(FHIRUtils.getResourceIdentifer(cc));
+			if(e != null)
+				b.append(getMentions((DomainResource) e)+" ");
+		}
+		return b.toString();
+	}
+	
+	public static String getMentions(DomainResource c){
+		StringBuffer b = new StringBuffer();
+		for(String str: getMentionExtensions(c)){
+			b.append(getMentionText(str)+" ");
+		}
+		return b.toString().trim();
+	}
+	
+	
 	
 	public static List<String> getMentionExtensions(DomainResource r){
 		List<String> mentions = new ArrayList<String>();

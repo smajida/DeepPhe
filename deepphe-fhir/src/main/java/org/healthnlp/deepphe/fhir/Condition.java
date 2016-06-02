@@ -85,6 +85,10 @@ public class Condition extends org.hl7.fhir.instance.model.Condition implements 
 			st.append(" | stage: "+s.getSummary().getText());
 			//+" T:"+s.getPrimaryTumorStage()+" N: "+s.getRegionalLymphNodeStage()+" M: "+s.getDistantMetastasisStage());
 		}
+		
+		// add text provenance
+		st.append(" [ "+FHIRUtils.getMentions(this)+" ]");
+		
 		return st.toString();
 	}
 	public void save(File dir) throws Exception {
