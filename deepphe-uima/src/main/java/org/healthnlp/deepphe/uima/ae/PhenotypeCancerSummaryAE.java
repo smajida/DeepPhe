@@ -77,32 +77,26 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		record.setCancerSummary(cancerSummary);
 
 		// merge stuff around
-		/*
-		 * for(Report report: record.getReports()){
-		 * 
-		 * PatientSummary p = report.getPatientSummary();
-		 * 
-		 * if(p != null && patientSummary.isAppendable(p)){
-		 * patientSummary.append(p); }
-		 * 
-		 * //append cancer summary for(CancerSummary cs:
-		 * report.getCancerSummaries()){ if(cancerSummary.isAppendable(cs)){
-		 * cancerSummary.append(cs); }else{ //TODO: well we have another cancer
-		 * summary, will ignore it for now } }
-		 * 
-		 * //append tumor summaries that are by themselves for(TumorSummary ts:
-		 * report.getTumorSummaries()){ cancerSummary.append(ts); }
-		 * 
-		 * }
-		 */
+		/*for(Report report: record.getReports()){
+			PatientSummary p = report.getPatientSummary();
+			if(p != null && patientSummary.isAppendable(p)){
+				patientSummary.append(p); 
+			}
+			for(CancerSummary c: report.getCancerSummaries()){
+				if(cancerSummary.isAppendable(c)){
+					cancerSummary.append(c);
+				}
+			}
+			
+		}*/
+		
 		// check ancestors
 		checkAncestors(record.getRecordLevelFacts());
 
-		/*
-		 * for(Fact f: record.getReportLevelFacts()){
-		 * System.out.println(f.getInfo()); }
-		 */
-
+		/* for(Fact f: record.getReportLevelFacts()){
+		  System.out.println(f.getInfo()); 
+		  }*/
+		
 		// insert record into drools
 		DroolsEngine de = new DroolsEngine();
 		KieSession droolsSession = null;
@@ -114,32 +108,30 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			// insert new medical record
 			droolsSession.insert(new Domain("Breast"));
 			droolsSession.insert(record);
-boolean doWrite = false;
-FileWriter fw = null;
-if(doWrite)
-fw = new FileWriter("/home/opm1/devSrc/deepPhe_Data/DeepPhe/sample/output_frank/droolsInput.txt");	
+			boolean doWrite = false;
+			FileWriter fw = null;
+			if (doWrite)
+				fw = new FileWriter("/home/opm1/devSrc/deepPhe_Data/DeepPhe/sample/output_frank/droolsInput.txt");
 			for (Fact f : record.getReportLevelFacts()) {
 				try {
 					if (!f.getCategory().equalsIgnoreCase("wasDerivedFrom") && !dupList.contains(f.getInfo())) {
 						dupList.add(f.getInfo());
-if(doWrite)
-fw.write(f.getInfo());
-	
-						
-						//System.out.println(f.getInfo());
+						if (doWrite)
+							fw.write(f.getInfo());
+
+						// System.out.println(f.getInfo());
 						droolsSession.insert(f);
 					}
 				} catch (NullPointerException e) {
 					// System.err.println("NO Category for F: "+f.getInfo());
 				}
 			}
-if(fw != null)
-fw.close();
+			if (fw != null)
+				fw.close();
 			dupList.clear();
 			dupList = null;
 			droolsSession.fireAllRules();
 			droolsSession.dispose();
-			
 
 			// System.out.println("DROOLS TIME: "+(System.currentTimeMillis() -
 			// stT)/1000+" sec");
@@ -157,9 +149,9 @@ fw.close();
 
 	}
 
-	public void checkAncestors(Collection<Fact> facts){
-		for(Fact f:	facts){
-			if(f.getAncestors().isEmpty())
+	public void checkAncestors(Collection<Fact> facts) {
+		for (Fact f : facts) {
+			if (f.getAncestors().isEmpty())
 				OntologyUtils.getInstance().addAncestors(f);
 		}
 	}

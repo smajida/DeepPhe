@@ -281,7 +281,7 @@ public class PhenotypeEval {
 			if(valueHeaders == null){
 				valueHeaders = new ArrayList<String>();
 				for(String h : headers){
-					if(!isIgnoreField(h) && !isIdField(h)){
+					if(!isIgnoreField(h)){ // && !isIdField(h)
 						valueHeaders.add(h);
 					}
 				}

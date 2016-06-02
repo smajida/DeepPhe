@@ -3,7 +3,7 @@
 body location	Breast_Cancer	hasBodySite
 body location laterality	BodySite	hasBodySide
 -documents for	BodySite	wasDerivedFrom
-Temporality		
+-Temporality		
 clinical stage	BreastCancerPhenotype	hasClinicalStage
 -documents for clinical stage	CancerStage	wasDerivedFrom
 clinical T classification	BreastCancerPhenotype	hasClinicalTClassification
@@ -26,13 +26,13 @@ pathologic prefix
 -documents for pathologic prefix		
 pathologic suffix		
 -documents for pathologic suffix		
-generic T classification	BreastCancerPhenotype	hasGenericTClassification
+-generic T classification	BreastCancerPhenotype	hasGenericTClassification
 -documents for generic T classification	Generic_Primary_Tumor_TNM_Finding	wasDerivedFrom
-generic N classification	BreastCancerPhenotype	hasGenericNClassification
+-generic N classification	BreastCancerPhenotype	hasGenericNClassification
 -documents for generic N classification	Generic_Regional_Lymph_Nodes_TNM_Finding	wasDerivedFrom
-generic M classification	BreastCancerPhenotype	hasGenericMClassification
+-generic M classification	BreastCancerPhenotype	hasGenericMClassification
 -documents for generic M classification	Generic_Distant_Metastasis_TNM_Finding	wasDerivedFrom
-generic prefix		
+-generic prefix		
 -documents for generic prefix		
-generic suffix		
+-generic suffix		
 -documents for generic suffix		
