@@ -124,29 +124,78 @@ public class TumorLocator {
 		} catch (NumberFormatException e){
 			return toret;
 		}
-		if(clockfacePosNum == 12 || clockfacePosNum ==3 || clockfacePosNum == 6 || clockfacePosNum ==9)
-			return toret;
+	//	if(clockfacePosNum == 12 || clockfacePosNum ==3 || clockfacePosNum == 6 || clockfacePosNum ==9)
+	//		return toret;
 		if(bodySide.equalsIgnoreCase("LEFT")){
-			if(clockfacePosNum < 3)
+			if(clockfacePosNum <= 3)
 				toret = "Upper_Outer_Quadrant_of_the_Breast";
-			else if(clockfacePosNum > 3 && clockfacePosNum < 6)
+			else if(clockfacePosNum > 3 && clockfacePosNum <= 6)
 				toret = "Lower_Outer_Quadrant_of_the_Breast";
-			else if(clockfacePosNum > 6 && clockfacePosNum < 9)
+			else if(clockfacePosNum > 6 && clockfacePosNum <= 9)
 				toret = "Lower_Inner_Quadrant_of_the_Breast";
-			else if(clockfacePosNum > 9 && clockfacePosNum < 12)
+			else if(clockfacePosNum > 9 && clockfacePosNum <= 12)
 				toret = "Upper_Inner_Quadrant_of_the_Breast";
 		}
 		else if(bodySide.equalsIgnoreCase("RIGHT")){
-			if(clockfacePosNum < 3)
+			if(clockfacePosNum <= 3)
 				toret = "Upper_Inner_Quadrant_of_the_Breast";
-			else if(clockfacePosNum > 3 && clockfacePosNum < 6)
+			else if(clockfacePosNum > 3 && clockfacePosNum <= 6)
 				toret = "Lower_Inner_Quadrant_of_the_Breast";
-			else if(clockfacePosNum > 6 && clockfacePosNum < 9)
+			else if(clockfacePosNum > 6 && clockfacePosNum <= 9)
 				toret = "Lower_Outer_Quadrant_of_the_Breast";
-			else if(clockfacePosNum > 9 && clockfacePosNum < 12)
+			else if(clockfacePosNum > 9 && clockfacePosNum <= 12)
 				toret = "Upper_Outer_Quadrant_of_the_Breast";
 		}
 		return toret;
 	}
-
+	
+	public static boolean clockFactInQuadrant(String bodySide, String clockfacePos, String quadrant){
+		float clockfacePosNum = 0;
+		try{
+			clockfacePosNum = Float.valueOf(clockfacePos.substring(0, clockfacePos.indexOf("_")));
+			
+		} catch (NumberFormatException e){
+			return false;
+		}
+		
+		if(bodySide.equalsIgnoreCase("RIGHT")){
+			if(clockfacePosNum < 3 && quadrant.equals("Upper_Inner_Quadrant_of_the_Breast"))
+				return true;
+			else if (clockfacePosNum == 3 && (quadrant.equals("Upper_Inner_Quadrant_of_the_Breast") || quadrant.equals("Lower_Inner_Quadrant_of_the_Breast")))
+				return true;
+			else if(clockfacePosNum > 3 && clockfacePosNum < 6 && quadrant.equals("Lower_Inner_Quadrant_of_the_Breast"))
+				return true;
+			else if (clockfacePosNum == 6 && (quadrant.equals("Lower_Inner_Quadrant_of_the_Breast") || quadrant.equals("Lower_Outer_Quadrant_of_the_Breast")))
+				return true;
+			else if(clockfacePosNum > 6 && clockfacePosNum < 9 && quadrant.equals("Lower_Outer_Quadrant_of_the_Breast"))
+				return true;
+			else if (clockfacePosNum == 9 && (quadrant.equals("Lower_Outer_Quadrant_of_the_Breast") || quadrant.equals("Upper_Outer_Quadrant_of_the_Breast")))
+				return true;
+			else if(clockfacePosNum > 9 && clockfacePosNum < 12 && quadrant.equals("Upper_Outer_Quadrant_of_the_Breast"))
+				return true;
+			else if (clockfacePosNum == 12 && (quadrant.equals("Upper_Outer_Quadrant_of_the_Breast") || quadrant.equals("Upper_Inner_Quadrant_of_the_Breast")))
+				return true;
+		}
+		else if(bodySide.equalsIgnoreCase("LEFT")){
+			if(clockfacePosNum < 3 && quadrant.equals("Upper_Outer_Quadrant_of_the_Breast"))
+				return true;
+			else if (clockfacePosNum == 3 && (quadrant.equals("Upper_Outer_Quadrant_of_the_Breast") || quadrant.equals("Lower_Outer_Quadrant_of_the_Breast")))
+				return true;
+			else if(clockfacePosNum > 3 && clockfacePosNum < 6 && quadrant.equals("Lower_Outer_Quadrant_of_the_Breast"))
+				return true;
+			else if (clockfacePosNum == 6 && (quadrant.equals("Lower_Outer_Quadrant_of_the_Breast") || quadrant.equals("Lower_Inner_Quadrant_of_the_Breast")))
+				return true;
+			else if(clockfacePosNum > 6 && clockfacePosNum < 9 && quadrant.equals("Lower_Inner_Quadrant_of_the_Breast"))
+				return true;
+			else if (clockfacePosNum == 9 && (quadrant.equals("Lower_Inner_Quadrant_of_the_Breast") || quadrant.equals("Upper_Inner_Quadrant_of_the_Breast")))
+				return true;
+			else if(clockfacePosNum > 9 && clockfacePosNum < 12 && quadrant.equals("Upper_Inner_Quadrant_of_the_Breast"))
+				return true;
+			else if (clockfacePosNum == 12 && (quadrant.equals("Upper_Inner_Quadrant_of_the_Breast") || quadrant.equals("Upper_Outer_Quadrant_of_the_Breast")))
+				return true;
+		}
+		
+		return false;
+		
+	}
 }
