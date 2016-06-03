@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.healthnlp.deepphe.util.FHIRConstants;
@@ -712,7 +713,27 @@ rule "add-histologicType"
 			setHistologicType($hist_name);
 		}
 end
+
+rule "make-new-fact-id-unique"
+	salience 10
+	no-loop true
+	when
+		$allFacts : Set()
+		from collect(Fact(documentType == "RecordSummary"))
+	then
+		List uniqIdList = new ArrayList<String>();
+		for(Object obj : $allFacts){
+			String idStr = ((Fact)obj).getIdentifier();
+			if(uniqIdList.contains(idStr)){
+				idStr = UUID.randomUUID().toString();
+				((Fact)obj).setIdentifier(idStr);
+			}
+			uniqIdList.add(uniqIdList);
+		}
+end
+				
 	
+		
 
 /*
 rule "print-idMap"
