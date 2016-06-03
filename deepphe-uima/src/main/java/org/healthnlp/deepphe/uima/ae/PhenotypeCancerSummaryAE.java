@@ -149,6 +149,11 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 		System.out.println("RECORD Summary: " + record.getSummaryText());
 		System.out.println("**************************");
 		
+		// reset fact level resource IDs that rules have created
+		for(Fact f: record.getRecordLevelFacts()){
+			 f.setIdentifier(record.getClass().getSimpleName()+"_"+f.getName()+"_"+Math.round(1000*Math.random())); 
+			// System.out.println(f.getInfo()); 
+		}
 		
 		
 		// this is where you save your work back to CAS
