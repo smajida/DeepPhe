@@ -305,7 +305,7 @@ public class TranSMART_Output  extends JCasAnnotator_ImplBase {
 		if(entryClass.equals(value.getName())){
 			return "True";
 		}
-		return value.getSummaryText();
+		return value.getName();
 	}
 
 
