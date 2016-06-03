@@ -10,6 +10,9 @@ public class GenericToBreastTNMMapper {
 	
 	static List <String> tBreast = null;
 	static List <String> nPathologicBreast = null;
+	static List <String> nClinicalBreast = null;
+	static List <String> mPathologicBreast = null;
+	static List <String> mClinicalBreast = null;
 	
 	public static String getBreastTClassification(String prefix, String genericValue, String suffix){
 		String pref = "";
@@ -21,7 +24,7 @@ public class GenericToBreastTNMMapper {
 		if("".equals(pref)) return null;
 		
 		String genV = genericValue.substring(0, genericValue.indexOf("_"));
-		if(!getTList().contains(genV)) return null;
+		if(!get_T_List().contains(genV)) return null;
 		
 		String suff = "";
 		if(genV.equals("Tis") && (suffix.equals("DCIS") || suffix.equals("LCIS") || suffix.equals("Paget")))
@@ -43,7 +46,7 @@ public class GenericToBreastTNMMapper {
 	    return "";
 	}
 	
-	public static List<String> getTList(){
+	public static List<String> get_T_List(){
 		if(tBreast != null) return tBreast;
 		tBreast = new ArrayList<String>();	
 		String[] tBreasArr = new String[] {"T0", "T1", "T1a", "T1b", "T1c", "T1mic","T2", "T3", "T4","T4a", "T4b", "T4c","T4d", "Tis", "TX"};
@@ -51,12 +54,36 @@ public class GenericToBreastTNMMapper {
 		return tBreast;
 	}
 	
-	public static List<String> getPathologicNMap(){
+	public static List<String> getClinical_N_List(){
+		if(nClinicalBreast != null) return nClinicalBreast;
+		nClinicalBreast = new ArrayList<String>();
+		String[] tBreasArr = new String[] {"N0", "N1", "N1mic","N2", "N2a", "N2b","N3", "N3a", "N3b", "N3c","NX"};
+		Collections.addAll(nClinicalBreast, tBreasArr); 
+		return nClinicalBreast;
+	}
+	
+	public static List<String> getPathologic_N_List(){
 		if(nPathologicBreast != null) return nPathologicBreast;
 		nPathologicBreast = new ArrayList<String>();
 		String[] tBreasArr = new String[] {"N0", "N1", "N1a", "N1b", "N1c", "N1mic","N2", "N2a", "N2b","N3", "N3a", "N3b", "N3c","NX"};
 		Collections.addAll(nPathologicBreast, tBreasArr); 
 		return nPathologicBreast;
+	}
+	
+	public static List<String> getPathologic_M_List(){
+		if(mPathologicBreast != null) return mPathologicBreast;
+		mPathologicBreast = new ArrayList<String>();
+		String[] tBreasArr = new String[] {"M1", "MX"};
+		Collections.addAll(mPathologicBreast, tBreasArr); 
+		return mPathologicBreast;
+	}
+	
+	public static List<String> getClinical_M_List(){
+		if(mClinicalBreast != null) return mClinicalBreast;
+		mClinicalBreast = new ArrayList<String>();
+		String[] tBreasArr = new String[] {"M0", "M1"};
+		Collections.addAll(mClinicalBreast, tBreasArr); 
+		return mClinicalBreast;
 	}
 
 }
