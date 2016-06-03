@@ -134,37 +134,43 @@ rule  "set-Tumor-Cancer-Diagnosis"
 	    	))
 	    $recordTFact : Fact(documentType == "RecordSummary", summaryType == "TumorSummary", summaryId == $newSummaryId)
 	    not(Fact(documentType == "RecordSummary", summaryType == "TumorSummary", category == "hasDiagnosis", provenanceFacts contains $tF))
+	    
+	    $$deepOldSummaryId : Set()
+	    from collect (Fact(summaryType == "TumorSummary", documentType != "RecordSummary", category == "hasDiagnosis", name == $deepName, summaryId == $deepOldSummaryId))
 
 	then
-		//tumor level
-		Fact tf = FactFactory.createFact($tF, "hasDiagnosis", OwlConstants.BREAST_CANCER_OWL+"#"+$tF.getName(), "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId);
-		tf.setIdentifier(tf.getName()+"-"+$newSummaryId);
-		tf.addProvenanceFact($tF);
-		tf.setSummaryId($newSummaryId);
-		insert(new IdMapper($tF.getIdentifier(), tf.getIdentifier(), $tF.getDocumentType(), $tF.getSummaryId(), tf.getSummaryId()));
-		
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), $newSummaryId, OwlConstants.BREAST_CANCER_OWL);
-		
-		insert(tf);
-		
-		//cancer level
-		Fact ctf = FactFactory.createFact($tF, "hasDiagnosis", OwlConstants.BREAST_CANCER_OWL+"#"+$tF.getName(), "RecordSummary");
-		ctf.setIdentifier($cancerFact.getIdentifier());
-		ctf.getContainerIdentifier().clear();
-		ctf.addContainerIdentifier($cancerFact.getSummaryId());
-		ctf.addProvenanceFact($tF);
-		ctf.setSummaryType("CancerSummary");
-		ctf.setSummaryId($cancerFact.getSummaryId());
-		insert(new IdMapper($tF.getIdentifier(), $cancerFact.getIdentifier(), $tF.getDocumentType(), $tF.getSummaryId(), $cancerFact.getSummaryId()));
-		
-		FactHelper.addFactToSummary(ctf, $record.getCancerSummary(), $cancerFact.getIdentifier(), OwlConstants.BREAST_CANCER_OWL);
-		insert(ctf);
+		for (Object obj: $$deepOldSummaryId){
+			Fact diagnFact = (Fact)obj;
+			//tumor level
+			Fact tf = FactFactory.createFact(diagnFact, "hasDiagnosis", OwlConstants.BREAST_CANCER_OWL+"#"+diagnFact.getName(), "RecordSummary");
+			tf.addContainerIdentifier($newSummaryId);
+			tf.setIdentifier(tf.getName()+"-"+$newSummaryId);
+			tf.addProvenanceFact(diagnFact);
+			tf.setSummaryId($newSummaryId);
+			insert(new IdMapper(diagnFact.getIdentifier(), tf.getIdentifier(), diagnFact.getDocumentType(), diagnFact.getSummaryId(), tf.getSummaryId()));
+			
+			FactHelper.addFactToSummary(tf, $record.getCancerSummary(), $newSummaryId, OwlConstants.BREAST_CANCER_OWL);
+			
+			insert(tf);
+			
+			//cancer level
+			Fact ctf = FactFactory.createFact(diagnFact, "hasDiagnosis", OwlConstants.BREAST_CANCER_OWL+"#"+diagnFact.getName(), "RecordSummary");
+			ctf.setIdentifier($cancerFact.getIdentifier());
+			ctf.getContainerIdentifier().clear();
+			ctf.addContainerIdentifier($cancerFact.getSummaryId());
+			ctf.addProvenanceFact(diagnFact);
+			ctf.setSummaryType("CancerSummary");
+			ctf.setSummaryId($cancerFact.getSummaryId());
+			insert(new IdMapper(diagnFact.getIdentifier(), $cancerFact.getIdentifier(), diagnFact.getDocumentType(), diagnFact.getSummaryId(), $cancerFact.getSummaryId()));
+			
+			FactHelper.addFactToSummary(ctf, $record.getCancerSummary(), $cancerFact.getIdentifier(), OwlConstants.BREAST_CANCER_OWL);
+			insert(ctf);
+		}
 		
 end  
 
 rule  "set-Tumor-Cancer-TumorExtent"
-	salience 44444
+	salience 44443
 	no-loop true
 	when
 		$record : MedicalRecord()	

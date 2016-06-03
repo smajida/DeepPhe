@@ -110,7 +110,7 @@ System.out.print(".");
 end	
 
 rule "latest-doc-FISH-Her2"
-	salience 66668
+	salience 66667
 	no-loop true
 	when
 		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
@@ -161,7 +161,7 @@ end
 
 
 rule "latest-doc-FISH-PR"
-	salience 66668
+	salience 66666
 	no-loop true
 	when
 		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
@@ -212,7 +212,7 @@ end
 
 
 rule "latest-doc-ER"
-	salience 66666
+	salience 66665
 	no-loop true
 	when
 		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
@@ -259,7 +259,7 @@ System.out.print(".");
 end	
 
 rule "latest-doc-Her2"
-	salience 66666
+	salience 66664
 	no-loop true
 	when
 		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
@@ -307,7 +307,7 @@ end
 
 //start
 rule "latest-doc-PR"
-	salience 66666
+	salience 66663
 	no-loop true
 	when
 		IdMapper($newId : newId, $oldSummaryId : oldSummaryId)
@@ -356,7 +356,7 @@ end
 //end
 
 rule "setMethod"
-	salience 66666
+	salience 66662
 	no-loop true
 	when 
 		$flag : Flag($mostRecentDocId : mostRecentDocId, $categoryNew : categoryNew, $value : value, methodIsSet == false)
@@ -393,7 +393,7 @@ end
 				
 				
 rule "setReceptorStatus-no-method"
-	salience 66655
+	salience 66661
 	no-loop true
 	when
 		$flag : Flag($mostRecentDocId : mostRecentDocId, $regex : regex, $categoryOrig : categoryOrig, 
@@ -458,7 +458,7 @@ System.out.print(".");
 end
 
 rule "setReceptorStatus-with-method"
-	salience 66655
+	salience 66660
 	no-loop true
 	when
 		$flag : Flag($mostRecentDocId : mostRecentDocId, $regex : regex, $categoryOrig : categoryOrig, 
