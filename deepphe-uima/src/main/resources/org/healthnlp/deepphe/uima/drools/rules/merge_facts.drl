@@ -21,39 +21,13 @@ import org.healthnlp.deepphe.uima.drools.*;
 
 import org.apache.ctakes.cancer.owl.OwlConstants;
 
-/*
-* Create cancerfact
-*/
-/*
-rule "createCancerFact"
-	salience 100000
-	no-loop true
-	when
-		$record : MedicalRecord()
-		$domain : Domain($domainName : domainName)
-		$cFact : Fact(summaryType == "CancerSummary", documentType != "RecordSummary", 
-					 category == "hasBodySite", $cancer_bs_name : name, $cancerId : identifier, $cSummaryId : summaryId,
-					$cancer_ancestors: ancestors, ($cancer_bs_name==$domainName || $cancer_ancestors contains $domainName))
-	then
-		String newId = "CancerSummary-"+$domainName;
-		Fact cf = FactFactory.createFact($cFact, $cFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#Breast", "RecordSummary");
-		cf.setIdentifier(newId);
-		cf.addProvenanceFact($cFact);
-		cf.setSummaryId(newId);
-		modify($record) {
-			getCancerSummary().setResourceIdentifier(newId)
-		}
-		insert(cf);
-		insert(new IdMapper($cancerId, newId, $cFact.getDocumentType(), $cFact.getSummaryId(), cf.getSummaryId()));
-		
-end	
-*/
+
 /*
 * Add Breast BodySite to CancerSummary if exists
 * use a bit higher salience than for Tumors
 */
 rule "add_create_BreastToCancerSummary"
-	salience 100000
+	salience 1000003
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -85,7 +59,7 @@ end
 * Same as add-create_BreastToCancerSummary, but without creation creation here
 */
 rule "addOtherBreastToCancerSummary"
-	salience 100000
+	salience 1000002
 	no-loop true
 	when
 		$record : MedicalRecord()

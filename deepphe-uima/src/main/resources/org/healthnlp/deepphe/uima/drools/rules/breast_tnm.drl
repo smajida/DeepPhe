@@ -53,7 +53,7 @@ end
 * Create record-level N
 */
 rule "record-setGenercNClassification"
-	salience 55559
+	salience 55558
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -82,7 +82,7 @@ end
 * Create record-level M
 */
 rule "record-setGenercMClassification"
-	salience 55559
+	salience 55557
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -111,7 +111,7 @@ end
 * create record-level prefixes
 */
 rule "record-setTNMPrefix"
-	salience 55557
+	salience 55556
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -177,7 +177,7 @@ end
 * If there is a generic T value asserted within a report with type=“SP”, then convert generic T value to a pathologic primary T value. 
 */
 rule "genericT-2-to-Pathologic"
-	salience 55542
+	salience 55532
 	no-loop true
 	when
 		not(Fact(documentType == "RecordSummary", summaryType=="CancerPhenotype", category == "hasPathologicTClassification"))
@@ -211,7 +211,7 @@ end
 * If there is a generic N value with an asserted prefix “p”, then convert generic N value to a pathologic regional lymph node N value. 
 */
 rule "genericN-1-to-Pathologic"
-	salience 55544
+	salience 55543
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -242,7 +242,7 @@ end
 * If there is a generic N value asserted within a report with type=“SP”, then convert generic N value to a pathologic regional lymph node N value. 
 */ 
 rule "genericN-2-to-Pathologic"
-	salience 55542
+	salience 55531
 	no-loop true
 	when
 		not(Fact(documentType == "RecordSummary", summaryType=="CancerPhenotype", category == "hasPathologicNClassification"))
@@ -275,7 +275,7 @@ end
 * If there is a generic M value with an asserted prefix “p”, then convert generic M value to a pathologic distant metastasis M value.
 */
 rule "genericM-1-to-Pathologic-M1"
-	salience 55544
+	salience 55542
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -304,7 +304,7 @@ end
 * If there is a generic M value with an asserted prefix “p”, then convert generic M value to a pathologic distant metastasis M value.
 */
 rule "genericM-1-to-Pathologic-MX"
-	salience 55544
+	salience 55541
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -334,7 +334,7 @@ end
 * If there is a generic M value asserted within a report with type=“SP”, then convert generic M value to a pathologic distant metastasis M value. 
 */ 
 rule "genericM-2-to-Pathologic-M1"
-	salience 55542
+	salience 55530
 	no-loop true
 	when
 		not(Fact(documentType == "RecordSummary", summaryType=="CancerPhenotype", category == "hasPathologicMClassification"))
@@ -368,7 +368,7 @@ end
 * If there is a generic M value asserted within a report with type=“SP”, then convert generic M value to a pathologic distant metastasis M value. 
 */ 
 rule "genericM-2-to-Pathologic-MX"
-	salience 55542
+	salience 55540
 	no-loop true
 	when
 		not(Fact(documentType == "RecordSummary", summaryType=="CancerPhenotype", category == "hasPathologicMClassification"))
@@ -403,7 +403,7 @@ end
 * If there is a generic T value with an asserted prefix “c”, then convert generic T value to a clinical primary T value. 
 */
 rule "genericT-3-to-Clinical"
-	salience 55544
+	salience 55539
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -434,7 +434,7 @@ end
 * If there is a generic T value asserted within a report with type !=“SP”, then convert generic T value to a clinical primary T value. 
 */ 
 rule "genericT-4-to-Clinical"
-	salience 55542
+	salience 55529
 	no-loop true
 	when
 		not(Fact(documentType == "RecordSummary", summaryType=="CancerPhenotype", category == "hasClinicalTClassification"))
@@ -470,7 +470,7 @@ end
 * If there is a generic N value with an asserted prefix “c”, then convert generic N value to a clinical regional lymph node N value. 
 */
 rule "genericN-3-to-Clinical"
-	salience 55544
+	salience 55538
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -501,7 +501,7 @@ end
 * If there is a generic N value asserted within a report with type !=“SP”, then convert generic N value to a clinical regional lymph node N value. 
 */
 rule "genericN-4-to-Clinical"
-	salience 55542
+	salience 55527
 	no-loop true
 	when
 		not(Fact(documentType == "RecordSummary", summaryType=="CancerPhenotype", category == "hasClinicalNClassification"))
@@ -536,7 +536,7 @@ end
 * If there is a generic M value with an asserted prefix “c”, then convert generic M value to a clinical distant metastasis M value. 
 */
 rule "genericM-3-to-Clinical"
-	salience 55544
+	salience 55538
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -567,7 +567,7 @@ end
 * If there is a generic M value asserted within a report with type !=“SP”, then convert generic M value to a clinical distant metastasis M value. 
 */
 rule "genericM-4-to-Clinical"
-	salience 55542
+	salience 55526
 	no-loop true
 	when
 		not(Fact(documentType == "RecordSummary", summaryType=="CancerPhenotype", category == "hasClinicalMClassification"))
