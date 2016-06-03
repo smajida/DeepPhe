@@ -308,9 +308,12 @@ public class PhenotypeResourceFactory {
 		}
 		
 		// add provenance facts
-		/*for(int i=0;i<getSize(annotation.getHasProvenanceFacts());i++){
+		//TODO: load provenance is disabled for now
+		/*
+		for(int i=0;i<getSize(annotation.getHasProvenanceFacts());i++){
 			fact.addProvenanceFact(loadFact(annotation.getHasProvenanceFacts(i)));
-		}*/
+		}
+		*/
 		
 		// load properties
 		fact.setProperties(loadProperties(annotation));
