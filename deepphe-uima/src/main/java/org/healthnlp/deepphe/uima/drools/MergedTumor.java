@@ -134,6 +134,10 @@ public class MergedTumor {
 			b.append("clockfacePosFacts: "+clockfacePosFactSet.size()+"\n");
 		return b.toString();
 	}
+	
+	public String toString(){
+		return getInfo();
+	}
 
 	public boolean isReadyForRetraction() {
 		return readyForRetraction;

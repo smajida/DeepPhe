@@ -46,6 +46,29 @@ public class GenericToBreastTNMMapper {
 	    return "";
 	}
 	
+	public static boolean hasBreastValue(String prefix, String category, String genericValue){
+		if(!prefix.equals("p_modifier") && !prefix.equals("c_modifier"))
+			return false;
+		
+		String prefType = prefix+"_"+category;
+		List<String> lookInList = null;
+		
+		switch (prefType) {
+			case "p_modifier_hasPathologicTClassification":
+				lookInList = tBreast;
+				break;
+			case "c_modifier_hasClinicalTClassification":
+				lookInList = tBreast;
+				break;
+		}
+		
+		if(lookInList != null)
+			return lookInList.contains(genericValue);
+		else
+			return false;
+			
+	}
+	
 	public static List<String> get_T_List(){
 		if(tBreast != null) return tBreast;
 		tBreast = new ArrayList<String>();	

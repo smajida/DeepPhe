@@ -27,7 +27,7 @@ import org.apache.ctakes.cancer.owl.OwlConstants;
 */
 
 rule "primaryTumor-2-Ductal"
-	salience 88889
+	salience 88879
 	no-loop true
 	when
 		$record : MedicalRecord()	
@@ -52,8 +52,10 @@ rule "primaryTumor-2-Ductal"
 		
 	then
 	//add new tumor
+System.out.print(".");
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
 		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($site_tFact, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$site_tFact.getName(), "RecordSummary");
+System.out.print(".");
 		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId); tf.setSummaryId(newId);
 		tf.setIdentifier(tf.getName()+"-"+newId);
 		tf.addProvenanceFact($site_tFact);
@@ -64,8 +66,7 @@ rule "primaryTumor-2-Ductal"
 			tf.addProvenanceFact(sameT);
 			insert(new IdMapper(sameT.getIdentifier(), tf.getIdentifier(), sameT.getDocumentType(), sameT.getSummaryId(), tf.getSummaryId()));
 			insert("removeTumorLocatorID "+sameT.getIdentifier());
-		}
-		
+		}		
 		insert(tf);
 		
 		// set as primary and side
@@ -129,7 +130,7 @@ System.out.print(".");
 end
 
 rule "primaryTumor-2-Lobular"
-	salience 88889
+	salience 88878
 	no-loop true
 	when
 		$record : MedicalRecord()	
@@ -239,7 +240,7 @@ end
 * If tumor 1 is located on the left side of the body and tumor 2 is on the right, then tumor 2 has tumor type primary tumor. 
 */
 rule "primaryTumor"
-	salience 88888
+	salience 88877
 	no-loop true
 	when
 		$record : MedicalRecord()	
@@ -322,7 +323,7 @@ end
 
 
 rule "regionalRecurrence1-1-Axillary_Lymph_Node"
-	salience 88887
+	salience 88876
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -422,7 +423,7 @@ end
 * then the tumor(s) in the infraclavicular lymph nodes have a tumor type of regional recurrences 
 */
 rule "regionalRecurrence1-2-Infraclavicular_Lymph_Node"
-	salience 88887
+	salience 88875
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -522,7 +523,7 @@ end
 * have a tumor type of regional recurrences 
 */
 rule "regionalRecurrence1-3a"
-	salience 88887
+	salience 88874
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -623,7 +624,7 @@ end
 * have a tumor type of regional recurrences 
 */
 rule "regionalRecurrence1-3b"
-	salience 88887
+	salience 88873
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -724,7 +725,7 @@ end
 * as the primary tumor, then the tumor(s) in the intramammary lymph nodes have a tumor type of regional recurrences 
 */
 rule "regionalRecurrence1-4"
-	salience 88887
+	salience 88872
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -824,7 +825,7 @@ end
 * infraclavicular, supraclavicular internal mammary/parasternal, or intramammary are considered distant metastasis  
 */
 rule "distantRecurrence1"
-	salience 88886
+	salience 88871
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -928,7 +929,7 @@ end
 * then the tumor located in the lymph node has type distant recurrence.  
 */
 rule "distantRecurrence2-1"
-	salience 88877
+	salience 88870
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -1026,7 +1027,7 @@ end
 *  If there is tumor located in the Sternal Bone and children, then the tumor has type Distant Recurrence 
 */
 rule "distantRecurrence3"
-	salience 88877
+	salience 88869
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -1104,7 +1105,7 @@ end
 * tumor has body side
 */
 rule "distantRecurrence4a"
-	salience 88777
+	salience 88768
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -1203,7 +1204,7 @@ end
 * tumor has NObody side
 */
 rule "distantRecurrence4b"
-	salience 87777
+	salience 87767
 	no-loop true
 	when
 		$record : MedicalRecord()

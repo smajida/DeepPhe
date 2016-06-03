@@ -453,7 +453,8 @@ rule "merge_tumors_by_location_no_clockface"
 			update(mt);
 		}
 		else{
-			System.err.println("Cacn't attach tumor: merge-tumors-by-location-no-clockface");
+			
+			System.err.println("Cacn't attach tumor: merge-tumors-by-location-no-clockface for MergedTumors: setSz = "+$withClockMT.size()+"\n"+$withClockMT);
 		}
 end
 
@@ -550,7 +551,7 @@ System.out.print(".");
 System.out.print(".");
 		}
 		else{
-			System.err.println("Can't attach tumor: merge-tumors-by-location-cant-have-quadrant");
+			System.err.println("Can't attach tumor: merge-tumors-by-location-cant-have-quadrant for MergedTumors: setSz = "+$withClockMT.size()+"\n"+$withClockMT);
 		}
 end	 	
 
@@ -626,7 +627,7 @@ System.out.print(".");
 System.out.print(".");
 		}
 		else{
-			System.err.println("can't attach tumor: merge-tumors-by-location-no-q-clock");
+			System.err.println("can't attach tumor: merge-tumors-by-location-no-q-clock for MergedTumors: setSz = "+$withClockMT.size()+"\n"+$withClockMT);
 		}
 end	 
 
@@ -692,7 +693,7 @@ System.out.print(".");
 System.out.print(".");
 		}
 		else{
-			System.err.println("Can't attach tumor: merge-tumors-by-location-no-bodyside");
+			System.err.println("Can't attach tumor: merge-tumors-by-location-no-bodyside for MergedTumors: setSz = "+$withClockMT.size()+"\n"+$withClockMT);
 		}
 end	 		
 
@@ -714,26 +715,6 @@ rule "add-histologicType"
 		}
 end
 
-rule "make-new-fact-id-unique"
-	salience 10
-	no-loop true
-	when
-		$allFacts : Set()
-		from collect(Fact(documentType == "RecordSummary"))
-	then
-		List uniqIdList = new ArrayList<String>();
-		for(Object obj : $allFacts){
-			String idStr = ((Fact)obj).getIdentifier();
-			if(uniqIdList.contains(idStr)){
-				idStr = UUID.randomUUID().toString();
-				((Fact)obj).setIdentifier(idStr);
-			}
-			uniqIdList.add(uniqIdList);
-		}
-end
-				
-	
-		
 
 /*
 rule "print-idMap"
