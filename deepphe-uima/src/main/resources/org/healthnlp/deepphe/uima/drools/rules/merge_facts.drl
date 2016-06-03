@@ -21,39 +21,13 @@ import org.healthnlp.deepphe.uima.drools.*;
 
 import org.apache.ctakes.cancer.owl.OwlConstants;
 
-/*
-* Create cancerfact
-*/
-/*
-rule "createCancerFact"
-	salience 100000
-	no-loop true
-	when
-		$record : MedicalRecord()
-		$domain : Domain($domainName : domainName)
-		$cFact : Fact(summaryType == "CancerSummary", documentType != "RecordSummary", 
-					 category == "hasBodySite", $cancer_bs_name : name, $cancerId : identifier, $cSummaryId : summaryId,
-					$cancer_ancestors: ancestors, ($cancer_bs_name==$domainName || $cancer_ancestors contains $domainName))
-	then
-		String newId = "CancerSummary-"+$domainName;
-		Fact cf = FactFactory.createFact($cFact, $cFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#Breast", "RecordSummary");
-		cf.setIdentifier(newId);
-		cf.addProvenanceFact($cFact);
-		cf.setSummaryId(newId);
-		modify($record) {
-			getCancerSummary().setResourceIdentifier(newId)
-		}
-		insert(cf);
-		insert(new IdMapper($cancerId, newId, $cFact.getDocumentType(), $cFact.getSummaryId(), cf.getSummaryId()));
-		
-end	
-*/
+
 /*
 * Add Breast BodySite to CancerSummary if exists
 * use a bit higher salience than for Tumors
 */
 rule "add_create_BreastToCancerSummary"
-	salience 100000
+	salience 1000003
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -85,7 +59,7 @@ end
 * Same as add-create_BreastToCancerSummary, but without creation creation here
 */
 rule "addOtherBreastToCancerSummary"
-	salience 100000
+	salience 1000002
 	no-loop true
 	when
 		$record : MedicalRecord()
@@ -192,8 +166,33 @@ rule "collect_locations"
 							tl.setClockfacePosFact((Fact)ff);
 							tl.setBodySide(sideName);
 							tl.setBodySideFact(sideF);
-							tl.setQuadrant(TumorLocator.inferQuadrant(sideName, (String)key));
+							List<String> inferredQList = TumorLocator.inferQuadrant(sideName, (String)key);
+							
+							int listSz = inferredQList.size();
+							if(listSz > 0)
+							tl.setQuadrant(inferredQList.get(0));
 							insert(tl);
+							
+							if(listSz > 1) {
+								boolean skip = true;
+								for(String q :  inferredQList){
+									if(!skip){
+										TumorLocator tli = new TumorLocator();
+										tli.setTumorSiteFact($tumor1_f);
+										tli.setDocTumorId($tSummaryId);
+										tli.setBodySite($tumor1_name);
+										tli.setClockFacePos((String)key);
+										tli.setClockfacePosFact((Fact)ff);
+										tli.setBodySide(sideName);
+										tli.setBodySideFact(sideF);
+										tl.setQuadrant(q);
+										insert(tli);
+									}
+									skip  = false;
+								}
+							}
+							
+							
 						}
 					}
   				}
@@ -453,6 +452,8 @@ rule "merge_tumors_by_location_no_clockface"
 			update(mt);
 		}
 		else{
+			
+			//System.err.println("Cacn't attach tumor: merge-tumors-by-location-no-clockface for MergedTumors: setSz = "+$withClockMT.size()+"\n"+$withClockMT);
 			System.err.println("Cacn't attach tumor: merge-tumors-by-location-no-clockface");
 		}
 end
@@ -550,6 +551,7 @@ System.out.print(".");
 System.out.print(".");
 		}
 		else{
+			//System.err.println("Can't attach tumor: merge-tumors-by-location-cant-have-quadrant for MergedTumors: setSz = "+$withClockMT.size()+"\n"+$withClockMT);
 			System.err.println("Can't attach tumor: merge-tumors-by-location-cant-have-quadrant");
 		}
 end	 	
@@ -626,6 +628,7 @@ System.out.print(".");
 System.out.print(".");
 		}
 		else{
+		//	System.err.println("can't attach tumor: merge-tumors-by-location-no-q-clock for MergedTumors: setSz = "+$withClockMT.size()+"\n"+$withClockMT);
 			System.err.println("can't attach tumor: merge-tumors-by-location-no-q-clock");
 		}
 end	 
@@ -692,6 +695,7 @@ System.out.print(".");
 System.out.print(".");
 		}
 		else{
+			//System.err.println("Can't attach tumor: merge-tumors-by-location-no-bodyside for MergedTumors: setSz = "+$withClockMT.size()+"\n"+$withClockMT);
 			System.err.println("Can't attach tumor: merge-tumors-by-location-no-bodyside");
 		}
 end	 		
@@ -714,26 +718,6 @@ rule "add-histologicType"
 		}
 end
 
-rule "make-new-fact-id-unique"
-	salience 10
-	no-loop true
-	when
-		$allFacts : Set()
-		from collect(Fact(documentType == "RecordSummary"))
-	then
-		List uniqIdList = new ArrayList<String>();
-		for(Object obj : $allFacts){
-			String idStr = ((Fact)obj).getIdentifier();
-			if(uniqIdList.contains(idStr)){
-				idStr = UUID.randomUUID().toString();
-				((Fact)obj).setIdentifier(idStr);
-			}
-			uniqIdList.add(uniqIdList);
-		}
-end
-				
-	
-		
 
 /*
 rule "print-idMap"
