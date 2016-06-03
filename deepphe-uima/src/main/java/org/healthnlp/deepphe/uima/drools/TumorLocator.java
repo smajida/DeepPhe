@@ -1,5 +1,8 @@
 package org.healthnlp.deepphe.uima.drools;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.healthnlp.deepphe.fhir.fact.Fact;
 
 public class TumorLocator {
@@ -115,8 +118,8 @@ public class TumorLocator {
 		this.readyForRetraction = readyForRetraction;
 	}
 	
-	public static String inferQuadrant(String bodySide, String clockfacePos){
-		String toret = "";
+	public static List<String> inferQuadrant(String bodySide, String clockfacePos){
+		List<String> toret = new ArrayList<String>();
 		float clockfacePosNum = 0;
 		try{
 			clockfacePosNum = Float.valueOf(clockfacePos.substring(0, clockfacePos.indexOf("_")));
@@ -127,24 +130,56 @@ public class TumorLocator {
 	//	if(clockfacePosNum == 12 || clockfacePosNum ==3 || clockfacePosNum == 6 || clockfacePosNum ==9)
 	//		return toret;
 		if(bodySide.equalsIgnoreCase("LEFT")){
-			if(clockfacePosNum <= 3)
-				toret = "Upper_Outer_Quadrant_of_the_Breast";
-			else if(clockfacePosNum > 3 && clockfacePosNum <= 6)
-				toret = "Lower_Outer_Quadrant_of_the_Breast";
-			else if(clockfacePosNum > 6 && clockfacePosNum <= 9)
-				toret = "Lower_Inner_Quadrant_of_the_Breast";
-			else if(clockfacePosNum > 9 && clockfacePosNum <= 12)
-				toret = "Upper_Inner_Quadrant_of_the_Breast";
+			if(clockfacePosNum < 3)
+				toret.add("Upper_Outer_Quadrant_of_the_Breast");
+			else if (clockfacePosNum == 3){
+				toret.add("Upper_Outer_Quadrant_of_the_Breast");
+				toret.add("Lower_Outer_Quadrant_of_the_Breast");
+			}
+			else if(clockfacePosNum > 3 && clockfacePosNum < 6)
+				toret.add("Lower_Outer_Quadrant_of_the_Breast");
+			else if (clockfacePosNum == 6){
+				toret.add("Lower_Outer_Quadrant_of_the_Breast");
+				toret.add("Lower_Inner_Quadrant_of_the_Breast");
+			}
+			else if(clockfacePosNum > 6 && clockfacePosNum < 9)
+				toret.add("Lower_Inner_Quadrant_of_the_Breast");
+			else if (clockfacePosNum == 9){
+				toret.add("Lower_Inner_Quadrant_of_the_Breast");
+				toret.add("Upper_Inner_Quadrant_of_the_Breast");
+			}
+			else if(clockfacePosNum > 9 && clockfacePosNum < 12)
+				toret.add("Upper_Inner_Quadrant_of_the_Breast");
+			else if(clockfacePosNum == 12){
+				toret.add("Upper_Inner_Quadrant_of_the_Breast");
+				toret.add("Upper_Outer_Quadrant_of_the_Breast");
+			}
 		}
 		else if(bodySide.equalsIgnoreCase("RIGHT")){
-			if(clockfacePosNum <= 3)
-				toret = "Upper_Inner_Quadrant_of_the_Breast";
-			else if(clockfacePosNum > 3 && clockfacePosNum <= 6)
-				toret = "Lower_Inner_Quadrant_of_the_Breast";
-			else if(clockfacePosNum > 6 && clockfacePosNum <= 9)
-				toret = "Lower_Outer_Quadrant_of_the_Breast";
+			if(clockfacePosNum < 3)
+				toret.add("Upper_Inner_Quadrant_of_the_Breast");
+			else if (clockfacePosNum == 3){
+				toret.add("Upper_Inner_Quadrant_of_the_Breast");
+				toret.add("Lower_Inner_Quadrant_of_the_Breast");
+			}
+			else if(clockfacePosNum > 3 && clockfacePosNum < 6)
+				toret.add("Lower_Inner_Quadrant_of_the_Breast");
+			else if (clockfacePosNum == 6){
+				toret.add("Lower_Inner_Quadrant_of_the_Breast");
+				toret.add("Lower_Outer_Quadrant_of_the_Breast");
+			}
+			else if(clockfacePosNum > 6 && clockfacePosNum < 9)
+				toret.add("Lower_Outer_Quadrant_of_the_Breast");
+			else if (clockfacePosNum == 9){
+				toret.add("Lower_Outer_Quadrant_of_the_Breast");
+				toret.add("Upper_Outer_Quadrant_of_the_Breast");
+			}
 			else if(clockfacePosNum > 9 && clockfacePosNum <= 12)
-				toret = "Upper_Outer_Quadrant_of_the_Breast";
+				toret.add("Upper_Outer_Quadrant_of_the_Breast");
+			else if(clockfacePosNum == 12){
+				toret.add("Upper_Inner_Quadrant_of_the_Breast");
+				toret.add("Upper_Outer_Quadrant_of_the_Breast");
+			}
 		}
 		return toret;
 	}

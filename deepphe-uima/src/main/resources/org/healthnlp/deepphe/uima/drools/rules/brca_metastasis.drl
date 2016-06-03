@@ -3,6 +3,7 @@ package org.healthnlp.deepphe.uima.drools;
 import java.lang.Object;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.healthnlp.deepphe.util.FHIRConstants;
@@ -62,10 +63,11 @@ System.out.print(".");
 		tf.addRulesApplied("primaryTumor");
 		insert(new IdMapper($site_tFact.getIdentifier(), tf.getIdentifier(), $site_tFact.getDocumentType(), $site_tFact.getSummaryId(), tf.getSummaryId()));
 		for(Object t : $sameTumors){
-			Fact sameT = ((TumorLocator)t).getTumorSiteFact();
-			tf.addProvenanceFact(sameT);
-			insert(new IdMapper(sameT.getIdentifier(), tf.getIdentifier(), sameT.getDocumentType(), sameT.getSummaryId(), tf.getSummaryId()));
-			insert("removeTumorLocatorID "+sameT.getIdentifier());
+			Set<Fact> sameTSet = ((MergedTumor)t).getTumorSiteFactSet();
+			for(Fact sameT : sameTSet){
+				tf.addProvenanceFact(sameT);
+				insert(new IdMapper(sameT.getIdentifier(), tf.getIdentifier(), sameT.getDocumentType(), sameT.getSummaryId(), tf.getSummaryId()));
+			}
 		}		
 		insert(tf);
 		
@@ -116,12 +118,13 @@ System.out.print(".");
 		insert (tumorsideF);
 		
 		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
-		//remove all the TumorLocator
+		//remove all the MergedTumor
 		$tl_1.setReadyForRetraction(true);
 
 		update ($tl_1);
+		
 		for(Object t : $sameTumors){
-			TumorLocator  sameTL = (TumorLocator)t;
+			MergedTumor  sameTL = (MergedTumor)t;
 			sameTL.setReadyForRetraction(true);
 			update(sameTL);
 		}
@@ -163,10 +166,11 @@ rule "primaryTumor-2-Lobular"
 		tf.addRulesApplied("primaryTumor");
 		insert(new IdMapper($site_tFact.getIdentifier(), newId, $site_tFact.getDocumentType(), $site_tFact.getSummaryId(), tf.getSummaryId()));
 		for(Object t : $sameTumors){
-			Fact sameT = ((TumorLocator)t).getTumorSiteFact();
-			tf.addProvenanceFact(sameT);
-			insert(new IdMapper(sameT.getIdentifier(), tf.getIdentifier(), sameT.getDocumentType(), sameT.getSummaryId(), tf.getSummaryId()));
-			insert("removeTumorLocatorID "+sameT.getIdentifier());
+			Set<Fact> sameTSet = ((MergedTumor)t).getTumorSiteFactSet();
+			for(Fact sameT : sameTSet){
+				tf.addProvenanceFact(sameT);
+				insert(new IdMapper(sameT.getIdentifier(), tf.getIdentifier(), sameT.getDocumentType(), sameT.getSummaryId(), tf.getSummaryId()));
+			}	
 		}
 		
 		insert(tf);
@@ -217,15 +221,17 @@ rule "primaryTumor-2-Lobular"
 		}
 		
 		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
-		//remove all the TumorLocator
+		//remove all the MergedTumor
 		$tl_1.setReadyForRetraction(true);
 
 		update ($tl_1);
+		
 		for(Object t : $sameTumors){
-			TumorLocator  sameTL = (TumorLocator)t;
+			MergedTumor  sameTL = (MergedTumor)t;
 			sameTL.setReadyForRetraction(true);
 			update(sameTL);
 		}
+		
 System.out.print(".");		
 	
 end
