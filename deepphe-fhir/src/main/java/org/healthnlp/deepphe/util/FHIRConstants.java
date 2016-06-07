@@ -9,6 +9,7 @@ import java.util.List;
  * @author tseytlin
  */
 public class FHIRConstants {
+	public static final String LINE = "_______________________________________________________";
 	
 	public static final String NLP_CANCER_URL = "http://ontologies.dbmi.pitt.edu/deepphe/nlpCancer.owl";
 	public static final String SCHEMA_URL = "http://blulab.chpc.utah.edu/ontologies/v2/Schema.owl";

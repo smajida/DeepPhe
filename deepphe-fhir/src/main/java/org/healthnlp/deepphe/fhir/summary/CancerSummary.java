@@ -110,7 +110,7 @@ public class CancerSummary extends Summary {
 		StringBuffer st = new StringBuffer(super.getSummaryText());
 		st.append(getPhenotype().getSummaryText()+"\n");
 		for(TumorSummary ts: getTumors()){
-			st.append(ts.getSummaryText()+"\n");
+			st.append(FHIRConstants.LINE+"\n"+ts.getSummaryText()+"\n");
 		}
 		return st.toString();
 	}
