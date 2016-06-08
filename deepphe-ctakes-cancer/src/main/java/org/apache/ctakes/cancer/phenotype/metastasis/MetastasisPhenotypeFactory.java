@@ -29,7 +29,6 @@ public class MetastasisPhenotypeFactory {
    public void createPhenotype( final JCas jcas,
                                 final IdentifiedAnnotation metastasis,
                                 final Iterable<IdentifiedAnnotation> neoplasms ) {
-//      createEventMentionDegree( jcas, eventMention, valueModifier );
       createEventMentionNeoplasm( jcas, metastasis, neoplasms );
    }
 
@@ -45,34 +44,50 @@ public class MetastasisPhenotypeFactory {
                                                     final IdentifiedAnnotation metastasis,
                                                     final Iterable<IdentifiedAnnotation> neoplasms ) {
       createEventMentionNeoplasm( jCas,
-            metastasis.getBegin(),
-            metastasis.getEnd(),
             metastasis,
             "metastasis_of", neoplasms );
    }
+
+//   /**
+//    * Create a "property_type_of" relation to a neoplasm.
+//    *
+//    * @param jCas      -
+//    * @param typeBegin character offset of the property
+//    * @param typeEnd   -
+//    * @param typeTitle -
+//    * @param neoplasms nearby neoplasms
+//    */
+//   final protected void createEventMentionNeoplasm( final JCas jCas,
+//                                                    final int typeBegin, final int typeEnd,
+//                                                    final IdentifiedAnnotation metastasis,
+//                                                    final String typeTitle,
+//                                                    final Iterable<IdentifiedAnnotation> neoplasms ) {
+//      final IdentifiedAnnotation closestNeoplasm
+//            = AnnotationUtil.getPrecedingOrAnnotation( typeBegin, typeEnd, neoplasms );
+//      if ( closestNeoplasm != null ) {
+//         final String relationName = typeTitle.replace( ' ', '_' ) + "_of";
+//         createEventMentionNeoplasm( jCas, metastasis, closestNeoplasm, relationName );
+//      }
+//   }
 
    /**
     * Create a "property_type_of" relation to a neoplasm.
     *
     * @param jCas      -
-    * @param typeBegin character offset of the property
-    * @param typeEnd   -
     * @param typeTitle -
     * @param neoplasms nearby neoplasms
     */
    final protected void createEventMentionNeoplasm( final JCas jCas,
-                                                    final int typeBegin, final int typeEnd,
                                                     final IdentifiedAnnotation metastasis,
                                                     final String typeTitle,
                                                     final Iterable<IdentifiedAnnotation> neoplasms ) {
       final IdentifiedAnnotation closestNeoplasm
-            = AnnotationUtil.getPrecedingOrAnnotation( typeBegin, typeEnd, neoplasms );
+            = AnnotationUtil.getPrecedingOrAnnotation( metastasis, neoplasms );
       if ( closestNeoplasm != null ) {
          final String relationName = typeTitle.replace( ' ', '_' ) + "_of";
          createEventMentionNeoplasm( jCas, metastasis, closestNeoplasm, relationName );
       }
    }
-
 
    /**
     * Create a "property_type_of" relation to a neoplasm.
