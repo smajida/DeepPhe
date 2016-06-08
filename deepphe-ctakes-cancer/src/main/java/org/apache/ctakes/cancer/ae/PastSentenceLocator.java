@@ -46,7 +46,7 @@ public class PastSentenceLocator extends JCasAnnotator_ImplBase {
       // body side is applied to all anatomical sites
       final Collection<AnatomicalSiteMention> sites = JCasUtil.select( jcas, AnatomicalSiteMention.class );
       getIsolatedModifiers( jcas, LocationModifier.BodySide.values() )
-            .forEach( s -> createPrecedingLocationRelation( jcas, s, sites ) );
+            .forEach( s -> createFollowingLocationRelation( jcas, s, sites ) );
       // the other special modifiers are applied only to breasts
       final Collection<IdentifiedAnnotation> breasts
             = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, OwlConstants.BREAST_CANCER_OWL + "#Breast" );
