@@ -210,7 +210,7 @@ public class Report extends Composition implements Element, Comparable<Report>{
 	
 	public String getSummaryText() {
 		StringBuffer st = new StringBuffer();
-		
+		/*
 		if(getPatient() != null)
 			st.append(getPatient().getSummaryText()+"\n");
 		for(Disease dx: getDiagnoses()){
@@ -227,15 +227,15 @@ public class Report extends Composition implements Element, Comparable<Report>{
 		}
 		for(Medication p: getMedications()){
 			st.append(p.getSummaryText()+"\n");
-		}
+		}*/
 		if(!getCompositionSummaries().isEmpty()){
-			st.append("---\nSummaries:\n");
+			st.append(FHIRConstants.LINE+"\nSummaries:\n");
 			for(Summary s: getCompositionSummaries()){
 				st.append(s.getSummaryText()+"\n");
 			}
-			st.append("---");
+			//st.append(line);
 		}
-		st.append("\n"+getDisplayText()+"\n---\n");
+		st.append("\n"+getDisplayText()+"\n"+"\n");
 		
 		return st.toString();
 	}

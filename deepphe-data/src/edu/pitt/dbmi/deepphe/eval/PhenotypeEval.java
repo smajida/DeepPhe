@@ -77,7 +77,7 @@ public class PhenotypeEval {
 	 *
 	 */
 	
-	private static class Record {
+	private static class Record implements Comparable<Record>{
 		public static int MAX_ATTRIBUTE_SIZE = 10;
 		private static final String I = "\\|";
 		private static final String FS = ";";
@@ -299,6 +299,10 @@ public class PhenotypeEval {
 			}
 			return ignoredHeaders;
 		}
+
+		public int compareTo(Record r) {
+			return getId().compareTo(r.getId());
+		}
 		
 	}
 
@@ -400,6 +404,7 @@ public class PhenotypeEval {
 		
 		// display individual counts
 		if(PRINT_RECORD_LEVEL_STATS){
+			Collections.sort(records);
 			for(Record r: records){
 				r.print(System.out);
 			}
