@@ -1,38 +1,55 @@
 package org.healthnlp.deepphe.uima.drools;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GenericToBreastTNMMapper {
 	
 	static List <String> tBreast = null;
+	static List<String> tSuffixList = new ArrayList<String>(Arrays.asList("DCIS", "LCIS", "Paget"));
+
 	static List <String> nPathologicBreast = null;
 	static List <String> nClinicalBreast = null;
 	static List <String> mPathologicBreast = null;
 	static List <String> mClinicalBreast = null;
 	
-	public static String getBreastTClassification(String prefix, String genericValue, String suffix){
+	public static Set<String> getBreastTClassification(String prefix, String genericValue, List<String> suffixList){
+		Set<String> breastClassifSet = new HashSet<String>();
 		String pref = "";
 		if(prefix.equals("p_modifier"))
 			pref = "p";
 		else if(prefix.equals("c_modifier"))
 			pref = "c";
 		
-		if("".equals(pref)) return null;
+		if("".equals(pref)) return breastClassifSet;
 		
 		String genV = genericValue.substring(0, genericValue.indexOf("_"));
-		if(!get_T_List().contains(genV)) return null;
+		if(!get_T_List().contains(genV)) return breastClassifSet;
+	
 		
 		String suff = "";
-		if(genV.equals("Tis") && (suffix.equals("DCIS") || suffix.equals("LCIS") || suffix.equals("Paget")))
-			 suff = "_"+suffix;
-		return "Breast_Cancer_"+pref+genV+suff+"_TNM_Finding";
+		if(suffixList != null && genV.equals("Tis")){	
+			for(String suffix : suffixList){
+				suff = "";
+				if(tSuffixList.contains("suffix")){
+					suff = "_"+suffix;
+					breastClassifSet.add("Breast_Cancer_"+pref+genV+suff+"_TNM_Finding");
+				}
+			}		
+		}
+		else
+			breastClassifSet.add("Breast_Cancer_"+pref+genV+suff+"_TNM_Finding");
+		
+		return breastClassifSet;
 	}
 	
-	public static String getBreastNClassification(String prefix, String genericValue, String suffix){
+	public static String getBreastNClassification(String prefix, String genericValue, List<String> suffix){
 		String pref = "";
 		if(prefix.equals("p_modifier"))
 			pref = "p";

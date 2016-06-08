@@ -115,7 +115,7 @@ public class PhenotypeCancerSummaryAE extends JCasAnnotator_ImplBase {
 			boolean doWrite = false;
 			FileWriter fw = null;
 			if (doWrite)
-				fw = new FileWriter("/home/opm1/devSrc/deepPhe_Data/DeepPhe/sample/output_frank/droolsInput_TCGA_41.txt");
+				fw = new FileWriter("/home/opm1/devSrc/deepPhe_Data/DeepPhe/droolsInput/droolsInput_TCGA_24.txt");
 			for (Fact f : reportFacts) {
 				try {
 					if (!f.getCategory().equalsIgnoreCase("wasDerivedFrom") && !dupList.contains(f.getInfo())) {

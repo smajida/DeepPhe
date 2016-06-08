@@ -20,7 +20,7 @@ import org.apache.ctakes.cancer.owl.OwlConstants;
 /*
 //If Tis, N0, M0 then Stage 0 Breast Cancer 
 rule "Stage0-1"
-	salience 99999991001
+	salience 10001
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -50,7 +50,7 @@ end
 
 //If T1, N0, M0, then Stage IA Breast Cancer 
 rule "Stage1A-1"
-	salience 99999991002
+	salience 10002
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -79,7 +79,7 @@ end
 
 //If T0, N1mi, M0, then Stage IB Breast Cancer  
 rule "Stage1B-1"
-	salience 99999991003
+	salience 10003
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -109,7 +109,7 @@ end
 
 //If T1, N1mi, M0, then Stage IB Breast Cancer  
 rule "Stage1B-2"
-	salience 99999991004
+	salience 10004
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -138,7 +138,7 @@ end
 
 //If T0, N1, M0, then Stage IIA Breast Cancer  
 rule "Stage2A-1.1"
-	salience 99999991005
+	salience 10005
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -167,7 +167,7 @@ end
 
 //If T1, N1, M0, then Stage IIA Breast Cancer   
 rule "Stage2A-2.1"
-	salience 99999991006
+	salience 10006
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -196,7 +196,7 @@ end
 
 //If T2, N0, M0, then Stage IIA Breast Cancer  
 rule "Stage2A-3.1"
-	salience 99999991007
+	salience 10007
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -226,7 +226,7 @@ end
 
 //If T2, N1, M0, then Stage IIB Breast Cancer 
 rule "Stage2B-1.1"
-	salience 99999991008
+	salience 10008
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -256,7 +256,7 @@ end
 
 //If T3, N0, M0, then Stage IIB Breast Cancer 
 rule "Stage2B-2.1"
-	salience 99999991009
+	salience 10009
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -286,7 +286,7 @@ end
 
 //If T0, N2, M0, then Stage IIIA Breast Cancer 
 rule "Stage3A-1.1"
-	salience 999999910010
+	salience 10010
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -316,7 +316,7 @@ end
 
 //If T1, N2, M0, then Stage IIIA Breast Cancer 
 rule "Stage3A-2.1"
-	salience 999999910011
+	salience 10011
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -346,7 +346,7 @@ end
 
 //If T2, N2, M0, then Stage IIIA Breast Cancer 
 rule "Stage3A-3.1"
-	salience 999999910012
+	salience 10012
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -376,7 +376,7 @@ end
 
 //If T3, N1, M0, then Stage IIIA Breast Cancer 
 rule "Stage3A-4.1"
-	salience 999999910013
+	salience 10013
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -406,7 +406,7 @@ end
 
 //If T3, N2, M0, then Stage IIIA Breast Cancer 
 rule "Stage3A-5.1"
-	salience 999999910014
+	salience 10014
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -436,7 +436,7 @@ end
 
 //If T4, N0, M0, then Stage IIIB Breast Cancer 
 rule "Stage3B-1.1"
-	salience 999999910015
+	salience 10015
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -466,7 +466,7 @@ end
 
 //If T4, N1, M0, then Stage IIIB Breast Cancer 
 rule "Stage3B-2.1"
-	salience 999999910016
+	salience 10016
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -496,7 +496,7 @@ end
 
 //If T4, N2, M0, then Stage IIIB Breast Cancer 
 rule "Stage3B-3.1"
-	salience 999999910017
+	salience 10017
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -526,7 +526,7 @@ end
 
 //If any T value, N3, M0, then Stage IIIC Breast Cancer 
 rule "Stage3C-1.1"
-	salience 999999910018
+	salience 10018
 	no-loop true
 	when
 		$record : MedicalRecord()		
@@ -556,7 +556,7 @@ end
 
 //If any T value, any N value, M1, then Stage IV Breast Cancer  
 rule "Stage4-1"
-	salience 999999910019
+	salience 10019
 	no-loop true
 	when
 		$record : MedicalRecord()		

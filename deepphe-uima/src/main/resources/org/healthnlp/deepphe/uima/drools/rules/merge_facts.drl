@@ -21,6 +21,56 @@ import org.healthnlp.deepphe.uima.drools.*;
 
 import org.apache.ctakes.cancer.owl.OwlConstants;
 
+/*
+* Retract all document level Cancer Summary/Phenotype without bodySite
+*/
+rule "retract-CS"
+	salience 100000002
+	no-loop true
+	when
+		$cFact : Fact(summaryType == "CancerSummary", documentType != "RecordSummary", category != "hasBodySite", $cSummaryId : summaryId)
+		not(Fact(this != $cFact, summaryType == "CancerSummary", category == "hasBodySite", documentType != "RecordSummary",
+						summaryId==$cSummaryId))
+		
+		$cSumm : Set()
+		from collect (Fact (summaryType == "CancerSummary", documentType != "RecordSummary", summaryId==$cSummaryId))
+		$cPhe : Set() 
+		from collect(Fact (summaryType == "CancerPhenotype", documentType != "RecordSummary", containerIdentifier contains $cSummaryId))
+		then
+System.out.println("About to retract CS/CPhe");
+			for(Object obj : $cSumm)
+				retract((Fact)obj);
+			for(Object obj : $cPhe)
+				retract((Fact)obj);
+end
+
+/*
+* Retract all document level Tumor Summary/Phenotype without bodySite
+*/
+rule "retract-TS"
+	salience 100000001
+	no-loop true
+	when
+		$cFact : Fact(summaryType == "TumorSummary", documentType != "RecordSummary", category != "hasBodySite", $cSummaryId : summaryId)
+		not(Fact(this != $cFact, summaryType == "TumorSummary", category == "hasBodySite", documentType != "RecordSummary",
+						summaryId==$cSummaryId))
+		
+		$cSumm : Set()
+		from collect (Fact (summaryType == "TumorSummary", documentType != "RecordSummary", summaryId==$cSummaryId))
+		$cPhe : Set() 
+		from collect(Fact (summaryType == "TumorPhenotype", documentType != "RecordSummary", containerIdentifier contains $cSummaryId))
+		then
+System.out.println("About to retract TS/TPhe");
+			for(Object obj : $cSumm){
+System.out.println("About to retract TS : "+((Fact)obj).getInfo());
+				retract((Fact)obj);
+			}
+			for(Object obj : $cPhe){
+System.out.println("About to retract TPhe : "+((Fact)obj).getInfo());			
+				retract((Fact)obj);
+			}
+end
+		
 
 /*
 * Add Breast BodySite to CancerSummary if exists
@@ -303,7 +353,8 @@ System.out.print(".");
 			}
 System.out.print(".");
   end
- 
+  
+	
  /**
  * Merge the same or create new if not exists
  */ 
@@ -478,6 +529,9 @@ rule "merge-tumors-by-location-cant-have-quadrant"
         from collect ( MergedTumor (bodySite == $bodySite, bodySide == bodySide, clockFacePos == $clockFacePos))
  
 	 then	
+	 	$tlFact.setReadyForRetraction(true);
+		update ($tlFact);
+		
 	  // no mentions of clockface
 	 	$sameTumors.add($tlFact);
 	 	if($withClockMT.size() == 0){
@@ -575,6 +629,9 @@ rule "merge-tumors-by-location-no-q-clock"
  
 	 then	
 	  // no mentions ofbodyside
+	  	$tlFact.setReadyForRetraction(true);
+		update ($tlFact);
+		
 	 	$sameTumors.add($tlFact);
 	 	if($withClockMT.size() == 0){
 		 	MergedTumor mt = new MergedTumor();
@@ -651,6 +708,9 @@ rule "merge-tumors-by-location-no-bodyside"
         from collect ( MergedTumor (bodySite == $bodySite))
  
 	 then	
+	 	$tlFact.setReadyForRetraction(true);
+		update ($tlFact);
+		
 	  // no mentions ofbodyside
 	 	$sameTumors.add($tlFact);
 	 	if($withClockMT.size() == 0){
@@ -725,7 +785,7 @@ rule "print-idMap"
 	when 
 		$m :IdMapper()
 	then
-		System.out.print("IdMapper oldId: "+$m.getOldId()+" newId: "+$m.getNewId()+" oldDocumantType: "+$m.getOldDocumantType()
+		System.out.println("IdMapper oldId: "+$m.getOldId()+" newId: "+$m.getNewId()+" oldDocumantType: "+$m.getOldDocumantType()
 		+" oldSummaryId: "+$m.getOldSummaryId()+" newSummaryId: "+$m.getNewSummaryId());
 end	
 */
@@ -736,9 +796,10 @@ rule "print-RecordSummary"
 	when 
 		$summaryF : Fact(documentType == "RecordSummary")
 	then
-		System.out.print("* RecordSummary: "+$summaryF.getInfo());
+		System.out.println("* RecordSummary: "+$summaryF.getInfo());
 end	
-
+*/
+/*
 rule "print-RecordSummary-Modifier"
 	salience 2
 	no-loop true
@@ -763,7 +824,7 @@ rule "print-MergedTumor"
 	when 
 		$f : MergedTumor()
 	then
-		System.out.print("*** MergedTumor: "+$f.getInfo());
+		System.out.println("*** MergedTumor: "+$f.getInfo());
 end	
 */
 /*

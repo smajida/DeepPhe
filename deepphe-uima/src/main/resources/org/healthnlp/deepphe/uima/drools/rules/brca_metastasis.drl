@@ -20,13 +20,12 @@ import org.apache.ctakes.cancer.owl.OwlConstants;
 
 /*
 * primaryTumor-2 :
-* Olga: create tumor here AND:
+* Olga: create TumorSummary here AND:
 * If tumors are on the same side and hitologicType is ductal or there is histologic type specified = >combine them as one "primary"
 * Tumors that are intraductal or ductal and Paget Disease are a single primary => 
 * If you have two tumors that are located within the same breast and both tumors have HistologicalType=Ductal 
 * and one or both of the tumors have Paget's Disease as a diagnosis, then you can merge the two tumors into one tumor with tumor type= "Primary".
 */
-
 rule "primaryTumor-2-Ductal"
 	salience 88879
 	no-loop true
@@ -40,38 +39,31 @@ rule "primaryTumor-2-Ductal"
 					$t_summaryId: summaryId, (name==$domainName || ancestors contains $domainName))
 		$side_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType != "RecordSummary",
 					$sideName : name, containerIdentifier contains $t_summaryId)
-		$hist_tFact : Fact(summaryType=="TumorPhenotype", category == "hasHistologicType", $name : name, $name=="Ductal", 
+		$hist_tFact : Fact(summaryType=="TumorPhenotype", category == "hasHistologicType", $name : name, ($name=="Ductal" || $name=="Lobular"), 
 				documentType != "RecordSummary",containerIdentifier contains $t_summaryId)
 					
-		$tl_1 : MergedTumor(tumorSiteFactSet contains $site_tFact, bodySite == $domainName, bodySide == $sideName, readyForRetraction == false)
+		$tl_1 : MergedTumor(tumorSiteFactSet contains $site_tFact, bodySite == $domainName, bodySide == $sideName, 
+			$histologicType :histologicType, ($histologicType =="Ductal" || $histologicType == "Lobular"), readyForRetraction == false)
 		not (Fact (summaryType=="TumorSummary", documentType == "RecordSummary", provenanceFacts contains $site_tFact))
 		
 		$sameTumors : List()
       	from collect( MergedTumor(tumorSiteFactSet not contains $site_tFact, bodySite == $domainName, $bodySide1 : bodySide, 
       			($bodySide1 == $sideName || $bodySide1 == ""), readyForRetraction == false,
-      				histologicType == "Ductal"))
+      				$histologicType2 :histologicType, ($histologicType2 =="Ductal" || $histologicType2 == "Lobular")))
 		
 	then
 	//add new tumor
 System.out.print(".");
+		
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
+//System.out.println("primaryTumor-2-Ductal: "+$tl_1.getInfo());		
 		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($site_tFact, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$site_tFact.getName(), "RecordSummary");
-System.out.print(".");
 		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId); tf.setSummaryId(newId);
 		tf.setIdentifier(tf.getName()+"-"+newId);
 		tf.addProvenanceFact($site_tFact);
 		tf.addRulesApplied("primaryTumor");
 		insert(new IdMapper($site_tFact.getIdentifier(), tf.getIdentifier(), $site_tFact.getDocumentType(), $site_tFact.getSummaryId(), tf.getSummaryId()));
-		for(Object t : $sameTumors){
-			Set<Fact> sameTSet = ((MergedTumor)t).getTumorSiteFactSet();
-			for(Fact sameT : sameTSet){
-				tf.addProvenanceFact(sameT);
-				insert(new IdMapper(sameT.getIdentifier(), tf.getIdentifier(), sameT.getDocumentType(), sameT.getSummaryId(), tf.getSummaryId()));
-			}
-		}		
-		insert(tf);
 		
-		// set as primary and side
 		Fact tumorTypeF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#PrimaryTumor", tf, 
 														$cancerFact, "TumorSummary", FHIRConstants.HAS_TUMOR_TYPE, "RecordSummary", "TumorType");
 		Fact tumorsideF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$sideName, tf, 
@@ -80,145 +72,58 @@ System.out.print(".");
 	    tumorTypeF.addContainerIdentifier(tf.getSummaryId());
 		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
 		tumorTypeF.setSummaryId(newId);
-	    
-	    tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF);
-		
-		
-		Set<Fact> qSet = $tl_1.getQuadrantFactSet();
-		for(Fact f : qSet){
-			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
-														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
-			qf.setAncestors(f.getAncestors());
-			qf.addContainerIdentifier(tf.getSummaryId());
-			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
-			qf.setSummaryId(newId);
-			tf.addModifier(qf);
-			insert(qf);
-		}
-		
-		Set<Fact> clockSet = $tl_1.getClockfacePosFactSet();
-		for(Fact f : clockSet){
-			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
-														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
-			qf.setAncestors(f.getAncestors());
-			qf.addContainerIdentifier(tf.getSummaryId());
-			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
-			qf.setSummaryId(newId);
-			tf.addModifier(qf);
-			insert(qf);
-		}
-		
-		modify($record){
-			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
-			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)
-			
-		}	
 
-		insert (tumorTypeF);
-		insert (tumorsideF);
-		
-		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
-		//remove all the MergedTumor
-		$tl_1.setReadyForRetraction(true);
-
-		update ($tl_1);
-		
-		for(Object t : $sameTumors){
-			MergedTumor  sameTL = (MergedTumor)t;
-			sameTL.setReadyForRetraction(true);
-			update(sameTL);
-		}
-System.out.print(".");	
-
-end
-
-rule "primaryTumor-2-Lobular"
-	salience 88878
-	no-loop true
-	when
-		$record : MedicalRecord()	
-		$domain : Domain($domainName : domainName)	
-		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
-						$newSummaryId : summaryId)  
-	    
-		$site_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySite", documentType != "RecordSummary",
-					$t_summaryId: summaryId, (name==$domainName || ancestors contains $domainName))
-		$side_tFact : Fact(summaryType=="TumorSummary", category == "hasBodySiteModifier", type == "BodySide", documentType != "RecordSummary",
-					$sideName : name, containerIdentifier contains $t_summaryId)
-		$hist_tFact : Fact(summaryType=="TumorPhenotype", category == "hasHistologicType", $name : name, $name == "Lobular", 
-				documentType != "RecordSummary",containerIdentifier contains $t_summaryId)
-					
-		$tl_1 : MergedTumor(tumorSiteFactSet contains $site_tFact, bodySite == $domainName, bodySide == $sideName, readyForRetraction == false)
-		not (Fact (summaryType=="TumorSummary", documentType == "RecordSummary", provenanceFacts contains $site_tFact))
-		
-		$sameTumors : List()
-      	from collect( MergedTumor(tumorSiteFactSet not contains $site_tFact, bodySite == $domainName, $bodySide1 : bodySide, 
-      			($bodySide1 == $sideName || $bodySide1 == ""), readyForRetraction == false,
-      				histologicType == "Lobular"  ))
-		
-	then
-	//add new tumor
-		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
-		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($site_tFact, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$site_tFact.getName(), "RecordSummary");
-		tf.addContainerIdentifier($newSummaryId); tf.setSummaryId(newId);
-		tf.setIdentifier(tf.getName()+"-"+newId);
-		tf.addProvenanceFact($site_tFact);
-		tf.addRulesApplied("primaryTumor");
-		insert(new IdMapper($site_tFact.getIdentifier(), newId, $site_tFact.getDocumentType(), $site_tFact.getSummaryId(), tf.getSummaryId()));
-		for(Object t : $sameTumors){
-			Set<Fact> sameTSet = ((MergedTumor)t).getTumorSiteFactSet();
-			for(Fact sameT : sameTSet){
-				tf.addProvenanceFact(sameT);
-				insert(new IdMapper(sameT.getIdentifier(), tf.getIdentifier(), sameT.getDocumentType(), sameT.getSummaryId(), tf.getSummaryId()));
-			}	
-		}
-		
+		tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF);
 		insert(tf);
 		
-		// set as primary and side
-		Fact tumorTypeF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#PrimaryTumor", tf, 
-														$cancerFact, "TumorSummary", FHIRConstants.HAS_TUMOR_TYPE, "RecordSummary", "TumorType");
-		Fact tumorsideF = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+$sideName, tf, 
-														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_SIDE);
+		$sameTumors.add($tl_1);
+		for(Object t : $sameTumors){
+			MergedTumor sameMT = (MergedTumor)t;
+//System.out.println("SAME MT primaryTumor-2-Ductal: "+sameMT.getInfo());
+			if(sameMT != $tl_1)
+				sameMT.setMergedTumorId($tl_1.getMergedTumorId());
+			sameMT.setReadyForRetraction(true);
+			update(sameMT);
+			Set<Fact> sameTSet = sameMT.getTumorSiteFactSet();
+			for(Fact sameTF : sameTSet){
+				insert(new IdMapper(sameTF.getIdentifier(), tf.getIdentifier(), sameTF.getDocumentType(), sameTF.getSummaryId(), tf.getSummaryId()));
+
+	    		Set<Fact> qSet = sameMT.getQuadrantFactSet();
+				for(Fact f : qSet){
+					Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+																$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+					qf.setAncestors(f.getAncestors());
+					qf.addContainerIdentifier(tf.getSummaryId());
+					qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+					qf.setSummaryId(newId);
+					tf.addModifier(qf);
+					insert(qf);
+				}
+				
+				Set<Fact> clockSet = sameMT.getClockfacePosFactSet();
+				for(Fact f : clockSet){
+					Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
+																$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
+					qf.setAncestors(f.getAncestors());
+					qf.addContainerIdentifier(tf.getSummaryId());
+					qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
+					qf.setSummaryId(newId);
+					tf.addModifier(qf);
+					insert(qf);
+				}
+			}
 		
-		tumorTypeF.addContainerIdentifier(tf.getSummaryId());
-		tumorTypeF.setIdentifier(tumorTypeF.getName()+"-"+newId);
-		tumorTypeF.setSummaryId(newId);
-	    
-	    tumorsideF.setSummaryId(tf.getSummaryId()); tf.addModifier(tumorsideF);
-		
-		
+
+		}		
+
 		modify($record){
 			getCancerSummary().getTumorSummaryByIdentifier(newId).addFact(FHIRConstants.HAS_TUMOR_TYPE, tumorTypeF),
 			getCancerSummary().addFact(FHIRConstants.HAS_BODY_SITE, tf)	
 		}	
+//System.out.println("FINALLY :Ductal Prim tf : "+tf.getSummaryText());
 
 		insert (tumorTypeF);
 		insert (tumorsideF);
-		
-		Set<Fact> qSet = $tl_1.getQuadrantFactSet();
-		for(Fact f : qSet){
-			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
-														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
-			qf.setAncestors(f.getAncestors());
-			qf.addContainerIdentifier(tf.getSummaryId());
-			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
-			qf.setSummaryId(newId);
-			tf.addModifier(qf);
-			insert(qf);
-		}
-		
-		Set<Fact> clockSet = $tl_1.getClockfacePosFactSet();
-		for(Fact f : clockSet){
-			Fact qf = FactFactory.createTumorFactModifier(OwlConstants.BREAST_CANCER_OWL+"#"+f.getName(), tf, 
-														$cancerFact, "TumorSummary", FHIRConstants.HAS_BODY_MODIFIER, "RecordSummary", FHIRConstants.BODY_MODIFIER);
-			qf.setAncestors(f.getAncestors());
-			qf.addContainerIdentifier(tf.getSummaryId());
-			qf.setIdentifier(tumorTypeF.getName()+"-"+newId);
-			qf.setSummaryId(newId);
-			tf.addModifier(qf);
-			insert(qf);
-		}
 		
 		FactHelper.addFactToSummary(tf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
 		//remove all the MergedTumor
@@ -226,14 +131,8 @@ rule "primaryTumor-2-Lobular"
 
 		update ($tl_1);
 		
-		for(Object t : $sameTumors){
-			MergedTumor  sameTL = (MergedTumor)t;
-			sameTL.setReadyForRetraction(true);
-			update(sameTL);
-		}
-		
-System.out.print(".");		
-	
+System.out.print(".");	
+
 end
 
 
@@ -264,6 +163,7 @@ rule "primaryTumor"
 		
 	then
 		modify($tumorFact){	addRulesApplied("primaryTumor") }
+//System.out.println("primaryTumor: "+$tl_1.getInfo());
 		//add new tumor
 		String newId = "TumorSummary-"+$tl_1.getMergedTumorId();
 		BodySiteFact tf = (BodySiteFact)FactFactory.createFact($tumorFact, "BodySite", OwlConstants.BREAST_CANCER_OWL+"#"+$tumorFact.getName(), "RecordSummary");

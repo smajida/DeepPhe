@@ -141,6 +141,41 @@ rule "record-setTNMPrefix"
 
 end  
 
+/**
+* create record-level sufffixes
+*/
+rule "record-setTNMSuffix"
+	salience 55555
+	no-loop true
+	when
+		$record : MedicalRecord()
+		$domain : Domain($domainName : domainName)	
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName, 
+						$newSummaryId : summaryId)
+		IdMapper($oldSummaryId : oldSummaryId, $newSummaryId == newSummaryId)
+		
+		$cPheTFact : Fact(summaryType == "CancerPhenotype", documentType == "RecordSummary", category == "hasGenericTClassification", 
+			$newCPheSummaryId : summaryId)
+		IdMapper($oldcPheId : oldId, newSummaryId == $newCPheSummaryId)
+		$tnmPrefFact : Fact(summaryType == "CancerPhenotype", documentType != "RecordSummary", category =="hasTNMSuffix",
+			containerIdentifier contains  $oldcPheId, $name : name)
+		not(Fact (summaryType == "CancerPhenotype", documentType == "RecordSummary", category == "hasTNMSuffix", 
+			provenanceFacts contains $tnmPrefFact))
+			
+		then
+		
+			String newId = "CancerPhenotype-"+$newSummaryId.replace("CancerSummary-","");
+			Fact cf = FactFactory.createFact($tnmPrefFact, $tnmPrefFact.getType(), OwlConstants.BREAST_CANCER_OWL+"#"+$name, "RecordSummary");
+			cf.setIdentifier(newId); cf.setSummaryId(newId);
+			cf.addProvenanceFact($tnmPrefFact);
+			cf.addContainerIdentifier($newSummaryId);
+			insert(cf);
+			insert(new IdMapper($tnmPrefFact.getIdentifier(), newId, $tnmPrefFact.getDocumentType(), $tnmPrefFact.getSummaryId(), newId));
+			FactHelper.addFactToSummary(cf, $record.getCancerSummary(), newId, OwlConstants.BREAST_CANCER_OWL);
+
+end  
+
+
 /*
 * ****genericT-1
 *If there is a generic T value with an asserted prefix “p”, then convert generic T value to a pathologic primary T value. 

@@ -417,7 +417,7 @@ rule "setReceptorStatus-no-method"
 					$docType: documentType, $docType != "RecordSummary", 
 					containerIdentifier.toString() matches $regex, $cIds : containerIdentifier, ($cIds contains $oldSummaryId && $cIds contains $identifier))
 		
-		
+		//IdMapper(oldSummaryId ==  $t_summaryId, $newTS_ID : newId)
 		$receptorRecInterpr : List(size > 0)
 		from collect(Fact(documentIdentifier == $mostRecentDocId, category == $categoryOrig, 
 					documentType!= "RecordSummary", containerIdentifier contains $identifier))
