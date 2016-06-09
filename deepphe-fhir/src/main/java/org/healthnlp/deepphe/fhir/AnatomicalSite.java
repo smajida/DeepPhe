@@ -30,7 +30,7 @@ public class AnatomicalSite extends BodySite implements Element{
 		}
 		
 		// add text provenance
-		st.append(" [ "+FHIRUtils.getMentions(this)+" ]");
+		st.append(" | text: "+FHIRUtils.getMentions(this));
 		
 		return st.toString();
 	}

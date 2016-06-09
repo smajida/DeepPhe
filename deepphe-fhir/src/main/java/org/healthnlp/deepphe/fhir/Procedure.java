@@ -40,7 +40,7 @@ public class Procedure extends org.hl7.fhir.instance.model.Procedure  implements
 			st.append(" | location: "+l.getText());
 		}
 		// add text provenance
-		st.append(" [ "+FHIRUtils.getMentions(this)+" ]");
+		st.append(" | text: "+FHIRUtils.getMentions(this));
 		
 		return st.toString();
 	}

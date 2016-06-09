@@ -744,7 +744,7 @@ public class FHIRUtils {
 		StringBuffer b = new StringBuffer();
 		b.append(getMentions((DomainResource)c)+", ");
 		for(CodeableConcept cc: c.getBodySite()){
-			Element e = FHIRRegistry.getInstance().getResource(FHIRUtils.getResourceIdentifer(cc));
+			Element e = FHIRRegistry.getInstance().getElement(FHIRUtils.getResourceIdentifer(cc));
 			if(e != null)
 				b.append(getMentions((DomainResource) e)+" ");
 		}

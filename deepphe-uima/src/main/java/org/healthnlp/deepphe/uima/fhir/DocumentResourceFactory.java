@@ -12,6 +12,7 @@ import org.apache.ctakes.cancer.owl.OwlConstants;
 import org.apache.ctakes.cancer.phenotype.PhenotypeAnnotationUtil;
 import org.apache.ctakes.cancer.phenotype.size.SizePropertyUtil;
 import org.apache.ctakes.cancer.type.textsem.SizeMeasurement;
+import org.apache.ctakes.core.ontology.OwlOntologyConceptUtil;
 import org.apache.ctakes.core.util.DocumentIDAnnotationUtil;
 import org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
@@ -462,23 +463,21 @@ final public class DocumentResourceFactory {
 	public static AnatomicalSite load( AnatomicalSite anatomicalSite, final ConceptInstance conceptInstance ) {
 		anatomicalSite.setCode( cTAKESUtils.getCodeableConcept( conceptInstance ) );
 
+		// add mention text
+		anatomicalSite.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
+	
+		
 		// add anatomical sites modifiers
-		for(String quadrant : ConceptInstanceUtil.getQuadrantUris( conceptInstance )){
-			anatomicalSite.addModifier(FHIRUtils.getCodeableConcept(URI.create(quadrant)));
-		}
-		for(String clock :  ConceptInstanceUtil.getClockwiseUris( conceptInstance )){
-			anatomicalSite.addModifier(FHIRUtils.getCodeableConcept(URI.create(clock)));
-		}
-		for(String side : ConceptInstanceUtil.getBodySideUris( conceptInstance )){
-			anatomicalSite.addModifier(FHIRUtils.getCodeableConcept(URI.create(side)));
+		for(IdentifiedAnnotation ia : cTAKESUtils.getBodySiteModifiers(conceptInstance.getIdentifiedAnnotation())){
+			for(String uri: OwlOntologyConceptUtil.getUris(ia)){
+				anatomicalSite.addModifier(FHIRUtils.getCodeableConcept(URI.create(uri)));
+			}
+			anatomicalSite.addExtension( cTAKESUtils.createMentionExtension( ia ) );
 		}
 		
 		// add language contexts
 		cTAKESUtils.addLanguageContext( conceptInstance, anatomicalSite );
 		
-		
-		// add mention text
-		anatomicalSite.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
 		
 		// create identifier
 		FHIRUtils.createIdentifier(anatomicalSite.addIdentifier(),anatomicalSite);
@@ -641,7 +640,9 @@ final public class DocumentResourceFactory {
 		// add language context
 		cTAKESUtils.addLanguageContext( conceptInstance, ob );
 		
-	
+		// add mention text
+		ob.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
+		
 		// is there an ordinal interpretation
 		String number = null, unit = null;
 		for(ConceptInstance i :ConceptInstanceUtil.getPropertyValues(conceptInstance)){
@@ -655,6 +656,7 @@ final public class DocumentResourceFactory {
 				// see if there is an ordinal interpretation
 				ob.setInterpretation(cTAKESUtils.getCodeableConcept(i));
 			}
+			ob.addExtension( cTAKESUtils.createMentionExtension( i ) );
 		}
 		
 		// set value of this observation
@@ -663,17 +665,15 @@ final public class DocumentResourceFactory {
 		}
 		
 		
-		
 		// set procedure method
 		for(ConceptInstance i: ConceptInstanceUtil.getDiagnosticTests(conceptInstance)){
 			//TODO: work around a bug that puts TNM modifier as a diagnostic test
-			if(!FHIRConstants.TNM_MODIFIER_LIST.contains(i.getIdentifiedAnnotation().getCoveredText()))
+			if(!FHIRConstants.TNM_MODIFIER_LIST.contains(i.getIdentifiedAnnotation().getCoveredText())){
 				ob.setMethod(cTAKESUtils.getCodeableConcept(i));
+				ob.addExtension( cTAKESUtils.createMentionExtension( i ) );
+			}
 		}
-		
 	
-		// add mention text
-		ob.addExtension( cTAKESUtils.createMentionExtension( conceptInstance ) );
 		
 		// add id
 		FHIRUtils.createIdentifier(ob.addIdentifier(),ob);

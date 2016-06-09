@@ -81,7 +81,7 @@ public class PhenotypeEval {
 		public static int MAX_ATTRIBUTE_SIZE = 10;
 		private static final String I = "\\|";
 		private static final String FS = ";";
-		private static List<String> headers,valueHeaders,ignoredHeaders;
+		private static List<String> headers,valueHeaders,ignoredHeaders,provenanceHeaders;
 		private Map<String,String> content;
 		private String id;
 		private ConfusionLabel confusionLabel;
@@ -142,6 +142,9 @@ public class PhenotypeEval {
 		public static boolean isIgnoreField(String hd) {
 			return hd.startsWith("-");
 		}
+		public static boolean isProvenanceField(String hd) {
+			return hd.startsWith("-doc");
+		}
 
 		public ConfusionLabel getConfusion() {
 			return confusionLabel;
@@ -180,24 +183,24 @@ public class PhenotypeEval {
 			}
 			out.println("\n\t"+String.format("%1$-"+Record.MAX_ATTRIBUTE_SIZE+"s","Weighted Score:")+"\t"+String.format("%.4f",getWeightedScore())+"\n");
 			out.println("\t-----------");
-			for(String hd: getIgnoredHeaders()){
-				List<String> gold = getValues(hd);
-				List<String> pred = Collections.EMPTY_LIST;
+			for(String hd: getProvenanceHeaders()){
+				String gold = getValue(hd);
+				String pred = "";
 				switch (getConfusion()) {
 				case TP:
-					pred = getPairedRecord().getValues(hd);
+					pred = getPairedRecord().getValue(hd);
 					break;
 				case FP:
-					gold = Collections.EMPTY_LIST;
-					pred = getValues(hd);
+					gold = "";
+					pred = getValue(hd);
 					break;
 				default:
 					break;
 				}
-				if(!gold.isEmpty())
-					out.println("\t"+String.format("%1$-"+Record.MAX_ATTRIBUTE_SIZE+"s",hd)+"\t gold: "+PhenotypeEval.toString(gold));
-				if(!pred.isEmpty())
-					out.println("\t"+String.format("%1$-"+Record.MAX_ATTRIBUTE_SIZE+"s",hd)+"\t pred: "+PhenotypeEval.toString(pred));
+				if(gold != null && gold.length() > 0)
+					out.println("\t"+String.format("%1$-"+Record.MAX_ATTRIBUTE_SIZE+"s",hd)+"\t gold: "+gold);
+				if(pred != null && pred.length() > 0)
+					out.println("\t"+String.format("%1$-"+Record.MAX_ATTRIBUTE_SIZE+"s",hd)+"\t pred: "+pred);
 				
 			}
 			out.println("\t-----------\n");
@@ -276,6 +279,10 @@ public class PhenotypeEval {
 			}
 			return vals;
 		}
+		
+		public String getValue(String hd){
+			return content.get(hd);
+		}
 
 		public List<String> getValueHeaders(){
 			if(valueHeaders == null){
@@ -299,6 +306,18 @@ public class PhenotypeEval {
 			}
 			return ignoredHeaders;
 		}
+		public List<String> getProvenanceHeaders(){
+			if(provenanceHeaders == null){
+				provenanceHeaders = new ArrayList<String>();
+				for(String h : headers){
+					if(isProvenanceField(h)){
+						provenanceHeaders.add(h);
+					}
+				}
+			}
+			return provenanceHeaders;
+		}
+		
 
 		public int compareTo(Record r) {
 			return getId().compareTo(r.getId());
