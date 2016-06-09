@@ -12,11 +12,11 @@ Diagnosis	Tumor	hasDiagnosis
 -document for diagnosis	Condition	wasDerivedFrom
 tumor type	BreastCancerTumorPhenotype	hasTumorType
 -documents for tumor type	Tumor	wasDerivedFrom
-cancer type	BreastCancerTumorPhenotype	hasCancerType
+-cancer type	BreastCancerTumorPhenotype	hasCancerType
 -documents for cancer type	CancerType	wasDerivedFrom
-histologic type	BreastCancerTumorPhenotype	hasHistologicType
+-histologic type	BreastCancerTumorPhenotype	hasHistologicType
 -documents for histologic type	HistologicType	wasDerivedFrom
-tumor extent	BreastCancerTumorPhenotype	hasTumorExtent
+-tumor extent	BreastCancerTumorPhenotype	hasTumorExtent
 -documents for extent	TumorExtent	wasDerivedFrom
 er status interpretation	Estrogen_Receptor_Status	hasInterpretation
 -documents for er status interpretation	OrdinalInterpretation	wasDerivedFrom
