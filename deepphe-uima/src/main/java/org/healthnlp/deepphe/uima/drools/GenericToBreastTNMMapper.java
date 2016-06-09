@@ -3,67 +3,101 @@ package org.healthnlp.deepphe.uima.drools;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class GenericToBreastTNMMapper {
 	
 	static List <String> tBreast = null;
-	static List<String> tSuffixList = new ArrayList<String>(Arrays.asList("DCIS", "LCIS", "Paget"));
+	static List<String> tTis_SuffixList = new ArrayList<String>(Arrays.asList("DCIS", "LCIS", "Paget"));
 
 	static List <String> nPathologicBreast = null;
+	static List <String> nN0_PathSuffixList = new ArrayList<String>(Arrays.asList("i_plus", "i_minus", "mol_plus", "mol_minus"));
 	static List <String> nClinicalBreast = null;
 	static List <String> mPathologicBreast = null;
 	static List <String> mClinicalBreast = null;
 	
 	public static Set<String> getBreastTClassification(String prefix, String genericValue, List<String> suffixList){
-		Set<String> breastClassifSet = new HashSet<String>();
-		String pref = "";
+		Set<String> breast_TClassifSet = new HashSet<String>();
+		String genV = genericValue.substring(0, genericValue.indexOf("_"));
+		if(!hasGenericBreastValue(prefix, "TClassification", genV))
+			return breast_TClassifSet;
+		
+		String pref = "c";
 		if(prefix.equals("p_modifier"))
 			pref = "p";
-		else if(prefix.equals("c_modifier"))
-			pref = "c";
-		
-		if("".equals(pref)) return breastClassifSet;
-		
-		String genV = genericValue.substring(0, genericValue.indexOf("_"));
-		if(!get_T_List().contains(genV)) return breastClassifSet;
-	
-		
+
 		String suff = "";
-		if(suffixList != null && genV.equals("Tis")){	
-			for(String suffix : suffixList){
-				suff = "";
-				if(tSuffixList.contains("suffix")){
-					suff = "_"+suffix;
-					breastClassifSet.add("Breast_Cancer_"+pref+genV+suff+"_TNM_Finding");
-				}
-			}		
+		if(suffixList != null && suffixList.size() > 0){
+			if(genV.equals("Tis")){	
+				for(String suffix : suffixList){
+					suff = "";
+					if(tTis_SuffixList.contains(suffix)){
+						suff = "_"+suffix;
+						breast_TClassifSet.add("Breast_Cancer_"+pref+genV+suff+"_TNM_Finding");
+					}
+				}	
+			} else if(genV.equals("T1") && suffixList.contains("mic"))
+				breast_TClassifSet.add("Breast_Cancer_"+pref+genV+"mic_TNM_Finding");
 		}
 		else
-			breastClassifSet.add("Breast_Cancer_"+pref+genV+suff+"_TNM_Finding");
+			breast_TClassifSet.add("Breast_Cancer_"+pref+genV+"_TNM_Finding");
 		
-		return breastClassifSet;
+		return breast_TClassifSet;
 	}
 	
-	public static String getBreastNClassification(String prefix, String genericValue, List<String> suffix){
-		String pref = "";
+	public static Set<String>  getBreastNClassification(String prefix, String genericValue, List<String> suffixList){
+		Set<String> breast_NClassifSet = new HashSet<String>();
+		String genV = genericValue.substring(0, genericValue.indexOf("_"));
+		if(!hasGenericBreastValue(prefix, "NClassification", genV))
+			return breast_NClassifSet;
+		
+		String pref = "c";
 		if(prefix.equals("p_modifier"))
 			pref = "p";
-		else if(prefix.equals("c_modifier"))
-			pref = "c";
+
+		String suff = "";
+		if(suffixList != null && suffixList.size() > 0){
+			if(pref.equals("p") && genV.equals("N0")){	
+				for(String suffix : suffixList){
+					suff = "";
+					if(nN0_PathSuffixList.contains(suffix)){
+						suff = "_"+suffix;
+						breast_NClassifSet.add("Breast_Cancer_"+pref+genV+suff+"_TNM_Finding");
+					}
+				}
+			} else if(genV.equals("N1") && suffixList.contains("mi")){
+				breast_NClassifSet.add("Breast_Cancer_"+pref+genV+"mi_TNM_Finding");
+			}
+		}
+		else
+			breast_NClassifSet.add("Breast_Cancer_"+pref+genV+"_TNM_Finding");
 		
-		if("".equals(pref)) return null;
-		String genV = genericValue.substring(0, genericValue.indexOf("_"));
-		
-	
-	    return "";
+	    return breast_NClassifSet;
 	}
 	
-	public static boolean hasBreastValue(String prefix, String category, String genericValue){
+	public static Set<String>  getBreastMClassification(String prefix, String genericValue, List<String> suffixList){
+		Set<String> breast_MClassifSet = new HashSet<String>();
+		String genV = genericValue.substring(0, genericValue.indexOf("_"));
+		if(!hasGenericBreastValue(prefix, "MClassification", genV))
+			return breast_MClassifSet;
+		
+		String pref = "c";
+		if(prefix.equals("p_modifier"))
+			pref = "p";
+
+		String suff = "";
+		if(suffixList != null && suffixList.size() > 0 && pref.equals("c") && genV.equals("M0") && suffixList.contains("i_plus")){
+				breast_MClassifSet.add("Breast_Cancer_"+pref+genV+"_i_plus_TNM_Finding");
+		}
+		else
+			breast_MClassifSet.add("Breast_Cancer_"+pref+genV+"_TNM_Finding");
+		
+	    return breast_MClassifSet;
+	}
+	
+	public static boolean hasGenericBreastValue(String prefix, String category, String genericValue){
 		if(!prefix.equals("p_modifier") && !prefix.equals("c_modifier"))
 			return false;
 		
@@ -71,11 +105,25 @@ public class GenericToBreastTNMMapper {
 		List<String> lookInList = null;
 		
 		switch (prefType) {
-			case "p_modifier_hasPathologicTClassification":
-				lookInList = tBreast;
+			case "p_modifier_TClassification":
+				lookInList = get_T_List();
 				break;
-			case "c_modifier_hasClinicalTClassification":
-				lookInList = tBreast;
+			case "c_modifier_TClassification":
+				lookInList = get_T_List();
+				break;
+			case "p_modifier_NClassification":
+				lookInList = getPathologic_N_List();
+				break;
+			case "c_modifier_NClassification":
+				lookInList = getClinical_N_List();
+				break;
+			case "p_modifier_MClassification":
+				lookInList = getPathologic_M_List();
+				break;
+			case "c_modifier_MClassification":
+				lookInList = getClinical_M_List();
+				break;
+			default:
 				break;
 		}
 		
@@ -124,6 +172,26 @@ public class GenericToBreastTNMMapper {
 		String[] tBreasArr = new String[] {"M0", "M1"};
 		Collections.addAll(mClinicalBreast, tBreasArr); 
 		return mClinicalBreast;
+	}
+	
+	public static void main(String[] args){
+		// T
+		String prefix = "c_modifier";
+		String genericValue="T1_Stage_Finding";
+		List<String> suffixList = new ArrayList<String>(Arrays.asList("mic"));
+		System.out.println("T: "+getBreastTClassification(prefix, genericValue, suffixList));
+		
+		// N
+		String prefixN = "p_modifier";
+		String genericValueN="N0_Stage_Finding";
+		List<String> suffixListN = new ArrayList<String>(Arrays.asList("i_plus"));
+		System.out.println("N: "+getBreastNClassification(prefixN, genericValueN, suffixListN));
+		
+		// M
+		String prefixM = "c_modifier";
+		String genericValueM="M0_Stage_Finding";
+		List<String> suffixListM = new ArrayList<String>(Arrays.asList("i_plus"));
+		System.out.println("M: "+getBreastMClassification(prefixM, genericValueM, suffixListM));
 	}
 
 }
