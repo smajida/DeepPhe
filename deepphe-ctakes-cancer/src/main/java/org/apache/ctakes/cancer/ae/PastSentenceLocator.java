@@ -46,7 +46,7 @@ public class PastSentenceLocator extends JCasAnnotator_ImplBase {
       // body side is applied to all anatomical sites
       final Collection<AnatomicalSiteMention> sites = JCasUtil.select( jcas, AnatomicalSiteMention.class );
       getIsolatedModifiers( jcas, LocationModifier.BodySide.values() )
-            .forEach( s -> createLocationRelation( jcas, s, sites ) );
+            .forEach( s -> createFollowingLocationRelation( jcas, s, sites ) );
       // the other special modifiers are applied only to breasts
       final Collection<IdentifiedAnnotation> breasts
             = OwlOntologyConceptUtil.getAnnotationsByUriBranch( jcas, OwlConstants.BREAST_CANCER_OWL + "#Breast" );
@@ -55,13 +55,13 @@ public class PastSentenceLocator extends JCasAnnotator_ImplBase {
          return;
       }
       // neoplasms
-      getIsolatedNeoplasms( jcas ).forEach( n -> createLocationRelation( jcas, n, breasts ) );
+      getIsolatedNeoplasms( jcas ).forEach( n -> createPrecedingLocationRelation( jcas, n, breasts ) );
       // quadrant
       getIsolatedModifiers( jcas, LocationModifier.Quadrant.values() )
-            .forEach( q -> createLocationRelation( jcas, q, breasts ) );
+            .forEach( q -> createPrecedingLocationRelation( jcas, q, breasts ) );
       // clockwise
       getIsolatedModifiers( jcas, LocationModifier.Clockwise.values() )
-            .forEach( c -> createLocationRelation( jcas, c, breasts ) );
+            .forEach( c -> createPrecedingLocationRelation( jcas, c, breasts ) );
 
       LOGGER.info( "Finished Processing" );
    }
@@ -92,15 +92,31 @@ public class PastSentenceLocator extends JCasAnnotator_ImplBase {
     * @param locatable neoplasm or location modifier
     * @param sites     breasts
     */
-   static public void createLocationRelation( final JCas jCas,
-                                              final IdentifiedAnnotation locatable,
-                                              final Collection<? extends IdentifiedAnnotation> sites ) {
+   static public void createPrecedingLocationRelation( final JCas jCas,
+                                                       final IdentifiedAnnotation locatable,
+                                                       final Collection<? extends IdentifiedAnnotation> sites ) {
       final IdentifiedAnnotation closestSite
-            = AnnotationUtil.getPrecedingOrAnnotation( locatable.getBegin(), locatable.getEnd(), sites );
+            = AnnotationUtil.getPrecedingOrAnnotation( locatable, sites );
       if ( closestSite != null ) {
          createLocationRelation( jCas, locatable, closestSite );
       }
    }
+
+   /**
+    * @param jCas      ye olde ...
+    * @param locatable neoplasm or location modifier
+    * @param sites     breasts
+    */
+   static public void createFollowingLocationRelation( final JCas jCas,
+                                              final IdentifiedAnnotation locatable,
+                                              final Collection<? extends IdentifiedAnnotation> sites ) {
+      final IdentifiedAnnotation closestSite
+            = AnnotationUtil.getFollowingOrAnnotation( locatable, sites );
+      if ( closestSite != null ) {
+         createLocationRelation( jCas, locatable, closestSite );
+      }
+   }
+
 
    /**
     * @param jCas      ye olde ...

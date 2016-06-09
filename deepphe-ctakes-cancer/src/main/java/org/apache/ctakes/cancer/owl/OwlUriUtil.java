@@ -5,6 +5,7 @@ import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -21,6 +22,7 @@ final public class OwlUriUtil {
 
 
    /**
+    * @param annotations -
     * @return a Collection of the most specific uris for all the given annotations
     */
    static public String getSpecificUri( final IdentifiedAnnotation... annotations ) {
@@ -28,38 +30,91 @@ final public class OwlUriUtil {
    }
 
    /**
+    * @param annotations -
     * @return a Collection of the most specific uris for all the given annotations
     */
    static public String getSpecificUri( final Collection<IdentifiedAnnotation> annotations ) {
-      return getSpecificUris( annotations ).stream().findFirst().orElse( OwlConstants.UNKNOWN_URI );
+//      return getSpecificUris( annotations ).stream().findFirst().orElse( OwlConstants.UNKNOWN_URI );
+      return getLeafUris( annotations ).stream().findFirst().orElse( "" );
    }
 
    /**
-    * @return a Collection of the most specific uris for all the given annotations
+    * Gets a stem uri.  For example, when given "left breast", "upper right breast"
+    * it will return the common parent "breast".
+    *
+    * @param annotations -
+    * @return a uri that covers all the leaves for all the given annotations
     */
-   // TODO Implement for most precise; now it returns most broad
-   static public Collection<String> getSpecificUris( final Collection<IdentifiedAnnotation> annotations ) {
+   static public String getStemUri( final Collection<IdentifiedAnnotation> annotations ) {
+      if ( annotations == null || annotations.isEmpty() ) {
+         return null;
+      }
+      // create map of all leaf uris to a collection of their roots
+      final Map<String,Collection<String>> uriSetMap = annotations.stream()
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .collect( Collectors.toMap( Function.identity(),
+                  u -> OwlOntologyConceptUtil.getUriRootsStream( u )
+                        .collect( Collectors.toSet() ) ) );
+      // get the common uris
+      final Collection<String> commonUris = new HashSet<>();
+      uriSetMap.values().forEach( commonUris::addAll );
+      uriSetMap.values().forEach( commonUris::retainAll );
+      // based upon the root size, get the stem - the leaf of this common root
+      final int size = commonUris.size();
+      return commonUris.stream()
+            .filter( u -> OwlOntologyConceptUtil.getUriRootsStream( u ).count() == size )
+            .findFirst()
+            .orElse( "" );
+   }
+
+   /**
+    * Gets the most descriptive leaf uris.
+    * For example, when given "breast", "left breast", "right breast", "upper right breast"
+    * it will return the most descriptive "left breast" and "right upper breast"
+    *
+    * @param annotation -
+    * @return the most specific uris representing the annotations.
+    */
+   static public Collection<String> getLeafUris( final IdentifiedAnnotation annotation ) {
+      return getLeafUris( Collections.singletonList( annotation ) );
+   }
+
+
+   /**
+    * Gets the most descriptive leaf uris.
+    * For example, when given "breast", "left breast", "right breast", "upper right breast"
+    * it will return the most descriptive "left breast" and "right upper breast"
+    *
+    * @param annotations -
+    * @return the most specific uris representing the annotations.
+    */
+   static public Collection<String> getLeafUris( final Collection<IdentifiedAnnotation> annotations ) {
       if ( annotations == null || annotations.isEmpty() ) {
          return Collections.emptyList();
       }
-      final Collection<String> specificUris = new HashSet<>();
-      for ( IdentifiedAnnotation value : annotations ) {
-         specificUris.addAll( OwlOntologyConceptUtil.getUris( value ) );
+      // create map of all leaf uris to a collection of their roots
+      final Map<String,Collection<String>> uriSetMap = annotations.stream()
+            .map( OwlOntologyConceptUtil::getUris )
+            .flatMap( Collection::stream )
+            .collect( Collectors.toMap( Function.identity(),
+                  u -> OwlOntologyConceptUtil.getUriRootsStream( u )
+                        .collect( Collectors.toSet() ) ) );
+      // collect all non leaf uris from each root
+      final Collection<String> nonLeafUris = new HashSet<>();
+      for ( Map.Entry<String,Collection<String>> entry : uriSetMap.entrySet() ) {
+         final String leaf = entry.getKey();
+         entry.getValue().stream()
+               .filter( u -> !leaf.equals( u ) )
+               .forEach( nonLeafUris::add );
       }
-      final Collection<String> backup = new ArrayList<>( specificUris );
-      for ( IdentifiedAnnotation value : annotations ) {
-         final Collection<String> uris = OwlOntologyConceptUtil.getUris( value );
-         for ( String uri : uris ) {
-            final Collection<String> uriBranch = OwlOntologyConceptUtil.getUriBranchStream( uri )
-                  .collect( Collectors.toList() );
-            specificUris.retainAll( uriBranch );
-         }
-      }
-      if ( specificUris.isEmpty() ) {
-         LOGGER.warn( "Value URIs are not in the same branch" );
-         return backup;
-      }
-      return specificUris;
+      // remove all non-(other)-leaf root uris from each root
+      uriSetMap.values().forEach( set -> set.removeAll( nonLeafUris ) );
+      // if the root is not empty then the associated leaf is not in any other root
+      return uriSetMap.entrySet().stream()
+            .filter( e -> !e.getValue().isEmpty() )
+            .map( Map.Entry::getKey )
+            .collect( Collectors.toSet() );
    }
 
 

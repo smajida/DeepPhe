@@ -12,7 +12,7 @@ import java.util.TimerTask;
  * @version %I%
  * @since 3/18/2016
  */
-public class DotLogger implements Closeable {
+final public class DotLogger implements Closeable {
 
    // TODO move into ctakes core
    static private final org.apache.log4j.Logger DOT_LOGGER = org.apache.log4j.Logger.getLogger( "ProgressAppender" );
