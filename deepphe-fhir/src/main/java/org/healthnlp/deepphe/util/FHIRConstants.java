@@ -130,7 +130,6 @@ public class FHIRConstants {
 	public static final URI TUMOR_EXTENT_URI = URI.create(MODEL_CANCER_URL+"#TumorExtent");
 	public static final URI CANCER_TYPE_URI = URI.create(MODEL_CANCER_URL+"#CancerType");
 	
-	
 	public static final URI PRIMARY_TUMOR_URI = URI.create(MODEL_CANCER_URL+"#PrimaryTumor");
 	public static final URI RECURRENT_TUMOR_URI = URI.create(MODEL_CANCER_URL+"#Recurrent_Tumor");
 	//public static final URI TUMOR_SIZE_URI = URI.create(MODEL_CANCER_URL+"/"+TUMOR_PHENOTYPE);
@@ -147,6 +146,10 @@ public class FHIRConstants {
 	public static final List<String> BODY_SIDE_LIST = Arrays.asList("Right","Left","Bilateral");
 	public static final List<String> TNM_MODIFIER_LIST = Arrays.asList("p","c","y","r","sn");
 	public static final String BREAST = "Breast";
+
+	
+
+	public static final String HAS_CANCER_CELL_LINE = "hasCancerCellLine";
 
 	
 
