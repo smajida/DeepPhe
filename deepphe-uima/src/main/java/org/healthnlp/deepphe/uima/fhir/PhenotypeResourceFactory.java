@@ -1116,13 +1116,13 @@ public class PhenotypeResourceFactory {
 		return ob;
 	}
 	
-	private static Finding loadFinding(org.healthnlp.deepphe.uima.types.TNMValue e) {
+	/*private static Finding loadFinding(org.healthnlp.deepphe.uima.types.TNMValue e) {
 		Finding ob = new Finding();
 		ob.setCode(getCodeableConcept(e));
 		ob.addExtension(FHIRUtils.createMentionExtension(e.getCoveredText(),e.getBegin(),e.getEnd()));
 		FHIRUtils.createIdentifier(ob.addIdentifier(),e.getHasIdentifier());
 		return ob;
-	}
+	}*/
 
 	private static Observation loadObservation(org.healthnlp.deepphe.uima.types.Observation e) {
 		Observation ob = new Observation();
