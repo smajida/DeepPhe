@@ -790,6 +790,16 @@ rule "print-idMap"
 end	
 */
 /*
+rule "print-Specific-RecordSummary"
+	salience 3
+	no-loop true
+	when 
+		$summaryF : Fact(documentType == "RecordSummary", identifier matches ".*TumorSummary.*")
+	then
+		System.out.println("* RecordSummary: "+$summaryF.getInfo());
+end	
+*/
+/*
 rule "print-RecordSummary"
 	salience 3
 	no-loop true

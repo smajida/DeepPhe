@@ -118,7 +118,7 @@ end
 * Sets the most specific tumor diagnosis across documants
 */
 
-rule  "set-Tumor-Cancer-Diagnosis"
+rule  "set-Tumor-Diagnosis"
 	salience 44444
 	no-loop true
 	when
@@ -139,10 +139,11 @@ rule  "set-Tumor-Cancer-Diagnosis"
 	    from collect (Fact(summaryType == "TumorSummary", documentType != "RecordSummary", category == "hasDiagnosis", name == $deepName, summaryId == $deepOldSummaryId))
 
 	then
+//System.out.println("in hasDiagnosis $deepName: "+$deepName +" $deepOldSummaryId: "+$deepOldSummaryId);
 		for (Object obj: $$deepOldSummaryId){
 			Fact diagnFact = (Fact)obj;
 			//tumor level
-			Fact tf = FactFactory.createFact(diagnFact, "hasDiagnosis", OwlConstants.BREAST_CANCER_OWL+"#"+diagnFact.getName(), "RecordSummary");
+			Fact tf = FactFactory.createFact(diagnFact, "hasDiagnosis", OwlConstants.BREAST_CANCER_OWL+"#"+$deepName, "RecordSummary");
 			tf.addContainerIdentifier($newSummaryId);
 			tf.setIdentifier(tf.getName()+"-"+$newSummaryId);
 			tf.addProvenanceFact(diagnFact);
@@ -152,9 +153,34 @@ rule  "set-Tumor-Cancer-Diagnosis"
 			FactHelper.addFactToSummary(tf, $record.getCancerSummary(), $newSummaryId, OwlConstants.BREAST_CANCER_OWL);
 			
 			insert(tf);
+		}
+		
+end  
+
+rule  "set-Cancer-Diagnosis"
+	salience 44445
+	no-loop true
+	when
+		$record : MedicalRecord()	
+		$domain : Domain($domainName : domainName)
+		$cancerFact : Fact(summaryType=="CancerSummary", documentType == "RecordSummary", name == $domainName)
+		
+		$tF : Fact(summaryType == "CancerSummary", documentType != "RecordSummary", category == "hasDiagnosis", $deepName : name, $deepOldSummaryId : summaryId)
+	    not((Fact(this != $tF, summaryType == "CancerSummary", documentType != "RecordSummary", $name : name, 
+	    		ancestors contains $deepName) 		
+	    	))
+	    not(Fact(documentType == "RecordSummary", summaryType == "CancerSummary", category == "hasDiagnosis", provenanceFacts contains $tF))
+	    
+	    $$deepOldSummaryId : Set()
+	    from collect (Fact(summaryType == "CancerSummary", documentType != "RecordSummary", category == "hasDiagnosis", name == $deepName, summaryId == $deepOldSummaryId))
+
+	then
+//System.out.println("in hasDiagnosis $deepName: "+$deepName +" $deepOldSummaryId: "+$deepOldSummaryId);
+		for (Object obj: $$deepOldSummaryId){
+			Fact diagnFact = (Fact)obj;
 			
 			//cancer level
-			Fact ctf = FactFactory.createFact(diagnFact, "hasDiagnosis", OwlConstants.BREAST_CANCER_OWL+"#"+diagnFact.getName(), "RecordSummary");
+			Fact ctf = FactFactory.createFact(diagnFact, "hasDiagnosis", OwlConstants.BREAST_CANCER_OWL+"#"+$deepName, "RecordSummary");
 			ctf.setIdentifier($cancerFact.getIdentifier());
 			ctf.getContainerIdentifier().clear();
 			ctf.addContainerIdentifier($cancerFact.getSummaryId());
