@@ -288,7 +288,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		}
 		
 		// upgrade TNM to Clinical or Pathologic
-		inferClinicalPathologicTNM(report, phenotype);
+		//inferClinicalPathologicTNM(report, phenotype);
 		
 		return cancer;
 	}

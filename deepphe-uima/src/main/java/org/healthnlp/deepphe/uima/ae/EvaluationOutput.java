@@ -115,7 +115,7 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 		b.append(getPatientIdentifier(cancer.getPatient())+"_");
 		String bodySite = "";
 		for(Fact site: cancer.getBodySite()){
-			bodySite = site.getFullName()+"_";
+			bodySite = site.getName()+"_";
 			//TODO: this is bad, I should not hard code this. 
 			// Will fix after demo, perhaps infer organ from ontology name?
 			if(FHIRConstants.BREAST.equals(site.getName())){
