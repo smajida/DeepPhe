@@ -83,6 +83,7 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 
 	public void process(JCas jcas) throws AnalysisEngineProcessException {
 		MedicalRecord record = PhenotypeResourceFactory.loadMedicalRecord(jcas);
+		record.getReportLevelFacts();
 		
 		if(record.getPatient()==null) {
 			throw new AnalysisEngineProcessException(new Exception("Medical Record has no patient attached. Skipping"));
@@ -170,12 +171,21 @@ public class EvaluationOutput  extends JCasAnnotator_ImplBase {
 		if(valueFacts == null)
 			return "";
 		StringBuffer b = new StringBuffer();
+		Set<String> documents = new LinkedHashSet<String>();
 		Set<String> mentions = new LinkedHashSet<String>();
 		for(Fact f : valueFacts){
 			//System.err.println(f.getDocumentIdentifier());
-			for(TextMention t: f.getProvenanceText()){
-				mentions.add(f.getDocumentName()+": "+t.toString());
+			for(Fact ff: f.getProvenanceFacts()){
+				if(ff.getDocumentName() != null)
+					documents.add(ff.getDocumentName());
+				for(TextMention t: ff.getProvenanceText()){
+					mentions.add(t.getText());
+				}
 			}
+			
+		}
+		for(String s: documents){
+			b.append(s+FS);
 		}
 		for(String s: mentions){
 			b.append(s+FS);

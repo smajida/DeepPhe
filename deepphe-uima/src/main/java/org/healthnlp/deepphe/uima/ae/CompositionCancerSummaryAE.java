@@ -225,6 +225,9 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 				TumorSummary tumor = createTumorSummary(report,condition,site);
 				cancer.addTumor(tumor);
 			}
+			// add provenance document
+			cancer.getContainedFacts();
+			
 			list.add(cancer);
 		}
 		
@@ -241,6 +244,7 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	 */
 	private CancerSummary createCancerSummary(Report report, Map<BodySiteFact,ConditionFact> tumors){
 		CancerSummary cancer = new CancerSummary(report.getTitle());
+		cancer.setReport(report);
 		
 		cancer.loadTemplate(ontology);
 		CancerPhenotype phenotype = cancer.getPhenotype();
@@ -372,6 +376,8 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	
 	private TumorSummary createTumorSummary(Report report, ConditionFact diagnosis, BodySiteFact bodySite){
 		TumorSummary tumor = new TumorSummary(report.getTitle()+Summary.createLocationIdentifier(bodySite));
+		tumor.setReport(report);
+		
 		tumor.loadTemplate(ontology);
 		TumorPhenotype phenotype = tumor.getPhenotype();
 		phenotype.loadTemplate(ontology);

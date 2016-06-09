@@ -87,7 +87,8 @@ public class Condition extends org.hl7.fhir.instance.model.Condition implements 
 		}
 		
 		// add text provenance
-		st.append(" [ "+FHIRUtils.getMentions(this)+" ]");
+		st.append(" | text: "+FHIRUtils.getMentions(this));
+		
 		
 		return st.toString();
 	}

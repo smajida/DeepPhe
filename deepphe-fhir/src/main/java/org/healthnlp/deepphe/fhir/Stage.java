@@ -143,7 +143,7 @@ public class Stage extends ConditionStageComponent implements Serializable{
 		// if list of targets is empty, check the references
 		if(super.getAssessmentTarget().isEmpty() && !getAssessment().isEmpty()){
 			for(Reference r: getAssessment()){
-				Element e = FHIRRegistry.getInstance().getResource(r.getReference());
+				Element e = FHIRRegistry.getInstance().getElement(r.getReference());
 				if(e != null){
 					super.getAssessmentTarget().add((Resource)e);
 				}

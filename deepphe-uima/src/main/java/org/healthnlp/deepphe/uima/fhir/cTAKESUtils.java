@@ -86,6 +86,22 @@ public class cTAKESUtils {
 		}
 		return FHIRUtils.createMentionExtension(b.toString(),st, en );
 	}
+	
+	public static Extension createMentionExtension( final IdentifiedAnnotation mention ) {
+		StringBuffer b = new StringBuffer(mention.getCoveredText());
+		int st = mention.getBegin();
+		int en = mention.getEnd();
+		return FHIRUtils.createMentionExtension(b.toString(),st, en );
+	}
+	
+	
+	public static List<IdentifiedAnnotation> getBodySiteModifiers(IdentifiedAnnotation ia){
+		List<IdentifiedAnnotation> list = new ArrayList<IdentifiedAnnotation>();
+		list.addAll(PhenotypeAnnotationUtil.getBodySides(ia));
+		list.addAll(PhenotypeAnnotationUtil.getQuadrants(ia));
+		list.addAll(PhenotypeAnnotationUtil.getClockwises(ia));
+		return list;
+	}
 
 
 	public static boolean equals(ConceptInstance conceptInstance,URI u){
@@ -519,13 +535,13 @@ public class cTAKESUtils {
 	}
 	
 	public static void addResource(Element e, ConceptInstance conceptInstance) {
-		FHIRRegistry.getInstance().addResource( e, conceptInstance.getIdentifiedAnnotation() );
+		FHIRRegistry.getInstance().addElement( e, conceptInstance.getIdentifiedAnnotation() );
 	}
 	public static void addResource(Element e) {
-		FHIRRegistry.getInstance().addResource( e);
+		FHIRRegistry.getInstance().addElement( e);
 	}
 	public static Element getResource(ConceptInstance ci){
-		return FHIRRegistry.getInstance().getResource(ci.getIdentifiedAnnotation());
+		return FHIRRegistry.getInstance().getElement(ci.getIdentifiedAnnotation());
 	}
 	
 	public static void addLanguageContext( ConceptInstance conceptInstance, DomainResource dx ) {

@@ -57,7 +57,7 @@ public class FactFactory {
 			return null;
 		
 		// do we have an element of this CC registered, then make a fact based on that
-		Element e = FHIRRegistry.getInstance().getResource(FHIRUtils.getResourceIdentifer(cc));
+		Element e = FHIRRegistry.getInstance().getElement(FHIRUtils.getResourceIdentifer(cc));
 		if(e != null)
 			return FactFactory.createFact(e);
 		

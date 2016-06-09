@@ -28,6 +28,7 @@ import org.healthnlp.deepphe.uima.types.HumanName;
 import org.healthnlp.deepphe.uima.types.Patient;
 import org.healthnlp.deepphe.uima.types.Property;
 import org.healthnlp.deepphe.util.FHIRConstants;
+import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.hl7.fhir.instance.model.*;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
@@ -37,7 +38,7 @@ import edu.pitt.dbmi.nlp.noble.tools.TextTools;
 
 import java.net.URI;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 public class PhenotypeResourceFactory {
 	
@@ -270,6 +271,11 @@ public class PhenotypeResourceFactory {
 	}
 
 	private static Fact loadFact(org.healthnlp.deepphe.uima.types.Fact annotation) {
+		// retun fact on annotation
+		//if(FHIRRegistry.getInstance().hasFact(annotation))
+		//	return FHIRRegistry.getInstance().getFact(annotation);
+		
+		
 		// try to convert if annotation
 		Element element = loadElement(annotation);
 		
@@ -309,11 +315,10 @@ public class PhenotypeResourceFactory {
 		
 		// add provenance facts
 		//TODO: load provenance is disabled for now
-		/*
 		for(int i=0;i<getSize(annotation.getHasProvenanceFacts());i++){
-			fact.addProvenanceFact(loadFact(annotation.getHasProvenanceFacts(i)));
+			if(FHIRRegistry.getInstance().hasFact(annotation.getHasProvenanceFacts(i)))
+				fact.addProvenanceFact(FHIRRegistry.getInstance().getFact(annotation));
 		}
-		*/
 		
 		// load properties
 		fact.setProperties(loadProperties(annotation));
@@ -440,6 +445,9 @@ public class PhenotypeResourceFactory {
 		
 		// save properties
 		saveProperties(fact.getProperties(),annotation, jcas);
+		
+		// add to registry
+		FHIRRegistry.getInstance().addFact(fact,annotation);
 		
 		
 		annotation.addToIndexes();
@@ -1055,6 +1063,11 @@ public class PhenotypeResourceFactory {
 	
 
 	public static Element loadElement(org.healthnlp.deepphe.uima.types.Fact e){
+		// retun fact on annotation
+		if(FHIRRegistry.getInstance().hasElement(e))
+			return FHIRRegistry.getInstance().getElement(e);
+		
+		
 		Element el = null;
 		if(e instanceof DiseaseDisorder){
 			el = loadDiagnosis((DiseaseDisorder)e);
@@ -1314,10 +1327,14 @@ public class PhenotypeResourceFactory {
 			rr.addCompositionSummary(summary);
 		}*/
 		for(int i=0;i<getSize(comp.getHasCompositionSummaryCancer());i++){
-			rr.addCompositionSummary(loadCancerSummary(comp.getHasCompositionSummaryCancer(i)));
+			CancerSummary cs = loadCancerSummary(comp.getHasCompositionSummaryCancer(i));
+			cs.setReport(rr);
+			rr.addCompositionSummary(cs);
 		}
 		for(int i=0;i<getSize(comp.getHasCompositionSummaryTumor());i++){
-			rr.addCompositionSummary(loadTumorSummary(comp.getHasCompositionSummaryTumor(i)));
+			TumorSummary ps = loadTumorSummary(comp.getHasCompositionSummaryTumor(i));
+			ps.setReport(rr);
+			rr.addCompositionSummary(ps);
 		}
 		
 		
