@@ -188,8 +188,10 @@ final public class CancerPipelineFactory {
                   CTAKES_DIR_PREFIX + "relation/extractor/location_of.jar" ) );
       // remove metastases from breasts, remove breast modifiers from non-breasts
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( MetastasisRelocator.class ) );
-      // add neoplasms and location modifiers to breasts
-      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( PastSentenceLocator.class ) );
+      // remove tumors from distance expression locations: "tumor 5 cm from nipple"
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( DistancedRemover.class ) );
+      // add neoplasms and location modifiers to breasts that lie outside the same sentence
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( BeyondSentenceLocator.class ) );
    }
 
    private static void addCorefEngines( final AggregateBuilder aggregateBuilder )

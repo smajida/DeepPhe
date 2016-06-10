@@ -40,7 +40,7 @@ public class MetastasisRelocator extends JCasAnnotator_ImplBase {
          = OwlOntologyConceptUtil.getUriBranchStream( OwlConstants.BREAST_CANCER_OWL + "#Breast" )
          .collect( Collectors.toSet() );
 
-   static private final Predicate<BinaryTextRelation> breastLocation = r -> {
+   static private final Predicate<BinaryTextRelation> isBreastLocation = r -> {
       final Annotation site = r.getArg2().getArgument();
       if ( !IdentifiedAnnotation.class.isInstance( site ) ) {
          return true;
@@ -50,7 +50,7 @@ public class MetastasisRelocator extends JCasAnnotator_ImplBase {
       return uris.isEmpty();
    };
 
-   static private final BiPredicate<BinaryTextRelation, Collection<String>> wantedLocatable = ( r, c ) -> {
+   static private final BiPredicate<BinaryTextRelation, Collection<String>> isWantedLocatable = ( r, c ) -> {
       final Annotation locatable = r.getArg1().getArgument();
       if ( !IdentifiedAnnotation.class.isInstance( locatable ) ) {
          return false;
@@ -85,16 +85,16 @@ public class MetastasisRelocator extends JCasAnnotator_ImplBase {
    static private Collection<LocationOfTextRelation> getBreastRelations( final JCas jCas,
                                                                          final Collection<String> locatableUris ) {
       return JCasUtil.select( jCas, LocationOfTextRelation.class ).stream()
-            .filter( r -> wantedLocatable.test( r, locatableUris ) )
-            .filter( breastLocation )
+            .filter( r -> isWantedLocatable.test( r, locatableUris ) )
+            .filter( isBreastLocation )
             .collect( Collectors.toList() );
    }
 
    static private Collection<LocationOfTextRelation> getNonBreastRelations( final JCas jCas,
                                                                             final Collection<String> locatableUris ) {
       return JCasUtil.select( jCas, LocationOfTextRelation.class ).stream()
-            .filter( r -> wantedLocatable.test( r, locatableUris ) )
-            .filter( breastLocation.negate() )
+            .filter( r -> isWantedLocatable.test( r, locatableUris ) )
+            .filter( isBreastLocation.negate() )
             .collect( Collectors.toList() );
    }
 
