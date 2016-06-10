@@ -1,36 +1,49 @@
 package org.healthnlp.deepphe.uima.ae;
 
-import edu.pitt.dbmi.nlp.noble.ontology.*;
-import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
-import edu.pitt.dbmi.nlp.noble.tools.TextTools;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_component.JCasAnnotator_ImplBase;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.healthnlp.deepphe.fhir.*;
-import org.healthnlp.deepphe.fhir.fact.*;
-import org.healthnlp.deepphe.fhir.summary.*;
+import org.healthnlp.deepphe.fhir.Condition;
+import org.healthnlp.deepphe.fhir.Element;
+import org.healthnlp.deepphe.fhir.Patient;
+import org.healthnlp.deepphe.fhir.Report;
+import org.healthnlp.deepphe.fhir.fact.BodySiteFact;
+import org.healthnlp.deepphe.fhir.fact.ConditionFact;
+import org.healthnlp.deepphe.fhir.fact.Fact;
+import org.healthnlp.deepphe.fhir.fact.FactFactory;
+import org.healthnlp.deepphe.fhir.fact.TNMFact;
+import org.healthnlp.deepphe.fhir.summary.CancerPhenotype;
+import org.healthnlp.deepphe.fhir.summary.CancerSummary;
+import org.healthnlp.deepphe.fhir.summary.MedicalRecord;
+import org.healthnlp.deepphe.fhir.summary.PatientSummary;
+import org.healthnlp.deepphe.fhir.summary.Summary;
+import org.healthnlp.deepphe.fhir.summary.TumorPhenotype;
+import org.healthnlp.deepphe.fhir.summary.TumorSummary;
 import org.healthnlp.deepphe.uima.fhir.PhenotypeResourceFactory;
 import org.healthnlp.deepphe.util.FHIRConstants;
-import org.healthnlp.deepphe.util.FHIRRegistry;
 import org.healthnlp.deepphe.util.FHIRUtils;
 import org.healthnlp.deepphe.util.OntologyUtils;
 import org.hl7.fhir.instance.model.CodeableConcept;
 
 import edu.pitt.dbmi.nlp.noble.ontology.IClass;
-import edu.pitt.dbmi.nlp.noble.ontology.ILogicExpression;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
-import edu.pitt.dbmi.nlp.noble.ontology.IRestriction;
 import edu.pitt.dbmi.nlp.noble.ontology.owl.OOntology;
 import edu.pitt.dbmi.nlp.noble.tools.TextTools;
-
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
 
 /**
  * create composition cancer and tumor summaries on document level
@@ -375,7 +388,9 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 	
 	
 	private TumorSummary createTumorSummary(Report report, ConditionFact diagnosis, BodySiteFact bodySite){
-		TumorSummary tumor = new TumorSummary(report.getTitle()+Summary.createLocationIdentifier(bodySite));
+		//System.out.println("creating tumor report: "+report.getTitle()+" tumor: "+diagnosis.getName()+" site: "+bodySite.getSummaryText());
+		
+		TumorSummary tumor = new TumorSummary(report.getTitle()+"_"+Summary.createLocationIdentifier(diagnosis,bodySite));
 		tumor.setReport(report);
 		
 		tumor.loadTemplate(ontology);
@@ -410,6 +425,12 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 			tumorExtent.addProvenanceFact(diagnosis);
 			phenotype.addFact(FHIRConstants.HAS_TUMOR_EXTENT,tumorExtent);
 		}
+		// adnecarcionma vs sarcoma
+		Fact cancerType = getLexicalPartValue(diagnosis,FHIRConstants.CANCER_TYPE_URI);
+		if(cancerType != null){
+			cancerType.addProvenanceFact(diagnosis);
+			phenotype.addFact(FHIRConstants.HAS_CANCER_CELL_LINE,cancerType);
+		}
 		
 	
 		return tumor;
@@ -426,7 +447,9 @@ public class CompositionCancerSummaryAE extends JCasAnnotator_ImplBase {
 		// get values from histologictype and search all synonyms up the tree 
 		IClass dx = ontology.getClass(fact.getName());
 		if(dx != null){
-			for(IClass cls : ontology.getClass(""+value).getSubClasses()){
+			IClass [] values = ontology.getClass(""+value).getSubClasses();
+			Arrays.sort(values);
+			for(IClass cls : values){
 				if(isLexicalPartOf(cls,dx)){
 					try {
 						return FactFactory.createFact(value.toURL().getRef(),""+cls.getURI());
