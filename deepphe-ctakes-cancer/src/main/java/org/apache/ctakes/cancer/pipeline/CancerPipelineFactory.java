@@ -153,6 +153,8 @@ final public class CancerPipelineFactory {
       addLoggedEngine( aggregateBuilder, UncertaintyCleartkAnalysisEngine.createAnnotatorDescription() );
       // make neoplasms generic if they have an expression like "evaluated for [breast cancer]"
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( GenericByTestFinder.class ) );
+      // make neoplasms negative if they have an expression like "[breast cancer] : NO"
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ListEntryNegator.class ) );
 //      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ClearNLPSemanticRoleLabelerAE.class ) );
 //      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ConstituencyParser.class ) );
    }
