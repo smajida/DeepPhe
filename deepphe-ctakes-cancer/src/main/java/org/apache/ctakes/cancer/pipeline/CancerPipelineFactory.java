@@ -151,6 +151,8 @@ final public class CancerPipelineFactory {
 //      aggregateBuilder.add( PolarityCleartkAnalysisEngine.createAnnotatorDescription() );
       addLoggedEngine( aggregateBuilder, ContextAnnotator.createAnnotatorDescription() );
       addLoggedEngine( aggregateBuilder, UncertaintyCleartkAnalysisEngine.createAnnotatorDescription() );
+      // make neoplasms generic if they have an expression like "evaluated for [breast cancer]"
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( GenericByTestFinder.class ) );
 //      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ClearNLPSemanticRoleLabelerAE.class ) );
 //      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ConstituencyParser.class ) );
    }
