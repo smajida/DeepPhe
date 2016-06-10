@@ -145,9 +145,9 @@ public class GenerateModelOntology {
 		for(Object o : src.getDirectNecessaryRestrictions()){
 			if(o instanceof IRestriction){
 				IRestriction r = copyRestriction((IRestriction)o,target.getOntology());
-				if(r != null && !hasRestriction(target,r))
+				if(r != null && !hasRestriction(target,r)){
 					target.addNecessaryRestriction(r);
-				else 
+				}else 
 					System.out.println("  skipping "+o);	
 			}else if(o instanceof ILogicExpression){
 				target.addNecessaryRestriction(copyExpression((ILogicExpression)o,target.getOntology()));
