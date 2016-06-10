@@ -57,7 +57,7 @@ public class DocumentSummarizerAE extends JCasAnnotator_ImplBase {
 			String namedID = patient != null?patient.getPatientName():"unknown";
 			Report report = DocumentResourceFactory.getReport(jcas);
 			
-			System.out.println("PROCESSING patient: " + patient.getDisplayText() +" document: "+report.getTitle()+" ..");
+			System.out.println("PROCESSING patient: " + namedID +" document: "+report.getTitle()+" ..");
 			
 			// save FHIR related data
 			File patientDir = new File(new File(outputDir, FHIR_TYPE), namedID);
