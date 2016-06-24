@@ -6,6 +6,7 @@ import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 import org.apache.ctakes.dictionary.lookup2.bsv.BsvParserUtil;
+import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
 import org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory;
 import org.apache.ctakes.dictionary.lookup2.ontology.OwlParserUtil;
 import org.apache.ctakes.dictionary.lookup2.term.RareWordTerm;
@@ -84,14 +85,6 @@ public class OwlDictionary implements RareWordDictionary {
 
    static private Collection<CuiTerm> createCuiTerms( final IClass iClass ) {
       final Concept concept = iClass.getConcept();
-      final String cui = OwlParserUtil.getCui( concept );
-      if ( cui == null ) {
-         return Collections.emptyList();
-      }
-      final String tui = OwlParserUtil.getTui( concept );
-      if ( tui == null ) {
-         return Collections.emptyList();
-      }
       if ( OwlParserUtil.getInstance().isUnwantedUri( OwlParserUtil.getUriString( iClass ) ) ) {
          return Collections.emptyList();
       }
@@ -99,6 +92,8 @@ public class OwlDictionary implements RareWordDictionary {
       if ( synonyms == null ) {
          return Collections.emptyList();
       }
+      String tryCui = OwlParserUtil.getCui( concept );
+      final String cui = tryCui == null ? OwlConcept.NULL_CUI : tryCui;
       return Arrays.stream( synonyms )
             .map( String::toLowerCase )
             .filter( ValidTextUtil::isValidText )

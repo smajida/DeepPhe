@@ -150,6 +150,9 @@ final public class CancerPipelineFactory {
       addLoggedEngine( aggregateBuilder, ClearNLPDependencyParserAE.createAnnotatorDescription() );
 //      aggregateBuilder.add( PolarityCleartkAnalysisEngine.createAnnotatorDescription() );
       addLoggedEngine( aggregateBuilder, ContextAnnotator.createAnnotatorDescription() );
+      // TODO - try the increased right scope and see if it improves scores
+//      addLoggedEngine( aggregateBuilder, AnalysisEngineFactory.createEngineDescription( ContextAnnotator.class,
+//            ContextAnnotator.MAX_RIGHT_SCOPE_SIZE_PARAM, 12 ) );
       addLoggedEngine( aggregateBuilder, UncertaintyCleartkAnalysisEngine.createAnnotatorDescription() );
       // make neoplasms generic if they have an expression like "evaluated for [breast cancer]"
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( GenericByTestFinder.class ) );
