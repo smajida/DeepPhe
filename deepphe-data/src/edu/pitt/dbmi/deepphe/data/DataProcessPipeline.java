@@ -25,8 +25,9 @@ public class DataProcessPipeline {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws Exception {
-		File dir = new File("/home/tseytlin/Data/DeepPhe/Data/Sample/Work/");
-		String dataPrefix = "EPIC_breast";
+		//File dir = new File("/home/tseytlin/Data/DeepPhe/Data/Sample/Work/");
+		File dir = new File("/home/tseytlin/Data/DeepPhe/Data/SEER/");
+		String dataPrefix = "SEER_breast";
 			
 		File dataFile  = new File(dir,"EPIC_data.tsv");
 		File summaryFile  = new File(dir,dataPrefix+"_data.tsv");
@@ -38,6 +39,12 @@ public class DataProcessPipeline {
 		File dataSampeFileScrubbed = new File(dir,dataPrefix+"_data_filtered.scrubbed");
 		File dataSampeDirectory = new File(dir,dataPrefix+"_data_filtered_scrubbed");
 		File linkFile = new File(dir,dataPrefix+"_data_filtered.link");
+		
+		
+		dataSampeFileFixed = new File(dir,dataPrefix+".deid");
+		dataSampeFileScrubbed = new File(dir,dataPrefix+".scrubbed");
+		dataSampeDirectory = new File(dir,dataPrefix+"_reports");
+		
 		
 		// create dates file
 		if(false)
@@ -58,7 +65,7 @@ public class DataProcessPipeline {
 		
 		if(true){	
 			// fix DeID mistakes
-			createFixedDeidentifiedDataset(dataSampleFile,dataSampeFileDeID,dataSampeFileFixed);
+			//createFixedDeidentifiedDataset(dataSampleFile,dataSampeFileDeID,dataSampeFileFixed);
 			
 			// scrub DeID tags from document
 			createScrubbedDataset(dataSampeFileFixed,dataSampeFileScrubbed);
@@ -67,7 +74,7 @@ public class DataProcessPipeline {
 			splitDatasetReports(dataSampeFileScrubbed, dataSampeDirectory);
 		
 			// create a linage file for future cross-reference
-			createLinkageFile(dataSampleFile, dataSampeFileScrubbed, dataSampeDirectory, linkFile);
+			//createLinkageFile(dataSampleFile, dataSampeFileScrubbed, dataSampeDirectory, linkFile);
 		}
 	}
 
