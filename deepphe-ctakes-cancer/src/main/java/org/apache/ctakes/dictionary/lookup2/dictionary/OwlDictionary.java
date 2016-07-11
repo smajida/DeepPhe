@@ -6,7 +6,6 @@ import edu.pitt.dbmi.nlp.noble.ontology.IOntology;
 import edu.pitt.dbmi.nlp.noble.ontology.IOntologyException;
 import edu.pitt.dbmi.nlp.noble.terminology.Concept;
 import org.apache.ctakes.dictionary.lookup2.bsv.BsvParserUtil;
-import org.apache.ctakes.dictionary.lookup2.concept.OwlConcept;
 import org.apache.ctakes.dictionary.lookup2.ontology.OwlConnectionFactory;
 import org.apache.ctakes.dictionary.lookup2.ontology.OwlParserUtil;
 import org.apache.ctakes.dictionary.lookup2.term.RareWordTerm;
@@ -93,7 +92,7 @@ public class OwlDictionary implements RareWordDictionary {
          return Collections.emptyList();
       }
       String tryCui = OwlParserUtil.getCui( concept );
-      final String cui = tryCui == null ? OwlConcept.NULL_CUI : tryCui;
+      final String cui = tryCui != null ? tryCui : "H" + iClass.hashCode();
       return Arrays.stream( synonyms )
             .map( String::toLowerCase )
             .filter( ValidTextUtil::isValidText )

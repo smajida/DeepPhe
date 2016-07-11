@@ -20,7 +20,6 @@ final public class OwlConcept implements Concept {
    static private final Logger LOGGER = Logger.getLogger( "OwlConcept" );
 
    static public final String URI_CODING_SCHEME = "OWL_URI";
-   static public final String NULL_CUI = "C0000000";
    static public final String NULL_TUI = "T000";
 
    final private IClass _iClass;
@@ -51,7 +50,7 @@ final public class OwlConcept implements Concept {
    @Override
    public String getCui() {
       final String cui = OwlParserUtil.getCui( _iClass );
-      return cui == null ? NULL_CUI : cui;
+      return cui != null ? cui : "H" + _hashcode;
    }
 
    /**

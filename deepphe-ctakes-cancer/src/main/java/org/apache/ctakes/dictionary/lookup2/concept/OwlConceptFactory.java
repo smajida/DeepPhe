@@ -85,7 +85,7 @@ public class OwlConceptFactory implements ConceptFactory {
          return Collections.emptyMap();
       }
       String tryCui = OwlParserUtil.getCui( concept );
-      final String cui = tryCui == null ? OwlConcept.NULL_CUI : tryCui;
+      final String cui = tryCui != null ? tryCui : "H" + iClass.hashCode();
       if ( !Arrays.stream( concept.getSynonyms() )
             .map( String::toLowerCase )
             .filter( ValidTextUtil::isValidText )
