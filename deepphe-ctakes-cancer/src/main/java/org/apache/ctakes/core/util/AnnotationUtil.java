@@ -1,7 +1,5 @@
 package org.apache.ctakes.core.util;
 
-import org.apache.ctakes.dictionary.lookup2.textspan.DefaultTextSpan;
-import org.apache.ctakes.dictionary.lookup2.textspan.TextSpan;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.log4j.Logger;
@@ -10,8 +8,6 @@ import org.apache.uima.jcas.cas.FSArray;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 /**
  * @author SPF , chip-nlp
@@ -26,8 +22,8 @@ final public class AnnotationUtil {
    private AnnotationUtil() {
    }
 
-   static private final int DEFAULT_CHAR_TOLERANCE = 35;
-   static private final int DEFAULT_TOKEN_TOLERANCE = 7;
+   //   static private final int DEFAULT_CHAR_TOLERANCE = 35;
+   static private final int DEFAULT_TOKEN_TOLERANCE = 9;
    static private final double DEFAULT_FAVORATISM = 2d;
    static private final FeatureStructure[] NO_FEATURES = new FeatureStructure[ 0 ];
 
@@ -72,7 +68,7 @@ final public class AnnotationUtil {
    static public <T extends IdentifiedAnnotation> T getPrecedingOrAnnotation( final int testStartOffset,
                                                                               final int testEndOffset,
                                                                               final Iterable<T> annotations ) {
-      return getPrecedingOrAnnotation( testStartOffset, testEndOffset, DEFAULT_CHAR_TOLERANCE, annotations );
+      return getPrecedingOrAnnotation( testStartOffset, testEndOffset, DEFAULT_TOKEN_TOLERANCE, annotations );
    }
 
    /**
@@ -89,10 +85,11 @@ final public class AnnotationUtil {
                                                                               final Iterable<T> annotations ) {
       final GappedAnnotation<T> preceding = getPrecedingAnnotation( testStartOffset, annotations );
       final GappedAnnotation<T> following = getFollowingAnnotation( testEndOffset, annotations );
-      if ( preceding.__gap > following.__gap / DEFAULT_FAVORATISM && following.__gap < tolerance ) {
+      if ( following.__gap < preceding.__gap / DEFAULT_FAVORATISM && following.__gap < tolerance
+           && !hasFrom( following.__annotation, testStartOffset, testEndOffset ) ) {
          return following.__annotation;
       }
-      if ( preceding.__gap < tolerance ) {
+      if ( preceding.__gap < tolerance && !hasFrom( preceding.__annotation, testStartOffset, testEndOffset ) ) {
          return preceding.__annotation;
       }
       return null;
@@ -121,13 +118,32 @@ final public class AnnotationUtil {
                                                                               final Iterable<T> annotations ) {
       final GappedAnnotation<T> preceding = getPrecedingAnnotation( annotation, annotations );
       final GappedAnnotation<T> following = getFollowingAnnotation( annotation, annotations );
-      if ( preceding.__gap > following.__gap / DEFAULT_FAVORATISM && following.__gap < tolerance ) {
+      if ( following.__gap < preceding.__gap / DEFAULT_FAVORATISM && following.__gap < tolerance
+           && !hasFrom( annotation, following.__annotation ) ) {
          return following.__annotation;
       }
-      if ( preceding.__gap < tolerance ) {
+      if ( preceding.__gap < tolerance && !hasFrom( annotation, preceding.__annotation ) ) {
          return preceding.__annotation;
       }
       return null;
+   }
+
+   static private boolean hasFrom( final IdentifiedAnnotation annotation1, final IdentifiedAnnotation annotation2 ) {
+      final int start = Math.min( annotation1.getEnd(), annotation2.getEnd() );
+      final int end = Math.max( annotation1.getBegin(), annotation2.getBegin() );
+      if ( start >= end ) {
+         return false;
+      }
+      return annotation1.getCAS().getDocumentText().substring( start, end ).contains( " from " );
+   }
+
+   static private boolean hasFrom( final IdentifiedAnnotation annotation1, final int testBegin, final int testEnd ) {
+      final int start = Math.min( annotation1.getEnd(), testEnd );
+      final int end = Math.max( annotation1.getBegin(), testBegin );
+      if ( start >= end ) {
+         return false;
+      }
+      return annotation1.getCAS().getDocumentText().substring( start, end ).contains( " from " );
    }
 
    /**
@@ -140,7 +156,7 @@ final public class AnnotationUtil {
    static public <T extends IdentifiedAnnotation> T getFollowingOrAnnotation( final int testStartOffset,
                                                                               final int testEndOffset,
                                                                               final Iterable<T> annotations ) {
-      return getFollowingOrAnnotation( testStartOffset, testEndOffset, DEFAULT_CHAR_TOLERANCE, annotations );
+      return getFollowingOrAnnotation( testStartOffset, testEndOffset, DEFAULT_TOKEN_TOLERANCE, annotations );
    }
 
    /**
@@ -157,10 +173,11 @@ final public class AnnotationUtil {
                                                                               final Iterable<T> annotations ) {
       final GappedAnnotation<T> following = getFollowingAnnotation( testEndOffset, annotations );
       final GappedAnnotation<T> preceding = getPrecedingAnnotation( testStartOffset, annotations );
-      if ( following.__gap > following.__gap / DEFAULT_FAVORATISM && preceding.__gap < tolerance ) {
+      if ( preceding.__gap < following.__gap / DEFAULT_FAVORATISM && preceding.__gap < tolerance
+           && !hasFrom( preceding.__annotation, testStartOffset, testEndOffset ) ) {
          return preceding.__annotation;
       }
-      if ( following.__gap < tolerance ) {
+      if ( following.__gap < tolerance && !hasFrom( following.__annotation, testStartOffset, testEndOffset ) ) {
          return following.__annotation;
       }
       return null;
@@ -189,10 +206,11 @@ final public class AnnotationUtil {
                                                                               final Iterable<T> annotations ) {
       final GappedAnnotation<T> following = getFollowingAnnotation( annotation, annotations );
       final GappedAnnotation<T> preceding = getPrecedingAnnotation( annotation, annotations );
-      if ( following.__gap > following.__gap / DEFAULT_FAVORATISM && preceding.__gap < tolerance ) {
+      if ( preceding.__gap < following.__gap / DEFAULT_FAVORATISM && preceding.__gap < tolerance
+           && !hasFrom( annotation, preceding.__annotation ) ) {
          return preceding.__annotation;
       }
-      if ( following.__gap < tolerance ) {
+      if ( following.__gap < tolerance && !hasFrom( annotation, following.__annotation ) ) {
          return following.__annotation;
       }
       return null;
@@ -210,7 +228,8 @@ final public class AnnotationUtil {
       T closestPreceding = null;
       int smallestGap = Integer.MAX_VALUE;
       for ( T annotation : annotations ) {
-         final int gap = testStartOffset - annotation.getEnd();
+         final int gap = getTokenGap( annotation, testStartOffset );
+         ;
          if ( gap > 0 && gap < smallestGap ) {
             closestPreceding = annotation;
             smallestGap = gap;
@@ -251,7 +270,7 @@ final public class AnnotationUtil {
       T closestFollowing = null;
       int smallestGap = Integer.MAX_VALUE;
       for ( T annotation : annotations ) {
-         final int gap = annotation.getBegin() - testEndOffset;
+         final int gap = getTokenGap( annotation, testEndOffset );
          if ( gap > 0 && gap < smallestGap ) {
             closestFollowing = annotation;
             smallestGap = gap;
@@ -283,12 +302,30 @@ final public class AnnotationUtil {
 
 
    static public int getTokenGap( final IdentifiedAnnotation annotation1, final IdentifiedAnnotation annotation2 ) {
-      final Collection<TextSpan> annotations
-            = org.apache.uima.fit.util.JCasUtil.selectBetween( IdentifiedAnnotation.class, annotation1, annotation2 )
-            .stream()
-            .map( a -> new DefaultTextSpan( a.getBegin(), a.getEnd() ) )
-            .collect( Collectors.toSet() );
-      return annotations.size();
+      final int start = Math.min( annotation1.getEnd(), annotation2.getEnd() );
+      final int end = Math.max( annotation1.getBegin(), annotation2.getBegin() );
+      if ( start >= end ) {
+         return 0;
+      }
+      final String between = annotation1.getCAS().getDocumentText().substring( start, end );
+      return between.split( "\\s+" ).length;
+//
+//      final Collection<TextSpan> annotations
+//            = org.apache.uima.fit.util.JCasUtil.selectBetween( IdentifiedAnnotation.class, annotation1, annotation2 )
+//            .stream()
+//            .map( a -> new DefaultTextSpan( a.getBegin(), a.getEnd() ) )
+//            .collect( Collectors.toSet() );
+//      return annotations.size();
+   }
+
+   static public int getTokenGap( final IdentifiedAnnotation annotation1, final int testOffset ) {
+      final int start = Math.min( annotation1.getEnd(), testOffset );
+      final int end = Math.max( annotation1.getBegin(), testOffset );
+      if ( start >= end ) {
+         return 0;
+      }
+      final String between = annotation1.getCAS().getDocumentText().substring( start, end );
+      return between.split( "\\s+" ).length;
    }
 
 
@@ -305,9 +342,9 @@ final public class AnnotationUtil {
       T closestAnnotation = null;
       int smallestGap = Integer.MAX_VALUE;
       for ( T annotation : annotations ) {
-         final int gap = Math.max( annotation.getBegin() - testEndOffset,
-               testStartOffset - annotation.getEnd() );
-         if ( gap < smallestGap ) {
+         final int gap = getTokenGap( annotation, testEndOffset );
+         ;
+         if ( gap > 0 && gap < smallestGap ) {
             closestAnnotation = annotation;
             smallestGap = gap;
          }
@@ -347,6 +384,6 @@ final public class AnnotationUtil {
       }
    }
 
-   static private final GappedAnnotation NULL_GAPPED_ANNOTATION = new GappedAnnotation( null, Integer.MAX_VALUE );
+//   static private final GappedAnnotation NULL_GAPPED_ANNOTATION = new GappedAnnotation<>( null, Integer.MAX_VALUE );
 
 }

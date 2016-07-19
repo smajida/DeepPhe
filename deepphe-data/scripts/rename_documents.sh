@@ -17,7 +17,8 @@ do
 	PNM=${PATIENT^}
 	
 	# rename the file to new patient
-	y=`echo $x | cut -c 10-`
+	z=$((${#PATIENT} + 1))
+	y=`echo $x | cut -c $z-`
 	y="$PATIENT$y" 
 
 	# move old content to tmp	

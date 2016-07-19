@@ -117,7 +117,7 @@ final public class FileTreeReader extends CollectionReader_ImplBase {
             childDirs.add( child );
             continue;
          }
-         if ( isExtensionValid( child, validExtensions ) ) {
+         if ( isExtensionValid( child, validExtensions ) && !child.isHidden() ) {
             descendentFiles.add( child );
          }
       }

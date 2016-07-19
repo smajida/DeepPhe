@@ -42,7 +42,7 @@ public interface LocationModifier {
 
       Quadrant( final String uri, final String regex ) {
          __uri = uri;
-         __pattern = Pattern.compile( "\\b(" + regex + ")\\b", Pattern.CASE_INSENSITIVE );
+         __pattern = Pattern.compile( "\\b(" + regex + ")\\.?,?\\b", Pattern.CASE_INSENSITIVE );
       }
 
 
@@ -66,7 +66,7 @@ public interface LocationModifier {
 
       BodySide( final String uri, final String regex ) {
          __uri = uri;
-         __pattern = Pattern.compile( "\\b(" + regex + ")\\b", Pattern.CASE_INSENSITIVE );
+         __pattern = Pattern.compile( "\\b(" + regex + ")\\.?,?\\b", Pattern.CASE_INSENSITIVE );
       }
 
       public String getUri() {
@@ -99,7 +99,7 @@ public interface LocationModifier {
 
       Clockwise( final String uri, final String regex ) {
          __uri = uri;
-         __pattern = Pattern.compile( "\\b(" + regex + ")\\b", Pattern.CASE_INSENSITIVE );
+         __pattern = Pattern.compile( "\\b(" + regex + ")\\.?,?\\b", Pattern.CASE_INSENSITIVE );
       }
 
       public String getUri() {

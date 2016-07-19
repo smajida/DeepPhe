@@ -150,7 +150,14 @@ final public class CancerPipelineFactory {
       addLoggedEngine( aggregateBuilder, ClearNLPDependencyParserAE.createAnnotatorDescription() );
 //      aggregateBuilder.add( PolarityCleartkAnalysisEngine.createAnnotatorDescription() );
       addLoggedEngine( aggregateBuilder, ContextAnnotator.createAnnotatorDescription() );
+      // TODO - try the increased right scope and see if it improves scores
+//      addLoggedEngine( aggregateBuilder, AnalysisEngineFactory.createEngineDescription( ContextAnnotator.class,
+//            ContextAnnotator.MAX_RIGHT_SCOPE_SIZE_PARAM, 12 ) );
       addLoggedEngine( aggregateBuilder, UncertaintyCleartkAnalysisEngine.createAnnotatorDescription() );
+      // make neoplasms generic if they have an expression like "evaluated for [breast cancer]"
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( GenericByTestFinder.class ) );
+      // make neoplasms negative if they have an expression like "[breast cancer] : NO"
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ListEntryNegator.class ) );
 //      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ClearNLPSemanticRoleLabelerAE.class ) );
 //      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( ConstituencyParser.class ) );
    }
@@ -188,8 +195,10 @@ final public class CancerPipelineFactory {
                   CTAKES_DIR_PREFIX + "relation/extractor/location_of.jar" ) );
       // remove metastases from breasts, remove breast modifiers from non-breasts
       aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( MetastasisRelocator.class ) );
-      // add neoplasms and location modifiers to breasts
-      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( PastSentenceLocator.class ) );
+      // remove tumors from distance expression locations: "tumor 5 cm from nipple"
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( DistancedRemover.class ) );
+      // add neoplasms and location modifiers to breasts that lie outside the same sentence
+      aggregateBuilder.add( AnalysisEngineFactory.createEngineDescription( BeyondSentenceLocator.class ) );
    }
 
    private static void addCorefEngines( final AggregateBuilder aggregateBuilder )

@@ -265,7 +265,7 @@ final public class DocumentResourceFactory {
 		return ConceptInstanceUtil.getBranchConceptInstanceStream( jcas, uri.toString() )
 				.map( DocumentResourceFactory::getValuesOrSame )
 				.flatMap( Collection::stream )
-				.filter( t -> !t.isNegated() )
+				.filter( t -> !t.isNegated() && !t.isHypothetical() )
 				.map( mapper )
 				.collect( Collectors.toList() );
 	}

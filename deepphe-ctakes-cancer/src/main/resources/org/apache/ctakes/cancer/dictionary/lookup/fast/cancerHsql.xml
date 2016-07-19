@@ -54,7 +54,8 @@
 
    <rareWordConsumer>
       <name>Term Consumer</name>
-      <implementationName>org.apache.ctakes.dictionary.lookup2.consumer.SemanticCleanupTermConsumer</implementationName>
+      <implementationName>org.apache.ctakes.dictionary.lookup2.consumer.OwlPrecisionTermConsumer</implementationName>
+      <!--<implementationName>org.apache.ctakes.dictionary.lookup2.consumer.SemanticCleanupTermConsumer</implementationName>-->
       <!--<implementationName>org.apache.ctakes.dictionary.lookup2.consumer.PrecisionTermConsumer</implementationName>-->
       <!--<implementationName>org.apache.ctakes.dictionary.lookup2.consumer.DefaultTermConsumer</implementationName>-->
       <properties>

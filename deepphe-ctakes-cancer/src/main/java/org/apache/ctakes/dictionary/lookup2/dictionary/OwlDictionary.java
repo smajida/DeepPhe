@@ -84,14 +84,6 @@ public class OwlDictionary implements RareWordDictionary {
 
    static private Collection<CuiTerm> createCuiTerms( final IClass iClass ) {
       final Concept concept = iClass.getConcept();
-      final String cui = OwlParserUtil.getCui( concept );
-      if ( cui == null ) {
-         return Collections.emptyList();
-      }
-      final String tui = OwlParserUtil.getTui( concept );
-      if ( tui == null ) {
-         return Collections.emptyList();
-      }
       if ( OwlParserUtil.getInstance().isUnwantedUri( OwlParserUtil.getUriString( iClass ) ) ) {
          return Collections.emptyList();
       }
@@ -99,6 +91,8 @@ public class OwlDictionary implements RareWordDictionary {
       if ( synonyms == null ) {
          return Collections.emptyList();
       }
+      String tryCui = OwlParserUtil.getCui( concept );
+      final String cui = tryCui != null ? tryCui : "H" + iClass.hashCode();
       return Arrays.stream( synonyms )
             .map( String::toLowerCase )
             .filter( ValidTextUtil::isValidText )

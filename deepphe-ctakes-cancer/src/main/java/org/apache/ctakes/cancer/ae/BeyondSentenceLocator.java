@@ -31,7 +31,7 @@ import java.util.stream.Stream;
  * @version %I%
  * @since 5/25/2016
  */
-public class PastSentenceLocator extends JCasAnnotator_ImplBase {
+public class BeyondSentenceLocator extends JCasAnnotator_ImplBase {
 
    static private final Logger LOGGER = Logger.getLogger( "PastSentenceLocator" );
 
@@ -108,8 +108,8 @@ public class PastSentenceLocator extends JCasAnnotator_ImplBase {
     * @param sites     breasts
     */
    static public void createFollowingLocationRelation( final JCas jCas,
-                                              final IdentifiedAnnotation locatable,
-                                              final Collection<? extends IdentifiedAnnotation> sites ) {
+                                                       final IdentifiedAnnotation locatable,
+                                                       final Collection<? extends IdentifiedAnnotation> sites ) {
       final IdentifiedAnnotation closestSite
             = AnnotationUtil.getFollowingOrAnnotation( locatable, sites );
       if ( closestSite != null ) {
@@ -131,7 +131,7 @@ public class PastSentenceLocator extends JCasAnnotator_ImplBase {
          return;
       }
       if ( site == null ) {
-         LOGGER.info( "No breast to relate to " + locatable.getCoveredText() );
+         LOGGER.info( "No site to relate to " + locatable.getCoveredText() );
          return;
       }
       // add the relation to the CAS

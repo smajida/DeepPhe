@@ -33,10 +33,14 @@ final public class ToyAE extends JCasAnnotator_ImplBase {
 
    @Override
    public void process( final JCas jcas ) throws AnalysisEngineProcessException {
-
+//      final Collection<IdentifiedAnnotation> annotations = JCasUtil.select( jcas, IdentifiedAnnotation.class );
+//      for ( IdentifiedAnnotation annotation : annotations ) {
+//         final String stemUri = OwlUriUtil.getStemUri( Collections.singletonList( annotation ) );
+//         final Collection<String> leafUris = OwlUriUtil.getLeafUris( Collections.singletonList( annotation ) );
+//         LOGGER.info( annotation.getCoveredText() + " == " + stemUri + "  ;  " + leafUris.toString() );
+//      }
 //      LOGGER.info( jcas.getDocumentText() );
       getAllNeoplasms( jcas ).forEach( n -> LOGGER.info( getNeoplasmDescription( n ) ) );
-
    }
 
 

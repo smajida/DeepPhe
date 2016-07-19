@@ -145,9 +145,9 @@ public class GenerateModelOntology {
 		for(Object o : src.getDirectNecessaryRestrictions()){
 			if(o instanceof IRestriction){
 				IRestriction r = copyRestriction((IRestriction)o,target.getOntology());
-				if(r != null && !hasRestriction(target,r))
+				if(r != null && !hasRestriction(target,r)){
 					target.addNecessaryRestriction(r);
-				else 
+				}else 
 					System.out.println("  skipping "+o);	
 			}else if(o instanceof ILogicExpression){
 				target.addNecessaryRestriction(copyExpression((ILogicExpression)o,target.getOntology()));
@@ -516,26 +516,27 @@ public class GenerateModelOntology {
 	private void copyDomainClass(IClass source, OOntology target) {
 		// does this class has special annotation
 		IProperty hasModel = source.getOntology().getProperty("hasModel");
-		String parentName = (String) source.getPropertyValue(hasModel);
-		if(parentName != null && getModelName(parentName) != null){
-			IClass targetClass = target.getClass(getModelName(parentName));
-			if(targetClass != null){
-				copyClass(source,targetClass);
-			}
-		}else{
-			// some special cases s.a. MedicationStatement = Medication
-			for(String nlpClassName: equivalenceMap.keySet()){
-				String modelClassName = equivalenceMap.get(nlpClassName);
-				IClass medSt = source.getOntology().getClass(nlpClassName);
-				if(source.hasDirectSuperClass(medSt)){
-					IClass targetClass = target.getClass(getModelName(modelClassName));
-					if(targetClass != null){
-						copyClass(source,targetClass);
+		for(Object v: source.getPropertyValues(hasModel) ){
+			String parentName = (String) v;
+			if(parentName != null && getModelName(parentName) != null){
+				IClass targetClass = target.getClass(getModelName(parentName));
+				if(targetClass != null){
+					copyClass(source,targetClass);
+				}
+			}else{
+				// some special cases s.a. MedicationStatement = Medication
+				for(String nlpClassName: equivalenceMap.keySet()){
+					String modelClassName = equivalenceMap.get(nlpClassName);
+					IClass medSt = source.getOntology().getClass(nlpClassName);
+					if(source.hasDirectSuperClass(medSt)){
+						IClass targetClass = target.getClass(getModelName(modelClassName));
+						if(targetClass != null){
+							copyClass(source,targetClass);
+						}
 					}
 				}
 			}
 		}
-		
 		// recurse
 		for(IClass c : source.getDirectSubClasses()){
 			copyDomainClass(c,target);

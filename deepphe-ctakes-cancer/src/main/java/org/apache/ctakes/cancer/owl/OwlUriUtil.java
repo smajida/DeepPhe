@@ -118,4 +118,28 @@ final public class OwlUriUtil {
    }
 
 
+   static public Collection<String> getUriLeafUris( final Collection<String> uris ) {
+      // create map of all leaf uris to a collection of their roots
+      final Map<String, Collection<String>> uriSetMap = uris.stream()
+            .collect( Collectors.toMap( Function.identity(),
+                  u -> OwlOntologyConceptUtil.getUriRootsStream( u )
+                        .collect( Collectors.toSet() ) ) );
+      // collect all non leaf uris from each root
+      final Collection<String> nonLeafUris = new HashSet<>();
+      for ( Map.Entry<String, Collection<String>> entry : uriSetMap.entrySet() ) {
+         final String leaf = entry.getKey();
+         entry.getValue().stream()
+               .filter( u -> !leaf.equals( u ) )
+               .forEach( nonLeafUris::add );
+      }
+      // remove all non-(other)-leaf root uris from each root
+      uriSetMap.values().forEach( set -> set.removeAll( nonLeafUris ) );
+      // if the root is not empty then the associated leaf is not in any other root
+      return uriSetMap.entrySet().stream()
+            .filter( e -> !e.getValue().isEmpty() )
+            .map( Map.Entry::getKey )
+            .collect( Collectors.toSet() );
+   }
+
+
 }
