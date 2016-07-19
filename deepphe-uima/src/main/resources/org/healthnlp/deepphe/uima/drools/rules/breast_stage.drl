@@ -23,7 +23,8 @@ rule "Stage0-1"
 	salience 10001
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*Tis.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage0-1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*N0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -55,7 +56,8 @@ rule "Stage1A-1"
 	salience 10002
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage1A-1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -84,7 +86,8 @@ rule "Stage1B-1"
 	salience 10003
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT0.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage1B-1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN1mi.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -114,7 +117,8 @@ rule "Stage1B-2"
 	salience 10004
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage1B-2")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN1mi.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -143,7 +147,8 @@ rule "Stage2A-1.1"
 	salience 10005
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT0.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage2A-1.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -172,7 +177,8 @@ rule "Stage2A-2.1"
 	salience 10006
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage2A-2.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -201,7 +207,8 @@ rule "Stage2A-3.1"
 	salience 10007
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT2.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage2A-3.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -231,7 +238,8 @@ rule "Stage2B-1.1"
 	salience 10008
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT2.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage2B-1.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -261,7 +269,8 @@ rule "Stage2B-2.1"
 	salience 10009
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT3.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage2B-2.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -291,7 +300,8 @@ rule "Stage3A-1.1"
 	salience 10010
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT0.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3A-1.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -321,7 +331,8 @@ rule "Stage3A-2.1"
 	salience 10011
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT1.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3A-2.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -351,7 +362,8 @@ rule "Stage3A-3.1"
 	salience 10012
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT2.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3A-3.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -381,7 +393,8 @@ rule "Stage3A-4.1"
 	salience 10013
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT3.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3A-4.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -411,7 +424,8 @@ rule "Stage3A-5.1"
 	salience 10014
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT3.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3A-5.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -441,7 +455,8 @@ rule "Stage3B-1.1"
 	salience 10015
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT4.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3B-1.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN0.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -471,7 +486,8 @@ rule "Stage3B-2.1"
 	salience 10016
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT4.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3B-2.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN1.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -501,7 +517,8 @@ rule "Stage3B-3.1"
 	salience 10017
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, name matches ".*cT4.*", $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3B-3.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN2.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -531,7 +548,8 @@ rule "Stage3C-1.1"
 	salience 10018
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage3C-1.1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", name matches ".*cN3.*", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -561,7 +579,8 @@ rule "Stage4-1"
 	salience 10019
 	no-loop true
 	when
-		$record : MedicalRecord()		
+		$record : MedicalRecord() 
+		not (String(this == "do_not_infer_stage"))		
 		$tFact : Fact(category == "hasClinicalTClassification", documentType == "RecordSummary",  $uri:uri, $patientId : patientIdentifier, $docId : documentIdentifier, 
 					rulesApplied not contains "Stage4-1")
 		$nFact : Fact(category == "hasClinicalNClassification", documentType == "RecordSummary", patientIdentifier==$patientId, documentIdentifier==$docId, 
@@ -586,11 +605,15 @@ rule "Stage4-1"
 		System.out.print(".");
 end
 
+/*
+* If there is a stage in the documants - use it, don't infer any
+*/
 rule "Stage-from-FHIR"
-	salience 9999
+	//salience 9999
+	salience 19999
 	no-loop true
 	when
-		$record : MedicalRecord()
+		$record : MedicalRecord() 
 		not( Fact (category == "hasCancerStage", documentType == "RecordSummary"))
 		
 		$stages : Set() 
@@ -615,4 +638,18 @@ rule "Stage-from-FHIR"
 			insert(stageF);		
 			System.out.print(".");
 		}
+		
+		if($stages.size() > 0 )
+			insert ("do_not_infer_stage");
+		
 end
+
+rule "clean_do_not_infer_stage"
+	salience 1
+	no-loop true
+	when
+		$str : String(this == "do_not_infer_stage")
+	then
+		retract($str);
+end
+		
