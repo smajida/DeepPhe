@@ -12,9 +12,9 @@ import java.util.regex.Pattern;
  * @since 8/19/2015
  */
 enum StatusValue implements Value {
-   POSITIVE( "Positive", "Positive", "\\+?pos(itive)?|\\+(pos)?" ),
-   NEGATIVE( "Negative", "Negative", "-?neg(ative)?|-(neg)?" ),
-   UNKNOWN( "Unknown", "Unknown", "unknown|indeterminate|equivocal|(not assessed)|\\bN/?A\\b" );
+   POSITIVE( "Positive", "Positive", "3\\+|\\+?pos(itive)?|\\+(pos)?" ),
+   NEGATIVE( "Negative", "Negative", "0\\+|1\\+|-?neg(ative)?|-(neg)?" ),
+   UNKNOWN( "Unknown", "Unknown", "2\\+|unknown|indeterminate|equivocal|(not assessed)|\\bN/?A\\b" );
    //   http://ontologies.dbmi.pitt.edu/deepphe/nlpBreastCancer.owl#Equivocal
    final private String _title;
    final private String _uri;

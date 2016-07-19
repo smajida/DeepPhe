@@ -30,14 +30,18 @@ final public class StatusFinder {
 
    static private final String TYPE_REGEX
          = "Triple|(Estrogen( and Progesterone)?)|(ER( ?(/|and) ?PR)?)|(Progesterone|PR)|(HER-?2( ?/ ?neu)?)";
-   static private final String INTERIM_EX = "(-?\\s*?Receptors?\\s*-?)?\\s*(status\\s*)?((is|are)\\s*)?\\s*:?";
-   static private final String LONG_VALUE = "(strongly |weakly )?(\\+?pos(itive)?)|(-?neg(ative)?)"
+   static private final String INTERIM_EX
+         = "((-?\\s*?Receptors?\\s*-?)?\\s*(status\\s*)?((is|are)\\s*)?\\s*:?)|( PROTEIN EXPRESSION \\(0-3\\+\\):)";
+   static private final String STRENGTH_EX = "strongly|weakly";
+   static private final String LONG_VALUE = "(\\+?pos(itive)?)|(-?neg(ative)?)"
                                             + "|N/?A\\b|unknown|indeterminate|equivocal|(not assessed)";
-   static private final String SHORT_VALUE = "\\+(pos)?|-(neg)?";
+   static private final String SHORT_VALUE = "\\b[0-3]\\+|[0-3]{0}\\+(pos)?|-(neg)?";
 
    // Order is very important
-   static private final String FULL_REGEX = "\\b(" + TYPE_REGEX + ")\\s*"
-                                            + "((" + INTERIM_EX + "\\s*(" + LONG_VALUE + "))"
+   static private final String FULL_REGEX = "\\b(?<TYPE>" + TYPE_REGEX + ")\\s*"
+                                            + "(" + INTERIM_EX + ")?\\s*"
+                                            + "(" + STRENGTH_EX + ")?\\s*"
+                                            + "(?<VALUE>(" + LONG_VALUE + ")"
                                             + "|(" + SHORT_VALUE + "))";
    static private final Pattern FULL_PATTERN = Pattern.compile( FULL_REGEX, Pattern.CASE_INSENSITIVE );
 
@@ -82,23 +86,25 @@ final public class StatusFinder {
       final List<Status> statuses = new ArrayList<>();
       final Matcher fullMatcher = FULL_PATTERN.matcher( lookupWindow );
       while ( fullMatcher.find() ) {
-         final String matchWindow = lookupWindow.substring( fullMatcher.start(), fullMatcher.end() );
+         final String typeWindow = fullMatcher.group( "TYPE" );
+         final int typeWindowStart = fullMatcher.start( "TYPE" );
+         final String valueWindow = fullMatcher.group( "VALUE" );
+         final int valueWindowStart = fullMatcher.start( "VALUE" );
          SpannedStatusType spannedType = null;
          SpannedStatusValue spannedValue = null;
          for ( StatusType type : StatusType.values() ) {
-            final Matcher typeMatcher = type.getMatcher( matchWindow );
+            final Matcher typeMatcher = type.getMatcher( typeWindow );
             while ( typeMatcher.find() ) {
-               final int typeStart = fullMatcher.start() + typeMatcher.start();
-               final int typeEnd = fullMatcher.start() + typeMatcher.end();
+               final int typeStart = typeWindowStart + typeMatcher.start();
+               final int typeEnd = typeWindowStart + typeMatcher.end();
                spannedType = new SpannedStatusType( type, typeStart, typeEnd );
-               final String valueLookupWindow = matchWindow.substring( typeMatcher.end() );
                spannedValue = null;
                for ( StatusValue value : StatusValue.values() ) {
-                  final Matcher valueMatcher = value.getMatcher( valueLookupWindow );
-                  if ( valueMatcher.find() ) {
+                  final Matcher valueMatcher = value.getMatcher( valueWindow );
+                  if ( valueMatcher.matches() ) {
                      spannedValue = new SpannedStatusValue( value,
-                           typeEnd + valueMatcher.start(),
-                           typeEnd + valueMatcher.end() );
+                           valueWindowStart + valueMatcher.start(),
+                           valueWindowStart + valueMatcher.end() );
                      break;
                   }
                }

@@ -138,7 +138,8 @@ final public class ReceptorStatusFinderTester {
          "HER-2/neu      POS", "HER2/neu Status           POSITIVE",
          "HER2: POS", "HER2/neu Receptors : Positive",
          "HER2/neu Receptor POS", "HER2/neu-Receptor POSITIVE",
-         "HER2/neu Receptor status POS", "HER2/neu-Receptor status is positive" };
+         "HER2/neu Receptor status POS", "HER2/neu-Receptor status is positive",
+         "HER2 PROTEIN EXPRESSION (0-3+):    3+" };
 
    static private final String[] HER2_NEG_SENTENCES = {
          "Patient tested HER2- last week.", "Patient tested HER2 - last week.",
@@ -155,7 +156,8 @@ final public class ReceptorStatusFinderTester {
          "HER2: NEG", "HER2/neu Receptors : Negative",
          "HER-2/neu      NEG", "HER2/neu Status           NEGATIVE",
          "HER2/neu Receptor NEG", "HER2/neu-Receptor NEGATIVE",
-         "HER2/neu Receptor status NEG", "HER2/neu-Receptor status is negative" };
+         "HER2/neu Receptor status NEG", "HER2/neu-Receptor status is negative",
+         "HER2 PROTEIN EXPRESSION (0-3+):    0+", "HER2 PROTEIN EXPRESSION (0-3+):    1+" };
 
    static private final String[] HER2_NA_SENTENCES = {
          "Patient HER2 status unknown.", "Patient HER2 status is unknown.",
@@ -179,7 +181,8 @@ final public class ReceptorStatusFinderTester {
          "HER2/neu      equivocal", "HER2/neu Status           equivocal",
          "HER2/neu      not assessed", "HER2/neu Status           not assessed",
          "HER-2/neu      NA", "HER2/neu Status           NA",
-         "HER2/neu      N/A", "HER2/neu Status           N/A" };
+         "HER2/neu      N/A", "HER2/neu Status           N/A",
+         "HER2 PROTEIN EXPRESSION (0-3+):    2+" };
 
 
    static private final String[] TRIPLE_NEG_SENTENCES = {
@@ -263,7 +266,8 @@ final public class ReceptorStatusFinderTester {
          assertEquals( "Expect one Hormone Receptor in " + sentence, 1, statuses.size() );
          assertTrue( "Receptor is " + expectedType.getTitle() + " in " + sentence,
                statuses.get( 0 ).getSpannedType().getType() == expectedType );
-         assertTrue( "Receptor is " + expectedValue.getTitle() + " in " + sentence,
+         assertTrue( "Receptor is " + statuses.get( 0 ).getSpannedValue().getValue().getTitle()
+                     + " not " + expectedValue.getTitle() + " in " + sentence,
                statuses.get( 0 ).getSpannedValue().getValue() == expectedValue );
          statuses.clear();
       }
