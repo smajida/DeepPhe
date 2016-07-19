@@ -48,6 +48,8 @@ rule "Stage0-1"
 end
 */
 
+
+
 //If T1, N0, M0, then Stage IA Breast Cancer 
 rule "Stage1A-1"
 	salience 10002
@@ -69,7 +71,7 @@ rule "Stage1A-1"
 		Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#Stage_IA_Breast_Cancer");
 		List<Fact> provFacts = new ArrayList<Fact>();
 		provFacts.add($tFact); provFacts.add($nFact); provFacts.add($mFact);
-		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary"); insert(stageF); insert(stageF);
+		stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary"); insert(stageF);
 		
 		modify($record){
 			getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF);
@@ -605,15 +607,12 @@ rule "Stage-from-FHIR"
 			Fact stageF =  FactFactory.createFact(FHIRConstants.CONDITION, OwlConstants.BREAST_CANCER_OWL+"#"+genericStage);
 			List<Fact> provFacts = new ArrayList<Fact>();
 			provFacts.add(((Fact)obj)); 
-			stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary"); insert(stageF);
+			stageF.addProvenanceFacts(provFacts); stageF.setDocumentType("RecordSummary");
 		
 			modify($record){
 				getCancerSummary().getPhenotype().addFact(FHIRConstants.HAS_CANCER_STAGE, stageF)
 			}
-					
+			insert(stageF);		
 			System.out.print(".");
 		}
 end
-			
-			
-	

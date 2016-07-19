@@ -105,8 +105,7 @@ rule "latest-doc-FISH-ER"
 					"hasERStatus", "Fluorescence_In_Situ_Hybridization", true);
 System.out.print(".");
 		   		insert(f);
-			}
-		
+			}		
 end	
 
 rule "latest-doc-FISH-Her2"
@@ -155,8 +154,7 @@ rule "latest-doc-FISH-Her2"
 					"Fluorescence_In_Situ_Hybridization", true);
 System.out.print(".");
 		   		insert(f);
-			}
-		
+			}		
 end	
 
 
@@ -205,8 +203,7 @@ rule "latest-doc-FISH-PR"
 					"Fluorescence_In_Situ_Hybridization", true);
 System.out.print(".");
 		   		insert(f);
-			}
-		
+			}		
 end	
 
 
@@ -254,8 +251,7 @@ rule "latest-doc-ER"
 			Flag f = new Flag(documentId, ".*Estrogen_Receptor_Status.*", "Estrogen_Receptor_Status","hasInterpretation", "hasERStatus", "", false);
 System.out.print(".");
 	   		insert(f);
-		}
-		
+		}		
 end	
 
 rule "latest-doc-Her2"
@@ -301,8 +297,7 @@ rule "latest-doc-Her2"
 			Flag f = new Flag(documentId, ".*HER2_Neu_Status.*", "HER2_Neu_Status","hasInterpretation", "hasHerStatus", "", false);
 System.out.print(".");
 	   		insert(f);
-		}
-		
+		}	
 end	
 
 //start
@@ -350,8 +345,7 @@ rule "latest-doc-PR"
 			Flag f = new Flag(documentId, ".*Progesterone_Receptor_Status.*", "Progesterone_Receptor_Status","hasInterpretation", "hasPRStatus", "", false);
 System.out.print(".");
 	   		insert(f);
-		}
-		
+		}		
 end	
 //end
 
@@ -454,7 +448,6 @@ System.out.print(".");
 		modify($record){
 			getCancerSummary().getTumorSummaryByIdentifier("TumorSummary-"+$mt.getMergedTumorId()).getPhenotype().addFact("hasReceptorStatus", tf)
 		}
-
 end
 
 rule "setReceptorStatus-with-method"
@@ -532,7 +525,6 @@ System.out.print(".");
 		insert(new IdMapper($recepFact.getIdentifier(), tf.getIdentifier(), $recepFact.getDocumentType(), $recepFact.getSummaryId(), tf.getSummaryId()));
 		
 System.out.print(".");
-
 end
 
 

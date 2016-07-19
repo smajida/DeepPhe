@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -130,7 +131,7 @@ rule "addOtherBreastToCancerSummary"
 end
 
 /**
-* Considering that for each tumorID could be not more than one side, Qadrant or clockFacePos
+* Considering that for each tumorID could not be more than one side, Qadrant or clockFacePos
 * run once
 */
 rule "collect_locations"
@@ -216,31 +217,31 @@ rule "collect_locations"
 							tl.setClockfacePosFact((Fact)ff);
 							tl.setBodySide(sideName);
 							tl.setBodySideFact(sideF);
-							List<String> inferredQList = TumorLocator.inferQuadrant(sideName, (String)key);
+							String inferredQ = TumorLocator.normalizeQuadrant(sideName, (String)key);
 							
-							int listSz = inferredQList.size();
-							if(listSz > 0)
-							tl.setQuadrant(inferredQList.get(0));
+							//int listSz = inferredQList.size();
+							if(!"".equals(inferredQ))
+								tl.setQuadrant(inferredQ);
 							insert(tl);
 							
-							if(listSz > 1) {
-								boolean skip = true;
-								for(String q :  inferredQList){
-									if(!skip){
-										TumorLocator tli = new TumorLocator();
-										tli.setTumorSiteFact($tumor1_f);
-										tli.setDocTumorId($tSummaryId);
-										tli.setBodySite($tumor1_name);
-										tli.setClockFacePos((String)key);
-										tli.setClockfacePosFact((Fact)ff);
-										tli.setBodySide(sideName);
-										tli.setBodySideFact(sideF);
-										tl.setQuadrant(q);
-										insert(tli);
-									}
-									skip  = false;
-								}
-							}
+							//if(listSz > 1) {
+							//	boolean skip = true;
+							//	for(String q :  inferredQList){
+							//		if(!skip){
+							//			TumorLocator tli = new TumorLocator();
+							//			tli.setTumorSiteFact($tumor1_f);
+							//			tli.setDocTumorId($tSummaryId);
+							//			tli.setBodySite($tumor1_name);
+							//			tli.setClockFacePos((String)key);
+							//			tli.setClockfacePosFact((Fact)ff);
+							//			tli.setBodySide(sideName);
+							//			tli.setBodySideFact(sideF);
+							//			tl.setQuadrant(q);
+							//			insert(tli);
+							//		}
+							//		skip  = false;
+							//	}
+							//}
 							
 							
 						}
@@ -356,7 +357,8 @@ System.out.print(".");
   
 	
  /**
- * Merge the same or create new if not exists
+ * Merge the same site, side, quadrant or create new if not exists
+ * If clockface in the same quadrant is different => create another merged tumor
  */ 
  rule "merge_tumors_by_location_exact_all_present"
  	salience 99888
@@ -366,20 +368,30 @@ System.out.print(".");
 		$tlFact  : TumorLocator($bodySite : bodySite, $bodySite != "", $bodySide : bodySide, $bodySide != "",
 						 $quadrant : quadrant, $quadrant != "", $clockFacePos : clockFacePos, $clockFacePos != "", readyForRetraction == false)
 		$sameTumors : Set()
-      	from collect( TumorLocator(this != $tlFact, bodySite == $bodySite, bodySide == bodySide, quadrant == $quadrant,
-      				//clockFacePos == $clockFacePos, 
+      	//from collect( TumorLocator(this != $tlFact, bodySite == $bodySite, bodySide == $bodySide, quadrant == $quadrant,
+      	from collect( TumorLocator(bodySite == $bodySite, bodySide == $bodySide, quadrant == $quadrant,
+      				clockFacePos != "",
       				readyForRetraction == false))
         not(MergedTumor (tumorSiteFactSet contains $tlFact.getTumorSiteFact()))    	
 	 then
-	 	MergedTumor mt = new MergedTumor();
-	 	mt.setBodySite($bodySite);
-	 	mt.setBodySide($bodySide);
-	 	mt.setQuadrant($quadrant);
-	 	mt.setClockFacePos($clockFacePos);
-	 	$sameTumors.add($tlFact);
+	 	Map<String, MergedTumor> mtByClockFacePos = new HashMap<String, MergedTumor>();
+	 	
+	 	MergedTumor mt = null;
 	 	String hystType = "";
 	 	for(Object tObj : $sameTumors){
+	 		hystType = "";
 	 		TumorLocator tl = (TumorLocator)tObj;
+	 		mt = mtByClockFacePos.get(tl.getClockFacePos());
+	 		if(mt == null){
+	 			mt = new MergedTumor();
+	 			mt.setBodySite($bodySite);
+			 	mt.setBodySide($bodySide);
+			 	//mt.setQuadrant($quadrant);
+			 	mt.setQuadrant(TumorLocator.normalizeQuadrant($bodySide, tl.getClockFacePos()));
+			 	mt.setClockFacePos(tl.getClockFacePos());
+			 	mtByClockFacePos.put(tl.getClockFacePos(), mt);
+	 		}	
+	 		
 		 	if(!tl.getHistologicType().equals("") && hystType.equals("")){
 		 		hystType = tl.getHistologicType();
 		 		mt.setHistologicType(hystType);
@@ -407,7 +419,13 @@ System.out.print(".");
 System.out.print(".");
 			update (tl);
 		}
-		insert(mt);
+		
+		for (Map.Entry<String, MergedTumor> entry : mtByClockFacePos.entrySet()) {
+			insert(entry.getValue());
+		}
+		
+		mtByClockFacePos.clear();
+		
 System.out.print(".");
 end
 
@@ -422,18 +440,19 @@ rule "merge_tumors_by_location_no_clockface"
 	when 
 		$record : MedicalRecord()
 		$tlFact  : TumorLocator($bodySite : bodySite, $bodySite != "", $bodySide : bodySide, $bodySide != "",
-						 $quadrant : quadrant, $quadrant != "", $clockFacePos : clockFacePos, $clockFacePos == "", readyForRetraction == false)
+						 $quadrant : quadrant, $quadrant != "", clockFacePos == "", readyForRetraction == false)
+						 
+		not(MergedTumor (tumorSiteFactSet contains $tlFact.getTumorSiteFact()))  
+		
 		$sameTumors : Set()
-      	from collect( TumorLocator(this != $tlFact, bodySite == $bodySite, bodySide == bodySide, quadrant == $quadrant,
-      				clockFacePos == $clockFacePos, readyForRetraction == false))
-        not(MergedTumor (tumorSiteFactSet contains $tlFact.getTumorSiteFact()))  
-        
+      	from collect( TumorLocator(bodySite == $bodySite, bodySide == $bodySide, quadrant == $quadrant,
+      				clockFacePos == "", readyForRetraction == false))
+             
         $withClockMT : Set()
-        from collect ( MergedTumor (bodySite == $bodySite, bodySide == bodySide, quadrant == $quadrant))
+        from collect ( MergedTumor (bodySite == $bodySite, bodySide == $bodySide, quadrant == $quadrant, clockFacePos != ""))
  
 	 then
 	 // no mentions of clockface
-	 	$sameTumors.add($tlFact);
 	 	if($withClockMT.size() == 0){
 		 	MergedTumor mt = new MergedTumor();
 		 	mt.setBodySite($bodySite);
@@ -502,48 +521,64 @@ rule "merge_tumors_by_location_no_clockface"
 			}
 			update(mt);
 		}
-		else{
-			
-			//System.err.println("Cacn't attach tumor: merge-tumors-by-location-no-clockface for MergedTumors: setSz = "+$withClockMT.size()+"\n"+$withClockMT);
-			System.err.println("Cacn't attach tumor: merge-tumors-by-location-no-clockface");
+		else{	
+			for(Object tObj : $sameTumors){
+		 		TumorLocator tl = (TumorLocator)tObj;
+		 		tl.setReadyForRetraction(true);
+				update (tl);
+			}
+			System.err.println("\n *** Can't tumor: merge-tumors-by-location-no-clockface. TumorLocator: "+ $tlFact.getInfo());
+			System.err.println("\n *** there are "+$withClockMT.size()+" possible MergedTumors for bodySite = "+$bodySite+"  bodySide = "+$bodySide+
+			" quadrant = "+$quadrant+"\n"+$withClockMT);
 		}
 end
 
 /**
-* Merge if the there is one mention of clockfae without quadrant in MergedTumor (for 12, 3, 6, 9 o'clock)
+* Merge if the there is one mention of clockface without quadrant in MergedTumor
 * or
 * create new if not exists
 */
-rule "merge-tumors-by-location-cant-have-quadrant"
+
+rule "merge-tumors-by-location-no-quadrant"
  	salience 99886
 	no-loop true
 	when 
 		$tlFact  : TumorLocator($bodySite : bodySite, $bodySite != "", $bodySide : bodySide, $bodySide != "",
-						 $quadrant : quadrant, $quadrant == "", $clockFacePos : clockFacePos, $clockFacePos != "", readyForRetraction == false)
+						 quadrant == "", $clockFacePos : clockFacePos, $clockFacePos != "", readyForRetraction == false)
+						 
+		not(MergedTumor (tumorSiteFactSet contains $tlFact.getTumorSiteFact())) 				 
 		$sameTumors : Set()
-      	from collect( TumorLocator(this != $tlFact, bodySite == $bodySite, bodySide == bodySide, clockFacePos == $clockFacePos,
-      				clockFacePos == $clockFacePos, readyForRetraction == false))
-        not(MergedTumor (tumorSiteFactSet contains $tlFact.getTumorSiteFact()))  
+      	from collect( TumorLocator( bodySite == $bodySite, bodySide == $bodySide, quadrant == "",
+      				clockFacePos == $clockFacePos, readyForRetraction == false)) 
         
-        $withClockMT : Set()
-        from collect ( MergedTumor (bodySite == $bodySite, bodySide == bodySide, clockFacePos == $clockFacePos))
+        $withQuadrant : Set()
+        from collect ( MergedTumor (bodySite == $bodySite, bodySide == $bodySide, quadrant != ""))
  
 	 then	
-	 	$tlFact.setReadyForRetraction(true);
-		update ($tlFact);
+System.out.println("in merge-tumors-by-location-no-quadrant");
+	 	String inferredQ = TumorLocator.normalizeQuadrant($bodySide, $clockFacePos);
+		//make tempo <quadrant, MergedTumor> map
+		Set<MergedTumor> withQuadrantMT = new HashSet<MergedTumor>();
+		for(Object mtObj: $withQuadrant){
+			MergedTumor tempMT = (MergedTumor)mtObj;
+			if(inferredQ.equals(tempMT.getQuadrant()))
+			withQuadrantMT.add(tempMT);
+		}
 		
-	  // no mentions of clockface
-	 	$sameTumors.add($tlFact);
-	 	if($withClockMT.size() == 0){
+	  // no MT with quadtants
+	 	if(withQuadrantMT.size() == 0){
 		 	MergedTumor mt = new MergedTumor();
 		 	mt.setBodySite($bodySite);
 		 	mt.setBodySide($bodySide);
-		 	mt.setClockFacePos($quadrant);
+		 	mt.setClockFacePos($clockFacePos);
+		 	mt.setQuadrant(TumorLocator.normalizeQuadrant($bodySide, $clockFacePos));
 
 		 	
 		 	String hystType = "";
 		 	for(Object tObj : $sameTumors){
 		 		TumorLocator tl = (TumorLocator)tObj;
+		 		
+		 		
 			 	if(!tl.getHistologicType().equals("") && hystType.equals("")){
 			 		hystType = tl.getHistologicType();
 			 		mt.setHistologicType(hystType);
@@ -571,9 +606,12 @@ System.out.print(".");
 			insert(mt);
 System.out.print(".");
 		}
+		
 		// exists one MT with 
-		else if($withClockMT.size() == 1){
-			MergedTumor mt = (MergedTumor)$withClockMT.iterator().next();
+		else if(withQuadrantMT.size() == 1){
+		//else{
+
+			MergedTumor mt = (MergedTumor)withQuadrantMT.iterator().next();
 			String hystType = mt.getHistologicType();
 			for(Object tObj : $sameTumors){
 		 		TumorLocator tl = (TumorLocator)tObj;
@@ -605,9 +643,17 @@ System.out.print(".");
 System.out.print(".");
 		}
 		else{
-			//System.err.println("Can't attach tumor: merge-tumors-by-location-cant-have-quadrant for MergedTumors: setSz = "+$withClockMT.size()+"\n"+$withClockMT);
-			System.err.println("Can't attach tumor: merge-tumors-by-location-cant-have-quadrant");
+			for(Object tObj : $sameTumors){
+		 		TumorLocator tl = (TumorLocator)tObj;
+		 		tl.setReadyForRetraction(true);
+				update (tl);
+			}
+			System.err.println("\n *** Can't tumor: merge-tumors-by-location-no-quadrant. TumorLocator: "+ $tlFact.getInfo());
+			System.err.println("\n *** there are "+$withQuadrant.size()+" possible MergedTumors for bodySite = "+$bodySite+"  bodySide = "+
+			$bodySide+" clockFacePos = "+$clockFacePos+"\n"+$withQuadrant);
 		}
+		
+		withQuadrantMT.clear();
 end	 	
 
 /**
@@ -618,19 +664,19 @@ rule "merge-tumors-by-location-no-q-clock"
 	no-loop true
 	when 
 		$tlFact  : TumorLocator($bodySite : bodySite, $bodySite != "", $bodySide : bodySide, $bodySide != "",
-						 $quadrant : quadrant, $quadrant == "", $clockFacePos : clockFacePos, $clockFacePos == "", readyForRetraction == false)
+						 quadrant == "", $clockFacePos : clockFacePos, $clockFacePos == "", readyForRetraction == false)
 		$sameTumors : Set()
-      	from collect( TumorLocator(this != $tlFact, bodySite == $bodySite, bodySide == bodySide, clockFacePos == $clockFacePos,
-      				clockFacePos == $clockFacePos, readyForRetraction == false))
+      	from collect(TumorLocator(bodySite == $bodySite, bodySide == $bodySide, clockFacePos == $clockFacePos,
+      				quadrant == "", readyForRetraction == false))
         not(MergedTumor (tumorSiteFactSet contains $tlFact.getTumorSiteFact()))  
         
         $withClockMT : Set()
-        from collect ( MergedTumor (bodySite == $bodySite, bodySide == bodySide))
+        from collect ( MergedTumor (bodySite == $bodySite, bodySide == $bodySide))
  
 	 then	
 	  // no mentions ofbodyside
-	  	$tlFact.setReadyForRetraction(true);
-		update ($tlFact);
+	  	//$tlFact.setReadyForRetraction(true);
+		//update ($tlFact);
 		
 	 	$sameTumors.add($tlFact);
 	 	if($withClockMT.size() == 0){
@@ -685,8 +731,13 @@ System.out.print(".");
 System.out.print(".");
 		}
 		else{
-		//	System.err.println("can't attach tumor: merge-tumors-by-location-no-q-clock for MergedTumors: setSz = "+$withClockMT.size()+"\n"+$withClockMT);
-			System.err.println("can't attach tumor: merge-tumors-by-location-no-q-clock");
+			for(Object tObj : $sameTumors){
+		 		TumorLocator tl = (TumorLocator)tObj;
+		 		tl.setReadyForRetraction(true);
+				update (tl);
+			}
+			System.err.println("\n *** Can't merge-tumors-by-location-no-q-clock. TumorLocator: "+ $tlFact.getInfo());
+			System.err.println("\n *** there are "+$withClockMT.size()+" possible MergedTumors for bodySite == "+$bodySite+"  bodySide == "+$bodySide+"\n"+$withClockMT);
 		}
 end	 
 
@@ -697,22 +748,18 @@ rule "merge-tumors-by-location-no-bodyside"
  	salience 99884
 	no-loop true
 	when 
-		$tlFact  : TumorLocator($bodySite : bodySite, $bodySite != "", $bodySide : bodySide, $bodySide == "",
-						 $quadrant : quadrant, $quadrant == "", $clockFacePos : clockFacePos, $clockFacePos == "", readyForRetraction == false)
+		$tlFact  : TumorLocator($bodySite : bodySite, $bodySite != "", bodySide == "",
+						 quadrant == "", clockFacePos == "", readyForRetraction == false)
 		$sameTumors : Set()
-      	from collect( TumorLocator(this != $tlFact, bodySite == $bodySite, bodySide == bodySide, clockFacePos == $clockFacePos,
-      				clockFacePos == $clockFacePos, readyForRetraction == false))
+      	from collect( TumorLocator( bodySite == $bodySite, bodySide == "", clockFacePos == "", quadrant =="", readyForRetraction == false))
         not(MergedTumor (tumorSiteFactSet contains $tlFact.getTumorSiteFact()))  
         
         $withClockMT : Set()
         from collect ( MergedTumor (bodySite == $bodySite))
  
 	 then	
-	 	$tlFact.setReadyForRetraction(true);
-		update ($tlFact);
 		
-	  // no mentions ofbodyside
-	 	$sameTumors.add($tlFact);
+	  // no mentions of bodyside
 	 	if($withClockMT.size() == 0){
 		 	MergedTumor mt = new MergedTumor();
 		 	mt.setBodySite($bodySite);
@@ -755,8 +802,13 @@ System.out.print(".");
 System.out.print(".");
 		}
 		else{
-			//System.err.println("Can't attach tumor: merge-tumors-by-location-no-bodyside for MergedTumors: setSz = "+$withClockMT.size()+"\n"+$withClockMT);
-			System.err.println("Can't attach tumor: merge-tumors-by-location-no-bodyside");
+			for(Object tObj : $sameTumors){
+		 		TumorLocator tl = (TumorLocator)tObj;
+		 		tl.setReadyForRetraction(true);
+				update (tl);
+			}
+			System.err.println("\n *** Can't merge-tumors-by-location-no-bodyside. TumorLocator: "+ $tlFact.getInfo());
+			System.err.println("\n *** there are "+$withClockMT.size()+" possible MergedTumors for bodySite == "+$bodySite+"\n"+$withClockMT);
 		}
 end	 		
 
@@ -823,21 +875,21 @@ rule "print-TumorLocator"
 	salience 1
 	no-loop true
 	when 
-		$f : TumorLocator()
+		$f : TumorLocator(clockFacePos=="3_o_clock_position")
 	then
-		System.out.print("*** TumorLocator: "+$f.getInfo());
+		System.out.println("*** TumorLocator: "+$f.getInfo());
 end	
 
 rule "print-MergedTumor"
 	salience 1
 	no-loop true
 	when 
-		$f : MergedTumor()
+		$f : MergedTumor(clockFacePos=="3_o_clock_position")
 	then
 		System.out.println("*** MergedTumor: "+$f.getInfo());
 end	
-*/
-/*
+
+
 rule "print-Medical-RecordSummary"
 	no-loop true
 	when 
